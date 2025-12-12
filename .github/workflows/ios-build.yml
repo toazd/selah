@@ -40,14 +40,11 @@ jobs:
         pod repo update
         pod install
         cd ..
-        
-    - name: Get Flutter dependencies
-      run: flutter pub get
       
     - name: Clean build
       run: flutter clean
       
-    - name: Get dependencies again after clean
+    - name: Get dependencies after clean
       run: flutter pub get
       
     - name: Install Ruby dependencies for codesign
@@ -65,7 +62,7 @@ jobs:
     - name: Build iOS debug
       run: |
         flutter build ios \
-          --debug \
+          --release \
           --no-codesign \
           --target lib/main.dart \
           --flavor default \
