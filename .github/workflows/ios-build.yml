@@ -106,8 +106,16 @@ jobs:
         # Create a temporary directory for the IPA contents
         mkdir -p build/ios-ipa
         
+        BUILD_DIR=$(find build/ios -name "selah.app" -type d | head -1)
+        if [ -z "$BUILD_DIR" ]; then
+          echo "❌ Could not find selah.app in build/ios directory"
+          exit 1
+        fi
+
+        echo "📱 Found app at: $BUILD_DIR"
+
         # Copy the built app
-        cp -R build/ios/iphoneos/selah.app build/ios-ipa/
+        cp -R "$BUILD_DIR" build/ios-ipa/
         
         # Copy provisioning profile from Xcode automatic provisioning
         # The provisioning profile will be automatically generated during build
