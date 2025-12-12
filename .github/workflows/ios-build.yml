@@ -57,10 +57,14 @@ jobs:
           # Check if version is less than 15.0
           if [[ "$(printf '%s\n' "15.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "15.0" ]]; then
             echo "🔧 Updating iOS platform to 15.0 (current: $CURRENT_VERSION)"
-            # Remove existing platform line
-            sed -i '' '/platform :ios/d' ios/Podfile
-            # Add new platform line
-            sed -i '' '1i platform :ios, '\''15.0'\''' ios/Podfile
+            # Create temp file with new platform line at top
+            echo "platform :ios, '15.0'" > ios/Podfile.tmp
+
+            # Add all original content EXCEPT the old platform line
+            grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
+
+            # Replace original with updated temp file
+            mv ios/Podfile.tmp ios/Podfile
             echo "✅ iOS platform updated to 15.0 for Firebase compatibility"
           else
             echo "✅ iOS platform version $CURRENT_VERSION is sufficient"
