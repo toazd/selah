@@ -87,11 +87,6 @@ jobs:
       
     - name: Get flutter dependencies
       run: flutter pub get
-      
-    - name: Install Ruby dependencies for codesign
-      run: |
-        gem install bundler
-        bundle install
         
     - name: Set up signing keychain
       run: |
