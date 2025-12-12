@@ -1,0 +1,181 @@
+name: selah
+version: 1.0.0+1
+description: A cross-platform Bible study app using Flutter and the 1769 King James Version.
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  sqflite: ^2.3.0
+  path: ^1.9.1
+  sqflite_common_ffi: ^2.3.0
+  shared_preferences: ^2.2.2
+  window_manager: ^0.5.1
+  screen_retriever: ^0.2.0
+  path_provider: ^2.0.0
+  file_picker: ^10.3.3
+  archive: ^4.0.7
+  firebase_core: ^4.2.0
+  firebase_auth: ^6.1.1
+  cloud_firestore: ^6.0.3
+  connectivity_plus: ^7.0.0
+  uuid: ^4.4.0
+  permission_handler: ^12.0.0
+  intl: ^0.20.2
+  flutter_quill: ^11.5.0
+  flutter_quill_to_pdf: ^2.3.9
+  vsc_quill_delta_to_html: ^1.0.5
+  flutter_html: ^3.0.0
+  pdf: ^3.11.3
+  web: ^1.1.1
+  sqflite_common_ffi_web : ^1.1.0
+  #flutter_onscreen_keyboard: ^0.4.1+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
+  flutter_prunekit: ^2.4.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/
+    - assets/icon.png
+  fonts:
+    - family: Arimo
+      fonts:
+        - asset: assets/fonts/Arimo-VariableFont_wght.ttf
+    - family: Open Sans
+      fonts:
+        - asset: assets/fonts/OpenSans-VariableFont_wdth,wght.ttf
+    - family: Daddy Time Mono
+      fonts:
+        - asset: assets/fonts/DaddyTimeMono.otf
+    - family: Inconsolata
+      fonts:
+        - asset: assets/fonts/Inconsolata-VariableFont_wdth,wght.ttf
+    - family: Roboto Mono
+      fonts:
+        - asset: assets/fonts/RobotoMono-VariableFont_wght.ttf
+    - family: Gabriela
+      fonts:
+        - asset: assets/fonts/Gabriela-Regular.ttf
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat-VariableFont_wght.ttf
+    - family: Dancing Script
+      fonts:
+        - asset: assets/fonts/DancingScript-VariableFont_wght.ttf
+    - family: Lobster Two
+      fonts:
+        - asset: assets/fonts/LobsterTwo-Regular.ttf
+          weight: 400
+          style: normal
+        - asset: assets/fonts/LobsterTwo-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/LobsterTwo-Bold.ttf
+          weight: 700
+          style: normal
+        - asset: assets/fonts/LobsterTwo-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: Ubuntu
+      fonts:
+        - asset: assets/fonts/Ubuntu-Regular.ttf
+    - family: Liberation Sans
+      fonts:
+        - asset: assets/fonts/LiberationSans-Regular.ttf
+    - family: Tinos
+      fonts:
+        - asset: assets/fonts/Tinos-Regular.ttf
+          weight: 400
+          style: normal
+        - asset: assets/fonts/Tinos-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Tinos-Bold.ttf
+          weight: 700
+          style: normal
+        - asset: assets/fonts/Tinos-BoldItalic.ttf
+          weight: 700
+          style: italic
+    - family: Merriweather
+      fonts:
+        - asset: assets/fonts/Merriweather-VariableFont_opsz,wdth,wght.ttf
+    - family: Liberation Serif
+      fonts:
+        - asset: assets/fonts/LiberationSerif-Regular.ttf
+    - family: Special Gothic
+      fonts:
+        - asset: assets/fonts/SpecialGothic-VariableFont_wdth,wght.ttf
+    - family: Rosemartin
+      fonts:
+        - asset: assets/fonts/Rosemartin.otf
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-VariableFont_wght.ttf
+    - family: Morris Roman
+      fonts:
+        - asset: assets/fonts/MorrisRomanBlack.ttf
+    - family: JSL Ancient
+      fonts:
+        - asset: assets/fonts/JSLancient.ttf
+    - family: Louis George Cafe
+      fonts:
+        - asset: assets/fonts/LouisGeorgeCafe.ttf
+    - family: Comfortaa
+      fonts:
+        - asset: assets/fonts/Comfortaa-Regular.ttf
+    - family: King Sans
+      fonts:
+        - asset: assets/fonts/KingSans.otf
+    - family: Fauna One
+      fonts:
+        - asset: assets/fonts/FaunaOne-Regular.ttf
+    - family: Hepta Slab
+      fonts:
+        - asset: assets/fonts/HeptaSlab-Regular.ttf
+    - family: IBM Plex Sans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+    - family: Libertinus Sans
+      fonts:
+        - asset: assets/fonts/LibertinusSans-Regular.ttf
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-Regular.ttf
+    - family: Noto Sans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+    - family: Old Standard
+      fonts:
+        - asset: assets/fonts/OldStandardTT-Regular.ttf
+    - family: Sanchez
+      fonts:
+        - asset: assets/fonts/Sanchez-Regular.ttf
+    - family: Scope One
+      fonts:
+        - asset: assets/fonts/ScopeOne-Regular.ttf
+    - family: Solway
+      fonts:
+        - asset: assets/fonts/Solway-Regular.ttf
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 22
+  web:
+    generate: true
+    background_color: "#ffffff"
+    theme_color: "#0f4c81"
+  windows:
+    generate: true
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon.png"

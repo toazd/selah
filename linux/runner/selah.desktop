@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Selah
+Comment=Holy Bible Study App
+Exec=selah
+Icon=selah
+Terminal=false
+Type=Application
+Categories=Education;Utility;
+StartupWMClass=selah
