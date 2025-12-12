@@ -31,7 +31,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.3'
+        flutter-version: '3.38.5'
         channel: 'stable'
         
     - name: Setup iOS platform
@@ -87,21 +87,13 @@ jobs:
       
     - name: Get flutter dependencies
       run: flutter pub get
-        
-    - name: Set up signing keychain
-      run: |
-        # Create a temporary keychain for signing
-        security create-keychain -p "" build.keychain
-        security set-keychain-settings build.keychain
-        security unlock-keychain -p "" build.keychain
-        
-    - name: Build iOS debug
+
+    - name: Build iOS release
       run: |
         flutter build ios \
-          --debug \
+          --release \
           --no-codesign \
           --target lib/main.dart \
-          --flavor default \
           --dart-define=BUILD_NUMBER=${{ github.run_number }} \
           --verbose
           
@@ -129,14 +121,14 @@ jobs:
         
         # Create IPA file
         cd build/ios-ipa
-        zip -r ../../build/selah-debug.ipa Payload
+        zip -r ../../build/selah-release.ipa Payload
         cd ../..
         
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: selah-ios-debug-${{ github.run_number }}
-        path: build/selah-debug.ipa
+        name: selah-ios-release-${{ github.run_number }}
+        path: build/selah-release.ipa
         retention-days: 7
         
     - name: Build Summary
@@ -144,10 +136,10 @@ jobs:
         echo "## ✅ iOS Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Debug Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** iOS (iPhone/iPad)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Configuration:** Debug" >> $GITHUB_STEP_SUMMARY
+        echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
         echo "- **iOS Target:** 15.0 (Firebase SDK 12.4.0 compatible)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
