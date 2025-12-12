@@ -94,8 +94,7 @@ jobs:
           --release \
           --no-codesign \
           --target lib/main.dart \
-          --dart-define=BUILD_NUMBER=${{ github.run_number }} \
-          --verbose
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
           
     - name: Create IPA file
       run: |
