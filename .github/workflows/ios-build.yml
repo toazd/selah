@@ -81,14 +81,11 @@ jobs:
         pod repo update
         pod install
         cd ..
-        
-    - name: Get Flutter dependencies
-      run: flutter pub get
-      
+
     - name: Clean build
       run: flutter clean
       
-    - name: Get dependencies again after clean
+    - name: Get flutter dependencies
       run: flutter pub get
       
     - name: Install Ruby dependencies for codesign
