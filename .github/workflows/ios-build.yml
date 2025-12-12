@@ -1,0 +1,133 @@
+name: Build iOS App
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+          
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.5'
+        channel: 'stable'
+        
+    - name: Get iOS dependencies
+      run: |
+        cd ios
+        pod repo update
+        pod install
+        cd ..
+        
+    - name: Get Flutter dependencies
+      run: flutter pub get
+      
+    - name: Clean build
+      run: flutter clean
+      
+    - name: Get dependencies again after clean
+      run: flutter pub get
+      
+    - name: Install Ruby dependencies for codesign
+      run: |
+        gem install bundler
+        bundle install
+        
+    - name: Set up signing keychain
+      run: |
+        # Create a temporary keychain for signing
+        security create-keychain -p "" build.keychain
+        security set-keychain-settings build.keychain
+        security unlock-keychain -p "" build.keychain
+        
+    - name: Build iOS debug
+      run: |
+        flutter build ios \
+          --debug \
+          --no-codesign \
+          --target lib/main.dart \
+          --flavor default \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }} \
+          --verbose
+          
+    - name: Create IPA file
+      run: |
+        # Install Xcode command line tools if needed
+        if ! command -v xcrun &> /dev/null; then
+          xcode-select --install
+        fi
+        
+        # Create a temporary directory for the IPA contents
+        mkdir -p build/ios-ipa
+        
+        # Copy the built app
+        cp -R build/ios/iphoneos/selah.app build/ios-ipa/
+        
+        # Copy provisioning profile from Xcode automatic provisioning
+        # The provisioning profile will be automatically generated during build
+        
+        # Create Payload directory
+        mkdir -p build/ios-ipa/Payload
+        
+        # Move app into Payload
+        mv build/ios-ipa/selah.app build/ios-ipa/Payload/
+        
+        # Create IPA file
+        cd build/ios-ipa
+        zip -r ../../build/selah-debug.ipa Payload
+        cd ../..
+        
+    - name: Upload IPA artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: selah-ios-debug-${{ github.run_number }}
+        path: build/selah-debug.ipa
+        retention-days: 7
+        
+    - name: Build Summary
+      run: |
+        echo "## ✅ iOS Build Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Debug Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Platform:** iOS (iPhone/iPad)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Configuration:** Debug" >> $GITHUB_STEP_SUMMARY
+        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the IPA file from the artifacts below" >> $GITHUB_STEP_SUMMARY
+        echo "2. Open Sideloadly on your computer" >> $GITHUB_STEP_SUMMARY
+        echo "3. Connect your iPhone XR" >> $GITHUB_STEP_SUMMARY
+        echo "4. Drag and drop the downloaded IPA file into Sideloadly" >> $GITHUB_STEP_SUMMARY
+        echo "5. Follow Sideloadly's installation prompts" >> $GITHUB_STEP_SUMMARY
+        echo "6. Trust the developer profile on your iPhone (Settings > General > VPN & Device Management)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
+        echo "- This is a debug build using free provisioning profiles" >> $GITHUB_STEP_SUMMARY
+        echo "- The app will need to be reinstalled every 7 days" >> $GITHUB_STEP_SUMMARY
+        echo "- Make sure your iPhone XR is connected and trusted" >> $GITHUB_STEP_SUMMARY
+        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- If installation fails, try restarting your iPhone and Sideloadly" >> $GITHUB_STEP_SUMMARY
