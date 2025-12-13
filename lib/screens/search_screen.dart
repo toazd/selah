@@ -253,12 +253,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
     // Parse input to get keywords (no phrases allowed in nearby search)
     RegExp phraseRegExp = RegExp(r'"([^"]+)"');
     String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-    final keywords = withoutPhrases
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .map((term) => term.replaceAll('*', '').trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+    final keywords = withoutPhrases.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).map((term) => term.replaceAll('*', '').trim()).where((t) => t.isNotEmpty).toList();
 
     if (keywords.length <= 1) {
       return []; // Should not happen due to validation, but safety check
@@ -297,9 +292,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
 
         // Get all verses in the continuous range from startVerse to endVerse
         final allChapterVerses = await BibleDatabase.getVerses(book, chapter);
-        final versesInRange = allChapterVerses
-            .where((v) => (v['verse'] as int) >= startVerse && (v['verse'] as int) <= endVerse)
-            .toList();
+        final versesInRange = allChapterVerses.where((v) => (v['verse'] as int) >= startVerse && (v['verse'] as int) <= endVerse).toList();
 
         // Combine all verse texts for display (remove pilcrow symbols)
         final combinedText = versesInRange.map((v) {
@@ -340,8 +333,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   }
 
   // Find clusters of verses within 7 verses that contain all keywords
-  List<List<Map<String, dynamic>>> _findNearbyClusters(
-      List<Map<String, dynamic>> chapterVerses, List<String> keywords) {
+  List<List<Map<String, dynamic>>> _findNearbyClusters(List<Map<String, dynamic>> chapterVerses, List<String> keywords) {
     final clusters = <List<Map<String, dynamic>>>[];
 
     for (int i = 0; i < chapterVerses.length; i++) {
@@ -416,18 +408,12 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   List<String> _getKeywordsFromInput(String input) {
     RegExp phraseRegExp = RegExp(r'"([^"]+)"');
     String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-    final keywords = withoutPhrases
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .map((term) => term.replaceAll('*', '').trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+    final keywords = withoutPhrases.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).map((term) => term.replaceAll('*', '').trim()).where((t) => t.isNotEmpty).toList();
     return keywords;
   }
 
   // Highlight keywords in nearby search combined text, and also highlight verse numbers and red letters
-  TextSpan _highlightNearbyText(
-      BuildContext context, String combinedText, List<String> keywords, TextStyle baseStyle) {
+  TextSpan _highlightNearbyText(BuildContext context, String combinedText, List<String> keywords, TextStyle baseStyle) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final verseNumberStyle = baseStyle.copyWith(
       fontSize: baseStyle.fontSize! - 2,
@@ -437,8 +423,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
     );
 
     // Create regex for keyword highlighting (same as regular search)
-    final escapedKeywords =
-        keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
+    final escapedKeywords = keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
     final pattern = '(${escapedKeywords.join('|')})';
     final keywordRegex = _createRegExp(pattern, _caseSensitive);
 
@@ -459,8 +444,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
 
         // Parse verse text for red letters, then apply keyword highlighting
         final parsedVerseSpan = VerseTextParser.parseVerseText(verseText, baseStyle);
-        final highlightedVerseSpan =
-            _highlightParsedSpan(parsedVerseSpan, keywordRegex, context, redLetterOnly: false);
+        final highlightedVerseSpan = _highlightParsedSpan(parsedVerseSpan, keywordRegex, context, redLetterOnly: false);
         spans.add(highlightedVerseSpan);
       } else {
         // No verse number pattern, highlight keywords and handle red letters
@@ -488,8 +472,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
     return !(end1 < start2 || end2 < start1);
   }
 
-  Future<List<Map<String, dynamic>>> _searchVersesOrdered(
-      List<String> keywords, RegExp searchRegex, List<String> escapedTerms, String input) async {
+  Future<List<Map<String, dynamic>>> _searchVersesOrdered(List<String> keywords, RegExp searchRegex, List<String> escapedTerms, String input) async {
     // Special handling for multi-term searches (except nearby): use AND logic
     if (escapedTerms.length > 1 && !_useNearby) {
       final results = await BibleDatabase.getAllVerses();
@@ -522,9 +505,8 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
       // Normal logic: OR logic for regular searches
       // For wildcard searches (containing *), skip database prefiltering to avoid false negatives
       final hasWildcards = input.contains('*');
-      final results = keywords.isEmpty || hasWildcards
-          ? await BibleDatabase.getAllVerses()
-          : await BibleDatabase.searchVerses(preFilterKeywords: keywords, caseSensitive: _caseSensitive);
+      final results =
+          keywords.isEmpty || hasWildcards ? await BibleDatabase.getAllVerses() : await BibleDatabase.searchVerses(preFilterKeywords: keywords, caseSensitive: _caseSensitive);
 
       await _buildBookOrderIndex();
 
@@ -557,8 +539,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
     } else {
       // parse phrases and words
       RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-      final phrases =
-          phraseRegExp.allMatches(input).map((m) => m.group(1)!).where((p) => p.isNotEmpty).toList();
+      final phrases = phraseRegExp.allMatches(input).map((m) => m.group(1)!).where((p) => p.isNotEmpty).toList();
       String queryWithoutPhrases = input.replaceAll(phraseRegExp, '').trim();
       final originalWords = queryWithoutPhrases.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
       final allTerms = [...phrases, ...originalWords];
@@ -567,8 +548,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
       }
 
       // For keywords, remove * for broad LIKE queries
-      List<String> keywords =
-          allTerms.map((term) => term.replaceAll('*', '').trim()).where((t) => t.isNotEmpty).toList();
+      List<String> keywords = allTerms.map((term) => term.replaceAll('*', '').trim()).where((t) => t.isNotEmpty).toList();
 
       // Treat * as [A-Za-z]*
       List<String> escapedTerms = allTerms.map((term) {
@@ -584,11 +564,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
       } else {
         pattern = '(${escapedTerms.join('|')})';
       }
-      return {
-        'keywords': keywords,
-        'regex': _createRegExp(pattern, _caseSensitive),
-        'escapedTerms': escapedTerms
-      };
+      return {'keywords': keywords, 'regex': _createRegExp(pattern, _caseSensitive), 'escapedTerms': escapedTerms};
     }
   }
   // --- END: Ensure results are in DB/Biblical order ---
@@ -787,8 +763,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         int matchCount = 0;
         int verseCount = 0;
         final keywords = _getKeywordsFromInput(lastSearch);
-        final escapedKeywords =
-            keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
+        final escapedKeywords = keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
         final pattern = '(${escapedKeywords.join('|')})';
         final regex = _createRegExp(pattern, _caseSensitive);
 
@@ -1037,8 +1012,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         int matchCount = 0;
         int verseCount = 0;
         final keywords = _getKeywordsFromInput(searchText);
-        final escapedKeywords =
-            keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
+        final escapedKeywords = keywords.map((k) => _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k)).toList();
         final pattern = '(${escapedKeywords.join('|')})';
         final regex = _createRegExp(pattern, _caseSensitive);
 
@@ -1069,8 +1043,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         final searchRegex = patternData['regex'] as RegExp;
 
         // Get all results at once
-        final results =
-            await _searchVersesOrdered(keywords, searchRegex, patternData['escapedTerms'], searchText);
+        final results = await _searchVersesOrdered(keywords, searchRegex, patternData['escapedTerms'], searchText);
 
         // Calculate match and verse counts
         int verseCount = results.length;
@@ -1133,8 +1106,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
     }
   }
 
-  TextSpan _highlightParsedSpan(TextSpan span, RegExp regex, BuildContext context,
-      {bool redLetterOnly = false}) {
+  TextSpan _highlightParsedSpan(TextSpan span, RegExp regex, BuildContext context, {bool redLetterOnly = false}) {
     final color = _getHighlightColor(context);
 
     // Performance optimization: if no children and no text, return as-is
@@ -1209,11 +1181,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UnbreakableText('Regular search',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               //UnbreakableText(
               //  '• The default search enables partial word',
@@ -1221,8 +1189,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               //),
               UnbreakableText(
                 '• Exact phrases must be surrounded by quotes (eg. "love one another").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               //UnbreakableText(
               //  '• Enable the whole word option to match complete words only (eg. "love" won\'t match "loved" or "lovely").',
@@ -1230,134 +1197,103 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               //),
               UnbreakableText(
                 '• The asterisk is a wild card and can be used with one or more words (eg. love* will match love, lovest, loved, etc.).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Check the search options menu for more ways to customize your searches.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• You can mix and match the various search options but some of them are mututally exclusive.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               const SizedBox(height: 16),
               UnbreakableText('Nearby search (must be enabled in search options)',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               UnbreakableText(
                 '• Finds passages where all search words appear within 3 verses of each other.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Requires more than one word (does not support quotes or the asterisk).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Example: "graven carved" results: Judges 18:17-20, 2 Chronicles 33:19-22, 2 Chronicles 34:7.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               const SizedBox(height: 16),
               UnbreakableText('Regular expression (must be enabled in search options)',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               UnbreakableText(
                 '• Supports ECMAScript 2018 regular expressions with Unicode properties.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• The caret symbol ^ matches the start of any line (eg. "^My" matches any verse that begins with My or my - since there are no verses that begin with a lowercase letter the case-sensitive toggle won\'t change the results).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• The dollar symbol \$ matches the end of a line (eg. "!\$" matches any verse that ends with an exclamation mark).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• The period character . matches any single character (eg. "S.chem"). Note that you need to add a quantifier if you want the period to match more than one character (eg. "S.+chem").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• \\s matches any white-space character (eg. " ").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• \\w is shorthand for the word character class [a-zA-Z0-9_] which is the same as any lower or uppercase character, any digit, and the underscore symbol.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Parenthesis can be used as a grouping construct and when combined with the alternation operator | they can be used together to match close variations of the same word (eg. "S(y|i|he)chem" will match "Sichem", "Shechem", and "Sychem"). Note that in grouping constructs the characters must appear in the order they are given to match (the same as an AND operator between each character).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Characters classes match any one of the characters in the set (eg. "[abc]" will match any ONE of a, b, or c which is the same as an OR operator between each character; "[abc]+" will match one or more of any character in the set; "[a-z]+" will match any one or more characters in the range a to z; "[a-z]+thite" will match Hamathite, Kohathite, Korathite, Gazathite, Ashdothite, and more).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• The negation operator can be used inside of character classes to negate characters or ranges from matching (eg. "\\b[^gG]od\\b" will match any three-letter word that does not begin with "g" or "G" and ends with "od").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Positive/negative lookahead (?=)/(?!) and positive/negative lookbehinds (?<=)/(?<!) are fully supported (eg. "(?<!dark)ness" will match any word that ends with "ness" but does not begin with "dark").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Characters classes and the grouping construct can be used together (eg. "S([yi]|he)chem" will match "Sichem", "Shechem", and "Sychem").',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Quantifiers can appear after any character, character class/set, or grouping construct to specify quantities. Quantifiers: * = zero or more, + = one or more, ? = zero or one, {n} = exactly n times, {n,} = n or more times, {n,m} = between n and m times inclusive. Note that quantifiers with no limit (* and +) are inherently greedy (they match as many as possible). Add a ? after any quantifier to make it lazy (match as few as possible). The range quantifier can be used to specify a precise amount or range that you are looking for "a{2}" will match sequences of exactly two a\'s (Naamah, Canaan, Balaam).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Unicode properties: \\p{P} = punctuation, \\p{L} = any letter, \\p{N} = any number, \\p{S} = any symbol, \\p{Z} = separators (spaces, line/paragraph breaks), \\p{M} = marks (accents, combining characters)',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Example: "^Verily" (with Red Letter enabled) matches any sentence that Jesus spoke that begins with "Verily".',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Example: "\\b(?!\\bwrit)\\w*ten\\b" will match all words that end with "ten" but do not begin with "writ".',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Example: "(!|\\?)\$" matches any verse that ends with an exclamation mark or a question mark. Take note that if the character you are looking for is also a quantifier it needs to be escaped to become literal (by adding a backslash \\ before it).',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               UnbreakableText(
                 '• Example: "horeb|sinai|mount of God|Sina" matches any verse that contains the text horeb, sinai, "mount of God", and Sina.',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
             ],
           ),
@@ -1366,8 +1302,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
           TextButton(
               child: Text(
                 'Close',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
               ),
               onPressed: () => Navigator.pop(context))
         ],
@@ -1405,10 +1340,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
             title: Center(
                 child: Text(
               'Goto Verse',
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
-                  color: getAdaptiveTextColor(context)),
+              style: TextStyle(fontFamily: fontFamilyNotifier.value, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
               Navigator.of(context).pop();
@@ -1419,10 +1351,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
             title: Center(
                 child: Text(
               'Show Context',
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
-                  color: getAdaptiveTextColor(context)),
+              style: TextStyle(fontFamily: fontFamilyNotifier.value, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
               Navigator.of(context).pop();
@@ -1433,10 +1362,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
             title: Center(
                 child: Text(
               'Copy ${isNearbyResult ? 'Verses $verseNum-$endVerseNum' : 'Verse $verseNum'}',
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
-                  color: getAdaptiveTextColor(context)),
+              style: TextStyle(fontFamily: fontFamilyNotifier.value, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
               Clipboard.setData(ClipboardData(text: copyText)).then((_) {
@@ -1483,13 +1409,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   // Open NoteScreen for editing notes in search screen context
   Future<void> _openNoteFromSearch(String book, int chapter, int verse, String? existingNote) async {
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => NoteScreen(
-                book: book,
-                chapter: chapter,
-                verse: verse,
-                existingNote: existingNote))); // Use provided existing note
+        context, MaterialPageRoute(builder: (_) => NoteScreen(book: book, chapter: chapter, verse: verse, existingNote: existingNote))); // Use provided existing note
   }
 
   // Show context dialog with chapter dialog
@@ -1510,12 +1430,9 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         chapter: chapter,
         verse: verseNum, // Focus on the target verse
         referenceText: referenceText, // Highlight the target verse
-        onNavigateToVerse: (verse) =>
-            _gotoVerse(normalizedShortBookName, chapter, verse), // Navigate the bible screen to the verse
-        onNoteIconTap: (int verse, String? noteText) =>
-            _openNoteFromSearch(normalizedShortBookName, chapter, verse, noteText),
-        onNoteEditTap: (int verse, String? noteText) =>
-            _openNoteFromSearch(normalizedShortBookName, chapter, verse, noteText),
+        onNavigateToVerse: (verse) => _gotoVerse(normalizedShortBookName, chapter, verse), // Navigate the bible screen to the verse
+        onNoteIconTap: (int verse, String? noteText) => _openNoteFromSearch(normalizedShortBookName, chapter, verse, noteText),
+        onNoteEditTap: (int verse, String? noteText) => _openNoteFromSearch(normalizedShortBookName, chapter, verse, noteText),
         onVerseLink: (link, referenceText) => handleVerseLink(
           context,
           link,
@@ -1530,9 +1447,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   }
 
   String _formatNumber(int? number) {
-    return number
-        .toString()
-        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+($|\D))'), (match) => '${match.group(1)},');
+    return number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+($|\D))'), (match) => '${match.group(1)},');
   }
 
   // Update totals
@@ -1545,9 +1460,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   Widget build(BuildContext context) {
     super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(Theme.of(context).brightness == Brightness.dark
-        ? darkBackgroundColor.value
-        : lightBackgroundColor.value);
+    final barColor = _adjustBarColor(Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
@@ -1561,10 +1474,8 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         title: (_totalMatches != null && _totalVerses != null)
             ? Center(
                 child: ResponsiveText(
-                text:
-                    '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'verse' : 'verses'}',
-                style: TextStyle(
-                    fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                text: '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'verse' : 'verses'}',
+                style: TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
@@ -1631,9 +1542,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
         ],
       ),
       endDrawer: Drawer(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? darkBackgroundColor.value
-            : lightBackgroundColor.value,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
         child: SingleChildScrollView(
             child: Column(
           children: [
@@ -1646,15 +1555,11 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               //title: Text('Search Options', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
               automaticallyImplyLeading: true,
               toolbarHeight: 60,
-              backgroundColor: Theme.of(context).brightness == Brightness.dark
-                  ? darkBackgroundColor.value
-                  : lightBackgroundColor.value,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text('Regex',
-                  style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Regex', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {
@@ -1674,9 +1579,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               },
             ),
             SwitchListTile(
-              title: Text('Nearby',
-                  style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Nearby', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useNearby,
               onChanged: (val) async {
                 setState(() {
@@ -1693,9 +1596,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               },
             ),
             SwitchListTile(
-              title: Text('Whole word',
-                  style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Whole word', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useWholeWord,
               onChanged: (val) async {
                 setState(() {
@@ -1712,9 +1613,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               },
             ),
             SwitchListTile(
-              title: Text('Red letter',
-                  style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Red letter', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useRedLetter,
               onChanged: (val) async {
                 setState(() {
@@ -1730,9 +1629,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               },
             ),
             SwitchListTile(
-              title: Text('Case-sensitive',
-                  style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Case-sensitive', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _caseSensitive,
               onChanged: (val) async {
                 setState(() {
@@ -1754,11 +1651,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Text(
                 'Book Filter',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    fontWeight: FontWeight.normal,
-                    color: getAdaptiveTextColor(context)),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, fontWeight: FontWeight.normal, color: getAdaptiveTextColor(context)),
               ),
             ),
             const SizedBox(height: 8),
@@ -1773,10 +1666,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
                       value: category,
                       child: Text(
                         category,
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context)),
+                        style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       ),
                     );
                   }),
@@ -1784,10 +1674,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
                     value: 'Custom Range',
                     child: Text(
                       'Custom Range',
-                      style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context)),
+                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                     ),
                   ),
                 ],
@@ -1851,10 +1738,7 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
                           color: Colors.red,
                         ),
                       ),
-                      style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context)),
+                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       onChanged: (value) {
                         _customBookFilter = value;
                         _updateBookFilter();
@@ -1876,47 +1760,26 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
                           _onSearch();
                         }
                       },
-                      child: Text('Apply',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                      child: Text('Apply', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
                     ),
                   ),
                   if (_bookFilterType == 'Custom Range') ...[
                     const SizedBox(height: 16),
                     ListTile(
                         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                      Text('Custom range help:',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context))),
+                      Text('Custom range help:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 16),
                       Text('• Both short and long book names are supported.',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context))),
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
-                      Text(
-                          '• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context))),
+                      Text('• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       Text('• Multiple ranges must be separated by a comma (,)',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context))),
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       Text('• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context))),
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     ]))
                   ],
                 ],
@@ -1924,357 +1787,295 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
           ],
         )),
       ),
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? darkBackgroundColor.value
-          : lightBackgroundColor.value,
-      body: Container(
-          color: barColor,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch, // ensure full width
-              children: [
-                TextField(
-                  //OnscreenKeyboardTextField(
-                  autofocus: true,
-                  maxLength: 100,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  controller: _controller,
-                  //focusNode: _searchFocusNode,
-                  decoration: InputDecoration(
-                    counter: SizedBox.shrink(), // Hide the counter eg. 0/100
-                    hintText: 'Search',
-                    hintStyle: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
-                    // Define the common border style
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Colors.blueGrey, // The default/unfocused color
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+      body: SafeArea(
+        child: Container(
+            color: barColor,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch, // ensure full width
+                children: [
+                  TextField(
+                    //OnscreenKeyboardTextField(
+                    autofocus: true,
+                    maxLength: 100,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    controller: _controller,
+                    //focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      counter: SizedBox.shrink(), // Hide the counter eg. 0/100
+                      hintText: 'Search',
+                      hintStyle: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
+                      // Define the common border style
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: Colors.blueGrey, // The default/unfocused color
+                        ),
                       ),
-                    ),
 
-                    // When NOT focused (enabled)
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Colors.blueGrey,
+                      // When NOT focused (enabled)
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: Colors.blueGrey,
+                        ),
                       ),
-                    ),
 
-                    // When SELECTED (focused)
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Colors.blueGrey, // Override the default purple focus color
-                        width: 2.0, // Optional: You can still use width to make it stand out if desired
+                      // When SELECTED (focused)
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: Colors.blueGrey, // Override the default purple focus color
+                          width: 2.0, // Optional: You can still use width to make it stand out if desired
+                        ),
                       ),
-                    ),
 
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear,
-                        color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                        semanticLabel: 'Clear Search Query',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear,
+                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          semanticLabel: 'Clear Search Query',
+                        ),
+                        onPressed: () => _controller.clear(),
+                        iconSize: 32,
                       ),
-                      onPressed: () => _controller.clear(),
-                      iconSize: 32,
                     ),
-                  ),
-                  // Live update the search results
-                  onChanged: (_) {
-                    _lastInputTime = DateTime.now();
-                    if (_onSearchDebounce?.isActive ?? false) {
-                      _onSearchDebounce?.cancel();
-                    }
-                    _onSearchDebounce = Timer(Duration(milliseconds: 500), () {
-                      if (_controller.text.isNotEmpty &&
-                          _controller.text.length > 1 &&
-                          (_controller.text.split('"').length - 1) % 2 == 0) {
-                        // Don't run unless zero or an even number of quotes
-                        _onSearch();
+                    // Live update the search results
+                    onChanged: (_) {
+                      _lastInputTime = DateTime.now();
+                      if (_onSearchDebounce?.isActive ?? false) {
+                        _onSearchDebounce?.cancel();
                       }
-                    });
-                  },
-                  onSubmitted: (_) => _onSearch(),
-                  style: TextStyle(fontSize: uiFontSize + 4, fontFamily: fontFamilyNotifier.value),
-                ),
-                const SizedBox(height: 16),
-                Wrap(alignment: WrapAlignment.end, runAlignment: WrapAlignment.end, children: [
-                  ElevatedButton(
-                    onPressed: (_totalMatches != null && _totalVerses != null && _totalVerses! > 0)
-                        ? () async {
-                            final searchText = _useRegex ? _controller.text : _controller.text.trim();
-                            await _saveSearchHistory(
-                                searchText, _isNearbySearchActive ? 'nearby' : (_useRegex ? 'regex' : null));
-                          }
-                        : null,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return Colors.grey; // Disabled/greyed out background
+                      _onSearchDebounce = Timer(Duration(milliseconds: 500), () {
+                        if (_controller.text.isNotEmpty && _controller.text.length > 1 && (_controller.text.split('"').length - 1) % 2 == 0) {
+                          // Don't run unless zero or an even number of quotes
+                          _onSearch();
                         }
-                        // Enabled state - use default elevated button background
-                        return Theme.of(context)
-                                .elevatedButtonTheme
-                                .style
-                                ?.backgroundColor
-                                ?.resolve(states) ??
-                            Colors.blue;
-                      }),
-                      foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return Colors.white60; // Less visible text for disabled
-                        }
-                        // Enabled state - use default elevated button text color
-                        return Theme.of(context)
-                                .elevatedButtonTheme
-                                .style
-                                ?.foregroundColor
-                                ?.resolve(states) ??
-                            Colors.white;
-                      }),
-                    ),
-                    child: Text('Save',
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                      });
+                    },
+                    onSubmitted: (_) => _onSearch(),
+                    style: TextStyle(fontSize: uiFontSize + 4, fontFamily: fontFamilyNotifier.value),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _isResetting
-                        ? null
-                        : () async {
-                            if (_isResetting) return;
-                            setState(() => _isResetting = true);
-
-                            setState(() {
-                              // Clear search query text
-                              _controller.clear();
-                              // Reset all search option toggles to false
-                              _useRegex = false;
-                              _useNearby = false;
-                              _isNearbySearchActive = false;
-                              _useWholeWord = false;
-                              _useRedLetter = false;
-                              _caseSensitive = false;
-                              // Set book filter range to "All Books"
-                              _bookFilterType = 'All Books';
-                              // Reset custom range text entry box to empty string
-                              _customBookFilter = '';
-                              _customRangeController.text = '';
-                              // Clear search results and totals
-                              _searchResults = [];
-                              _totalMatches = null;
-                              _totalVerses = null;
-                            });
-                            // Clear highlight cache
-                            _clearHighlightCache();
-                            // Update book filter state
-                            _updateBookFilter();
-                            // Save reset options
-                            await _saveSearchOptions();
-
-                            if (context.mounted) {
-                              showStyledSnackBar(context, 'Search Options Reset');
+                  const SizedBox(height: 16),
+                  Wrap(alignment: WrapAlignment.end, runAlignment: WrapAlignment.end, children: [
+                    ElevatedButton(
+                      onPressed: (_totalMatches != null && _totalVerses != null && _totalVerses! > 0)
+                          ? () async {
+                              final searchText = _useRegex ? _controller.text : _controller.text.trim();
+                              await _saveSearchHistory(searchText, _isNearbySearchActive ? 'nearby' : (_useRegex ? 'regex' : null));
                             }
-
-                            // Enable button again after 3 seconds
-                            Future.delayed(const Duration(seconds: 3), () {
-                              if (mounted) {
-                                setState(() => _isResetting = false);
-                              }
-                            });
-                          },
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return Colors.grey; // Disabled/greyed out background
-                        }
-                        // Enabled state - use default elevated button background
-                        return Theme.of(context)
-                                .elevatedButtonTheme
-                                .style
-                                ?.backgroundColor
-                                ?.resolve(states) ??
-                            Colors.blue;
-                      }),
-                      foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return Colors.white60; // Less visible text for disabled
-                        }
-                        // Enabled state - use default elevated button text color
-                        return Theme.of(context)
-                                .elevatedButtonTheme
-                                .style
-                                ?.foregroundColor
-                                ?.resolve(states) ??
-                            Colors.white;
-                      }),
+                          : null,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.grey; // Disabled/greyed out background
+                          }
+                          // Enabled state - use default elevated button background
+                          return Theme.of(context).elevatedButtonTheme.style?.backgroundColor?.resolve(states) ?? Colors.blue;
+                        }),
+                        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.white60; // Less visible text for disabled
+                          }
+                          // Enabled state - use default elevated button text color
+                          return Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(states) ?? Colors.white;
+                        }),
+                      ),
+                      child: Text('Save',
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
                     ),
-                    child: Text('Reset',
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context, usePrimaryColor: true))),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    focusNode: _searchButtonFocusNode,
-                    onPressed: () => _onSearch(),
-                    child: Text('Search',
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context, usePrimaryColor: true))),
-                  ),
-                ]),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: _controller.text.trim().isEmpty
-                      ? Center(
-                          child: Text(
-                            'Enter search terms above to find verses',
-                            style: TextStyle(
-                              fontSize: uiFontSize + 6,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                        )
-                      : _isSearching
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  const SizedBox(height: 16),
-                                  Text('Searching...🔎',
-                                      style: TextStyle(
-                                          fontSize: uiFontSize + 8,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context))),
-                                ],
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _isResetting
+                          ? null
+                          : () async {
+                              if (_isResetting) return;
+                              setState(() => _isResetting = true);
+
+                              setState(() {
+                                // Clear search query text
+                                _controller.clear();
+                                // Reset all search option toggles to false
+                                _useRegex = false;
+                                _useNearby = false;
+                                _isNearbySearchActive = false;
+                                _useWholeWord = false;
+                                _useRedLetter = false;
+                                _caseSensitive = false;
+                                // Set book filter range to "All Books"
+                                _bookFilterType = 'All Books';
+                                // Reset custom range text entry box to empty string
+                                _customBookFilter = '';
+                                _customRangeController.text = '';
+                                // Clear search results and totals
+                                _searchResults = [];
+                                _totalMatches = null;
+                                _totalVerses = null;
+                              });
+                              // Clear highlight cache
+                              _clearHighlightCache();
+                              // Update book filter state
+                              _updateBookFilter();
+                              // Save reset options
+                              await _saveSearchOptions();
+
+                              if (context.mounted) {
+                                showStyledSnackBar(context, 'Search Options Reset');
+                              }
+
+                              // Enable button again after 3 seconds
+                              Future.delayed(const Duration(seconds: 3), () {
+                                if (mounted) {
+                                  setState(() => _isResetting = false);
+                                }
+                              });
+                            },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.grey; // Disabled/greyed out background
+                          }
+                          // Enabled state - use default elevated button background
+                          return Theme.of(context).elevatedButtonTheme.style?.backgroundColor?.resolve(states) ?? Colors.blue;
+                        }),
+                        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return Colors.white60; // Less visible text for disabled
+                          }
+                          // Enabled state - use default elevated button text color
+                          return Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(states) ?? Colors.white;
+                        }),
+                      ),
+                      child: Text('Reset',
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      focusNode: _searchButtonFocusNode,
+                      onPressed: () => _onSearch(),
+                      child: Text('Search',
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                    ),
+                  ]),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: _controller.text.trim().isEmpty
+                        ? Center(
+                            child: Text(
+                              'Enter search terms above to find verses',
+                              style: TextStyle(
+                                fontSize: uiFontSize + 6,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
                               ),
-                            )
-                          : (_searchResults.isEmpty && (_controller.text.split('"').length - 1) % 2 == 0)
-                              ? Center(
-                                  child: Text('No matches found 🧐',
-                                      style: TextStyle(
-                                          fontSize: uiFontSize + 8,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context))))
-                              : ValueListenableBuilder<double>(
-                                  valueListenable: fontSizeNotifier,
-                                  builder: (context, fontSize, child) {
-                                    return RawScrollbar(
-                                        thumbColor: isDark
-                                            ? darkPrimaryColor.value.withValues(alpha: 0.3)
-                                            : lightPrimaryColor.value.withValues(alpha: 0.5),
-                                        thumbVisibility: false,
-                                        trackVisibility: false,
-                                        thickness: 16.0,
-                                        controller: _resultsScrollController,
-                                        radius: Radius.circular(8.0),
-                                        child: ScrollConfiguration(
-                                            behavior:
-                                                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                            child: ListView.builder(
-                                              padding: EdgeInsets.only(
-                                                  bottom:
-                                                      100.0), // Allow the user to scroll below the results just like the bible screens
-                                              controller: _resultsScrollController,
-                                              itemCount: _searchResults.length,
-                                              itemBuilder: (context, index) {
-                                                final result = _searchResults[index];
-                                                final baseStyle = TextStyle(
-                                                  fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                      fontFamilyNotifier.value, fontSize),
-                                                  color: Theme.of(context).brightness == Brightness.dark
-                                                      ? darkTextColor.value
-                                                      : lightTextColor.value,
-                                                );
-
-                                                // Check if this is a nearby search result (has startVerse/endVerse)
-                                                final isNearbyResult = result.containsKey('startVerse') &&
-                                                    result.containsKey('endVerse');
-
-                                                // Get keywords for highlighting (only available for nearby search)
-                                                final List<String> keywords = isNearbyResult
-                                                    ? _getKeywordsFromInput(_controller.text)
-                                                    : [];
-
-                                                return GestureDetector(
-                                                  onTap: () => _showSearchResultActionMenu(context, result),
-                                                  child: Container(
-                                                    //color: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
-                                                    color: barColor,
-                                                    width: double.infinity,
-                                                    padding: EdgeInsets.only(
-                                                        left: 0.0, top: 0.0, bottom: 0.0, right: 18.0),
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Text.rich(
-                                                          TextSpan(
-                                                            children: [
-                                                              // Reference (bold)
-                                                              TextSpan(
-                                                                text: isNearbyResult
-                                                                    ? '${result['bookLongName'] as String? ?? 'ERROR'} ${result['chapter']}:${result['startVerse']}-${result['endVerse']}\n'
-                                                                    : '${result['bookLongName'] as String? ?? 'ERROR'} ${result['chapter']}:${result['verse']}\n',
-                                                                style: TextStyle(
-                                                                  fontSize:
-                                                                      FontSizeAdjustments.getAdjustedSize(
-                                                                          fontFamilyNotifier.value, fontSize),
-                                                                  fontWeight: FontWeight.bold,
-                                                                  color: Theme.of(context).brightness ==
-                                                                          Brightness.dark
-                                                                      ? darkPrimaryColor
-                                                                          .value // darkTextColor.value
-                                                                      : lightPrimaryColor
-                                                                          .value, // lightTextColor.value
-                                                                ),
-                                                              ),
-                                                              // Verse text with highlighting
-                                                              if (isNearbyResult)
-                                                                _highlightNearbyText(
-                                                                    context,
-                                                                    result['text'] as String,
-                                                                    keywords,
-                                                                    baseStyle)
-                                                              else
-                                                                _getHighlightedSpan(result, baseStyle),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        if (index < _searchResults.length - 1)
-                                                          Divider(
-                                                            thickness: 1,
-                                                            height: 16,
-                                                            indent: MediaQuery.of(context).size.width * 0.01,
-                                                            endIndent:
-                                                                MediaQuery.of(context).size.width * 0.01,
-                                                            color: const Color.fromARGB(47, 158, 158, 158),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            )));
-                                  },
+                            ),
+                          )
+                        : _isSearching
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    Text('Searching...🔎', style: TextStyle(fontSize: uiFontSize + 8, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                                  ],
                                 ),
-                ),
-              ],
-            ),
-          )),
+                              )
+                            : (_searchResults.isEmpty && (_controller.text.split('"').length - 1) % 2 == 0)
+                                ? Center(
+                                    child: Text('No matches found 🧐', style: TextStyle(fontSize: uiFontSize + 8, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
+                                : ValueListenableBuilder<double>(
+                                    valueListenable: fontSizeNotifier,
+                                    builder: (context, fontSize, child) {
+                                      return RawScrollbar(
+                                          thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
+                                          thumbVisibility: false,
+                                          trackVisibility: false,
+                                          thickness: 16.0,
+                                          controller: _resultsScrollController,
+                                          radius: Radius.circular(8.0),
+                                          child: ScrollConfiguration(
+                                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                              child: ListView.builder(
+                                                padding: EdgeInsets.only(bottom: 100.0), // Allow the user to scroll below the results just like the bible screens
+                                                controller: _resultsScrollController,
+                                                itemCount: _searchResults.length,
+                                                itemBuilder: (context, index) {
+                                                  final result = _searchResults[index];
+                                                  final baseStyle = TextStyle(
+                                                    fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize),
+                                                    color: Theme.of(context).brightness == Brightness.dark ? darkTextColor.value : lightTextColor.value,
+                                                  );
+
+                                                  // Check if this is a nearby search result (has startVerse/endVerse)
+                                                  final isNearbyResult = result.containsKey('startVerse') && result.containsKey('endVerse');
+
+                                                  // Get keywords for highlighting (only available for nearby search)
+                                                  final List<String> keywords = isNearbyResult ? _getKeywordsFromInput(_controller.text) : [];
+
+                                                  return GestureDetector(
+                                                    onTap: () => _showSearchResultActionMenu(context, result),
+                                                    child: Container(
+                                                      //color: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+                                                      color: barColor,
+                                                      width: double.infinity,
+                                                      padding: EdgeInsets.only(left: 0.0, top: 0.0, bottom: 0.0, right: 18.0),
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                // Reference (bold)
+                                                                TextSpan(
+                                                                  text: isNearbyResult
+                                                                      ? '${result['bookLongName'] as String? ?? 'ERROR'} ${result['chapter']}:${result['startVerse']}-${result['endVerse']}\n'
+                                                                      : '${result['bookLongName'] as String? ?? 'ERROR'} ${result['chapter']}:${result['verse']}\n',
+                                                                  style: TextStyle(
+                                                                    fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize),
+                                                                    fontWeight: FontWeight.bold,
+                                                                    color: Theme.of(context).brightness == Brightness.dark
+                                                                        ? darkPrimaryColor.value // darkTextColor.value
+                                                                        : lightPrimaryColor.value, // lightTextColor.value
+                                                                  ),
+                                                                ),
+                                                                // Verse text with highlighting
+                                                                if (isNearbyResult)
+                                                                  _highlightNearbyText(context, result['text'] as String, keywords, baseStyle)
+                                                                else
+                                                                  _getHighlightedSpan(result, baseStyle),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          if (index < _searchResults.length - 1)
+                                                            Divider(
+                                                              thickness: 1,
+                                                              height: 16,
+                                                              indent: MediaQuery.of(context).size.width * 0.01,
+                                                              endIndent: MediaQuery.of(context).size.width * 0.01,
+                                                              color: const Color.fromARGB(47, 158, 158, 158),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              )));
+                                    },
+                                  ),
+                  ),
+                ],
+              ),
+            )),
+      ),
     );
   }
 }

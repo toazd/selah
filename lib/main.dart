@@ -1398,7 +1398,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
     showDialog(
       context: context,
-      useSafeArea: false, // prevent dialog from shrinking in immersive mode
+      useSafeArea: true,
       builder: (context) {
         return VerseHistoryDialog(
           //screenIndex: screenIndex,
@@ -1411,7 +1411,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
   void _showCustomizeHighlightColorsDialog(BuildContext context) {
     showDialog(
       context: context,
-      useSafeArea: false,
+      useSafeArea: true,
       builder: (context) => Dialog(
         child: Container(
           width: 500,
@@ -1552,7 +1552,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
   void _showCustomizeColorsDialog(BuildContext context) {
     showDialog(
       context: context,
-      useSafeArea: false,
+      useSafeArea: true,
       builder: (context) => Dialog(
         child: Container(
           width: 350,
@@ -1963,7 +1963,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       builder: (context, showNavBar, _) {
                         return SwitchListTile(
                           title: Text(
-                            showNavBar ? 'Show navigation bar' : 'Hide navigation bar',
+                            'Navigation Bar', //showNavBar ? 'Show navigation bar' : 'Hide navigation bar',
                             style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,
@@ -1991,7 +1991,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       builder: (context, showInline, _) {
                         return SwitchListTile(
                           title: Text(
-                            showInline ? 'Inline notes' : 'Notes as icons',
+                            'Inline Notes', //showInline ? 'Inline Notes' : 'Notes as Icons',
                             style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,
@@ -3765,7 +3765,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
     final result = await showDialog<bool>(
       context: context,
-      useSafeArea: false,
+      useSafeArea: true,
       builder: (context) {
         return AlertDialog(
           //title: Text('WARNING: edit with caution!', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: Colors.red)),
@@ -3989,33 +3989,49 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
     if (!mounted) return;
 
-    // --- 2. Show Progress Dialog (Non-Blocking) ---
+    // --- 2. Request storage permission BEFORE showing progress dialog ---
+    // This prevents permission issues during data collection on iOS
+    bool hasPermission = await _requestStoragePermission();
+    if (!hasPermission) {
+      if (mounted) {
+        showStyledSnackBar(
+          context,
+          'Storage permission is required for export',
+          isError: true,
+        );
+      }
+      return;
+    }
+
+    // --- 3. Show Progress Dialog (Non-Blocking) ---
     // The showDialog returns a Future that completes when the dialog is dismissed.
     // We do NOT await it here. This allows the code to continue execution
     // and start the long process immediately after the dialog is requested to show.
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Collecting your data...',
-              style: TextStyle(
-                fontSize: uiFontSize,
-                fontFamily: uiFontFamily,
-                color: getAdaptiveTextColor(context),
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Collecting your data...',
+                style: TextStyle(
+                  fontSize: uiFontSize,
+                  fontFamily: uiFontFamily,
+                  color: getAdaptiveTextColor(context),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
 
-    // --- 3. Execute Long Process Immediately After Dialog is Queued ---
+    // --- 4. Execute Long Process Immediately After Dialog is Queued ---
     // This Future ensures the code is executed outside of the immediate build cycle,
     // allowing the dialog to actually render before the long synchronous task blocks the UI.
     // We use .then() to handle the result and ensure the dialog is closed.
@@ -4027,20 +4043,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           return _collectAllData(selectedTypes!);
         });
 
-        // B. Check storage permission
-        bool hasPermission = await _requestStoragePermission();
-        if (!hasPermission) {
-          if (mounted) {
-            showStyledSnackBar(
-              context,
-              'Storage permission is required for export',
-              isError: true,
-            );
-          }
-          return;
-        }
-
-        // C. Let user choose export location
+        // B. Let user choose export location
         final timestamp = DateTime.now().toString().replaceAll(RegExp(r'[:.]'), '-').substring(0, 19);
         final fileName = 'Selah_$timestamp.zip';
 
@@ -4067,7 +4070,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           return;
         }
 
-        // D. Create and Write zip file
+        // C. Create and Write zip file
         final zipFile = File(path.join(selectedDirectory, fileName));
         final encoder = ZipEncoder();
         final archive = Archive();
@@ -4079,18 +4082,19 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         final zipBytes = encoder.encode(archive);
         await zipFile.writeAsBytes(zipBytes);
 
-        // E. Show success message
+        // D. Show success message
         if (mounted) {
           showStyledSnackBar(context, '✅ Data exported to $fileName');
         }
       } catch (e) {
-        // F. Handle errors during data collection or saving
+        // E. Handle errors during data collection or saving
         if (mounted) {
-          showStyledSnackBar(context, 'Export failed: $e');
-        }
+          // Close progress dialog first to prevent stuck UI
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          }
 
-        // Show error dialog
-        if (mounted) {
+          // Show error dialog
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -4123,13 +4127,14 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
             ),
           );
         }
+        return; // Exit early to prevent finally block from running again
       } finally {
-        // --- 4. Close Progress Dialog (Guaranteed to Run LAST) ---
+        // --- 5. Close Progress Dialog (Guaranteed to Run LAST) ---
         // This runs after the entire chain of Future.value().then() completes.
         if (mounted) {
-          // We MUST pop the dialog we showed in step 2.
+          // We MUST pop the dialog we showed in step 3.
           if (Navigator.of(context).canPop()) {
-            Navigator.pop(context);
+            Navigator.of(context).pop();
           }
         }
       }

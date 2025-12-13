@@ -18,7 +18,7 @@ class ResponsiveText extends StatefulWidget {
     super.key,
     required this.text,
     required this.style,
-    this.minFontSize = 8.0,
+    this.minFontSize = 4.0,
     this.stepSize = 1.0,
     this.maxLines = 1,
     this.overflow = TextOverflow.ellipsis,

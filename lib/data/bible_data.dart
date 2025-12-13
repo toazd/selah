@@ -17258,8 +17258,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       125: 'I am thy servant; give me understanding, that I may know thy testimonies.',
       126: 'It is time for thee, LORD, to work: for they have made void thy law.',
       127: 'Therefore I love thy commandments above gold; yea, above fine gold.',
-      128:
-          'Therefore I esteem all thy precepts concerning all things to be right; and I hate every false way.',
+      128: 'Therefore I esteem all thy precepts concerning all things to be right; and I hate every false way.',
       129: '¶ PE. Thy testimonies are wonderful: therefore doth my soul keep them.',
       130: 'The entrance of thy words giveth light; it giveth understanding unto the simple.',
       131: 'I opened my mouth, and panted: for I longed for thy commandments.',
@@ -33184,7 +33183,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       15: 'And his feet like unto fine brass, as if they burned in a furnace; and his voice as the sound of many waters.',
       16: 'And he had in his right hand seven stars: and out of his mouth went a sharp twoedged sword: and his countenance was as the sun shineth in his strength.',
       17: 'And when I saw him, I fell at his feet as dead. And he laid his right hand upon me, saying unto me, <r>Fear not; I am the first and the last:</r>',
-      18: 'I am <r>he that liveth, and was dead; and, behold, I am alive for evermore, Amen; and have the keys of hell and of death.</r>',
+      18: '<r>I am he that liveth, and was dead; and, behold, I am alive for evermore, Amen; and have the keys of hell and of death.</r>',
       19: '<r>Write the things which thou hast seen, and the things which are, and the things which shall be hereafter;</r>',
       20: '<r>The mystery of the seven stars which thou sawest in my right hand, and the seven golden candlesticks. The seven stars are the angels of the seven churches: and the seven candlesticks which thou sawest are the seven churches.</r>',
     },

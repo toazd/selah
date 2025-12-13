@@ -40,7 +40,7 @@ Future<void> showHighlightDialog({
 }) async {
   await showDialog(
     context: context,
-    useSafeArea: false,
+    useSafeArea: true,
     builder: (context) => HighlightDialog(
       rawVerseText: rawVerseText,
       verseNumber: verseNumber,
