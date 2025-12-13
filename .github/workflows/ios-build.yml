@@ -106,9 +106,16 @@ jobs:
         # Create a temporary directory for the IPA contents
         mkdir -p build/ios-ipa
         
-        BUILD_DIR=$(find build/ios -name "selah.app" -type d | head -1)
+        # Set the default build dir
+        BUILD_DIR="build/ios/iphoneos/Runner.app"
+        
+        # if that doesn't work search for it
         if [ -z "$BUILD_DIR" ]; then
-          echo "❌ Could not find selah.app in build/ios directory"
+          BUILD_DIR=$(find build/ -name "Runner.app" -type d | head -1)
+        fi
+
+        if [ -z "$BUILD_DIR" ]; then
+          echo "❌ Could not find Runner.app in build/ios directory"
           exit 1
         fi
 
@@ -117,26 +124,23 @@ jobs:
         # Copy the built app
         cp -R "$BUILD_DIR" build/ios-ipa/
         
-        # Copy provisioning profile from Xcode automatic provisioning
-        # The provisioning profile will be automatically generated during build
-        
         # Create Payload directory
         mkdir -p build/ios-ipa/Payload
         
         # Move app into Payload
-        mv build/ios-ipa/selah.app build/ios-ipa/Payload/
+        mv build/ios-ipa/Runner.app build/ios-ipa/Payload/Selah.app
         
         # Create IPA file
         cd build/ios-ipa
-        zip -r ../../build/selah-release.ipa Payload
+        zip -r ../../build/Selah-release.ipa Payload
         cd ../..
         
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: selah-ios-release-${{ github.run_number }}
-        path: build/selah-release.ipa
-        retention-days: 7
+        name: Selah-ios-release-${{ github.run_number }}
+        path: build/Selah-release.ipa
+        retention-days: 90
         
     - name: Build Summary
       run: |
