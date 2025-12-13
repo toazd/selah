@@ -1,0 +1,133 @@
+name: Build macOS Desktop App
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  build-macos-desktop:
+    name: Build macOS Desktop App
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.5'
+        channel: 'stable'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build macOS release
+      run: |
+        flutter build macos \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create DMG package
+      run: |
+        # Set variables
+        APP_NAME="Selah"
+        VERSION="1.0.0"
+        BUILD_DIR="build/macos/Build/Products/Release/Selah.app"
+        OUTPUT_DIR="build/packages"
+        DMG_NAME="${APP_NAME}-${VERSION}-macos.dmg"
+
+        mkdir -p $OUTPUT_DIR
+
+        # Check if app exists
+        if [ ! -d "$BUILD_DIR" ]; then
+          echo "❌ Selah.app not found in $BUILD_DIR"
+          find build/ -name "*.app" -type d
+          exit 1
+        fi
+
+        echo "📦 Found app at: $BUILD_DIR"
+
+        # Create temporary DMG contents
+        DMG_DIR="$OUTPUT_DIR/dmg"
+        mkdir -p "$DMG_DIR"
+        cp -R "$BUILD_DIR" "$DMG_DIR/"
+
+        # Create DMG
+        echo "📦 Creating DMG package..."
+        hdiutil create -volname "$APP_NAME" \
+          -srcfolder "$DMG_DIR" \
+          -ov \
+          -format UDZO \
+          "$OUTPUT_DIR/$DMG_NAME"
+
+        echo "✅ DMG created: $OUTPUT_DIR/$DMG_NAME"
+
+        # Also copy the .app bundle for direct installation
+        cp -R "$BUILD_DIR" "$OUTPUT_DIR/"
+
+    - name: List created packages
+      run: |
+        echo "📦 macOS packages created:"
+        ls -la build/packages/
+
+    - name: Upload macOS desktop artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Selah-macos-desktop-${{ github.run_number }}
+        path: |
+          build/packages/Selah.app
+          build/packages/Selah-1.0.0-macos.dmg
+        retention-days: 90
+
+    - name: Build Summary
+      run: |
+        echo "## ✅ macOS Desktop Build Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Platform:** macOS (Intel/Apple Silicon)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
+        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📦 Available Packages:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Selah.app:** Application bundle (drag to Applications folder)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Selah-1.0.0-macos.dmg:** Disk image installer" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
+        echo "**Option 1 - DMG Installer:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the .dmg file from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "2. Double-click the .dmg to mount it" >> $GITHUB_STEP_SUMMARY
+        echo "3. Drag Selah.app to your Applications folder" >> $GITHUB_STEP_SUMMARY
+        echo "4. Eject the DMG" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Option 2 - Direct App Bundle:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download Selah.app from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "2. Move to Applications folder" >> $GITHUB_STEP_SUMMARY
+        echo "3. Right-click > Open (first time only, to bypass Gatekeeper)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
+        echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
+        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- Desktop integration includes window management and file access" >> $GITHUB_STEP_SUMMARY
+        echo "- First launch may show security warnings - right-click and select 'Open'" >> $GITHUB_STEP_SUMMARY

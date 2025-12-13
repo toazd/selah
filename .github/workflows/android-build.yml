@@ -1,0 +1,105 @@
+name: Build Android App
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.5'
+        channel: 'stable'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Accept Android licenses
+      run: yes | flutter doctor --android-licenses
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build Android APK
+      run: |
+        flutter build apk \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: List APK files
+      run: |
+        echo "📱 APK files created:"
+        find build/ -name "*.apk" -type f -exec ls -la {} \;
+
+    - name: Upload Android APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Selah-android-apk-${{ github.run_number }}
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 90
+
+    - name: Build Summary
+      run: |
+        echo "## ✅ Android Build Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Platform:** Android" >> $GITHUB_STEP_SUMMARY
+        echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
+        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- **Min SDK:** 22 (Android 5.1+)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **APK:** app-release.apk (Universal Android package)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
+        echo "**Option 1 - Direct APK Install:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the APK file from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "2. Transfer to your Android device" >> $GITHUB_STEP_SUMMARY
+        echo "3. Enable 'Install from Unknown Sources' in settings" >> $GITHUB_STEP_SUMMARY
+        echo "4. Open the APK file and install" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Option 2 - ADB Install:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Connect Android device with USB debugging enabled" >> $GITHUB_STEP_SUMMARY
+        echo "2. Download APK and run: \`adb install app-release.apk\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
+        echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
+        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- App requires Android 5.1 or higher" >> $GITHUB_STEP_SUMMARY
+        echo "- Enable 'Install unknown apps' permission for your browser/file manager" >> $GITHUB_STEP_SUMMARY
+        echo "- If installation fails, check device storage and try restarting the device" >> $GITHUB_STEP_SUMMARY
