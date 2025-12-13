@@ -34,6 +34,12 @@ jobs:
         flutter-version: '3.38.5'
         channel: 'stable'
 
+    - name: Extract app version
+      run: |
+        APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "📋 App version: $APP_VERSION"
+
     - name: Clean build
       run: flutter clean
 
@@ -51,10 +57,10 @@ jobs:
       run: |
         # Set variables
         APP_NAME="Selah"
-        VERSION="1.0.0"
+        VERSION="${{ env.APP_VERSION }}"
         BUILD_DIR="build/macos/Build/Products/Release/Selah.app"
         OUTPUT_DIR="build/packages"
-        DMG_NAME="${APP_NAME}-${VERSION}-macos.dmg"
+        DMG_NAME="Selah-${VERSION}.dmg"
 
         mkdir -p $OUTPUT_DIR
 
@@ -74,7 +80,7 @@ jobs:
 
         # Create DMG
         echo "📦 Creating DMG package..."
-        hdiutil create -volname "$APP_NAME" \
+        hdiutil create -volname "Selah ${{ env.APP_VERSION }}" \
           -srcfolder "$DMG_DIR" \
           -ov \
           -format UDZO \
@@ -93,10 +99,10 @@ jobs:
     - name: Upload macOS desktop artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-macos-desktop-${{ github.run_number }}
+        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: |
           build/packages/Selah.app
-          build/packages/Selah-1.0.0-macos.dmg
+          build/packages/Selah-${{ env.APP_VERSION }}.dmg
         retention-days: 90
 
     - name: Build Summary
@@ -112,7 +118,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Packages:**" >> $GITHUB_STEP_SUMMARY
         echo "- **Selah.app:** Application bundle (drag to Applications folder)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Selah-1.0.0-macos.dmg:** Disk image installer" >> $GITHUB_STEP_SUMMARY
+        echo "- **Selah-${{ env.APP_VERSION }}.dmg:** Disk image installer" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "**Option 1 - DMG Installer:**" >> $GITHUB_STEP_SUMMARY

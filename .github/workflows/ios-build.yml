@@ -33,7 +33,13 @@ jobs:
       with:
         flutter-version: '3.38.5'
         channel: 'stable'
-        
+
+    - name: Extract app version
+      run: |
+        APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "📋 App version: $APP_VERSION"
+
     - name: Setup iOS platform
       run: |
         # Check if Podfile exists
@@ -132,14 +138,14 @@ jobs:
         
         # Create IPA file
         cd build/ios-ipa
-        zip -r ../../build/Selah-release.ipa Payload
+        zip -r "../../build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa" Payload
         cd ../..
-        
+
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-ios-release-${{ github.run_number }}
-        path: build/Selah-release.ipa
+        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        path: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
         retention-days: 90
         
     - name: Build Summary
@@ -153,6 +159,9 @@ jobs:
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
         echo "- **iOS Target:** 15.0 (Firebase SDK 12.4.0 compatible)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
+        echo "- **IPA:** Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa (iOS App Package, unsigned for sideloading)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "1. Download the IPA file from the artifacts below" >> $GITHUB_STEP_SUMMARY

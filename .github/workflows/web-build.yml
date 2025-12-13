@@ -34,6 +34,12 @@ jobs:
         flutter-version: '3.38.5'
         channel: 'stable'
 
+    - name: Extract app version
+      run: |
+        APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "📋 App version: $APP_VERSION"
+
     - name: Setup Node.js for web build
       uses: actions/setup-node@v4
       with:
@@ -63,7 +69,7 @@ jobs:
     - name: Upload Web build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-web-build-${{ github.run_number }}
+        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/web/
         retention-days: 90
 

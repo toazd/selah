@@ -34,6 +34,12 @@ jobs:
         flutter-version: '3.38.5'
         channel: 'stable'
 
+    - name: Extract app version
+      run: |
+        APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+        echo "📋 App version: $APP_VERSION"
+
     - name: Setup Java JDK
       uses: actions/setup-java@v4
       with:
@@ -59,16 +65,24 @@ jobs:
           --target lib/main.dart \
           --dart-define=BUILD_NUMBER=${{ github.run_number }}
 
+    - name: Rename APK artifact
+      run: |
+        mkdir -p build/artifacts
+        cp build/app/outputs/flutter-apk/app-release.apk "build/artifacts/Selah-${{ env.APP_VERSION }}.apk"
+
     - name: List APK files
       run: |
         echo "📱 APK files created:"
         find build/ -name "*.apk" -type f -exec ls -la {} \;
+        echo ""
+        echo "📦 Final artifact:"
+        ls -la build/artifacts/
 
     - name: Upload Android APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-android-apk-${{ github.run_number }}
-        path: build/app/outputs/flutter-apk/app-release.apk
+        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        path: build/artifacts/Selah-${{ env.APP_VERSION }}.apk
         retention-days: 90
 
     - name: Build Summary
@@ -84,7 +98,7 @@ jobs:
         echo "- **Min SDK:** 22 (Android 5.1+)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **APK:** app-release.apk (Universal Android package)" >> $GITHUB_STEP_SUMMARY
+        echo "- **APK:** Selah-${{ env.APP_VERSION }}.apk (Universal Android package)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "**Option 1 - Direct APK Install:**" >> $GITHUB_STEP_SUMMARY
@@ -95,7 +109,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Option 2 - ADB Install:**" >> $GITHUB_STEP_SUMMARY
         echo "1. Connect Android device with USB debugging enabled" >> $GITHUB_STEP_SUMMARY
-        echo "2. Download APK and run: \`adb install app-release.apk\`" >> $GITHUB_STEP_SUMMARY
+        echo "2. Download APK and run: \`adb install Selah-${{ env.APP_VERSION }}.apk\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
         echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
