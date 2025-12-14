@@ -75,7 +75,7 @@ class _NoteScreenState extends State<NoteScreen> {
     super.initState();
 
     // Create QuillController from existing note, auto-detecting format
-    _quillController = NoteStorageFormat.createControllerFromNote(widget.existingNote);
+    _quillController = NoteStorageFormat.createControllerFromNoteWithConfig(widget.existingNote);
 
     // If this is an existing note, clean verse links to prevent stale links during editing
     if (widget.existingNote != null && widget.existingNote!.isNotEmpty) {
@@ -402,18 +402,19 @@ class _NoteScreenState extends State<NoteScreen> {
                                                     focusNode: _focusNode,
                                                     scrollController: _scrollController,
                                                     config: QuillEditorConfig(
-                                                        customStyles: DefaultStyles(
-                                                            paragraph: DefaultTextBlockStyle(
-                                                                TextStyle(
-                                                                    fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
-                                                                    // Don't pass a list here because then it won't use the first one
-                                                                    fontFamily: fontFamilyNotifier.value,
-                                                                    color: isDark ? darkTextColor.value : lightTextColor.value),
-                                                                const HorizontalSpacing(15, 15),
-                                                                const VerticalSpacing(0, 0),
-                                                                const VerticalSpacing(0, 0),
-                                                                null)),
-                                                        customLinkPrefixes: const ['verse://', 'verse:']),
+                                                      customStyles: DefaultStyles(
+                                                          paragraph: DefaultTextBlockStyle(
+                                                              TextStyle(
+                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
+                                                                  // Don't pass a list here because then it won't use the first one
+                                                                  fontFamily: fontFamilyNotifier.value,
+                                                                  color: isDark ? darkTextColor.value : lightTextColor.value),
+                                                              const HorizontalSpacing(15, 15),
+                                                              const VerticalSpacing(0, 0),
+                                                              const VerticalSpacing(0, 0),
+                                                              null)),
+                                                      customLinkPrefixes: const ['verse://', 'verse:'],
+                                                    ),
                                                   ),
                                                 )
                                               ]))
@@ -439,6 +440,7 @@ class _NoteScreenState extends State<NoteScreen> {
     final plainText = _quillController.document.getPlainText(0, _quillController.document.length);
 
     //if (kDebugMode) debugPrint('_saveAndExit document: ${_quillController.document.toDelta().toJson()}');
+    //if (kDebugMode) debugPrint('_saveAndExit document: ${_quillController.document.toPlainText()}');
 
     // Save if: non-empty AND (new note OR content actually changed)
     if (plainText.trim().isNotEmpty && (_existingCreatedAt == 0 || _contentHasChanged())) {

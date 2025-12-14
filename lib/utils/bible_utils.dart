@@ -1,6 +1,7 @@
 // Utility functions shared across Bible-related screens and components
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/book_name_converter.dart';
 import '../screens/chapter_dialog.dart';
 
@@ -97,19 +98,20 @@ Future<void> handleVerseLink(
               targetVerses: targetVerses, // New parameter for individual verses
               referenceText: referenceText,
               onVerseLink: finalOnVerseLink, // Pass link handler for navigation
-              onNavigateToVerse: navigateToVerse != null
-                  ? (verse) => navigateToVerse(normalizedBook, chapter, verse)
-                  : null, // Navigate to verse callback
-              onNoteIconTap: onNoteIconTap != null
-                  ? (verse, noteText) => onNoteIconTap(normalizedBook, chapter, verse, noteText)
-                  : null,
-              onNoteEditTap: onNoteEditTap != null
-                  ? (verse, noteText) => onNoteEditTap(normalizedBook, chapter, verse, noteText)
-                  : null,
+              onNavigateToVerse: navigateToVerse != null ? (verse) => navigateToVerse(normalizedBook, chapter, verse) : null, // Navigate to verse callback
+              onNoteIconTap: onNoteIconTap != null ? (verse, noteText) => onNoteIconTap(normalizedBook, chapter, verse, noteText) : null,
+              onNoteEditTap: onNoteEditTap != null ? (verse, noteText) => onNoteEditTap(normalizedBook, chapter, verse, noteText) : null,
             ),
           );
         }
       }
+    }
+  } else {
+    // Launch external URL
+    try {
+      await launchUrl(Uri.parse(link));
+    } catch (e) {
+      // Silently handle errors for external URL launching
     }
   }
 }

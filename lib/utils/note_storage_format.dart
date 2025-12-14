@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' show QuillController, Document;
+import 'package:flutter_quill/flutter_quill.dart' show QuillController, Document, QuillControllerConfig, QuillClipboardConfig;
 import 'package:flutter_quill/quill_delta.dart' show Delta;
+import 'package:flutter_quill/internal.dart';
 
 /// Utilities for handling note storage formats
 /// The quill editor delta format is used throughout the app in both local db
@@ -126,6 +127,69 @@ class NoteStorageFormat {
     return QuillController(
       document: Document.fromDelta(Delta.fromJson(operations)),
       selection: const TextSelection.collapsed(offset: 0),
+    );
+  }
+
+  /// Creates a QuillController from note text with clipboard config to disable rich paste
+  static QuillController createControllerFromNoteWithConfig(String? noteText) {
+    if (noteText == null || noteText.trim().isEmpty) {
+      // Create empty document
+      final document = Document();
+
+      // Define custom rules so we can for example disable the automatic link creation
+      // which causes a bug when <img> tags are used (the link within the src="" gets
+      // turned into an <a href INSIDE of the <img tag and then of course the <img> doesn't
+      // load because it's not valid HTML)
+      document.setCustomRules([
+        FormatLinkAtCaretPositionRule(),
+        ResolveLineFormatRule(),
+        ResolveInlineFormatRule(),
+        ResolveImageFormatRule(),
+        InsertEmbedsRule(),
+        AutoExitBlockRule(),
+        PreserveBlockStyleOnInsertRule(),
+        PreserveLineStyleOnSplitRule(),
+        ResetLineFormatOnNewLineRule(),
+        // OMITTED: AutoFormatLinksRule()
+        // OMITTED: AutoFormatMultipleLinksRule()
+        PreserveInlineStylesRule(),
+        CatchAllInsertRule(),
+        EnsureEmbedLineRule(),
+        PreserveLineStyleOnMergeRule(),
+        CatchAllDeleteRule(),
+        EnsureLastLineBreakDeleteRule(),
+      ]);
+      return QuillController(
+        document: document,
+        selection: const TextSelection.collapsed(offset: 0),
+        config: QuillControllerConfig(
+          clipboardConfig: QuillClipboardConfig(enableExternalRichPaste: false),
+        ),
+      );
+    }
+
+    if (isDeltaFormat(noteText)) {
+      // Load Delta format directly
+      final delta = Delta.fromJson(jsonDecode(noteText));
+      return QuillController(
+        document: Document.fromDelta(delta),
+        selection: const TextSelection.collapsed(offset: 0),
+        config: QuillControllerConfig(
+          clipboardConfig: QuillClipboardConfig(enableExternalRichPaste: false),
+        ),
+      );
+    }
+
+    // Unexpected format - treat as plain text for backwards compatibility
+    final operations = [
+      {'insert': noteText}
+    ];
+    return QuillController(
+      document: Document.fromDelta(Delta.fromJson(operations)),
+      selection: const TextSelection.collapsed(offset: 0),
+      config: QuillControllerConfig(
+        clipboardConfig: QuillClipboardConfig(enableExternalRichPaste: false),
+      ),
     );
   }
 

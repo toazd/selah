@@ -3,14 +3,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta; // new import for Delta
 import 'package:flutter_quill/flutter_quill.dart' show Document; // new import for Document
-import 'package:flutter_html/flutter_html.dart'; // new import for HTML display
 import 'package:selah/utils/preferences_constants.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import '../utils/note_storage_format.dart'; // import for note format handling
 import '../utils/verse_reference_linker.dart'; // import for link creation
 import '../main.dart'; // For global notifiers
 import '../utils/font_size_adjustments.dart';
-//import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_table/flutter_html_table.dart';
+import 'package:flutter_html_audio/flutter_html_audio.dart';
+import 'package:flutter_html_svg/flutter_html_svg.dart';
+import 'package:flutter_html_math/flutter_html_math.dart';
+import 'package:flutter_html_video/flutter_html_video.dart';
 
 class HtmlNoteDisplay extends StatelessWidget {
   final String noteText;
@@ -64,9 +69,10 @@ class HtmlNoteDisplay extends StatelessWidget {
     */
 
     // Enable to see the html used for display
-    //if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
+    if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
 
     return Html(
+      extensions: const [TableHtmlExtension(), AudioHtmlExtension(), MathHtmlExtension(), VideoHtmlExtension(), SvgHtmlExtension(), AudioHtmlExtension()],
       data: cleanedHtml,
       onLinkTap: (url, _, element) {
         if (url != null && onLinkTap != null) {
@@ -88,9 +94,7 @@ class HtmlNoteDisplay extends StatelessWidget {
           fontSize: FontSize(FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value - 4)), // Use fontSize from baseStyle
           fontFamily: fontFamilyNotifier.value,
           lineHeight: LineHeight(defaultLineHeight),
-          textAlign: TextAlign.left,
-          whiteSpace: WhiteSpace.normal,
-          //border: Border.all(color: Colors.red), // Debug only
+          //border: Border.all(color: Colors.red), // For Debug use only
         ),
         "body": Style(
           padding: HtmlPaddings.all(0.0),
@@ -118,13 +122,9 @@ class HtmlNoteDisplay extends StatelessWidget {
           lineHeight: LineHeight(defaultLineHeight),
         ),
         "li": Style(
-          //   padding: HtmlPaddings.all(0.0),
-          //   margin: Margins.all(0.0),
           fontSize: FontSize(FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value - 6)),
           fontFamily: fontFamilyNotifier.value,
           lineHeight: LineHeight(defaultLineHeight),
-          //   textAlign: TextAlign.left,
-          //   whiteSpace: WhiteSpace.normal,
         ),
         "a": Style(
           padding: HtmlPaddings.all(0.0),
@@ -136,11 +136,29 @@ class HtmlNoteDisplay extends StatelessWidget {
           lineHeight: LineHeight(defaultLineHeight),
         ),
         "p": Style(
-          //padding: HtmlPaddings.all(0.0),
           fontSize: FontSize(FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value - 4)),
           fontFamily: fontFamilyNotifier.value,
           margin: Margins.only(top: 4, bottom: 4),
           lineHeight: LineHeight(defaultLineHeight),
+        ),
+        "center": Style(
+          textAlign: TextAlign.center,
+          display: Display.block,
+        ),
+        "img": Style(
+          display: Display.block,
+        ),
+        "code": Style(
+          fontFamily: 'Roboto Mono',
+        ),
+        "pre": Style(
+          padding: HtmlPaddings.all(0.0),
+          margin: Margins.all(0.0),
+          fontFamily: 'Roboto Mono',
+        ),
+        // "div": Style(),
+        "hr": Style(
+          margin: Margins.all(0.0), // the default hr has some crazy vertical margin setting, like 500px below it
         ),
       },
     );
@@ -168,7 +186,7 @@ class HtmlNoteDisplay extends StatelessWidget {
 
       //debugPrint('operationsMap: $operationsMap');
 
-      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
+      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
 
       final html = converter.convert();
       return html;
