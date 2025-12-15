@@ -12,6 +12,7 @@ import '../database/bible_database.dart';
 import '../main.dart';
 import '../utils/verse_display_utils.dart';
 import '../utils/book_name_converter.dart'; // Import for book name conversion
+import '../utils/book_filter.dart'; // Import for book filtering
 import '../database/history_database.dart'; // Import for history tracking
 import 'package:flutter/services.dart'; // <-- added to request on-screen keyboard
 import '../utils/preferences_constants.dart'; // For uiFontSize and uiFontFamily
@@ -56,11 +57,21 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   static const String _regexKey = 'noteSearchRegex';
   static const String _wholeWordKey = 'noteSearchWholeWord';
   static const String _caseSensitiveKey = 'noteSearchCaseSensitive';
+  static const String _bookFilterTypeKey = 'noteSearchBookFilterType';
+  static const String _bookFilterCustomKey = 'noteSearchBookFilterCustom';
 
   bool _useRegex = false;
   bool _useWholeWord = false;
   bool _caseSensitive = false;
   bool _isResetting = false; // Flag to prevent spamming the reset button
+
+  // Book filter state
+  String _bookFilterType = 'All Books'; // Current selected filter type
+  String _customBookFilter = ''; // Custom range specification
+  List<String> _allowedBooks = []; // Parsed allowed books (short names)
+  Map<String, Set<int>> _allowedChapters = {}; // Parsed allowed chapters per book
+  late TextEditingController _customRangeController; // Controller for custom range input
+  String? _customRangeError; // Error message for invalid custom range
 
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
@@ -162,6 +173,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         .where((note) {
           String searchText = _getSearchText(note['note_text'] as String);
           return _currentRegex!.hasMatch(searchText);
+        })
+        .where((note) {
+          // Apply book filtering
+          return BookFilter.verseMatchesFilter(note, _allowedBooks, _allowedChapters);
         })
         .map((note) => {
               ...note,
@@ -329,6 +344,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   void initState() {
     super.initState();
 
+    // Initialize controllers
+    _customRangeController = TextEditingController(text: _customBookFilter);
+
     // Add a listener to the focus node to show/hide the on-screen keyboard.
     //_searchFocusNode.addListener(_onFocusChange);
 
@@ -341,6 +359,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   void dispose() {
     _searchButtonFocusNode.dispose();
     _controller.dispose();
+    _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
     _resultsScrollController.dispose();
     _onSearchDebounce?.cancel();
@@ -354,9 +373,16 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         _useRegex = prefs.getBool(_regexKey) ?? false;
         _useWholeWord = prefs.getBool(_wholeWordKey) ?? false;
         _caseSensitive = prefs.getBool(_caseSensitiveKey) ?? false;
+        _bookFilterType = prefs.getString(_bookFilterTypeKey) ?? 'All Books';
+        _customBookFilter = prefs.getString(_bookFilterCustomKey) ?? '';
+        // Update the text controller to reflect loaded custom range
+        _customRangeController.text = _customBookFilter;
       });
+      // Update parsed filter state
+      await _updateBookFilter();
     } catch (e) {
       // If error, keep defaults
+      await _updateBookFilter();
     }
   }
 
@@ -365,6 +391,31 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
     await prefs.setBool(_regexKey, _useRegex);
     await prefs.setBool(_wholeWordKey, _useWholeWord);
     await prefs.setBool(_caseSensitiveKey, _caseSensitive);
+    await prefs.setString(_bookFilterTypeKey, _bookFilterType);
+    await prefs.setString(_bookFilterCustomKey, _customBookFilter);
+  }
+
+  // Update the parsed book filter state based on current filter type and custom input
+  Future<void> _updateBookFilter() async {
+    final result = await BookFilter.parseCustomRange(_customBookFilter);
+    setState(() {
+      if (_bookFilterType == 'Custom Range') {
+        if (result.isSuccess) {
+          _allowedBooks = result.books;
+          _allowedChapters = result.chapters;
+          _customRangeError = null; // Clear any previous error
+        } else {
+          _customRangeError = result.error;
+          _allowedBooks = [];
+          _allowedChapters = {};
+        }
+      } else {
+        // Use predefined category
+        _allowedBooks = BookFilter.predefinedCategories[_bookFilterType] ?? [];
+        _allowedChapters = {};
+        _customRangeError = null; // Clear error when switching away from Custom Range
+      }
+    });
   }
 
   Future<void> _loadLastSearch() async {
@@ -661,9 +712,13 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
-                'Notes Search',
-                style: TextStyle(color: getAdaptiveTextColor(context)),
+                '',
+                style: TextStyle(color: Colors.transparent),
               ),
+        // Text(
+        //     'Notes Search',
+        //     style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 2, color: getAdaptiveTextColor(context)),
+        //   ),
         toolbarHeight: 60,
         backgroundColor: barColor,
         actions: [
@@ -740,6 +795,144 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                 }
               },
             ),
+            const SizedBox(height: 16),
+            Divider(),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                'Book Filter',
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, fontWeight: FontWeight.normal, color: getAdaptiveTextColor(context)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: DropdownButton<String>(
+                value: _bookFilterType,
+                isExpanded: true,
+                items: [
+                  ...BookFilter.categoryDisplayNames.map((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(
+                        category,
+                        style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      ),
+                    );
+                  }),
+                  DropdownMenuItem<String>(
+                    value: 'Custom Range',
+                    child: Text(
+                      'Custom Range',
+                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                    ),
+                  ),
+                ],
+                onChanged: (String? newValue) async {
+                  if (newValue != null) {
+                    setState(() {
+                      _bookFilterType = newValue;
+                      // When switching TO Custom Range, ensure controller shows preserved text
+                      if (newValue == 'Custom Range') {
+                        _customRangeController.text = _customBookFilter;
+                      }
+                    });
+                    _updateBookFilter();
+                    await _saveSearchOptions();
+                    if (_controller.text.trim().isNotEmpty) {
+                      _onSearch();
+                    }
+                  }
+                },
+              ),
+            ),
+            if (_bookFilterType == 'Custom Range')
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: TextField(
+                      autofocus: true,
+                      maxLength: 100,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      controller: _customRangeController,
+                      decoration: InputDecoration(
+                        counter: SizedBox.shrink(), // Hide the counter eg. 0/100
+                        hintText: '',
+                        hintStyle: TextStyle(fontSize: uiFontSize - 4, fontFamily: uiFontFamily),
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                            semanticLabel: 'Clear Custom Range',
+                          ),
+                          onPressed: () async {
+                            setState(() {
+                              _customRangeController.clear();
+                              _customBookFilter = ''; // Reset underlying state
+                              _customRangeError = null; // Clear any lingering error
+                            });
+                            await _saveSearchOptions();
+                          },
+                          iconSize: 32,
+                        ),
+                        errorText: _customRangeError,
+                        errorMaxLines: 3,
+                        errorStyle: TextStyle(
+                          fontSize: uiFontSize - 4,
+                          fontFamily: uiFontFamily,
+                          color: Colors.red,
+                        ),
+                      ),
+                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      onChanged: (value) {
+                        _customBookFilter = value;
+                        _updateBookFilter();
+                      },
+                      onSubmitted: (_) async {
+                        await _saveSearchOptions();
+                        if (_controller.text.trim().isNotEmpty) {
+                          _onSearch();
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _saveSearchOptions();
+                        if (_controller.text.trim().isNotEmpty) {
+                          _onSearch();
+                        }
+                      },
+                      child: Text('Apply', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                    ),
+                  ),
+                  if (_bookFilterType == 'Custom Range') ...[
+                    const SizedBox(height: 16),
+                    ListTile(
+                        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+                      Text('Custom range help:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      const SizedBox(height: 16),
+                      Text('• Both short and long book names are supported.',
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      const SizedBox(height: 8),
+                      Text('• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      const SizedBox(height: 8),
+                      Text('• Multiple ranges must be separated by a comma (,)',
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      const SizedBox(height: 8),
+                      Text('• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    ]))
+                  ],
+                ],
+              ),
           ],
         )),
       ),
@@ -816,6 +1009,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                           _useRegex = false;
                           _useWholeWord = false;
                           _caseSensitive = false;
+                          // Reset book filter
+                          _bookFilterType = 'All Books';
+                          _customBookFilter = '';
+                          _customRangeController.text = '';
                           _searchResults = [];
                           _totalMatches = null;
                           _totalVerses = null;
@@ -829,6 +1026,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                         await prefs.remove('lastNoteSearchUseRegex');
                         await prefs.remove('lastNoteSearchUseWholeWord');
                         await prefs.remove('lastNoteSearchCaseSensitive');
+                        await prefs.remove(_bookFilterTypeKey);
+                        await prefs.remove(_bookFilterCustomKey);
                         await prefs.setDouble('noteSearchScrollOffset', 0.0);
 
                         if (context.mounted) {
