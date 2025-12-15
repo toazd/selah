@@ -61,7 +61,8 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '2Ti': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO TIMOTHY.',
-    'colophon': 'The second epistle unto Timotheus, ordained the first bishop of the church of the Ephesians, was written from Rome, when Paul was brought before Nero the second time.',
+    'colophon':
+        'The second epistle unto Timotheus, ordained the first bishop of the church of the Ephesians, was written from Rome, when Paul was brought before Nero the second time.',
   },
   '3Jo': {
     'title': 'THE THIRD EPISTLE OF JOHN.',
@@ -231,7 +232,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'title': 'THE PROVERBS.',
     'colophon': '',
   },
-  'Psa': {
+  'Psa 1': {
     'title': 'THE BOOK OF PSALMS.',
     'colophon': '',
   },
@@ -384,7 +385,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 18': {
-    'title': 'To the chief Musician, A Psalm of David, the servant of the LORD, who spake unto the LORD the words of this song in the day that the LORD delivered him from the hand of all his enemies, and from the hand of Saul: And he said,',
+    'title':
+        'To the chief Musician, A Psalm of David, the servant of the LORD, who spake unto the LORD the words of this song in the day that the LORD delivered him from the hand of all his enemies, and from the hand of Saul: And he said,',
     'colophon': '',
   },
   'Psa 19': {
@@ -492,7 +494,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 45': {
-    'title': 'To the chief Musician upon Shoshannim, for the sons of Jorah, Maschil, A song of loves.',
+    'title': 'To the chief Musician upon Shoshannim, for the sons of Korah, Maschil, A Song of loves.',
     'colophon': '',
   },
   'Psa 46': {
@@ -520,7 +522,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 51': {
-    'title': 'To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bath-sheba.',
+    'title': 'To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bathsheba.',
     'colophon': '',
   },
   'Psa 52': {
@@ -540,11 +542,11 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 56': {
-    'title': 'To the chief Musician upon Jonath-elem-rechokim, Michtam of David, when the Philistines took him in Gath.',
+    'title': 'To the chief Musician upon Jonathelemrechokim, Michtam of David, when the Philistines took him in Gath.',
     'colophon': '',
   },
   'Psa 57': {
-    'title': 'To the chief Musician, Al-taschith, Michtam of David, when he fled from Saul in the cave.',
+    'title': 'To the chief Musician, Altaschith, Michtam of David, when he fled from Saul in the cave.',
     'colophon': '',
   },
   'Psa 58': {
@@ -552,7 +554,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 59': {
-    'title': 'To the chief Musician, Al-taschith, Michtam of David; when Sault sent, and they watched the house to kill him.',
+    'title': 'To the chief Musician, Altaschith, Michtam of David; when Saul sent, and they watched the house to kill him.',
     'colophon': '',
   },
   'Psa 6': {
@@ -560,7 +562,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 60': {
-    'title': 'To the chief Musician upon Shushan-eduth, Michtam of David, to teach; when he strove with Aram-naharaim and with Aram-zobah, when Joab returned, and smote of Edom in the valley of salt twelve thousand.',
+    'title':
+        'To the chief Musician upon Shushaneduth, Michtam of David, to teach; when he strove with Aramnaharaim and with Aramzobah, when Joab returned, and smote of Edom in the valley of salt twelve thousand.',
     'colophon': '',
   },
   'Psa 61': {
@@ -588,7 +591,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 67': {
-    'title': 'To the chief Musician on Neginoth, A Song or Psalm.',
+    'title': 'To the chief Musician on Neginoth, A Psalm or Song.',
     'colophon': '',
   },
   'Psa 68': {
@@ -620,7 +623,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 75': {
-    'title': 'To the chief Musician, Al-taschith, A Psalm or Song of Asaph.',
+    'title': 'To the chief Musician, Altaschith, A Psalm or Song of Asaph.',
     'colophon': '',
   },
   'Psa 76': {
@@ -644,7 +647,7 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 80': {
-    'title': 'To the chief Musician upon Shoshannim-Eduth, A Psalm of Asaph.',
+    'title': 'To the chief Musician upon Shoshannimeduth, A Psalm of Asaph.',
     'colophon': '',
   },
   'Psa 81': {

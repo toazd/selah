@@ -14958,7 +14958,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'Kiss the Son, lest he be angry, and ye perish from the way, when his wrath is kindled but a little. Blessed are all they that put their trust in him.',
     },
     3: {
-      1: '¶ A Psalm of David, when he fled from Absalom his son. LORD, how are they increased that trouble me! many are they that rise up against me.',
+      1: 'LORD, how are they increased that trouble me! many are they that rise up against me.',
       2: 'Many there be which say of my soul, There is no help for him in God. Selah.',
       3: 'But thou, O LORD, art a shield for me; my glory, and the lifter up of mine head.',
       4: '¶ I cried unto the LORD with my voice, and he heard me out of his holy hill. Selah.',
@@ -14968,7 +14968,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'Salvation belongeth unto the LORD: thy blessing is upon thy people. Selah.',
     },
     4: {
-      1: '¶ To the chief Musician on Neginoth, A Psalm of David. Hear me when I call, O God of my righteousness: thou hast enlarged me when I was in distress; have mercy upon me, and hear my prayer.',
+      1: 'Hear me when I call, O God of my righteousness: thou hast enlarged me when I was in distress; have mercy upon me, and hear my prayer.',
       2: 'O ye sons of men, how long will ye turn my glory into shame? how long will ye love vanity, and seek after leasing? Selah.',
       3: 'But know that the LORD hath set apart him that is godly for himself: the LORD will hear when I call unto him.',
       4: 'Stand in awe, and sin not: commune with your own heart upon your bed, and be still. Selah.',
@@ -14978,7 +14978,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'I will both lay me down in peace, and sleep: for thou, LORD, only makest me dwell in safety.',
     },
     5: {
-      1: '¶ To the chief Musician upon Nehiloth, A Psalm of David. Give ear to my words, O LORD, consider my meditation.',
+      1: 'Give ear to my words, O LORD, consider my meditation.',
       2: 'Hearken unto the voice of my cry, my King, and my God: for unto thee will I pray.',
       3: 'My voice shalt thou hear in the morning, O LORD; in the morning will I direct my prayer unto thee, and will look up.',
       4: 'For thou art not a God that hath pleasure in wickedness: neither shall evil dwell with thee.',
@@ -14992,7 +14992,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'For thou, LORD, wilt bless the righteous; with favour wilt thou compass him as with a shield.',
     },
     6: {
-      1: '¶ To the chief Musician on Neginoth upon Sheminith, A Psalm of David. O LORD, rebuke me not in thine anger, neither chasten me in thy hot displeasure.',
+      1: 'O LORD, rebuke me not in thine anger, neither chasten me in thy hot displeasure.',
       2: 'Have mercy upon me, O LORD; for I am weak: O LORD, heal me; for my bones are vexed.',
       3: 'My soul is also sore vexed: but thou, O LORD, how long?',
       4: 'Return, O LORD, deliver my soul: oh save me for thy mercies\' sake.',
@@ -15004,7 +15004,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       10: 'Let all mine enemies be ashamed and sore vexed: let them return and be ashamed suddenly.',
     },
     7: {
-      1: '¶ Shiggaion of David, which he sang unto the LORD, concerning the words of Cush the Benjamite. O LORD my God, in thee do I put my trust: save me from all them that persecute me, and deliver me:',
+      1: 'O LORD my God, in thee do I put my trust: save me from all them that persecute me, and deliver me:',
       2: 'Lest he tear my soul like a lion, rending it in pieces, while there is none to deliver.',
       3: 'O LORD my God, if I have done this; if there be iniquity in my hands;',
       4: 'If I have rewarded evil unto him that was at peace with me; (yea, I have delivered him that without cause is mine enemy:)',
@@ -15023,7 +15023,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'I will praise the LORD according to his righteousness: and will sing praise to the name of the LORD most high.',
     },
     8: {
-      1: '¶ To the chief Musician upon Gittith, A Psalm of David. O LORD our Lord, how excellent is thy name in all the earth! who hast set thy glory above the heavens.',
+      1: 'O LORD our Lord, how excellent is thy name in all the earth! who hast set thy glory above the heavens.',
       2: 'Out of the mouth of babes and sucklings hast thou ordained strength because of thine enemies, that thou mightest still the enemy and the avenger.',
       3: '¶ When I consider thy heavens, the work of thy fingers, the moon and the stars, which thou hast ordained;',
       4: 'What is man, that thou art mindful of him? and the son of man, that thou visitest him?',
@@ -15034,7 +15034,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'O LORD our Lord, how excellent is thy name in all the earth!',
     },
     9: {
-      1: '¶ To the chief Musician upon Muthlabben, A Psalm of David. I will praise thee, O LORD, with my whole heart; I will shew forth all thy marvellous works.',
+      1: 'I will praise thee, O LORD, with my whole heart; I will shew forth all thy marvellous works.',
       2: 'I will be glad and rejoice in thee: I will sing praise to thy name, O thou most High.',
       3: 'When mine enemies are turned back, they shall fall and perish at thy presence.',
       4: 'For thou hast maintained my right and my cause; thou satest in the throne judging right.',
@@ -15076,7 +15076,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       18: 'To judge the fatherless and the oppressed, that the man of the earth may no more oppress.',
     },
     11: {
-      1: '¶ To the chief Musician, A Psalm of David. In the LORD put I my trust: how say ye to my soul, Flee as a bird to your mountain?',
+      1: 'In the LORD put I my trust: how say ye to my soul, Flee as a bird to your mountain?',
       2: 'For, lo, the wicked bend their bow, they make ready their arrow upon the string, that they may privily shoot at the upright in heart.',
       3: 'If the foundations be destroyed, what can the righteous do?',
       4: '¶ The LORD is in his holy temple, the LORD\'S throne is in heaven: his eyes behold, his eyelids try, the children of men.',
@@ -15085,7 +15085,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'For the righteous LORD loveth righteousness; his countenance doth behold the upright.',
     },
     12: {
-      1: '¶ To the chief Musician upon Sheminith, A Psalm of David. Help, LORD; for the godly man ceaseth; for the faithful fail from among the children of men.',
+      1: 'Help, LORD; for the godly man ceaseth; for the faithful fail from among the children of men.',
       2: 'They speak vanity every one with his neighbour: with flattering lips and with a double heart do they speak.',
       3: 'The LORD shall cut off all flattering lips, and the tongue that speaketh proud things:',
       4: 'Who have said, With our tongue will we prevail; our lips are our own: who is lord over us?',
@@ -15095,7 +15095,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'The wicked walk on every side, when the vilest men are exalted.',
     },
     13: {
-      1: '¶ To the chief Musician, A Psalm of David. How long wilt thou forget me, O LORD? for ever? how long wilt thou hide thy face from me?',
+      1: 'How long wilt thou forget me, O LORD? for ever? how long wilt thou hide thy face from me?',
       2: 'How long shall I take counsel in my soul, having sorrow in my heart daily? how long shall mine enemy be exalted over me?',
       3: 'Consider and hear me, O LORD my God: lighten mine eyes, lest I sleep the sleep of death;',
       4: 'Lest mine enemy say, I have prevailed against him; and those that trouble me rejoice when I am moved.',
@@ -15103,7 +15103,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       6: 'I will sing unto the LORD, because he hath dealt bountifully with me.',
     },
     14: {
-      1: '¶ To the chief Musician, A Psalm of David. The fool hath said in his heart, There is no God. They are corrupt, they have done abominable works, there is none that doeth good.',
+      1: 'The fool hath said in his heart, There is no God. They are corrupt, they have done abominable works, there is none that doeth good.',
       2: 'The LORD looked down from heaven upon the children of men, to see if there were any that did understand, and seek God.',
       3: 'They are all gone aside, they are all together become filthy: there is none that doeth good, no, not one.',
       4: '¶ Have all the workers of iniquity no knowledge? who eat up my people as they eat bread, and call not upon the LORD.',
@@ -15112,14 +15112,14 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'Oh that the salvation of Israel were come out of Zion! when the LORD bringeth back the captivity of his people, Jacob shall rejoice, and Israel shall be glad.',
     },
     15: {
-      1: '¶ A Psalm of David. LORD, who shall abide in thy tabernacle? who shall dwell in thy holy hill?',
+      1: 'LORD, who shall abide in thy tabernacle? who shall dwell in thy holy hill?',
       2: 'He that walketh uprightly, and worketh righteousness, and speaketh the truth in his heart.',
       3: 'He that backbiteth not with his tongue, nor doeth evil to his neighbour, nor taketh up a reproach against his neighbour.',
       4: 'In whose eyes a vile person is contemned; but he honoureth them that fear the LORD. He that sweareth to his own hurt, and changeth not.',
       5: 'He that putteth not out his money to usury, nor taketh reward against the innocent. He that doeth these things shall never be moved.',
     },
     16: {
-      1: '¶ Michtam of David. Preserve me, O God: for in thee do I put my trust.',
+      1: 'Preserve me, O God: for in thee do I put my trust.',
       2: 'O my soul, thou hast said unto the LORD, Thou art my Lord: my goodness extendeth not to thee;',
       3: 'But to the saints that are in the earth, and to the excellent, in whom is all my delight.',
       4: 'Their sorrows shall be multiplied that hasten after another god: their drink offerings of blood will I not offer, nor take up their names into my lips.',
@@ -15132,7 +15132,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'Thou wilt shew me the path of life: in thy presence is fulness of joy; at thy right hand there are pleasures for evermore.',
     },
     17: {
-      1: '¶ A Prayer of David. Hear the right, O LORD, attend unto my cry, give ear unto my prayer, that goeth not out of feigned lips.',
+      1: 'Hear the right, O LORD, attend unto my cry, give ear unto my prayer, that goeth not out of feigned lips.',
       2: 'Let my sentence come forth from thy presence; let thine eyes behold the things that are equal.',
       3: 'Thou hast proved mine heart; thou hast visited me in the night; thou hast tried me, and shalt find nothing; I am purposed that my mouth shall not transgress.',
       4: 'Concerning the works of men, by the word of thy lips I have kept me from the paths of the destroyer.',
@@ -15149,7 +15149,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       15: 'As for me, I will behold thy face in righteousness: I shall be satisfied, when I awake, with thy likeness.',
     },
     18: {
-      1: '¶ To the chief Musician, A Psalm of David, the servant of the LORD, who spake unto the LORD the words of this song in the day that the LORD delivered him from the hand of all his enemies, and from the hand of Saul: And he said, I will love thee, O LORD, my strength.',
+      1: 'I will love thee, O LORD, my strength.',
       2: 'The LORD is my rock, and my fortress, and my deliverer; my God, my strength, in whom I will trust; my buckler, and the horn of my salvation, and my high tower.',
       3: 'I will call upon the LORD, who is worthy to be praised: so shall I be saved from mine enemies.',
       4: 'The sorrows of death compassed me, and the floods of ungodly men made me afraid.',
@@ -15201,7 +15201,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       50: 'Great deliverance giveth he to his king; and sheweth mercy to his anointed, to David, and to his seed for evermore.',
     },
     19: {
-      1: '¶ To the chief Musician, A Psalm of David. The heavens declare the glory of God; and the firmament sheweth his handywork.',
+      1: 'The heavens declare the glory of God; and the firmament sheweth his handywork.',
       2: 'Day unto day uttereth speech, and night unto night sheweth knowledge.',
       3: 'There is no speech nor language, where their voice is not heard.',
       4: 'Their line is gone out through all the earth, and their words to the end of the world. In them hath he set a tabernacle for the sun,',
@@ -15217,7 +15217,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       14: 'Let the words of my mouth, and the meditation of my heart, be acceptable in thy sight, O LORD, my strength, and my redeemer.',
     },
     20: {
-      1: '¶ To the chief Musician, A Psalm of David. The LORD hear thee in the day of trouble; the name of the God of Jacob defend thee;',
+      1: 'The LORD hear thee in the day of trouble; the name of the God of Jacob defend thee;',
       2: 'Send thee help from the sanctuary, and strengthen thee out of Zion;',
       3: 'Remember all thy offerings, and accept thy burnt sacrifice; Selah.',
       4: 'Grant thee according to thine own heart, and fulfil all thy counsel.',
@@ -15228,7 +15228,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'Save, LORD: let the king hear us when we call.',
     },
     21: {
-      1: '¶ To the chief Musician, A Psalm of David. The king shall joy in thy strength, O LORD; and in thy salvation how greatly shall he rejoice!',
+      1: 'The king shall joy in thy strength, O LORD; and in thy salvation how greatly shall he rejoice!',
       2: 'Thou hast given him his heart\'s desire, and hast not withholden the request of his lips. Selah.',
       3: 'For thou preventest him with the blessings of goodness: thou settest a crown of pure gold on his head.',
       4: 'He asked life of thee, and thou gavest it him, even length of days for ever and ever.',
@@ -15243,7 +15243,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'Be thou exalted, LORD, in thine own strength: so will we sing and praise thy power.',
     },
     22: {
-      1: '¶ To the chief Musician upon Aijeleth Shahar, A Psalm of David. My God, my God, why hast thou forsaken me? why art thou so far from helping me, and from the words of my roaring?',
+      1: 'My God, my God, why hast thou forsaken me? why art thou so far from helping me, and from the words of my roaring?',
       2: 'O my God, I cry in the daytime, but thou hearest not; and in the night season, and am not silent.',
       3: 'But thou art holy, O thou that inhabitest the praises of Israel.',
       4: 'Our fathers trusted in thee: they trusted, and thou didst deliver them.',
@@ -15276,7 +15276,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       31: 'They shall come, and shall declare his righteousness unto a people that shall be born, that he hath done this.',
     },
     23: {
-      1: '¶ A Psalm of David. The LORD is my shepherd; I shall not want.',
+      1: 'The LORD is my shepherd; I shall not want.',
       2: 'He maketh me to lie down in green pastures: he leadeth me beside the still waters.',
       3: 'He restoreth my soul: he leadeth me in the paths of righteousness for his name\'s sake.',
       4: 'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.',
@@ -15284,7 +15284,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       6: 'Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.',
     },
     24: {
-      1: '¶ A Psalm of David. The earth is the LORD\'S, and the fulness thereof; the world, and they that dwell therein.',
+      1: 'The earth is the LORD\'S, and the fulness thereof; the world, and they that dwell therein.',
       2: 'For he hath founded it upon the seas, and established it upon the floods.',
       3: '¶ Who shall ascend into the hill of the LORD? or who shall stand in his holy place?',
       4: 'He that hath clean hands, and a pure heart; who hath not lifted up his soul unto vanity, nor sworn deceitfully.',
@@ -15296,7 +15296,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       10: 'Who is this King of glory? The LORD of hosts, he is the King of glory. Selah.',
     },
     25: {
-      1: '¶ A Psalm of David. Unto thee, O LORD, do I lift up my soul.',
+      1: 'Unto thee, O LORD, do I lift up my soul.',
       2: 'O my God, I trust in thee: let me not be ashamed, let not mine enemies triumph over me.',
       3: 'Yea, let none that wait on thee be ashamed: let them be ashamed which transgress without cause.',
       4: 'Shew me thy ways, O LORD; teach me thy paths.',
@@ -15320,7 +15320,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       22: 'Redeem Israel, O God, out of all his troubles.',
     },
     26: {
-      1: '¶ A Psalm of David. Judge me, O LORD; for I have walked in mine integrity: I have trusted also in the LORD; therefore I shall not slide.',
+      1: 'Judge me, O LORD; for I have walked in mine integrity: I have trusted also in the LORD; therefore I shall not slide.',
       2: 'Examine me, O LORD, and prove me; try my reins and my heart.',
       3: 'For thy lovingkindness is before mine eyes: and I have walked in thy truth.',
       4: 'I have not sat with vain persons, neither will I go in with dissemblers.',
@@ -15334,7 +15334,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'My foot standeth in an even place: in the congregations will I bless the LORD.',
     },
     27: {
-      1: '¶ A Psalm of David. The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?',
+      1: 'The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?',
       2: 'When the wicked, even mine enemies and my foes, came upon me to eat up my flesh, they stumbled and fell.',
       3: 'Though an host should encamp against me, my heart shall not fear: though war should rise against me, in this will I be confident.',
       4: 'One thing have I desired of the LORD, that will I seek after; that I may dwell in the house of the LORD all the days of my life, to behold the beauty of the LORD, and to enquire in his temple.',
@@ -15350,7 +15350,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       14: 'Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD.',
     },
     28: {
-      1: '¶ A Psalm of David. Unto thee will I cry, O LORD my rock; be not silent to me: lest, if thou be silent to me, I become like them that go down into the pit.',
+      1: 'Unto thee will I cry, O LORD my rock; be not silent to me: lest, if thou be silent to me, I become like them that go down into the pit.',
       2: 'Hear the voice of my supplications, when I cry unto thee, when I lift up my hands toward thy holy oracle.',
       3: 'Draw me not away with the wicked, and with the workers of iniquity, which speak peace to their neighbours, but mischief is in their hearts.',
       4: 'Give them according to their deeds, and according to the wickedness of their endeavours: give them after the work of their hands; render to them their desert.',
@@ -15361,7 +15361,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'Save thy people, and bless thine inheritance: feed them also, and lift them up for ever.',
     },
     29: {
-      1: '¶ A Psalm of David. Give unto the LORD, O ye mighty, give unto the LORD glory and strength.',
+      1: 'Give unto the LORD, O ye mighty, give unto the LORD glory and strength.',
       2: 'Give unto the LORD the glory due unto his name; worship the LORD in the beauty of holiness.',
       3: 'The voice of the LORD is upon the waters: the God of glory thundereth: the LORD is upon many waters.',
       4: 'The voice of the LORD is powerful; the voice of the LORD is full of majesty.',
@@ -15374,7 +15374,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'The LORD will give strength unto his people; the LORD will bless his people with peace.',
     },
     30: {
-      1: '¶ A Psalm and Song at the dedication of the house of David. I will extol thee, O LORD; for thou hast lifted me up, and hast not made my foes to rejoice over me.',
+      1: 'I will extol thee, O LORD; for thou hast lifted me up, and hast not made my foes to rejoice over me.',
       2: 'O LORD my God, I cried unto thee, and thou hast healed me.',
       3: 'O LORD, thou hast brought up my soul from the grave: thou hast kept me alive, that I should not go down to the pit.',
       4: 'Sing unto the LORD, O ye saints of his, and give thanks at the remembrance of his holiness.',
@@ -15388,7 +15388,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'To the end that my glory may sing praise to thee, and not be silent. O LORD my God, I will give thanks unto thee for ever.',
     },
     31: {
-      1: '¶ To the chief Musician, A Psalm of David. In thee, O LORD, do I put my trust; let me never be ashamed: deliver me in thy righteousness.',
+      1: 'In thee, O LORD, do I put my trust; let me never be ashamed: deliver me in thy righteousness.',
       2: 'Bow down thine ear to me; deliver me speedily: be thou my strong rock, for an house of defence to save me.',
       3: 'For thou art my rock and my fortress; therefore for thy name\'s sake lead me, and guide me.',
       4: 'Pull me out of the net that they have laid privily for me: for thou art my strength.',
@@ -15414,7 +15414,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       24: 'Be of good courage, and he shall strengthen your heart, all ye that hope in the LORD.',
     },
     32: {
-      1: '¶ A Psalm of David, Maschil. Blessed is he whose transgression is forgiven, whose sin is covered.',
+      1: 'Blessed is he whose transgression is forgiven, whose sin is covered.',
       2: 'Blessed is the man unto whom the LORD imputeth not iniquity, and in whose spirit there is no guile.',
       3: 'When I kept silence, my bones waxed old through my roaring all the day long.',
       4: 'For day and night thy hand was heavy upon me: my moisture is turned into the drought of summer. Selah.',
@@ -15451,7 +15451,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       22: 'Let thy mercy, O LORD, be upon us, according as we hope in thee.',
     },
     34: {
-      1: '¶ A Psalm of David, when he changed his behaviour before Abimelech; who drove him away, and he departed. I will bless the LORD at all times: his praise shall continually be in my mouth.',
+      1: 'I will bless the LORD at all times: his praise shall continually be in my mouth.',
       2: 'My soul shall make her boast in the LORD: the humble shall hear thereof, and be glad.',
       3: 'O magnify the LORD with me, and let us exalt his name together.',
       4: 'I sought the LORD, and he heard me, and delivered me from all my fears.',
@@ -15475,7 +15475,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       22: 'The LORD redeemeth the soul of his servants: and none of them that trust in him shall be desolate.',
     },
     35: {
-      1: '¶ A Psalm of David. Plead my cause, O LORD, with them that strive with me: fight against them that fight against me.',
+      1: 'Plead my cause, O LORD, with them that strive with me: fight against them that fight against me.',
       2: 'Take hold of shield and buckler, and stand up for mine help.',
       3: 'Draw out also the spear, and stop the way against them that persecute me: say unto my soul, I am thy salvation.',
       4: 'Let them be confounded and put to shame that seek after my soul: let them be turned back and brought to confusion that devise my hurt.',
@@ -15505,7 +15505,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       28: 'And my tongue shall speak of thy righteousness and of thy praise all the day long.',
     },
     36: {
-      1: '¶ To the chief Musician, A Psalm of David the servant of the LORD. The transgression of the wicked saith within my heart, that there is no fear of God before his eyes.',
+      1: 'The transgression of the wicked saith within my heart, that there is no fear of God before his eyes.',
       2: 'For he flattereth himself in his own eyes, until his iniquity be found to be hateful.',
       3: 'The words of his mouth are iniquity and deceit: he hath left off to be wise, and to do good.',
       4: 'He deviseth mischief upon his bed; he setteth himself in a way that is not good; he abhorreth not evil.',
@@ -15519,7 +15519,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'There are the workers of iniquity fallen: they are cast down, and shall not be able to rise.',
     },
     37: {
-      1: '¶ A Psalm of David. Fret not thyself because of evildoers, neither be thou envious against the workers of iniquity.',
+      1: 'Fret not thyself because of evildoers, neither be thou envious against the workers of iniquity.',
       2: 'For they shall soon be cut down like the grass, and wither as the green herb.',
       3: 'Trust in the LORD, and do good; so shalt thou dwell in the land, and verily thou shalt be fed.',
       4: 'Delight thyself also in the LORD; and he shall give thee the desires of thine heart.',
@@ -15561,7 +15561,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       40: 'And the LORD shall help them, and deliver them: he shall deliver them from the wicked, and save them, because they trust in him.',
     },
     38: {
-      1: '¶ A Psalm of David, to bring to remembrance. O LORD, rebuke me not in thy wrath: neither chasten me in thy hot displeasure.',
+      1: 'O LORD, rebuke me not in thy wrath: neither chasten me in thy hot displeasure.',
       2: 'For thine arrows stick fast in me, and thy hand presseth me sore.',
       3: 'There is no soundness in my flesh because of thine anger; neither is there any rest in my bones because of my sin.',
       4: 'For mine iniquities are gone over mine head: as an heavy burden they are too heavy for me.',
@@ -15585,7 +15585,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       22: 'Make haste to help me, O Lord my salvation.',
     },
     39: {
-      1: '¶ To the chief Musician, even to Jeduthun, A Psalm of David. I said, I will take heed to my ways, that I sin not with my tongue: I will keep my mouth with a bridle, while the wicked is before me.',
+      1: 'I said, I will take heed to my ways, that I sin not with my tongue: I will keep my mouth with a bridle, while the wicked is before me.',
       2: 'I was dumb with silence, I held my peace, even from good; and my sorrow was stirred.',
       3: 'My heart was hot within me, while I was musing the fire burned: then spake I with my tongue,',
       4: 'LORD, make me to know mine end, and the measure of my days, what it is; that I may know how frail I am.',
@@ -15600,7 +15600,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'O spare me, that I may recover strength, before I go hence, and be no more.',
     },
     40: {
-      1: '¶ To the chief Musician, A Psalm of David. I waited patiently for the LORD; and he inclined unto me, and heard my cry.',
+      1: 'I waited patiently for the LORD; and he inclined unto me, and heard my cry.',
       2: 'He brought me up also out of an horrible pit, out of the miry clay, and set my feet upon a rock, and established my goings.',
       3: 'And he hath put a new song in my mouth, even praise unto our God: many shall see it, and fear, and shall trust in the LORD.',
       4: 'Blessed is that man that maketh the LORD his trust, and respecteth not the proud, nor such as turn aside to lies.',
@@ -15619,7 +15619,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'But I am poor and needy; yet the Lord thinketh upon me: thou art my help and my deliverer; make no tarrying, O my God.',
     },
     41: {
-      1: '¶ To the chief Musician, A Psalm of David. Blessed is he that considereth the poor: the LORD will deliver him in time of trouble.',
+      1: 'Blessed is he that considereth the poor: the LORD will deliver him in time of trouble.',
       2: 'The LORD will preserve him, and keep him alive; and he shall be blessed upon the earth: and thou wilt not deliver him unto the will of his enemies.',
       3: 'The LORD will strengthen him upon the bed of languishing: thou wilt make all his bed in his sickness.',
       4: 'I said, LORD, be merciful unto me: heal my soul; for I have sinned against thee.',
@@ -15634,7 +15634,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'Blessed be the LORD God of Israel from everlasting, and to everlasting. Amen, and Amen.',
     },
     42: {
-      1: '¶ To the chief Musician, Maschil, for the sons of Korah. As the hart panteth after the water brooks, so panteth my soul after thee, O God.',
+      1: 'As the hart panteth after the water brooks, so panteth my soul after thee, O God.',
       2: 'My soul thirsteth for God, for the living God: when shall I come and appear before God?',
       3: 'My tears have been my meat day and night, while they continually say unto me, Where is thy God?',
       4: 'When I remember these things, I pour out my soul in me: for I had gone with the multitude, I went with them to the house of God, with the voice of joy and praise, with a multitude that kept holyday.',
@@ -15654,7 +15654,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       5: 'Why art thou cast down, O my soul? and why art thou disquieted within me? hope in God: for I shall yet praise him, who is the health of my countenance, and my God.',
     },
     44: {
-      1: '¶ To the chief Musician for the sons of Korah, Maschil. We have heard with our ears, O God, our fathers have told us, what work thou didst in their days, in the times of old.',
+      1: 'We have heard with our ears, O God, our fathers have told us, what work thou didst in their days, in the times of old.',
       2: 'How thou didst drive out the heathen with thy hand, and plantedst them; how thou didst afflict the people, and cast them out.',
       3: 'For they got not the land in possession by their own sword, neither did their own arm save them: but thy right hand, and thine arm, and the light of thy countenance, because thou hadst a favour unto them.',
       4: 'Thou art my King, O God: command deliverances for Jacob.',
@@ -15682,7 +15682,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       26: 'Arise for our help, and redeem us for thy mercies\' sake.',
     },
     45: {
-      1: '¶ To the chief Musician upon Shoshannim, for the sons of Korah, Maschil, A Song of loves. My heart is inditing a good matter: I speak of the things which I have made touching the king: my tongue is the pen of a ready writer.',
+      1: 'My heart is inditing a good matter: I speak of the things which I have made touching the king: my tongue is the pen of a ready writer.',
       2: 'Thou art fairer than the children of men: grace is poured into thy lips: therefore God hath blessed thee for ever.',
       3: 'Gird thy sword upon thy thigh, O most mighty, with thy glory and thy majesty.',
       4: 'And in thy majesty ride prosperously because of truth and meekness and righteousness; and thy right hand shall teach thee terrible things.',
@@ -15701,7 +15701,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'I will make thy name to be remembered in all generations: therefore shall the people praise thee for ever and ever.',
     },
     46: {
-      1: '¶ To the chief Musician for the sons of Korah, A Song upon Alamoth. God is our refuge and strength, a very present help in trouble.',
+      1: 'God is our refuge and strength, a very present help in trouble.',
       2: 'Therefore will not we fear, though the earth be removed, and though the mountains be carried into the midst of the sea;',
       3: 'Though the waters thereof roar and be troubled, though the mountains shake with the swelling thereof. Selah.',
       4: 'There is a river, the streams whereof shall make glad the city of God, the holy place of the tabernacles of the most High.',
@@ -15714,7 +15714,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'The LORD of hosts is with us; the God of Jacob is our refuge. Selah.',
     },
     47: {
-      1: '¶ To the chief Musician, A Psalm for the sons of Korah. O clap your hands, all ye people; shout unto God with the voice of triumph.',
+      1: 'O clap your hands, all ye people; shout unto God with the voice of triumph.',
       2: 'For the LORD most high is terrible; he is a great King over all the earth.',
       3: 'He shall subdue the people under us, and the nations under our feet.',
       4: 'He shall choose our inheritance for us, the excellency of Jacob whom he loved. Selah.',
@@ -15725,7 +15725,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'The princes of the people are gathered together, even the people of the God of Abraham: for the shields of the earth belong unto God: he is greatly exalted.',
     },
     48: {
-      1: '¶ A Song and Psalm for the sons of Korah. Great is the LORD, and greatly to be praised in the city of our God, in the mountain of his holiness.',
+      1: 'Great is the LORD, and greatly to be praised in the city of our God, in the mountain of his holiness.',
       2: 'Beautiful for situation, the joy of the whole earth, is mount Zion, on the sides of the north, the city of the great King.',
       3: 'God is known in her palaces for a refuge.',
       4: 'For, lo, the kings were assembled, they passed by together.',
@@ -15741,7 +15741,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       14: 'For this God is our God for ever and ever: he will be our guide even unto death.',
     },
     49: {
-      1: '¶ To the chief Musician, A Psalm for the sons of Korah. Hear this, all ye people; give ear, all ye inhabitants of the world:',
+      1: 'Hear this, all ye people; give ear, all ye inhabitants of the world:',
       2: 'Both low and high, rich and poor, together.',
       3: 'My mouth shall speak of wisdom; and the meditation of my heart shall be of understanding.',
       4: 'I will incline mine ear to a parable: I will open my dark saying upon the harp.',
@@ -15763,7 +15763,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       20: 'Man that is in honour, and understandeth not, is like the beasts that perish.',
     },
     50: {
-      1: '¶ A Psalm of Asaph. The mighty God, even the LORD, hath spoken, and called the earth from the rising of the sun unto the going down thereof.',
+      1: 'The mighty God, even the LORD, hath spoken, and called the earth from the rising of the sun unto the going down thereof.',
       2: 'Out of Zion, the perfection of beauty, God hath shined.',
       3: 'Our God shall come, and shall not keep silence: a fire shall devour before him, and it shall be very tempestuous round about him.',
       4: 'He shall call to the heavens from above, and to the earth, that he may judge his people.',
@@ -15788,7 +15788,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       23: 'Whoso offereth praise glorifieth me: and to him that ordereth his conversation aright will I shew the salvation of God.',
     },
     51: {
-      1: '¶ To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bathsheba. Have mercy upon me, O God, according to thy lovingkindness: according unto the multitude of thy tender mercies blot out my transgressions.',
+      1: 'Have mercy upon me, O God, according to thy lovingkindness: according unto the multitude of thy tender mercies blot out my transgressions.',
       2: 'Wash me throughly from mine iniquity, and cleanse me from my sin.',
       3: 'For I acknowledge my transgressions: and my sin is ever before me.',
       4: 'Against thee, thee only, have I sinned, and done this evil in thy sight: that thou mightest be justified when thou speakest, and be clear when thou judgest.',
@@ -15809,7 +15809,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       19: 'Then shalt thou be pleased with the sacrifices of righteousness, with burnt offering and whole burnt offering: then shall they offer bullocks upon thine altar.',
     },
     52: {
-      1: '¶ To the chief Musician, Maschil, A Psalm of David, when Doeg the Edomite came and told Saul, and said unto him, David is come to the house of Ahimelech. Why boastest thou thyself in mischief, O mighty man? the goodness of God endureth continually.',
+      1: 'Why boastest thou thyself in mischief, O mighty man? the goodness of God endureth continually.',
       2: 'Thy tongue deviseth mischiefs; like a sharp razor, working deceitfully.',
       3: 'Thou lovest evil more than good; and lying rather than to speak righteousness. Selah.',
       4: 'Thou lovest all devouring words, O thou deceitful tongue.',
@@ -15820,7 +15820,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'I will praise thee for ever, because thou hast done it: and I will wait on thy name; for it is good before thy saints.',
     },
     53: {
-      1: '¶ To the chief Musician upon Mahalath, Maschil, A Psalm of David. The fool hath said in his heart, There is no God. Corrupt are they, and have done abominable iniquity: there is none that doeth good.',
+      1: 'The fool hath said in his heart, There is no God. Corrupt are they, and have done abominable iniquity: there is none that doeth good.',
       2: 'God looked down from heaven upon the children of men, to see if there were any that did understand, that did seek God.',
       3: 'Every one of them is gone back: they are altogether become filthy; there is none that doeth good, no, not one.',
       4: 'Have the workers of iniquity no knowledge? who eat up my people as they eat bread: they have not called upon God.',
@@ -15828,7 +15828,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       6: 'Oh that the salvation of Israel were come out of Zion! When God bringeth back the captivity of his people, Jacob shall rejoice, and Israel shall be glad.',
     },
     54: {
-      1: '¶ To the chief Musician on Neginoth, Maschil, A Psalm of David, when the Ziphims came and said to Saul, Doth not David hide himself with us? Save me, O God, by thy name, and judge me by thy strength.',
+      1: 'Save me, O God, by thy name, and judge me by thy strength.',
       2: 'Hear my prayer, O God; give ear to the words of my mouth.',
       3: 'For strangers are risen up against me, and oppressors seek after my soul: they have not set God before them. Selah.',
       4: '¶ Behold, God is mine helper: the Lord is with them that uphold my soul.',
@@ -15837,7 +15837,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'For he hath delivered me out of all trouble: and mine eye hath seen his desire upon mine enemies.',
     },
     55: {
-      1: '¶ To the chief Musician on Neginoth, Maschil, A Psalm of David. Give ear to my prayer, O God; and hide not thyself from my supplication.',
+      1: 'Give ear to my prayer, O God; and hide not thyself from my supplication.',
       2: 'Attend unto me, and hear me: I mourn in my complaint, and make a noise;',
       3: 'Because of the voice of the enemy, because of the oppression of the wicked: for they cast iniquity upon me, and in wrath they hate me.',
       4: 'My heart is sore pained within me: and the terrors of death are fallen upon me.',
@@ -15862,7 +15862,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       23: 'But thou, O God, shalt bring them down into the pit of destruction: bloody and deceitful men shall not live out half their days; but I will trust in thee.',
     },
     56: {
-      1: '¶ To the chief Musician upon Jonathelemrechokim, Michtam of David, when the Philistines took him in Gath. Be merciful unto me, O God: for man would swallow me up; he fighting daily oppresseth me.',
+      1: 'Be merciful unto me, O God: for man would swallow me up; he fighting daily oppresseth me.',
       2: 'Mine enemies would daily swallow me up: for they be many that fight against me, O thou most High.',
       3: 'What time I am afraid, I will trust in thee.',
       4: 'In God I will praise his word, in God I have put my trust; I will not fear what flesh can do unto me.',
@@ -15877,7 +15877,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'For thou hast delivered my soul from death: wilt not thou deliver my feet from falling, that I may walk before God in the light of the living?',
     },
     57: {
-      1: '¶ To the chief Musician, Altaschith, Michtam of David, when he fled from Saul in the cave. Be merciful unto me, O God, be merciful unto me: for my soul trusteth in thee: yea, in the shadow of thy wings will I make my refuge, until these calamities be overpast.',
+      1: 'Be merciful unto me, O God, be merciful unto me: for my soul trusteth in thee: yea, in the shadow of thy wings will I make my refuge, until these calamities be overpast.',
       2: 'I will cry unto God most high; unto God that performeth all things for me.',
       3: 'He shall send from heaven, and save me from the reproach of him that would swallow me up. Selah. God shall send forth his mercy and his truth.',
       4: 'My soul is among lions: and I lie even among them that are set on fire, even the sons of men, whose teeth are spears and arrows, and their tongue a sharp sword.',
@@ -15890,7 +15890,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'Be thou exalted, O God, above the heavens: let thy glory be above all the earth.',
     },
     58: {
-      1: '¶ To the chief Musician, Altaschith, Michtam of David. Do ye indeed speak righteousness, O congregation? do ye judge uprightly, O ye sons of men?',
+      1: 'Do ye indeed speak righteousness, O congregation? do ye judge uprightly, O ye sons of men?',
       2: 'Yea, in heart ye work wickedness; ye weigh the violence of your hands in the earth.',
       3: 'The wicked are estranged from the womb: they go astray as soon as they be born, speaking lies.',
       4: 'Their poison is like the poison of a serpent: they are like the deaf adder that stoppeth her ear;',
@@ -15903,7 +15903,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'So that a man shall say, Verily there is a reward for the righteous: verily he is a God that judgeth in the earth.',
     },
     59: {
-      1: '¶ To the chief Musician, Altaschith, Michtam of David; when Saul sent, and they watched the house to kill him. Deliver me from mine enemies, O my God: defend me from them that rise up against me.',
+      1: 'Deliver me from mine enemies, O my God: defend me from them that rise up against me.',
       2: 'Deliver me from the workers of iniquity, and save me from bloody men.',
       3: 'For, lo, they lie in wait for my soul: the mighty are gathered against me; not for my transgression, nor for my sin, O LORD.',
       4: 'They run and prepare themselves without my fault: awake to help me, and behold.',
@@ -15922,7 +15922,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'Unto thee, O my strength, will I sing: for God is my defence, and the God of my mercy.',
     },
     60: {
-      1: '¶ To the chief Musician upon Shushaneduth, Michtam of David, to teach; when he strove with Aramnaharaim and with Aramzobah, when Joab returned, and smote of Edom in the valley of salt twelve thousand. O God, thou hast cast us off, thou hast scattered us, thou hast been displeased; O turn thyself to us again.',
+      1: 'O God, thou hast cast us off, thou hast scattered us, thou hast been displeased; O turn thyself to us again.',
       2: 'Thou hast made the earth to tremble; thou hast broken it: heal the breaches thereof; for it shaketh.',
       3: 'Thou hast shewed thy people hard things: thou hast made us to drink the wine of astonishment.',
       4: 'Thou hast given a banner to them that fear thee, that it may be displayed because of the truth. Selah.',
@@ -15936,7 +15936,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'Through God we shall do valiantly: for he it is that shall tread down our enemies.',
     },
     61: {
-      1: '¶ To the chief Musician upon Neginah, A Psalm of David. Hear my cry, O God; attend unto my prayer.',
+      1: 'Hear my cry, O God; attend unto my prayer.',
       2: 'From the end of the earth will I cry unto thee, when my heart is overwhelmed: lead me to the rock that is higher than I.',
       3: 'For thou hast been a shelter for me, and a strong tower from the enemy.',
       4: 'I will abide in thy tabernacle for ever: I will trust in the covert of thy wings. Selah.',
@@ -15946,7 +15946,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'So will I sing praise unto thy name for ever, that I may daily perform my vows.',
     },
     62: {
-      1: '¶ To the chief Musician, to Jeduthun, A Psalm of David. Truly my soul waiteth upon God: from him cometh my salvation.',
+      1: 'Truly my soul waiteth upon God: from him cometh my salvation.',
       2: 'He only is my rock and my salvation; he is my defence; I shall not be greatly moved.',
       3: 'How long will ye imagine mischief against a man? ye shall be slain all of you: as a bowing wall shall ye be, and as a tottering fence.',
       4: 'They only consult to cast him down from his excellency: they delight in lies: they bless with their mouth, but they curse inwardly. Selah.',
@@ -15960,7 +15960,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'Also unto thee, O Lord, belongeth mercy: for thou renderest to every man according to his work.',
     },
     63: {
-      1: '¶ A Psalm of David, when he was in the wilderness of Judah. O God, thou art my God; early will I seek thee: my soul thirsteth for thee, my flesh longeth for thee in a dry and thirsty land, where no water is;',
+      1: 'O God, thou art my God; early will I seek thee: my soul thirsteth for thee, my flesh longeth for thee in a dry and thirsty land, where no water is;',
       2: 'To see thy power and thy glory, so as I have seen thee in the sanctuary.',
       3: '¶ Because thy lovingkindness is better than life, my lips shall praise thee.',
       4: 'Thus will I bless thee while I live: I will lift up my hands in thy name.',
@@ -15973,7 +15973,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       11: 'But the king shall rejoice in God; every one that sweareth by him shall glory: but the mouth of them that speak lies shall be stopped.',
     },
     64: {
-      1: '¶ To the chief Musician, A Psalm of David. Hear my voice, O God, in my prayer: preserve my life from fear of the enemy.',
+      1: 'Hear my voice, O God, in my prayer: preserve my life from fear of the enemy.',
       2: 'Hide me from the secret counsel of the wicked; from the insurrection of the workers of iniquity:',
       3: 'Who whet their tongue like a sword, and bend their bows to shoot their arrows, even bitter words:',
       4: 'That they may shoot in secret at the perfect: suddenly do they shoot at him, and fear not.',
@@ -15985,7 +15985,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       10: 'The righteous shall be glad in the LORD, and shall trust in him; and all the upright in heart shall glory.',
     },
     65: {
-      1: '¶ To the chief Musician, A Psalm and Song of David. Praise waiteth for thee, O God, in Sion: and unto thee shall the vow be performed.',
+      1: 'Praise waiteth for thee, O God, in Sion: and unto thee shall the vow be performed.',
       2: 'O thou that hearest prayer, unto thee shall all flesh come.',
       3: 'Iniquities prevail against me: as for our transgressions, thou shalt purge them away.',
       4: 'Blessed is the man whom thou choosest, and causest to approach unto thee, that he may dwell in thy courts: we shall be satisfied with the goodness of thy house, even of thy holy temple.',
@@ -16000,7 +16000,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'The pastures are clothed with flocks; the valleys also are covered over with corn; they shout for joy, they also sing.',
     },
     66: {
-      1: '¶ To the chief Musician, A Song or Psalm. Make a joyful noise unto God, all ye lands:',
+      1: 'Make a joyful noise unto God, all ye lands:',
       2: 'Sing forth the honour of his name: make his praise glorious.',
       3: 'Say unto God, How terrible art thou in thy works! through the greatness of thy power shall thine enemies submit themselves unto thee.',
       4: 'All the earth shall worship thee, and shall sing unto thee; they shall sing to thy name. Selah.',
@@ -16022,7 +16022,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       20: 'Blessed be God, which hath not turned away my prayer, nor his mercy from me.',
     },
     67: {
-      1: '¶ To the chief Musician on Neginoth, A Psalm or Song. God be merciful unto us, and bless us; and cause his face to shine upon us; Selah.',
+      1: 'God be merciful unto us, and bless us; and cause his face to shine upon us; Selah.',
       2: 'That thy way may be known upon earth, thy saving health among all nations.',
       3: 'Let the people praise thee, O God; let all the people praise thee.',
       4: 'O let the nations be glad and sing for joy: for thou shalt judge the people righteously, and govern the nations upon earth. Selah.',
@@ -16031,7 +16031,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'God shall bless us; and all the ends of the earth shall fear him.',
     },
     68: {
-      1: '¶ To the chief Musician, A Psalm or Song of David. Let God arise, let his enemies be scattered: let them also that hate him flee before him.',
+      1: 'Let God arise, let his enemies be scattered: let them also that hate him flee before him.',
       2: 'As smoke is driven away, so drive them away: as wax melteth before the fire, so let the wicked perish at the presence of God.',
       3: 'But let the righteous be glad; let them rejoice before God: yea, let them exceedingly rejoice.',
       4: 'Sing unto God, sing praises to his name: extol him that rideth upon the heavens by his name JAH, and rejoice before him.',
@@ -16068,7 +16068,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       35: 'O God, thou art terrible out of thy holy places: the God of Israel is he that giveth strength and power unto his people. Blessed be God.',
     },
     69: {
-      1: '¶ To the chief Musician upon Shoshannim, A Psalm of David. Save me, O God; for the waters are come in unto my soul.',
+      1: 'Save me, O God; for the waters are come in unto my soul.',
       2: 'I sink in deep mire, where there is no standing: I am come into deep waters, where the floods overflow me.',
       3: 'I am weary of my crying: my throat is dried: mine eyes fail while I wait for my God.',
       4: 'They that hate me without a cause are more than the hairs of mine head: they that would destroy me, being mine enemies wrongfully, are mighty: then I restored that which I took not away.',
@@ -16106,7 +16106,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       36: 'The seed also of his servants shall inherit it: and they that love his name shall dwell therein.',
     },
     70: {
-      1: '¶ To the chief Musician, A Psalm of David, to bring to remembrance. Make haste, O God, to deliver me; make haste to help me, O LORD.',
+      1: 'Make haste, O God, to deliver me; make haste to help me, O LORD.',
       2: 'Let them be ashamed and confounded that seek after my soul: let them be turned backward, and put to confusion, that desire my hurt.',
       3: 'Let them be turned back for a reward of their shame that say, Aha, aha.',
       4: 'Let all those that seek thee rejoice and be glad in thee: and let such as love thy salvation say continually, Let God be magnified.',
@@ -16139,7 +16139,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       24: 'My tongue also shall talk of thy righteousness all the day long: for they are confounded, for they are brought unto shame, that seek my hurt.',
     },
     72: {
-      1: '¶ A Psalm for Solomon. Give the king thy judgments, O God, and thy righteousness unto the king\'s son.',
+      1: 'Give the king thy judgments, O God, and thy righteousness unto the king\'s son.',
       2: '¶ He shall judge thy people with righteousness, and thy poor with judgment.',
       3: 'The mountains shall bring peace to the people, and the little hills, by righteousness.',
       4: 'He shall judge the poor of the people, he shall save the children of the needy, and shall break in pieces the oppressor.',
@@ -16161,7 +16161,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       20: 'The prayers of David the son of Jesse are ended.',
     },
     73: {
-      1: '¶ A Psalm of Asaph. Truly God is good to Israel, even to such as are of a clean heart.',
+      1: 'Truly God is good to Israel, even to such as are of a clean heart.',
       2: 'But as for me, my feet were almost gone; my steps had well nigh slipped.',
       3: 'For I was envious at the foolish, when I saw the prosperity of the wicked.',
       4: 'For there are no bands in their death: but their strength is firm.',
@@ -16191,7 +16191,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       28: 'But it is good for me to draw near to God: I have put my trust in the Lord GOD, that I may declare all thy works.',
     },
     74: {
-      1: '¶ Maschil of Asaph. O God, why hast thou cast us off for ever? why doth thine anger smoke against the sheep of thy pasture?',
+      1: 'O God, why hast thou cast us off for ever? why doth thine anger smoke against the sheep of thy pasture?',
       2: 'Remember thy congregation, which thou hast purchased of old; the rod of thine inheritance, which thou hast redeemed; this mount Zion, wherein thou hast dwelt.',
       3: 'Lift up thy feet unto the perpetual desolations; even all that the enemy hath done wickedly in the sanctuary.',
       4: 'Thine enemies roar in the midst of thy congregations; they set up their ensigns for signs.',
@@ -16216,7 +16216,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       23: 'Forget not the voice of thine enemies: the tumult of those that rise up against thee increaseth continually.',
     },
     75: {
-      1: '¶ To the chief Musician, Altaschith, A Psalm or Song of Asaph. Unto thee, O God, do we give thanks, unto thee do we give thanks: for that thy name is near thy wondrous works declare.',
+      1: 'Unto thee, O God, do we give thanks, unto thee do we give thanks: for that thy name is near thy wondrous works declare.',
       2: 'When I shall receive the congregation I will judge uprightly.',
       3: 'The earth and all the inhabitants thereof are dissolved: I bear up the pillars of it. Selah.',
       4: 'I said unto the fools, Deal not foolishly: and to the wicked, Lift not up the horn:',
@@ -16228,7 +16228,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       10: 'All the horns of the wicked also will I cut off; but the horns of the righteous shall be exalted.',
     },
     76: {
-      1: '¶ To the chief Musician on Neginoth, A Psalm or Song of Asaph. In Judah is God known: his name is great in Israel.',
+      1: 'In Judah is God known: his name is great in Israel.',
       2: 'In Salem also is his tabernacle, and his dwelling place in Zion.',
       3: 'There brake he the arrows of the bow, the shield, and the sword, and the battle. Selah.',
       4: 'Thou art more glorious and excellent than the mountains of prey.',
@@ -16242,7 +16242,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'He shall cut off the spirit of princes: he is terrible to the kings of the earth.',
     },
     77: {
-      1: '¶ To the chief Musician, to Jeduthun, A Psalm of Asaph. I cried unto God with my voice, even unto God with my voice; and he gave ear unto me.',
+      1: 'I cried unto God with my voice, even unto God with my voice; and he gave ear unto me.',
       2: 'In the day of my trouble I sought the Lord: my sore ran in the night, and ceased not: my soul refused to be comforted.',
       3: 'I remembered God, and was troubled: I complained, and my spirit was overwhelmed. Selah.',
       4: 'Thou holdest mine eyes waking: I am so troubled that I cannot speak.',
@@ -16264,7 +16264,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       20: 'Thou leddest thy people like a flock by the hand of Moses and Aaron.',
     },
     78: {
-      1: '¶ Maschil of Asaph. Give ear, O my people, to my law: incline your ears to the words of my mouth.',
+      1: 'Give ear, O my people, to my law: incline your ears to the words of my mouth.',
       2: 'I will open my mouth in a parable: I will utter dark sayings of old:',
       3: 'Which we have heard and known, and our fathers have told us.',
       4: 'We will not hide them from their children, shewing to the generation to come the praises of the LORD, and his strength, and his wonderful works that he hath done.',
@@ -16338,7 +16338,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       72: 'So he fed them according to the integrity of his heart; and guided them by the skilfulness of his hands.',
     },
     79: {
-      1: '¶ A Psalm of Asaph. O God, the heathen are come into thine inheritance; thy holy temple have they defiled; they have laid Jerusalem on heaps.',
+      1: 'O God, the heathen are come into thine inheritance; thy holy temple have they defiled; they have laid Jerusalem on heaps.',
       2: 'The dead bodies of thy servants have they given to be meat unto the fowls of the heaven, the flesh of thy saints unto the beasts of the earth.',
       3: 'Their blood have they shed like water round about Jerusalem; and there was none to bury them.',
       4: 'We are become a reproach to our neighbours, a scorn and derision to them that are round about us.',
@@ -16353,7 +16353,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'So we thy people and sheep of thy pasture will give thee thanks for ever: we will shew forth thy praise to all generations.',
     },
     80: {
-      1: '¶ To the chief Musician upon Shoshannimeduth, A Psalm of Asaph. Give ear, O Shepherd of Israel, thou that leadest Joseph like a flock; thou that dwellest between the cherubims, shine forth.',
+      1: 'Give ear, O Shepherd of Israel, thou that leadest Joseph like a flock; thou that dwellest between the cherubims, shine forth.',
       2: 'Before Ephraim and Benjamin and Manasseh stir up thy strength, and come and save us.',
       3: 'Turn us again, O God, and cause thy face to shine; and we shall be saved.',
       4: 'O LORD God of hosts, how long wilt thou be angry against the prayer of thy people?',
@@ -16374,7 +16374,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       19: 'Turn us again, O LORD God of hosts, cause thy face to shine; and we shall be saved.',
     },
     81: {
-      1: '¶ To the chief Musician upon Gittith, A Psalm of Asaph. Sing aloud unto God our strength: make a joyful noise unto the God of Jacob.',
+      1: 'Sing aloud unto God our strength: make a joyful noise unto the God of Jacob.',
       2: 'Take a psalm, and bring hither the timbrel, the pleasant harp with the psaltery.',
       3: 'Blow up the trumpet in the new moon, in the time appointed, on our solemn feast day.',
       4: 'For this was a statute for Israel, and a law of the God of Jacob.',
@@ -16392,7 +16392,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       16: 'He should have fed them also with the finest of the wheat: and with honey out of the rock should I have satisfied thee.',
     },
     82: {
-      1: '¶ A Psalm of Asaph. God standeth in the congregation of the mighty; he judgeth among the gods.',
+      1: 'God standeth in the congregation of the mighty; he judgeth among the gods.',
       2: 'How long will ye judge unjustly, and accept the persons of the wicked? Selah.',
       3: 'Defend the poor and fatherless: do justice to the afflicted and needy.',
       4: 'Deliver the poor and needy: rid them out of the hand of the wicked.',
@@ -16402,7 +16402,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'Arise, O God, judge the earth: for thou shalt inherit all nations.',
     },
     83: {
-      1: '¶ A Song or Psalm of Asaph. Keep not thou silence, O God: hold not thy peace, and be not still, O God.',
+      1: 'Keep not thou silence, O God: hold not thy peace, and be not still, O God.',
       2: 'For, lo, thine enemies make a tumult: and they that hate thee have lifted up the head.',
       3: 'They have taken crafty counsel against thy people, and consulted against thy hidden ones.',
       4: 'They have said, Come, and let us cut them off from being a nation; that the name of Israel may be no more in remembrance.',
@@ -16422,7 +16422,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       18: 'That men may know that thou, whose name alone is JEHOVAH, art the most high over all the earth.',
     },
     84: {
-      1: '¶ To the chief Musician upon Gittith, A Psalm for the sons of Korah. How amiable are thy tabernacles, O LORD of hosts!',
+      1: 'How amiable are thy tabernacles, O LORD of hosts!',
       2: 'My soul longeth, yea, even fainteth for the courts of the LORD: my heart and my flesh crieth out for the living God.',
       3: 'Yea, the sparrow hath found an house, and the swallow a nest for herself, where she may lay her young, even thine altars, O LORD of hosts, my King, and my God.',
       4: 'Blessed are they that dwell in thy house: they will be still praising thee. Selah.',
@@ -16436,7 +16436,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'O LORD of hosts, blessed is the man that trusteth in thee.',
     },
     85: {
-      1: '¶ To the chief Musician, A Psalm for the sons of Korah. LORD, thou hast been favourable unto thy land: thou hast brought back the captivity of Jacob.',
+      1: 'LORD, thou hast been favourable unto thy land: thou hast brought back the captivity of Jacob.',
       2: 'Thou hast forgiven the iniquity of thy people, thou hast covered all their sin. Selah.',
       3: 'Thou hast taken away all thy wrath: thou hast turned thyself from the fierceness of thine anger.',
       4: 'Turn us, O God of our salvation, and cause thine anger toward us to cease.',
@@ -16451,7 +16451,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'Righteousness shall go before him; and shall set us in the way of his steps.',
     },
     86: {
-      1: '¶ A Prayer of David. Bow down thine ear, O LORD, hear me: for I am poor and needy.',
+      1: 'Bow down thine ear, O LORD, hear me: for I am poor and needy.',
       2: 'Preserve my soul; for I am holy: O thou my God, save thy servant that trusteth in thee.',
       3: 'Be merciful unto me, O Lord: for I cry unto thee daily.',
       4: 'Rejoice the soul of thy servant: for unto thee, O Lord, do I lift up my soul.',
@@ -16470,7 +16470,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'Shew me a token for good; that they which hate me may see it, and be ashamed: because thou, LORD, hast holpen me, and comforted me.',
     },
     87: {
-      1: '¶ A Psalm or Song for the sons of Korah. His foundation is in the holy mountains.',
+      1: 'His foundation is in the holy mountains.',
       2: 'The LORD loveth the gates of Zion more than all the dwellings of Jacob.',
       3: 'Glorious things are spoken of thee, O city of God. Selah.',
       4: '¶ I will make mention of Rahab and Babylon to them that know me: behold Philistia, and Tyre, with Ethiopia; this man was born there.',
@@ -16479,7 +16479,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'As well the singers as the players on instruments shall be there: all my springs are in thee.',
     },
     88: {
-      1: '¶ A Song or Psalm for the sons of Korah, to the chief Musician upon Mahalath Leannoth, Maschil of Heman the Ezrahite. O LORD God of my salvation, I have cried day and night before thee:',
+      1: 'O LORD God of my salvation, I have cried day and night before thee:',
       2: 'Let my prayer come before thee: incline thine ear unto my cry;',
       3: 'For my soul is full of troubles: and my life draweth nigh unto the grave.',
       4: 'I am counted with them that go down into the pit: I am as a man that hath no strength:',
@@ -16499,7 +16499,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       18: 'Lover and friend hast thou put far from me, and mine acquaintance into darkness.',
     },
     89: {
-      1: '¶ Maschil of Ethan the Ezrahite. I will sing of the mercies of the LORD for ever: with my mouth will I make known thy faithfulness to all generations.',
+      1: 'I will sing of the mercies of the LORD for ever: with my mouth will I make known thy faithfulness to all generations.',
       2: 'For I have said, Mercy shall be built up for ever: thy faithfulness shalt thou establish in the very heavens.',
       3: 'I have made a covenant with my chosen, I have sworn unto David my servant,',
       4: 'Thy seed will I establish for ever, and build up thy throne to all generations. Selah.',
@@ -16553,7 +16553,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       52: 'Blessed be the LORD for evermore. Amen, and Amen.',
     },
     90: {
-      1: '¶ A Prayer of Moses the man of God. Lord, thou hast been our dwelling place in all generations.',
+      1: 'Lord, thou hast been our dwelling place in all generations.',
       2: 'Before the mountains were brought forth, or ever thou hadst formed the earth and the world, even from everlasting to everlasting, thou art God.',
       3: 'Thou turnest man to destruction; and sayest, Return, ye children of men.',
       4: 'For a thousand years in thy sight are but as yesterday when it is past, and as a watch in the night.',
@@ -16590,7 +16590,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       16: 'With long life will I satisfy him, and shew him my salvation.',
     },
     92: {
-      1: '¶ A Psalm or Song for the sabbath day. It is a good thing to give thanks unto the LORD, and to sing praises unto thy name, O most High:',
+      1: 'It is a good thing to give thanks unto the LORD, and to sing praises unto thy name, O most High:',
       2: 'To shew forth thy lovingkindness in the morning, and thy faithfulness every night,',
       3: 'Upon an instrument of ten strings, and upon the psaltery; upon the harp with a solemn sound.',
       4: 'For thou, LORD, hast made me glad through thy work: I will triumph in the works of thy hands.',
@@ -16681,7 +16681,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'Rejoice in the LORD, ye righteous; and give thanks at the remembrance of his holiness.',
     },
     98: {
-      1: '¶ A Psalm. O sing unto the LORD a new song; for he hath done marvellous things: his right hand, and his holy arm, hath gotten him the victory.',
+      1: 'O sing unto the LORD a new song; for he hath done marvellous things: his right hand, and his holy arm, hath gotten him the victory.',
       2: 'The LORD hath made known his salvation: his righteousness hath he openly shewed in the sight of the heathen.',
       3: 'He hath remembered his mercy and his truth toward the house of Israel: all the ends of the earth have seen the salvation of our God.',
       4: '¶ Make a joyful noise unto the LORD, all the earth: make a loud noise, and rejoice, and sing praise.',
@@ -16703,14 +16703,14 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'Exalt the LORD our God, and worship at his holy hill; for the LORD our God is holy.',
     },
     100: {
-      1: '¶ A Psalm of praise. Make a joyful noise unto the LORD, all ye lands.',
+      1: 'Make a joyful noise unto the LORD, all ye lands.',
       2: 'Serve the LORD with gladness: come before his presence with singing.',
       3: 'Know ye that the LORD he is God: it is he that hath made us, and not we ourselves; we are his people, and the sheep of his pasture.',
       4: 'Enter into his gates with thanksgiving, and into his courts with praise: be thankful unto him, and bless his name.',
       5: 'For the LORD is good; his mercy is everlasting; and his truth endureth to all generations.',
     },
     101: {
-      1: '¶ A Psalm of David. I will sing of mercy and judgment: unto thee, O LORD, will I sing.',
+      1: 'I will sing of mercy and judgment: unto thee, O LORD, will I sing.',
       2: 'I will behave myself wisely in a perfect way. O when wilt thou come unto me? I will walk within my house with a perfect heart.',
       3: 'I will set no wicked thing before mine eyes: I hate the work of them that turn aside; it shall not cleave to me.',
       4: 'A froward heart shall depart from me: I will not know a wicked person.',
@@ -16750,7 +16750,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       28: 'The children of thy servants shall continue, and their seed shall be established before thee.',
     },
     103: {
-      1: '¶ A Psalm of David. Bless the LORD, O my soul: and all that is within me, bless his holy name.',
+      1: 'Bless the LORD, O my soul: and all that is within me, bless his holy name.',
       2: 'Bless the LORD, O my soul, and forget not all his benefits:',
       3: 'Who forgiveth all thine iniquities; who healeth all thy diseases;',
       4: 'Who redeemeth thy life from destruction; who crowneth thee with lovingkindness and tender mercies;',
@@ -16953,7 +16953,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       43: 'Whoso is wise, and will observe these things, even they shall understand the lovingkindness of the LORD.',
     },
     108: {
-      1: '¶ A Song or Psalm of David. O God, my heart is fixed; I will sing and give praise, even with my glory.',
+      1: 'O God, my heart is fixed; I will sing and give praise, even with my glory.',
       2: 'Awake, psaltery and harp: I myself will awake early.',
       3: 'I will praise thee, O LORD, among the people: and I will sing praises unto thee among the nations.',
       4: 'For thy mercy is great above the heavens: and thy truth reacheth unto the clouds.',
@@ -16968,7 +16968,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'Through God we shall do valiantly: for he it is that shall tread down our enemies.',
     },
     109: {
-      1: '¶ To the chief Musician, A Psalm of David. Hold not thy peace, O God of my praise;',
+      1: 'Hold not thy peace, O God of my praise;',
       2: 'For the mouth of the wicked and the mouth of the deceitful are opened against me: they have spoken against me with a lying tongue.',
       3: 'They compassed me about also with words of hatred; and fought against me without a cause.',
       4: 'For my love they are my adversaries: but I give myself unto prayer.',
@@ -17001,7 +17001,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       31: 'For he shall stand at the right hand of the poor, to save him from those that condemn his soul.',
     },
     110: {
-      1: '¶ A Psalm of David. The LORD said unto my Lord, Sit thou at my right hand, until I make thine enemies thy footstool.',
+      1: 'The LORD said unto my Lord, Sit thou at my right hand, until I make thine enemies thy footstool.',
       2: 'The LORD shall send the rod of thy strength out of Zion: rule thou in the midst of thine enemies.',
       3: 'Thy people shall be willing in the day of thy power, in the beauties of holiness from the womb of the morning: thou hast the dew of thy youth.',
       4: 'The LORD hath sworn, and will not repent, Thou art a priest for ever after the order of Melchizedek.',
@@ -17309,7 +17309,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       176: 'I have gone astray like a lost sheep; seek thy servant; for I do not forget thy commandments.',
     },
     120: {
-      1: '¶ A Song of degrees. In my distress I cried unto the LORD, and he heard me.',
+      1: 'In my distress I cried unto the LORD, and he heard me.',
       2: 'Deliver my soul, O LORD, from lying lips, and from a deceitful tongue.',
       3: 'What shall be given unto thee? or what shall be done unto thee, thou false tongue?',
       4: 'Sharp arrows of the mighty, with coals of juniper.',
@@ -17318,7 +17318,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'I am for peace: but when I speak, they are for war.',
     },
     121: {
-      1: '¶ A Song of degrees. I will lift up mine eyes unto the hills, from whence cometh my help.',
+      1: 'I will lift up mine eyes unto the hills, from whence cometh my help.',
       2: 'My help cometh from the LORD, which made heaven and earth.',
       3: 'He will not suffer thy foot to be moved: he that keepeth thee will not slumber.',
       4: 'Behold, he that keepeth Israel shall neither slumber nor sleep.',
@@ -17328,7 +17328,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'The LORD shall preserve thy going out and thy coming in from this time forth, and even for evermore.',
     },
     122: {
-      1: '¶ A Song of degrees of David. I was glad when they said unto me, Let us go into the house of the LORD.',
+      1: 'I was glad when they said unto me, Let us go into the house of the LORD.',
       2: 'Our feet shall stand within thy gates, O Jerusalem.',
       3: 'Jerusalem is builded as a city that is compact together:',
       4: 'Whither the tribes go up, the tribes of the LORD, unto the testimony of Israel, to give thanks unto the name of the LORD.',
@@ -17339,13 +17339,13 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'Because of the house of the LORD our God I will seek thy good.',
     },
     123: {
-      1: '¶ A Song of degrees. Unto thee lift I up mine eyes, O thou that dwellest in the heavens.',
+      1: 'Unto thee lift I up mine eyes, O thou that dwellest in the heavens.',
       2: 'Behold, as the eyes of servants look unto the hand of their masters, and as the eyes of a maiden unto the hand of her mistress; so our eyes wait upon the LORD our God, until that he have mercy upon us.',
       3: 'Have mercy upon us, O LORD, have mercy upon us: for we are exceedingly filled with contempt.',
       4: 'Our soul is exceedingly filled with the scorning of those that are at ease, and with the contempt of the proud.',
     },
     124: {
-      1: '¶ A Song of degrees of David. If it had not been the LORD who was on our side, now may Israel say;',
+      1: 'If it had not been the LORD who was on our side, now may Israel say;',
       2: 'If it had not been the LORD who was on our side, when men rose up against us:',
       3: 'Then they had swallowed us up quick, when their wrath was kindled against us:',
       4: 'Then the waters had overwhelmed us, the stream had gone over our soul:',
@@ -17355,14 +17355,14 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'Our help is in the name of the LORD, who made heaven and earth.',
     },
     125: {
-      1: '¶ A Song of degrees. They that trust in the LORD shall be as mount Zion, which cannot be removed, but abideth for ever.',
+      1: 'They that trust in the LORD shall be as mount Zion, which cannot be removed, but abideth for ever.',
       2: 'As the mountains are round about Jerusalem, so the LORD is round about his people from henceforth even for ever.',
       3: 'For the rod of the wicked shall not rest upon the lot of the righteous; lest the righteous put forth their hands unto iniquity.',
       4: '¶ Do good, O LORD, unto those that be good, and to them that are upright in their hearts.',
       5: 'As for such as turn aside unto their crooked ways, the LORD shall lead them forth with the workers of iniquity: but peace shall be upon Israel.',
     },
     126: {
-      1: '¶ A Song of degrees. When the LORD turned again the captivity of Zion, we were like them that dream.',
+      1: 'When the LORD turned again the captivity of Zion, we were like them that dream.',
       2: 'Then was our mouth filled with laughter, and our tongue with singing: then said they among the heathen, The LORD hath done great things for them.',
       3: 'The LORD hath done great things for us; whereof we are glad.',
       4: '¶ Turn again our captivity, O LORD, as the streams in the south.',
@@ -17370,14 +17370,14 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       6: 'He that goeth forth and weepeth, bearing precious seed, shall doubtless come again with rejoicing, bringing his sheaves with him.',
     },
     127: {
-      1: '¶ A Song of degrees for Solomon. Except the LORD build the house, they labour in vain that build it: except the LORD keep the city, the watchman waketh but in vain.',
+      1: 'Except the LORD build the house, they labour in vain that build it: except the LORD keep the city, the watchman waketh but in vain.',
       2: 'It is vain for you to rise up early, to sit up late, to eat the bread of sorrows: for so he giveth his beloved sleep.',
       3: 'Lo, children are an heritage of the LORD: and the fruit of the womb is his reward.',
       4: 'As arrows are in the hand of a mighty man; so are children of the youth.',
       5: 'Happy is the man that hath his quiver full of them: they shall not be ashamed, but they shall speak with the enemies in the gate.',
     },
     128: {
-      1: '¶ A Song of degrees. Blessed is every one that feareth the LORD; that walketh in his ways.',
+      1: 'Blessed is every one that feareth the LORD; that walketh in his ways.',
       2: 'For thou shalt eat the labour of thine hands: happy shalt thou be, and it shall be well with thee.',
       3: 'Thy wife shall be as a fruitful vine by the sides of thine house: thy children like olive plants round about thy table.',
       4: 'Behold, that thus shall the man be blessed that feareth the LORD.',
@@ -17385,7 +17385,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       6: 'Yea, thou shalt see thy children\'s children, and peace upon Israel.',
     },
     129: {
-      1: '¶ A Song of degrees. Many a time have they afflicted me from my youth, may Israel now say:',
+      1: 'Many a time have they afflicted me from my youth, may Israel now say:',
       2: 'Many a time have they afflicted me from my youth: yet they have not prevailed against me.',
       3: 'The plowers plowed upon my back: they made long their furrows.',
       4: 'The LORD is righteous: he hath cut asunder the cords of the wicked.',
@@ -17395,7 +17395,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'Neither do they which go by say, The blessing of the LORD be upon you: we bless you in the name of the LORD.',
     },
     130: {
-      1: '¶ A Song of degrees. Out of the depths have I cried unto thee, O LORD.',
+      1: 'Out of the depths have I cried unto thee, O LORD.',
       2: 'Lord, hear my voice: let thine ears be attentive to the voice of my supplications.',
       3: 'If thou, LORD, shouldest mark iniquities, O Lord, who shall stand?',
       4: 'But there is forgiveness with thee, that thou mayest be feared.',
@@ -17405,12 +17405,12 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'And he shall redeem Israel from all his iniquities.',
     },
     131: {
-      1: '¶ A Song of degrees of David. LORD, my heart is not haughty, nor mine eyes lofty: neither do I exercise myself in great matters, or in things too high for me.',
+      1: 'LORD, my heart is not haughty, nor mine eyes lofty: neither do I exercise myself in great matters, or in things too high for me.',
       2: 'Surely I have behaved and quieted myself, as a child that is weaned of his mother: my soul is even as a weaned child.',
       3: 'Let Israel hope in the LORD from henceforth and for ever.',
     },
     132: {
-      1: '¶ A Song of degrees. LORD, remember David, and all his afflictions:',
+      1: 'LORD, remember David, and all his afflictions:',
       2: 'How he sware unto the LORD, and vowed unto the mighty God of Jacob;',
       3: 'Surely I will not come into the tabernacle of my house, nor go up into my bed;',
       4: 'I will not give sleep to mine eyes, or slumber to mine eyelids,',
@@ -17430,12 +17430,12 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       18: 'His enemies will I clothe with shame: but upon himself shall his crown flourish.',
     },
     133: {
-      1: '¶ A Song of degrees of David. Behold, how good and how pleasant it is for brethren to dwell together in unity!',
+      1: 'Behold, how good and how pleasant it is for brethren to dwell together in unity!',
       2: 'It is like the precious ointment upon the head, that ran down upon the beard, even Aaron\'s beard: that went down to the skirts of his garments;',
       3: 'As the dew of Hermon, and as the dew that descended upon the mountains of Zion: for there the LORD commanded the blessing, even life for evermore.',
     },
     134: {
-      1: '¶ A Song of degrees. Behold, bless ye the LORD, all ye servants of the LORD, which by night stand in the house of the LORD.',
+      1: 'Behold, bless ye the LORD, all ye servants of the LORD, which by night stand in the house of the LORD.',
       2: 'Lift up your hands in the sanctuary, and bless the LORD.',
       3: 'The LORD that made heaven and earth bless thee out of Zion.',
     },
@@ -17502,7 +17502,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       9: 'Happy shall he be, that taketh and dasheth thy little ones against the stones.',
     },
     138: {
-      1: '¶ A Psalm of David. I will praise thee with my whole heart: before the gods will I sing praise unto thee.',
+      1: 'I will praise thee with my whole heart: before the gods will I sing praise unto thee.',
       2: 'I will worship toward thy holy temple, and praise thy name for thy lovingkindness and for thy truth: for thou hast magnified thy word above all thy name.',
       3: 'In the day when I cried thou answeredst me, and strengthenedst me with strength in my soul.',
       4: 'All the kings of the earth shall praise thee, O LORD, when they hear the words of thy mouth.',
@@ -17512,7 +17512,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       8: 'The LORD will perfect that which concerneth me: thy mercy, O LORD, endureth for ever: forsake not the works of thine own hands.',
     },
     139: {
-      1: '¶ To the chief Musician, A Psalm of David. O LORD, thou hast searched me, and known me.',
+      1: 'O LORD, thou hast searched me, and known me.',
       2: 'Thou knowest my downsitting and mine uprising, thou understandest my thought afar off.',
       3: 'Thou compassest my path and my lying down, and art acquainted with all my ways.',
       4: 'For there is not a word in my tongue, but, lo, O LORD, thou knowest it altogether.',
@@ -17538,7 +17538,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       24: 'And see if there be any wicked way in me, and lead me in the way everlasting.',
     },
     140: {
-      1: '¶ To the chief Musician, A Psalm of David. Deliver me, O LORD, from the evil man: preserve me from the violent man;',
+      1: 'Deliver me, O LORD, from the evil man: preserve me from the violent man;',
       2: 'Which imagine mischiefs in their heart; continually are they gathered together for war.',
       3: 'They have sharpened their tongues like a serpent; adders\' poison is under their lips. Selah.',
       4: 'Keep me, O LORD, from the hands of the wicked; preserve me from the violent man; who have purposed to overthrow my goings.',
@@ -17553,7 +17553,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       13: 'Surely the righteous shall give thanks unto thy name: the upright shall dwell in thy presence.',
     },
     141: {
-      1: '¶ A Psalm of David. LORD, I cry unto thee: make haste unto me; give ear unto my voice, when I cry unto thee.',
+      1: 'LORD, I cry unto thee: make haste unto me; give ear unto my voice, when I cry unto thee.',
       2: 'Let my prayer be set forth before thee as incense; and the lifting up of my hands as the evening sacrifice.',
       3: 'Set a watch, O LORD, before my mouth; keep the door of my lips.',
       4: 'Incline not my heart to any evil thing, to practise wicked works with men that work iniquity: and let me not eat of their dainties.',
@@ -17565,7 +17565,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       10: 'Let the wicked fall into their own nets, whilst that I withal escape.',
     },
     142: {
-      1: '¶ Maschil of David; A Prayer when he was in the cave. I cried unto the LORD with my voice; with my voice unto the LORD did I make my supplication.',
+      1: 'I cried unto the LORD with my voice; with my voice unto the LORD did I make my supplication.',
       2: 'I poured out my complaint before him; I shewed before him my trouble.',
       3: 'When my spirit was overwhelmed within me, then thou knewest my path. In the way wherein I walked have they privily laid a snare for me.',
       4: '¶ I looked on my right hand, and beheld, but there was no man that would know me: refuge failed me; no man cared for my soul.',
@@ -17574,7 +17574,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       7: 'Bring my soul out of prison, that I may praise thy name: the righteous shall compass me about; for thou shalt deal bountifully with me.',
     },
     143: {
-      1: '¶ A Psalm of David. Hear my prayer, O LORD, give ear to my supplications: in thy faithfulness answer me, and in thy righteousness.',
+      1: 'Hear my prayer, O LORD, give ear to my supplications: in thy faithfulness answer me, and in thy righteousness.',
       2: 'And enter not into judgment with thy servant: for in thy sight shall no man living be justified.',
       3: 'For the enemy hath persecuted my soul; he hath smitten my life down to the ground; he hath made me to dwell in darkness, as those that have been long dead.',
       4: 'Therefore is my spirit overwhelmed within me; my heart within me is desolate.',
@@ -17588,7 +17588,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       12: 'And of thy mercy cut off mine enemies, and destroy all them that afflict my soul: for I am thy servant.',
     },
     144: {
-      1: '¶ A Psalm of David. Blessed be the LORD my strength, which teacheth my hands to war, and my fingers to fight:',
+      1: 'Blessed be the LORD my strength, which teacheth my hands to war, and my fingers to fight:',
       2: 'My goodness, and my fortress; my high tower, and my deliverer; my shield, and he in whom I trust; who subdueth my people under me.',
       3: 'LORD, what is man, that thou takest knowledge of him! or the son of man, that thou makest account of him!',
       4: 'Man is like to vanity: his days are as a shadow that passeth away.',
@@ -17605,7 +17605,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       15: 'Happy is that people, that is in such a case: yea, happy is that people, whose God is the LORD.',
     },
     145: {
-      1: '¶ David\'s Psalm of praise. I will extol thee, my God, O king; and I will bless thy name for ever and ever.',
+      1: 'I will extol thee, my God, O king; and I will bless thy name for ever and ever.',
       2: 'Every day will I bless thee; and I will praise thy name for ever and ever.',
       3: 'Great is the LORD, and greatly to be praised; and his greatness is unsearchable.',
       4: 'One generation shall praise thy works to another, and shall declare thy mighty acts.',

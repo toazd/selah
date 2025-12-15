@@ -54,8 +54,7 @@ class BibleDatabase {
             // OR logic: at least one keyword must be present
             matches = false;
             for (final keyword in preFilterKeywords) {
-              final checkKeyword =
-                  caseSensitive ? keyword : keyword.toLowerCase(); // Only lowercase keyword if not case-sensitive
+              final checkKeyword = caseSensitive ? keyword : keyword.toLowerCase(); // Only lowercase keyword if not case-sensitive
               if (text.contains(checkKeyword)) {
                 matches = true;
                 break;
@@ -118,7 +117,22 @@ class BibleDatabase {
   }
 
   // Get book metadata (title, colophon)
-  static Future<Map<String, dynamic>?> getBookMetadata(String bookShortName) async {
+  static Future<Map<String, dynamic>?> getBookMetadata(String bookShortName, {int? chapter}) async {
+    // Try the specific Psalm lookup first if chapter is provided and book starts with 'Psa'
+    if (chapter != null && bookShortName == 'Psa') {
+      final psalmSpecificKey = '$bookShortName $chapter';
+      final psalmMetadata = bookMetadata[psalmSpecificKey];
+      if (psalmMetadata != null) {
+        return {
+          'book': bookShortName,
+          'title': psalmMetadata['title'],
+          'colophon': psalmMetadata['colophon'],
+        };
+      }
+      return null;
+    }
+
+    // Fallback to regular book lookup
     final metadata = bookMetadata[bookShortName];
     if (metadata == null) return null;
 

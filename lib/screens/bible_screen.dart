@@ -196,11 +196,24 @@ class _BibleScreenState extends State<BibleScreen> {
 
   Future<void> _loadBookMetadata() async {
     if (_selectedBook != null) {
-      final metadata = await BibleDatabase.getBookMetadata(_selectedBook as String);
-      _bookTitle = metadata?['title'] as String;
+      Map<String, dynamic>? metadata;
+
+      //debugPrint('_selectedBook: $_selectedBook');
+
+      // Only pass chapter parameter for Psalms
+      if (_selectedBook == 'Psa') {
+        metadata = await BibleDatabase.getBookMetadata(
+          _selectedBook as String,
+          chapter: _selectedChapter,
+        );
+      } else {
+        metadata = await BibleDatabase.getBookMetadata(_selectedBook as String);
+      }
+
+      _bookTitle = metadata?['title'] as String?;
       _bookColophon = metadata?['colophon'] as String?;
 
-      if (_bookTitle != null && mounted) {
+      if (mounted) {
         setState(() {});
       }
     } else {
@@ -228,10 +241,18 @@ class _BibleScreenState extends State<BibleScreen> {
         _loading = true;
       });
       _selectedChapter = chapter;
+
+      // Reload metadata for Psalm superscriptions (titles)
+      if (_selectedBook == 'Psa') {
+        await _loadBookMetadata();
+      }
+
       await _loadVerses();
+
       setState(() {
-        // Set to null for chapter 1 (scroll to top), verse 1 otherwise
-        _selectedVerse = chapter == 1 ? null : 1;
+        // Set to null for chapter 1 OR for Psalms with titles (scroll to top), verse 1 otherwise
+        final shouldScrollToTop = chapter == 1 || (_selectedBook == 'Psa' && _bookTitle != null);
+        _selectedVerse = shouldScrollToTop ? null : 1;
         _loading = false;
       });
       if (widget.onLocationChanged != null) {
@@ -761,52 +782,52 @@ class _BibleScreenState extends State<BibleScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
-                                child: Builder(
-                                  builder: (context) {
-                                    //final lineHeight = lineHeightNotifier.value;
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onHorizontalDragEnd: (DragEndDetails details) {
+                                    // Only process if not currently navigating
+                                    if (_isNavigating) return;
 
-                                    return RawScrollbar(
-                                        thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
-                                        thumbVisibility: false,
-                                        trackVisibility: false,
-                                        thickness: 16.0,
-                                        radius: Radius.circular(8.0),
-                                        controller: _scrollController,
-                                        child: ScrollConfiguration(
-                                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                            child: SingleChildScrollView(
-                                                controller: _scrollController,
-                                                child: Padding(
-                                                  // Leave a large blank gap at the bottom for when reading while laying down
-                                                  padding: EdgeInsets.only(left: 0.0, top: 8.0, bottom: 300.0, right: 16.0),
-                                                  child: GestureDetector(
-                                                    behavior: HitTestBehavior.opaque,
-                                                    onHorizontalDragEnd: (DragEndDetails details) {
-                                                      // Only process if not currently navigating
-                                                      if (_isNavigating) return;
+                                    // Swipe navigation minimum velocity for changing chapters
+                                    const minVelocity = 300.0;
 
-                                                      // Swipe navigation minimum velocity for changing chapters
-                                                      const minVelocity = 300.0;
+                                    // Ensure the swipe is primarily horizontal
+                                    final horizontalVelocity = details.velocity.pixelsPerSecond.dx.abs();
+                                    final verticalVelocity = details.velocity.pixelsPerSecond.dy.abs();
 
-                                                      // Ensure the swipe is primarily horizontal
-                                                      final horizontalVelocity = details.velocity.pixelsPerSecond.dx.abs();
-                                                      final verticalVelocity = details.velocity.pixelsPerSecond.dy.abs();
+                                    if (horizontalVelocity > minVelocity && horizontalVelocity > verticalVelocity * 2) {
+                                      if (details.velocity.pixelsPerSecond.dx > 0) {
+                                        _handlePreviousChapter();
+                                      } else {
+                                        _handleNextChapter();
+                                      }
+                                    }
+                                  },
+                                  child: Builder(
+                                    builder: (context) {
+                                      //final lineHeight = lineHeightNotifier.value;
 
-                                                      if (horizontalVelocity > minVelocity && horizontalVelocity > verticalVelocity * 2) {
-                                                        if (details.velocity.pixelsPerSecond.dx > 0) {
-                                                          _handlePreviousChapter();
-                                                        } else {
-                                                          _handleNextChapter();
-                                                        }
-                                                      }
-                                                    },
+                                      return RawScrollbar(
+                                          thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
+                                          thumbVisibility: false,
+                                          trackVisibility: false,
+                                          thickness: 16.0,
+                                          radius: Radius.circular(8.0),
+                                          controller: _scrollController,
+                                          child: ScrollConfiguration(
+                                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                              child: SingleChildScrollView(
+                                                  controller: _scrollController,
+                                                  child: Padding(
+                                                    // Leave a large blank gap at the bottom for when reading while laying down
+                                                    padding: EdgeInsets.only(left: 0.0, top: 8.0, bottom: 300.0, right: 16.0),
                                                     child: Column(
                                                       mainAxisSize: MainAxisSize.min,
                                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                                       // Add book title and colophon
                                                       children: [
-                                                        // Show book title only on Chapter 1
-                                                        if (_bookTitle != null && _selectedChapter == 1)
+                                                        // Show book title only on Chapter 1, or for Psalms (superscriptions)
+                                                        if (_bookTitle != null && (_selectedChapter == 1 || _selectedBook == 'Psa'))
                                                           Padding(
                                                             padding: const EdgeInsets.only(bottom: 16.0),
                                                             child: Center(
@@ -846,9 +867,9 @@ class _BibleScreenState extends State<BibleScreen> {
                                                           ),
                                                       ],
                                                     ),
-                                                  ),
-                                                ))));
-                                  },
+                                                  ))));
+                                    },
+                                  ),
                                 ),
                               ),
                               if (showNavBar)
