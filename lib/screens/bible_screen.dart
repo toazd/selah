@@ -17,6 +17,7 @@ import '../utils/bible_utils.dart'; // <-- shared utility functions
 import '../utils/data_loaders.dart'; // <-- shared data loading functions
 import '../utils/dialog_utils.dart'; // <-- shared dialog functions
 import '../utils/font_size_adjustments.dart';
+import 'bible_screen_header.dart'; // Import custom header
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor, BuildContext context) {
@@ -721,7 +722,7 @@ class _BibleScreenState extends State<BibleScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final verseTextColor = isDark ? darkTextColor.value : lightTextColor.value;
-    final textColor = isDark ? darkTextColor.value : lightTextColor.value;
+    //final textColor = isDark ? darkTextColor.value : lightTextColor.value;
     final bibleBgColor = isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
     //final biblePrimaryColor = isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
     // Derived verse number color from primary color
@@ -729,269 +730,202 @@ class _BibleScreenState extends State<BibleScreen> {
     // Adjusted color for bars (app bar and bottom navigation)
     final barColor = _adjustBarColor(bibleBgColor, context);
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        toolbarHeight: 48,
-        actionsPadding: EdgeInsets.all(0),
-        titleSpacing: 0.0,
-        scrolledUnderElevation: 0,
-        iconTheme: IconThemeData(
-          size: 32,
-          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+    // return SafeArea(
+    //   bottom: false,
+    //   child:
+    return Column(
+      //mainAxisSize: MainAxisSize.min,
+      children: [
+        // Custom header to replace AppBar
+        BibleScreenHeader(
+          showViewMenu: widget.showViewMenu,
+          onOpenDrawer: widget.onOpenDrawer,
+          onShowHistory: widget.onShowHistory,
+          onShowSearch: widget.onShowSearch,
+          onTitlePressed: _openVerseChooser,
+          selectedBook: _selectedBook,
+          selectedChapter: _selectedChapter,
         ),
-        leading: (widget.showViewMenu)
-            ? IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  semanticLabel: 'Main Options Menu',
-                ),
-                tooltip: 'Options',
-                onPressed: widget.onOpenDrawer,
-              )
-            : const SizedBox(width: 48.0),
-        title: Center(child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Compute best-fitting label: prefer full name, fallback to short
-            final style = Theme.of(context).textTheme.bodyMedium ??
-                TextStyle(fontSize: fontSizeNotifier.value, fontFamily: fontFamilyNotifier.value, color: isDark ? darkTextColor.value : lightTextColor.value);
+        Expanded(
+          child: Container(
+            color: bibleBgColor,
+            child: _loading
+                ? Center(child: CircularProgressIndicator())
+                : ValueListenableBuilder<bool>(
+                    valueListenable: widget.showNotesInline ?? _localShowNotesInlineFallback,
+                    builder: (context, showNotesInline, _) {
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: showNavigationBarNotifier,
+                        builder: (context, showNavBar, _) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Expanded(
+                                child: Builder(
+                                  builder: (context) {
+                                    //final lineHeight = lineHeightNotifier.value;
 
-            String makeTitle({required bool fullBookName}) {
-              if (_selectedBook == null || _selectedChapter == null) {
-                return 'Choose Verse';
-              }
+                                    return RawScrollbar(
+                                        thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
+                                        thumbVisibility: false,
+                                        trackVisibility: false,
+                                        thickness: 16.0,
+                                        radius: Radius.circular(8.0),
+                                        controller: _scrollController,
+                                        child: ScrollConfiguration(
+                                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                            child: SingleChildScrollView(
+                                                controller: _scrollController,
+                                                child: Padding(
+                                                  // Leave a large blank gap at the bottom for when reading while laying down
+                                                  padding: EdgeInsets.only(left: 0.0, top: 8.0, bottom: 300.0, right: 16.0),
+                                                  child: GestureDetector(
+                                                    behavior: HitTestBehavior.opaque,
+                                                    onHorizontalDragEnd: (DragEndDetails details) {
+                                                      // Only process if not currently navigating
+                                                      if (_isNavigating) return;
 
-              // If fullBookName is true display the longBookName (Genesis), otherwise use the short name (Gen)
-              final name = fullBookName ? BookNameConverter.shortNameToLongName(_selectedBook!) : _selectedBook;
+                                                      // Swipe navigation minimum velocity for changing chapters
+                                                      const minVelocity = 300.0;
 
-              // Show just the book name and chapter number
-              return '$name ${_selectedChapter!}';
+                                                      // Ensure the swipe is primarily horizontal
+                                                      final horizontalVelocity = details.velocity.pixelsPerSecond.dx.abs();
+                                                      final verticalVelocity = details.velocity.pixelsPerSecond.dy.abs();
 
-              // Show the book name, chapter number and verse number
-              //return '$name ${_selectedChapter!}:${_selectedVerse ?? 1}';
-            }
-
-            double textWidth(String text, TextStyle style) {
-              final tp = TextPainter(
-                text: TextSpan(text: text, style: style),
-                maxLines: 1,
-                textDirection: TextDirection.ltr,
-              )..layout(minWidth: 0, maxWidth: double.infinity);
-              return tp.size.width;
-            }
-
-            // Precise available width inside this center slot
-            final maxButtonWidth = constraints.maxWidth;
-
-            // Button padding we will apply below
-            const double horizontalPad = 12.0;
-            final availableForText = (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
-
-            final fullTitle = makeTitle(fullBookName: true);
-            final shortTitle = makeTitle(fullBookName: false);
-            final label = textWidth(fullTitle, style) <= availableForText ? fullTitle : shortTitle;
-
-            return ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                //backgroundColor: bibleBgColor,
-                backgroundColor: _adjustBarColor(barColor, context),
-                padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
-                //minimumSize: Size(textWidth(fullTitle, style), 48),
-                minimumSize: Size(availableForText / 2.0, 38),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: _openVerseChooser,
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: uiFontSize + 2, fontFamily: fontFamilyNotifier.value, color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value),
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.fade,
-              ),
-            );
-          },
-        )),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.history,
-              semanticLabel: 'Show Verse Reference History Dialog',
-            ),
-            tooltip: 'History',
-            onPressed: widget.onShowHistory,
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.search,
-              semanticLabel: 'Goto Search Screen',
-            ),
-            tooltip: 'Search',
-            onPressed: widget.onShowSearch != null
-                ? () async {
-                    await widget.onShowSearch!();
-                  }
-                : null,
-          ),
-        ],
-        backgroundColor: barColor,
-        foregroundColor: textColor,
-      ),
-      backgroundColor: bibleBgColor,
-      body: SafeArea(
-        child: _loading
-            ? Center(child: CircularProgressIndicator())
-            : ValueListenableBuilder<bool>(
-                valueListenable: widget.showNotesInline ?? _localShowNotesInlineFallback,
-                builder: (context, showNotesInline, _) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: showNavigationBarNotifier,
-                    builder: (context, showNavBar, _) {
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: Builder(
-                              builder: (context) {
-                                //final lineHeight = lineHeightNotifier.value;
-
-                                return RawScrollbar(
-                                    thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
-                                    thumbVisibility: false,
-                                    trackVisibility: false,
-                                    thickness: 16.0,
-                                    radius: Radius.circular(8.0),
-                                    controller: _scrollController,
-                                    child: ScrollConfiguration(
-                                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                        child: SingleChildScrollView(
-                                            controller: _scrollController,
-                                            child: Padding(
-                                              // Leave a large blank gap at the bottom for when reading while laying down
-                                              padding: EdgeInsets.only(left: 0.0, top: 8.0, bottom: 300.0, right: 16.0),
-                                              child: GestureDetector(
-                                                behavior: HitTestBehavior.opaque,
-                                                onHorizontalDragEnd: (DragEndDetails details) {
-                                                  // Only process if not currently navigating
-                                                  if (_isNavigating) return;
-
-                                                  // Swipe navigation minimum velocity for changing chapters
-                                                  const minVelocity = 300.0;
-
-                                                  // Ensure the swipe is primarily horizontal
-                                                  final horizontalVelocity = details.velocity.pixelsPerSecond.dx.abs();
-                                                  final verticalVelocity = details.velocity.pixelsPerSecond.dy.abs();
-
-                                                  if (horizontalVelocity > minVelocity && horizontalVelocity > verticalVelocity * 2) {
-                                                    if (details.velocity.pixelsPerSecond.dx > 0) {
-                                                      _handlePreviousChapter();
-                                                    } else {
-                                                      _handleNextChapter();
-                                                    }
-                                                  }
-                                                },
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                                  // Add book title and colophon
-                                                  children: [
-                                                    // Show book title only on Chapter 1
-                                                    if (_bookTitle != null && _selectedChapter == 1)
-                                                      Padding(
-                                                        padding: const EdgeInsets.only(bottom: 16.0),
-                                                        child: Center(
-                                                          child: Text(
-                                                            _bookTitle!,
-                                                            textAlign: TextAlign.center,
-                                                            style: TextStyle(
-                                                              fontWeight: FontWeight.bold,
-                                                              fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value + 1),
-                                                              color: isDark ? darkTextColor.value : lightTextColor.value,
+                                                      if (horizontalVelocity > minVelocity && horizontalVelocity > verticalVelocity * 2) {
+                                                        if (details.velocity.pixelsPerSecond.dx > 0) {
+                                                          _handlePreviousChapter();
+                                                        } else {
+                                                          _handleNextChapter();
+                                                        }
+                                                      }
+                                                    },
+                                                    child: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                      // Add book title and colophon
+                                                      children: [
+                                                        // Show book title only on Chapter 1
+                                                        if (_bookTitle != null && _selectedChapter == 1)
+                                                          Padding(
+                                                            padding: const EdgeInsets.only(bottom: 16.0),
+                                                            child: Center(
+                                                              child: Text(
+                                                                _bookTitle!,
+                                                                textAlign: TextAlign.center,
+                                                                style: TextStyle(
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value + 1),
+                                                                  color: isDark ? darkTextColor.value : lightTextColor.value,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
+                                                        // Always use verse mode
+                                                        _buildVerseModeWidget(
+                                                          context: context,
+                                                          lineHeight: lineHeightNotifier.value,
+                                                          verseNumberColor: verseNumberColor,
+                                                          verseTextColor: verseTextColor,
+                                                          showNotesInline: showNotesInline,
+                                                          backgroundColor: bibleBgColor,
                                                         ),
-                                                      ),
-                                                    // Always use verse mode
-                                                    _buildVerseModeWidget(
-                                                      context: context,
-                                                      lineHeight: lineHeightNotifier.value,
-                                                      verseNumberColor: verseNumberColor,
-                                                      verseTextColor: verseTextColor,
-                                                      showNotesInline: showNotesInline,
-                                                      backgroundColor: bibleBgColor,
-                                                    ),
-                                                    // Show colophon only on the last chapter
-                                                    if (_bookColophon != null && _bookColophon!.isNotEmpty && _chapters.isNotEmpty && _selectedChapter == _chapters.last)
-                                                      Padding(
-                                                        padding: const EdgeInsets.only(top: 16.0),
-                                                        child: Text(
-                                                          _bookColophon!,
-                                                          textAlign: TextAlign.left,
-                                                          style: TextStyle(
-                                                            fontStyle: FontStyle.italic,
-                                                            fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value - 1),
-                                                            color: isDark ? darkTextColor.value : lightTextColor.value,
+                                                        // Show colophon only on the last chapter
+                                                        if (_bookColophon != null && _bookColophon!.isNotEmpty && _chapters.isNotEmpty && _selectedChapter == _chapters.last)
+                                                          Padding(
+                                                            padding: const EdgeInsets.only(top: 16.0),
+                                                            child: Text(
+                                                              _bookColophon!,
+                                                              textAlign: TextAlign.left,
+                                                              style: TextStyle(
+                                                                fontStyle: FontStyle.italic,
+                                                                fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value - 1),
+                                                                color: isDark ? darkTextColor.value : lightTextColor.value,
+                                                              ),
+                                                            ),
                                                           ),
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ))));
-                              },
-                            ),
-                          ),
-                          if (showNavBar)
-                            Container(
-                              width: double.infinity,
-                              height: 40,
-                              color: barColor,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Center(
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.arrow_back_ios_new,
-                                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                          semanticLabel: 'Navigate to the Previous Chapter',
-                                        ),
-                                        tooltip: 'Previous Chapter',
-                                        color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                        onPressed: _selectedChapter != null && _chapters.isNotEmpty && _selectedChapter! > _chapters.first
-                                            ? () => _onChapterChanged(_selectedChapter! - 1, recordHistory: false)
-                                            : (_selectedChapter == _chapters.first && _books.indexOf(_selectedBook!) > 0 && _selectedBook != _books.first)
-                                                ? () => _handlePreviousChapter()
-                                                : null,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                          semanticLabel: 'Navigate to the next chapter',
-                                        ),
-                                        tooltip: 'Next Chapter',
-                                        color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                        onPressed: _selectedChapter != null && _chapters.isNotEmpty && _selectedChapter! < _chapters.last
-                                            ? () => _onChapterChanged(_selectedChapter! + 1, recordHistory: false)
-                                            : (_selectedChapter == _chapters.last && _books.indexOf(_selectedBook!) < _books.length - 1 && _selectedBook != _books.last)
-                                                ? () => _handleNextChapter()
-                                                : null,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ))));
+                                  },
+                                ),
                               ),
-                            ),
-                        ],
+                              if (showNavBar)
+                                Container(
+                                  margin: EdgeInsetsGeometry.all(0),
+                                  padding: EdgeInsetsGeometry.all(0),
+                                  // decoration: BoxDecoration(
+                                  //   border: Border.all(
+                                  //     color: Colors.red, // The color of the border
+                                  //     width: 2.0, // The thickness of the border (optional)
+                                  //   ),
+                                  // ),
+                                  width: double.infinity,
+                                  height: 40,
+                                  color: barColor,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Expanded(
+                                        // child: Container(
+                                        //   decoration: BoxDecoration(
+                                        //     border: Border.all(
+                                        //       color: Colors.red, // The color of the border
+                                        //       width: 2.0, // The thickness of the border (optional)
+                                        //     ),
+                                        //   ),
+                                        child: Center(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.arrow_back_ios_new,
+                                              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                              semanticLabel: 'Navigate to the Previous Chapter',
+                                              size: 24.0,
+                                            ),
+                                            tooltip: 'Previous Chapter',
+                                            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                            onPressed: _selectedChapter != null && _chapters.isNotEmpty && _selectedChapter! > _chapters.first
+                                                ? () => _onChapterChanged(_selectedChapter! - 1, recordHistory: false)
+                                                : (_selectedChapter == _chapters.first && _books.indexOf(_selectedBook!) > 0 && _selectedBook != _books.first)
+                                                    ? () => _handlePreviousChapter()
+                                                    : null,
+                                          ),
+                                        ),
+                                        //),
+                                      ),
+                                      Expanded(
+                                        child: Center(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.arrow_forward_ios,
+                                              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                              semanticLabel: 'Navigate to the next chapter',
+                                              size: 24.0,
+                                            ),
+                                            tooltip: 'Next Chapter',
+                                            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                            onPressed: _selectedChapter != null && _chapters.isNotEmpty && _selectedChapter! < _chapters.last
+                                                ? () => _onChapterChanged(_selectedChapter! + 1, recordHistory: false)
+                                                : (_selectedChapter == _chapters.last && _books.indexOf(_selectedBook!) < _books.length - 1 && _selectedBook != _books.last)
+                                                    ? () => _handleNextChapter()
+                                                    : null,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
-      ),
+                  ),
+          ),
+        ),
+      ],
+      //),
     );
   }
 

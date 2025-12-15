@@ -366,7 +366,7 @@ class _NoteScreenState extends State<NoteScreen> {
                             ),
                             backgroundColor: bgColor,
                             body: SafeArea(
-                              bottom: false,
+                              //bottom: false,
                               child: Column(children: [
                                 Expanded(
                                     child: Column(

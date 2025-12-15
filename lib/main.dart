@@ -1890,7 +1890,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           builder: (context, fontFamily, _) {
             return SingleChildScrollView(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                //mainAxisSize: MainAxisSize.min,
                 children: [
                   // This invisible ElevatedButton is necessary to circumvent a bug
                   // on windows desktop where the OSK will pop up for nearly any
@@ -3555,126 +3555,132 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           },
         ),
       ),
-      body: Row(
-        children: [
-          Expanded(
-            child: ValueListenableBuilder<bool>(
-              valueListenable: isVerticalTile,
-              builder: (context, vertical, _) {
-                if (vertical) {
-                  return Row(
-                    children: List.generate(_screenLocations.length, (i) {
-                      return Expanded(
-                        child: BibleScreen(
-                          initialBook: _screenLocations[i]['book'],
-                          initialChapter: _screenLocations[i]['chapter'],
-                          initialVerse: _screenLocations[i]['verse'],
-                          onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
-                          onOpenDrawer: () => Scaffold.of(context).openDrawer(),
-                          onShowHistory: () => _showHistoryDialog(context, i),
-                          onShowSearch: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchScreen(
-                                  sourceScreenIndex: i, // Pass the current screen index
-                                ),
-                                settings: RouteSettings(name: '/search'),
-                              ),
-                            ).then((searchResult) {
-                              // Handle returned verse location from search screen
-                              if (searchResult != null && searchResult is Map<String, dynamic>) {
-                                final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
-                                final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
+      body: SafeArea(
+        //Row(
+        //mainAxisSize: MainAxisSize.min,
+        //children: [
+        //Expanded(
+        //child:
+        child: ValueListenableBuilder<bool>(
+          valueListenable: isVerticalTile,
+          builder: (context, vertical, _) {
+            if (vertical) {
+              return Row(
+                // Main Bible screen row
+                //mainAxisSize: MainAxisSize.min,
+                children: List.generate(_screenLocations.length, (i) {
+                  return Expanded(
+                    child: BibleScreen(
+                      initialBook: _screenLocations[i]['book'],
+                      initialChapter: _screenLocations[i]['chapter'],
+                      initialVerse: _screenLocations[i]['verse'],
+                      onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
+                      onOpenDrawer: () => Scaffold.of(context).openDrawer(),
+                      onShowHistory: () => _showHistoryDialog(context, i),
+                      onShowSearch: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SearchScreen(
+                              sourceScreenIndex: i, // Pass the current screen index
+                            ),
+                            settings: RouteSettings(name: '/search'),
+                          ),
+                        ).then((searchResult) {
+                          // Handle returned verse location from search screen
+                          if (searchResult != null && searchResult is Map<String, dynamic>) {
+                            final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
+                            final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
 
-                                if (verseLocation != null && targetScreenIndex != null) {
-                                  final book = verseLocation['book'] as String?;
-                                  final chapter = verseLocation['chapter'] as int?;
-                                  final verse = verseLocation['verse'] as int?;
+                            if (verseLocation != null && targetScreenIndex != null) {
+                              final book = verseLocation['book'] as String?;
+                              final chapter = verseLocation['chapter'] as int?;
+                              final verse = verseLocation['verse'] as int?;
 
-                                  if (book != null && chapter != null && verse != null) {
-                                    // Update the target bible screen with the verse location
-                                    setState(() {
-                                      _updateLocation(
-                                        targetScreenIndex,
-                                        book,
-                                        chapter,
-                                        verse,
-                                      );
-                                    });
-                                  }
-                                }
+                              if (book != null && chapter != null && verse != null) {
+                                // Update the target bible screen with the verse location
+                                setState(() {
+                                  _updateLocation(
+                                    targetScreenIndex,
+                                    book,
+                                    chapter,
+                                    verse,
+                                  );
+                                });
                               }
-                            });
-                          },
-                          // Show options on the first screen explicitly
-                          showViewMenu: i == 0,
-                          // Add: pass notes inline mode
-                          showNotesInline: showNotesInlineNotifier,
-                        ),
-                      );
-                    }),
+                            }
+                          }
+                        });
+                      },
+                      // Show options on the first screen explicitly
+                      showViewMenu: i == 0,
+                      // Add: pass notes inline mode
+                      showNotesInline: showNotesInlineNotifier,
+                    ),
                   );
-                } else {
-                  return Column(
-                    children: List.generate(_screenLocations.length, (i) {
-                      return Expanded(
-                        child: BibleScreen(
-                          initialBook: _screenLocations[i]['book'],
-                          initialChapter: _screenLocations[i]['chapter'],
-                          initialVerse: _screenLocations[i]['verse'],
-                          onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
-                          onOpenDrawer: () => Scaffold.of(context).openDrawer(),
-                          onShowHistory: () => _showHistoryDialog(context, i),
-                          onShowSearch: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchScreen(
-                                  sourceScreenIndex: i, // Pass the current screen index
-                                ),
-                                settings: RouteSettings(name: '/search'),
-                              ),
-                            ).then((searchResult) {
-                              // Handle returned verse location from search screen
-                              if (searchResult != null && searchResult is Map<String, dynamic>) {
-                                final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
-                                final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
+                }),
+              );
+            } else {
+              return Column(
+                mainAxisSize: MainAxisSize.max,
+                children: List.generate(_screenLocations.length, (i) {
+                  return Expanded(
+                    child: BibleScreen(
+                      initialBook: _screenLocations[i]['book'],
+                      initialChapter: _screenLocations[i]['chapter'],
+                      initialVerse: _screenLocations[i]['verse'],
+                      onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
+                      onOpenDrawer: () => Scaffold.of(context).openDrawer(),
+                      onShowHistory: () => _showHistoryDialog(context, i),
+                      onShowSearch: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SearchScreen(
+                              sourceScreenIndex: i, // Pass the current screen index
+                            ),
+                            settings: RouteSettings(name: '/search'),
+                          ),
+                        ).then((searchResult) {
+                          // Handle returned verse location from search screen
+                          if (searchResult != null && searchResult is Map<String, dynamic>) {
+                            final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
+                            final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
 
-                                if (verseLocation != null && targetScreenIndex != null) {
-                                  final book = verseLocation['book'] as String?;
-                                  final chapter = verseLocation['chapter'] as int?;
-                                  final verse = verseLocation['verse'] as int?;
+                            if (verseLocation != null && targetScreenIndex != null) {
+                              final book = verseLocation['book'] as String?;
+                              final chapter = verseLocation['chapter'] as int?;
+                              final verse = verseLocation['verse'] as int?;
 
-                                  if (book != null && chapter != null && verse != null) {
-                                    // Update the target bible screen with the verse location
-                                    setState(() {
-                                      _updateLocation(
-                                        targetScreenIndex,
-                                        book,
-                                        chapter,
-                                        verse,
-                                      );
-                                    });
-                                  }
-                                }
+                              if (book != null && chapter != null && verse != null) {
+                                // Update the target bible screen with the verse location
+                                setState(() {
+                                  _updateLocation(
+                                    targetScreenIndex,
+                                    book,
+                                    chapter,
+                                    verse,
+                                  );
+                                });
                               }
-                            });
-                          },
-                          // Show options menu on the first screen only
-                          showViewMenu: i == 0,
-                          // Add: pass notes inline mode
-                          showNotesInline: showNotesInlineNotifier,
-                        ),
-                      );
-                    }),
+                            }
+                          }
+                        });
+                      },
+                      // Show options menu on the first screen only
+                      showViewMenu: i == 0,
+                      // Add: pass notes inline mode
+                      showNotesInline: showNotesInlineNotifier,
+                    ),
                   );
-                }
-              },
-            ),
-          ),
-        ],
+                }),
+              );
+            }
+          },
+        ),
       ),
+      //],
+      //),
     );
   }
 
