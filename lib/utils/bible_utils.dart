@@ -1,6 +1,7 @@
 // Utility functions shared across Bible-related screens and components
 
 import 'package:flutter/material.dart';
+import 'package:selah/main.dart';
 import 'package:selah/utils/preferences_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/book_name_converter.dart';
@@ -114,7 +115,6 @@ Future<void> handleVerseLink(
       builder: (BuildContext context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           // title: Text(
           //   'Open External Link',
           //   style: TextStyle(
@@ -130,7 +130,7 @@ Future<void> handleVerseLink(
                 style: TextStyle(
                   fontFamily: uiFontFamily,
                   fontSize: uiFontSize,
-                  color: isDark ? Colors.white70 : Colors.black87,
+                  color: getAdaptiveTextColor(context),
                 ),
               ),
               const SizedBox(height: 8),
@@ -143,7 +143,7 @@ Future<void> handleVerseLink(
                 child: Text(
                   link,
                   style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
+                    color: getAdaptiveTextColor(context), //isDark ? Colors.white : Colors.black,
                     fontFamily: 'Roboto Mono',
                     fontSize: uiFontSize,
                   ),
@@ -159,7 +159,7 @@ Future<void> handleVerseLink(
                 style: TextStyle(
                   fontFamily: uiFontFamily,
                   fontSize: uiFontSize,
-                  color: isDark ? Colors.white70 : Colors.black54,
+                  color: getAdaptiveTextColor(context),
                 ),
               ),
             ),
