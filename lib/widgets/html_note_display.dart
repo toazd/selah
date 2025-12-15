@@ -9,7 +9,7 @@ import '../utils/note_storage_format.dart'; // import for note format handling
 import '../utils/verse_reference_linker.dart'; // import for link creation
 import '../main.dart'; // For global notifiers
 import '../utils/font_size_adjustments.dart';
-import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:flutter_html_audio/flutter_html_audio.dart';
@@ -21,12 +21,14 @@ class HtmlNoteDisplay extends StatelessWidget {
   final String noteText;
   //final TextStyle baseStyle;
   final Function(String, String?)? onLinkTap;
+  final RegExp? highlightRegex;
 
   const HtmlNoteDisplay({
     super.key,
     required this.noteText,
     //required this.baseStyle,
     this.onLinkTap,
+    this.highlightRegex,
   });
 
   @override
@@ -42,6 +44,11 @@ class HtmlNoteDisplay extends StatelessWidget {
     //if (kDebugMode) debugPrint('HtmlNoteDisplay html: $html');
 
     String cleanedHtml = html;
+
+    // Apply highlighting if regex is provided
+    if (highlightRegex != null) {
+      cleanedHtml = _addHighlightingToHtml(cleanedHtml, highlightRegex!, context);
+    }
 
     // Clean out the <p> tags that are auto-inserted around each line so the display is closer to
     // what the user actually entered into the note
@@ -69,7 +76,7 @@ class HtmlNoteDisplay extends StatelessWidget {
     */
 
     // Enable to see the html used for display
-    if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
+    //if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
 
     return Html(
       extensions: const [TableHtmlExtension(), AudioHtmlExtension(), MathHtmlExtension(), VideoHtmlExtension(), SvgHtmlExtension(), AudioHtmlExtension()],
@@ -210,5 +217,67 @@ class HtmlNoteDisplay extends StatelessWidget {
       final html = converter.convert();
       return html;
     }
+  }
+
+  // Add highlighting to HTML content by wrapping search matches with styled spans
+  String _addHighlightingToHtml(String htmlContent, RegExp regex, BuildContext context) {
+    if (regex.pattern.isEmpty || !regex.hasMatch(htmlContent)) {
+      return htmlContent;
+    }
+
+    // Get the highlight color based on theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final highlightColor = isDark ? darkHighlightColor.value : lightHighlightColor.value;
+    final hexColor = '#${highlightColor.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+    final highlightStyle = 'background-color: $hexColor; font-weight: bold;';
+
+    // Find all matches in the HTML content
+    final matches = regex.allMatches(htmlContent);
+    if (matches.isEmpty) {
+      return htmlContent;
+    }
+
+    // Process matches in reverse order to maintain indices
+    var result = htmlContent;
+    for (final match in matches.toList().reversed) {
+      // Check if this match is inside a tag attribute (should not highlight)
+      final beforeMatch = result.substring(0, match.start);
+      final afterMatch = result.substring(match.end);
+
+      // Count unclosed < and > tags before the match
+      int openTagsBefore = '<'.allMatches(beforeMatch).length - '>'.allMatches(beforeMatch).length;
+
+      // If we're inside a tag (unclosed <), skip this match
+      if (openTagsBefore > 0) {
+        continue;
+      }
+
+      // Check if the match is inside a tag attribute by looking for ="
+      // This is a simple heuristic - more complex parsing would be needed for perfect accuracy
+      bool inAttribute = false;
+      int lastEquals = beforeMatch.lastIndexOf('="');
+      if (lastEquals != -1) {
+        // Look for the corresponding closing quote after the match
+        int closingQuote = afterMatch.indexOf('"');
+        if (closingQuote != -1) {
+          // Check if there are any < characters between the = and our match
+          String betweenEqualsAndMatch = beforeMatch.substring(lastEquals);
+          if (!betweenEqualsAndMatch.contains('<')) {
+            inAttribute = true;
+          }
+        }
+      }
+
+      // Skip if in attribute
+      if (inAttribute) {
+        continue;
+      }
+
+      // Apply highlighting
+      final highlightedText = '<span style="$highlightStyle">${match.group(0)}</span>';
+      result = result.replaceRange(match.start, match.end, highlightedText);
+    }
+
+    return result;
   }
 }

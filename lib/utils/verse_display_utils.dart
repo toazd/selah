@@ -31,6 +31,7 @@ Widget buildVerseDisplayWidget({
   required Function(int, String?)? onNoteIconTap,
   double? verseNumberWidth,
   Color? customBackgroundColor,
+  bool displayVerseNumber = true,
 }) {
   // Determine whether it's a dark theme or not
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -83,13 +84,29 @@ Widget buildVerseDisplayWidget({
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left column: verse number with fixed width
-        Container(
-          width: effectiveVerseNumberWidth,
-          alignment: Alignment.centerRight,
-          child: verseKey != null
-              ? Container(
-                  key: verseKey,
-                  child: Text(
+        if (displayVerseNumber)
+          Container(
+            width: effectiveVerseNumberWidth,
+            alignment: Alignment.centerRight,
+            child: verseKey != null
+                ? Container(
+                    key: verseKey,
+                    child: Text(
+                      softWrap: false,
+                      overflow: TextOverflow.fade,
+                      '$verseNumber',
+                      style: baseTextStyle.copyWith(
+                        fontSize: baseTextStyle.fontSize! - 2,
+                        color: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(alpha: 0.8),
+                        fontWeight: FontWeight.normal,
+                      ),
+                      //textHeightBehavior: const TextHeightBehavior(
+                      //  applyHeightToFirstAscent: false,
+                      //  applyHeightToLastDescent: false,
+                      //  leadingDistribution: TextLeadingDistribution.even,
+                      //),
+                    ))
+                : Text(
                     softWrap: false,
                     overflow: TextOverflow.fade,
                     '$verseNumber',
@@ -103,24 +120,9 @@ Widget buildVerseDisplayWidget({
                     //  applyHeightToLastDescent: false,
                     //  leadingDistribution: TextLeadingDistribution.even,
                     //),
-                  ))
-              : Text(
-                  softWrap: false,
-                  overflow: TextOverflow.fade,
-                  '$verseNumber',
-                  style: baseTextStyle.copyWith(
-                    fontSize: baseTextStyle.fontSize! - 2,
-                    color: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(alpha: 0.8),
-                    fontWeight: FontWeight.normal,
                   ),
-                  //textHeightBehavior: const TextHeightBehavior(
-                  //  applyHeightToFirstAscent: false,
-                  //  applyHeightToLastDescent: false,
-                  //  leadingDistribution: TextLeadingDistribution.even,
-                  //),
-                ),
-        ),
-        const SizedBox(width: 8),
+          ),
+        if (displayVerseNumber) const SizedBox(width: 8),
         // Right column: verse text with inline icon
         Expanded(
           child: Container(

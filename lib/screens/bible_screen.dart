@@ -9,6 +9,7 @@ import '../main.dart'; // For color notifiers
 import '../services/firestore_sync_service.dart';
 import 'verse_chooser_dialog.dart'; // <-- new import
 import 'note_screen.dart'; // <-- new import
+import 'note_search_screen.dart'; // <-- new import
 import 'dart:async'; // For StreamSubscription
 import '../services/local_data_change_notifier.dart';
 import '../utils/verse_display_utils.dart'; // <-- new import for shared verse display utilities
@@ -48,6 +49,8 @@ class BibleScreen extends StatefulWidget {
   final Future<void> Function()? onShowSearch;
   // Add: external notes inline mode toggle (default: false => "Icon mode")
   final ValueListenable<bool>? showNotesInline;
+  final VoidCallback? onShowNotesSearch;
+  final VoidCallback? onShowBookmarksManager;
 
   const BibleScreen({
     super.key,
@@ -60,6 +63,8 @@ class BibleScreen extends StatefulWidget {
     this.onShowHistory,
     this.onShowSearch,
     this.showNotesInline, // optional listenable for notes display mode
+    this.onShowNotesSearch,
+    this.onShowBookmarksManager,
   });
   @override
   State<BibleScreen> createState() => _BibleScreenState();
@@ -694,6 +699,32 @@ class _BibleScreenState extends State<BibleScreen> {
     );
   }
 
+  void _showNotesSearch() {
+    // Navigate to note search screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteSearchScreen(sourceScreenIndex: 0),
+      ),
+    ).then((result) {
+      // Handle result from note search screen (verse navigation)
+      if (result != null && result is Map && result.containsKey('verseLocation')) {
+        final verseLocation = result['verseLocation'] as Map<String, dynamic>;
+        final book = verseLocation['book'] as String;
+        final chapter = verseLocation['chapter'] as int;
+        final verse = verseLocation['verse'] as int;
+        _applyLocation(book, chapter, verse);
+      }
+    });
+  }
+
+  void _showBookmarksManager() {
+    // TODO: Implement bookmarks management functionality
+    if (context.mounted) {
+      showStyledSnackBar(context, 'Bookmarks manager coming soon');
+    }
+  }
+
   // Build Widget for verse mode
   Widget _buildVerseModeWidget({
     required BuildContext context,
@@ -705,7 +736,7 @@ class _BibleScreenState extends State<BibleScreen> {
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+      //mainAxisSize: MainAxisSize.min,
       children: buildVerseListWidget(
         context: context,
         verses: _verses,
@@ -766,6 +797,8 @@ class _BibleScreenState extends State<BibleScreen> {
           onTitlePressed: _openVerseChooser,
           selectedBook: _selectedBook,
           selectedChapter: _selectedChapter,
+          onShowNotesSearch: widget.onShowNotesSearch ?? _showNotesSearch,
+          onShowBookmarksManager: widget.onShowBookmarksManager ?? _showBookmarksManager,
         ),
         Expanded(
           child: Container(
@@ -779,7 +812,7 @@ class _BibleScreenState extends State<BibleScreen> {
                         valueListenable: showNavigationBarNotifier,
                         builder: (context, showNavBar, _) {
                           return Column(
-                            mainAxisSize: MainAxisSize.min,
+                            //mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
                                 child: GestureDetector(
@@ -822,7 +855,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                                     // Leave a large blank gap at the bottom for when reading while laying down
                                                     padding: EdgeInsets.only(left: 0.0, top: 8.0, bottom: 300.0, right: 16.0),
                                                     child: Column(
-                                                      mainAxisSize: MainAxisSize.min,
+                                                      //mainAxisSize: MainAxisSize.min,
                                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                                       // Add book title and colophon
                                                       children: [
@@ -886,7 +919,7 @@ class _BibleScreenState extends State<BibleScreen> {
                                   height: 40,
                                   color: barColor,
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                    //mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Expanded(
                                         // child: Container(

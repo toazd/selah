@@ -1,6 +1,7 @@
 // Utility functions shared across Bible-related screens and components
 
 import 'package:flutter/material.dart';
+import 'package:selah/utils/preferences_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/book_name_converter.dart';
 import '../screens/chapter_dialog.dart';
@@ -107,11 +108,85 @@ Future<void> handleVerseLink(
       }
     }
   } else {
-    // Launch external URL
-    try {
-      await launchUrl(Uri.parse(link));
-    } catch (e) {
-      // Silently handle errors for external URL launching
+    // Handle external links (not verse://) - show confirmation dialog
+    final shouldOpen = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          // title: Text(
+          //   'Open External Link',
+          //   style: TextStyle(
+          //     color: isDark ? Colors.white : Colors.black,
+          //   ),
+          // ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This will open the following link in your default browser:',
+                style: TextStyle(
+                  fontFamily: uiFontFamily,
+                  fontSize: uiFontSize,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black26 : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  link,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                    fontFamily: 'Roboto Mono',
+                    fontSize: uiFontSize,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: uiFontFamily,
+                  fontSize: uiFontSize,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                'Open Link',
+                style: TextStyle(
+                  fontFamily: uiFontFamily,
+                  fontSize: uiFontSize,
+                  color: isDark ? Colors.blue.shade300 : Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldOpen == true) {
+      // Launch external URL
+      try {
+        await launchUrl(Uri.parse(link));
+      } catch (e) {
+        // Silently handle errors for external URL launching
+      }
     }
   }
 }

@@ -11,6 +11,8 @@ class BibleScreenHeader extends StatelessWidget {
   final VoidCallback? onTitlePressed;
   final String? selectedBook;
   final int? selectedChapter;
+  final VoidCallback? onShowNotesSearch;
+  final VoidCallback? onShowBookmarksManager;
 
   const BibleScreenHeader({
     super.key,
@@ -21,6 +23,8 @@ class BibleScreenHeader extends StatelessWidget {
     this.onTitlePressed,
     this.selectedBook,
     this.selectedChapter,
+    this.onShowNotesSearch,
+    this.onShowBookmarksManager,
   });
 
   @override
@@ -68,6 +72,28 @@ class BibleScreenHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: Icon(
+                  Icons.manage_search_rounded,
+                  semanticLabel: 'Search Notes',
+                ),
+                tooltip: 'Notes Search',
+                onPressed: onShowNotesSearch,
+                iconSize: 32,
+                padding: EdgeInsets.all(8),
+                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.bookmark_border_rounded,
+                  semanticLabel: 'Manage Bookmarks',
+                ),
+                tooltip: 'Bookmarks',
+                onPressed: onShowBookmarksManager,
+                iconSize: 32,
+                padding: EdgeInsets.all(8),
+                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              ),
               IconButton(
                 icon: Icon(
                   Icons.history,

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 const int defaultThemeMode = 0; // ThemeMode.system
 const double defaultFontSize = 22.0;
 const String defaultFontFamily = 'IBM Plex Sans';
-const double defaultLineHeight = 1.1;
+const double defaultLineHeight = 1.2;
 // TODO: remove usage throughout app if not needed
 const double defaultHighlightAlpha = 0.9; // Not user-configurable
 
