@@ -259,37 +259,7 @@ class _NoteScreenState extends State<NoteScreen> {
           ),
         ),
         // Indenting doesn't display correctly with the html widget
-        /*
-        const SizedBox(width: 4),
-        QuillToolbarIndentButton(
-          controller: _quillController,
-          isIncrease: true,
-          options: QuillToolbarIndentButtonOptions(
-            tooltip: 'Increase Indent',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        QuillToolbarIndentButton(
-          controller: _quillController,
-          isIncrease: false,
-          options: QuillToolbarIndentButtonOptions(
-              tooltip: 'Decrease Indent',
-              iconSize: 18,
-              afterButtonPressed: () {
-                _focusNode.requestFocus();
-              },
-              iconTheme: QuillIconTheme(
-                  iconButtonUnselectedData: IconButtonData(color: iconColor),
-                  iconButtonSelectedData: IconButtonData(color: iconColor))),
-        ),
-        const SizedBox(width: 4),
-        */
+        // so don't use it
       ],
     );
   }
@@ -455,9 +425,6 @@ class _NoteScreenState extends State<NoteScreen> {
     final plainText = _quillController.document
         .getPlainText(0, _quillController.document.length);
 
-    //if (kDebugMode) debugPrint('_saveAndExit document: ${_quillController.document.toDelta().toJson()}');
-    //if (kDebugMode) debugPrint('_saveAndExit document: ${_quillController.document.toPlainText()}');
-
     // Save if: non-empty AND (new note OR content actually changed)
     if (plainText.trim().isNotEmpty &&
         (_existingCreatedAt == 0 || _contentHasChanged())) {
@@ -468,15 +435,6 @@ class _NoteScreenState extends State<NoteScreen> {
         finalDocument = VerseReferenceLinker.addVerseReferenceLinks(
             _quillController.document);
       }
-
-      // String debugNoteText = NoteStorageFormat.deltaToJsonString(finalDocument);
-      // if (kDebugMode) debugPrint('_saveAndExit BeforeNewlineTrimming: ${debugNoteText}');
-
-      // // Apply newline trimming
-      // final normalizedDocument = Document.fromDelta(NoteStorageFormat.normalizeNewlines(finalDocument.toDelta()));
-
-      // debugNoteText = NoteStorageFormat.deltaToJsonString(normalizedDocument);
-      // if (kDebugMode) debugPrint('_saveAndExit AfterNewlineTrimming: $debugNoteText');
 
       // Save with proper timestamp handling (preserve created_at if exists)
       NotesDatabase.addOrUpdateNote(

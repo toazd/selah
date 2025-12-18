@@ -8,13 +8,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  sqflite: ^2.3.0
+  #sqflite: ^2.3.0
   path: ^1.9.1
   sqflite_common_ffi: ^2.3.0
   shared_preferences: ^2.2.2
   window_manager: ^0.5.1
   screen_retriever: ^0.2.0
-  path_provider: ^2.0.0
+  #path_provider: ^2.0.0
   file_picker: ^10.3.3
   archive: ^4.0.7
   #firebase_core: ^4.2.0
@@ -27,7 +27,7 @@ dependencies:
   intl: ^0.20.2
   flutter_quill: ^11.5.0
   #flutter_quill_extensions: ^11.0.0
-  flutter_quill_to_pdf: ^2.3.9
+  #flutter_quill_to_pdf: ^2.3.9
   vsc_quill_delta_to_html: ^1.0.5
   flutter_html: ^3.0.0
   flutter_html_table: ^3.0.0
@@ -38,17 +38,18 @@ dependencies:
   flutter_html_video: ^3.0.0
   #webview_flutter: ^4.13.0
   #webview_all: ^0.5.2
-  pdf: ^3.11.3
-  web: ^1.1.1
+  #pdf: ^3.11.3
+  #web: ^1.1.1
   sqflite_common_ffi_web : ^1.1.0
   url_launcher: ^6.3.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  #flutter_test:
+  #  sdk: flutter
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_prunekit: ^2.4.0
+  dependency_validator: ^5.0.3
 flutter:
   uses-material-design: true
   assets:
