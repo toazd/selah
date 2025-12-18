@@ -95,75 +95,6 @@ class SupabaseSyncService {
   SyncStatus _syncStatus = SyncStatus.offline;
   bool _isListening = false;
 
-  // Flag to prevent realtime listeners from firing during bulk operations
-  bool _bulkOperationInProgress = false;
-  int _bulkOperationDepth = 0; // Support nested bulk operations
-
-  // Start a bulk operation - temporarily pause realtime listeners
-  void _startBulkOperation() {
-    if (_bulkOperationDepth == 0) {
-      _bulkOperationInProgress = true;
-      _pauseRealtimeListeners();
-    }
-    _bulkOperationDepth++;
-
-    if (kDebugMode) {
-      debugPrint(
-          'Bulk operation started - depth: $_bulkOperationDepth, paused: $_bulkOperationInProgress');
-    }
-  }
-
-  // End a bulk operation - resume realtime listeners when depth reaches zero
-  void _endBulkOperation() {
-    _bulkOperationDepth--;
-
-    if (_bulkOperationDepth <= 0) {
-      _bulkOperationInProgress = false;
-      _bulkOperationDepth = 0;
-      _resumeRealtimeListeners();
-    }
-
-    if (kDebugMode) {
-      debugPrint(
-          'Bulk operation ended - depth: $_bulkOperationDepth, paused: $_bulkOperationInProgress');
-    }
-  }
-
-  // Temporarily pause all realtime listeners
-  void _pauseRealtimeListeners() {
-    _highlightsSubscription?.cancel();
-    _notesSubscription?.cancel();
-    _historySubscription?.cancel();
-    _searchHistorySubscription?.cancel();
-
-    // Clear subscription references
-    _highlightsSubscription = null;
-    _notesSubscription = null;
-    _historySubscription = null;
-    _searchHistorySubscription = null;
-
-    if (kDebugMode) {
-      debugPrint('Realtime listeners paused for bulk operation');
-    }
-  }
-
-  // Resume all realtime listeners
-  void _resumeRealtimeListeners() {
-    if (!_isListening || _currentUserId == null) {
-      return;
-    }
-
-    if (kDebugMode) {
-      debugPrint('Resuming realtime listeners after bulk operation');
-    }
-
-    // Re-setup all listeners
-    _setupRealtimeListeners();
-  }
-
-  // Check if bulk operation is in progress
-  bool get _isBulkOperationInProgress => _bulkOperationInProgress;
-
   // Last sync timestamps to track changes
   DateTime? _lastHighlightsSync;
   DateTime? _lastNotesSync;
@@ -1424,14 +1355,6 @@ class SupabaseSyncService {
   // Handle highlights changes from Supabase realtime
   void _onHighlightsChanged(List<Map<String, dynamic>> data) async {
     try {
-      // Skip processing if bulk operation is in progress
-      if (_isBulkOperationInProgress) {
-        if (kDebugMode) {
-          debugPrint('Skipping realtime highlights changes - bulk operation in progress');
-        }
-        return;
-      }
-
       // Check if highlights sync is enabled
       final highlightsEnabled = await _getSyncEnabled('syncHighlights');
 
@@ -1445,8 +1368,43 @@ class SupabaseSyncService {
         debugPrint('Received ${data.length} realtime highlight changes');
       }
 
-      // For realtime streams, we need to compare with local data
-      await _downloadHighlights(data);
+      // Get current local highlights to detect deletions
+      final localHighlights = await HighlightsDatabase.getHighlights();
+      final localCreatedAtTimestamps =
+          Set<int>.from(localHighlights.map((h) => h['created_at'] as int));
+
+      // Get the created_at timestamps from the incoming data
+      final remoteCreatedAtTimestamps =
+          Set<int>.from(data.map((h) => h['created_at'] as int));
+
+      // Find highlights that exist locally but not in the remote data (these were deleted remotely)
+      final deletedCreatedAtTimestamps =
+          localCreatedAtTimestamps.difference(remoteCreatedAtTimestamps);
+
+      // Handle deletions first
+      if (deletedCreatedAtTimestamps.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint(
+              'Detected ${deletedCreatedAtTimestamps.length} highlights deleted remotely');
+        }
+
+        // Delete these highlights locally to sync the deletion
+        for (final createdAt in deletedCreatedAtTimestamps) {
+          final highlightToDelete =
+              localHighlights.firstWhere((h) => h['created_at'] == createdAt);
+          await HighlightsDatabase.deleteHighlight(highlightToDelete['id'] as int,
+              skipSync: true);
+        }
+
+        // Notify UI about the changes
+        LocalDataChangeNotifier.notifyHighlightsChanged();
+        _highlightsChangedController?.add(null);
+      }
+
+      // Then handle updates/creations
+      if (data.isNotEmpty) {
+        await _downloadHighlights(data);
+      }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
       await ErrorHandler.handleSyncError(e, context: {
@@ -1461,14 +1419,6 @@ class SupabaseSyncService {
   // Handle notes changes from Supabase realtime
   void _onNotesChanged(List<Map<String, dynamic>> data) async {
     try {
-      // Skip processing if bulk operation is in progress
-      if (_isBulkOperationInProgress) {
-        if (kDebugMode) {
-          debugPrint('Skipping realtime notes changes - bulk operation in progress');
-        }
-        return;
-      }
-
       // Check if notes sync is enabled
       final notesEnabled = await _getSyncEnabled('syncNotes');
 
@@ -1482,7 +1432,41 @@ class SupabaseSyncService {
         debugPrint('Received ${data.length} realtime note changes');
       }
 
-      await _downloadNotes(data);
+      // Get current local notes to detect deletions
+      final localNotes = await NotesDatabase.getNotes();
+      final localCreatedAtTimestamps =
+          Set<int>.from(localNotes.map((n) => n['created_at'] as int));
+
+      // Get the created_at timestamps from the incoming data
+      final remoteCreatedAtTimestamps =
+          Set<int>.from(data.map((n) => n['created_at'] as int));
+
+      // Find notes that exist locally but not in the remote data (these were deleted remotely)
+      final deletedCreatedAtTimestamps =
+          localCreatedAtTimestamps.difference(remoteCreatedAtTimestamps);
+
+      // Handle deletions first
+      if (deletedCreatedAtTimestamps.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint(
+              'Detected ${deletedCreatedAtTimestamps.length} notes deleted remotely');
+        }
+
+        // Delete these notes locally to sync the deletion
+        for (final createdAt in deletedCreatedAtTimestamps) {
+          final noteToDelete = localNotes.firstWhere((n) => n['created_at'] == createdAt);
+          await NotesDatabase.deleteNote(noteToDelete['id'] as int, skipSync: true);
+        }
+
+        // Notify UI about the changes
+        LocalDataChangeNotifier.notifyNotesChanged();
+        _notesChangedController?.add(null);
+      }
+
+      // Then handle updates/creations
+      if (data.isNotEmpty) {
+        await _downloadNotes(data);
+      }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
       await ErrorHandler.handleSyncError(e, context: {
@@ -1497,14 +1481,6 @@ class SupabaseSyncService {
   // Handle history changes from Supabase realtime
   void _onHistoryChanged(List<Map<String, dynamic>> data) async {
     try {
-      // Skip processing if bulk operation is in progress
-      if (_isBulkOperationInProgress) {
-        if (kDebugMode) {
-          debugPrint('Skipping realtime history changes - bulk operation in progress');
-        }
-        return;
-      }
-
       // Check if history sync is enabled
       final historyEnabled = await _getSyncEnabled('syncHistory');
 
@@ -1518,7 +1494,41 @@ class SupabaseSyncService {
         debugPrint('Received ${data.length} realtime history changes');
       }
 
-      await _downloadHistory(data);
+      // Get current local history to detect deletions
+      final localHistory = await HistoryDatabase.getHistory();
+      final localTimestamps =
+          Set<int>.from(localHistory.map((h) => h['timestamp'] as int));
+
+      // Get the timestamps from the incoming data
+      final remoteTimestamps = Set<int>.from(data.map((h) => h['timestamp'] as int));
+
+      // Find history items that exist locally but not in the remote data (these were deleted remotely)
+      final deletedTimestamps = localTimestamps.difference(remoteTimestamps);
+
+      // Handle deletions first
+      if (deletedTimestamps.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint(
+              'Detected ${deletedTimestamps.length} history items deleted remotely');
+        }
+
+        // Delete these history items locally to sync the deletion
+        for (final timestamp in deletedTimestamps) {
+          final historyItemToDelete =
+              localHistory.firstWhere((h) => h['timestamp'] == timestamp);
+          await HistoryDatabase.deleteHistoryItem(historyItemToDelete['id'] as int,
+              skipSync: true);
+        }
+
+        // Notify UI about the changes
+        LocalDataChangeNotifier.notifyHistoryChanged();
+        _historyChangedController?.add(null);
+      }
+
+      // Then handle updates/creations
+      if (data.isNotEmpty) {
+        await _downloadHistory(data);
+      }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
       await ErrorHandler.handleSyncError(e, context: {
@@ -1533,15 +1543,6 @@ class SupabaseSyncService {
   // Handle search history changes from Supabase realtime
   void _onSearchHistoryChanged(List<Map<String, dynamic>> data) async {
     try {
-      // Skip processing if bulk operation is in progress
-      if (_isBulkOperationInProgress) {
-        if (kDebugMode) {
-          debugPrint(
-              'Skipping realtime search history changes - bulk operation in progress');
-        }
-        return;
-      }
-
       // Check if search history sync is enabled
       final searchHistoryEnabled = await _getSyncEnabled('syncSearchHistory');
 
@@ -1555,7 +1556,42 @@ class SupabaseSyncService {
         debugPrint('Received ${data.length} realtime search history changes');
       }
 
-      await _downloadSearchHistory(data);
+      // Get current local search history to detect deletions
+      final localSearchHistory = await SearchDatabase.getSearchHistory();
+      final localTimestamps =
+          Set<int>.from(localSearchHistory.map((h) => h['timestamp'] as int));
+
+      // Get the timestamps from the incoming data
+      final remoteTimestamps = Set<int>.from(data.map((h) => h['timestamp'] as int));
+
+      // Find search history items that exist locally but not in the remote data (these were deleted remotely)
+      final deletedTimestamps = localTimestamps.difference(remoteTimestamps);
+
+      // Handle deletions first
+      if (deletedTimestamps.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint(
+              'Detected ${deletedTimestamps.length} search history items deleted remotely');
+        }
+
+        // Delete these search history items locally to sync the deletion
+        for (final timestamp in deletedTimestamps) {
+          final searchHistoryItemToDelete =
+              localSearchHistory.firstWhere((h) => h['timestamp'] == timestamp);
+          await SearchDatabase.deleteSearchHistoryItem(
+              searchHistoryItemToDelete['id'] as int,
+              skipSync: true);
+        }
+
+        // Notify UI about the changes
+        LocalDataChangeNotifier.notifySearchHistoryChanged();
+        _searchHistoryChangedController?.add(null);
+      }
+
+      // Then handle updates/creations
+      if (data.isNotEmpty) {
+        await _downloadSearchHistory(data);
+      }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
       await ErrorHandler.handleSyncError(e, context: {
@@ -1583,9 +1619,6 @@ class SupabaseSyncService {
     if (_syncStatus == SyncStatus.offline) {
       return;
     }
-
-    // Start bulk operation to prevent listener interference
-    _startBulkOperation();
 
     try {
       // DEBUG: Log sync operation start
@@ -1696,9 +1729,10 @@ class SupabaseSyncService {
       if (kDebugMode) {
         debugPrint('=== DEBUG syncHighlights COMPLETE ===');
       }
-    } finally {
-      // End bulk operation to resume listeners
-      _endBulkOperation();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('sycHighlights exception: ${e.toString()}');
+      }
     }
   }
 
@@ -2111,9 +2145,6 @@ class SupabaseSyncService {
       return;
     }
 
-    // Start bulk operation to prevent listener interference
-    _startBulkOperation();
-
     try {
       // Get local notes - all for deletion checks
       final localNotes = await NotesDatabase.getNotes();
@@ -2202,9 +2233,6 @@ class SupabaseSyncService {
       await _saveLastSyncTimestamps('notes');
     } catch (e) {
       // For critical failures, don't retry - just log
-    } finally {
-      // End bulk operation to resume listeners
-      _endBulkOperation();
     }
   }
 
@@ -2296,9 +2324,6 @@ class SupabaseSyncService {
       return;
     }
 
-    // Start bulk operation to prevent listener interference
-    _startBulkOperation();
-
     try {
       // Get local search history - all for deletion checks
       final localSearchHistory = await SearchDatabase.getSearchHistory();
@@ -2389,9 +2414,10 @@ class SupabaseSyncService {
 
       // Save timestamps to preferences - only for search_history
       await _saveLastSyncTimestamps('search_history');
-    } finally {
-      // End bulk operation to resume listeners
-      _endBulkOperation();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('syncSearchHistory exception: ${e.toString()}');
+      }
     }
   }
 
@@ -2465,9 +2491,6 @@ class SupabaseSyncService {
     if (_syncStatus == SyncStatus.offline) {
       return;
     }
-
-    // Start bulk operation to prevent listener interference
-    _startBulkOperation();
 
     try {
       // Get local history - all for deletion checks
@@ -2553,9 +2576,10 @@ class SupabaseSyncService {
 
       // Save timestamps to preferences - only for history
       await _saveLastSyncTimestamps('history');
-    } finally {
-      // End bulk operation to resume listeners
-      _endBulkOperation();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('syncHistory exception: ${e.toString()}');
+      }
     }
   }
 
@@ -2632,9 +2656,6 @@ class SupabaseSyncService {
   Future<void> _syncRecentChangesOnly() async {
     if (_currentUserId == null || !isOnline) return;
 
-    // Start bulk operation to prevent listener interference during incremental sync
-    _startBulkOperation();
-
     try {
       // Check sync settings and download recent changes only
       final highlightsEnabled = await _getSyncEnabled('syncHighlights');
@@ -2709,9 +2730,10 @@ class SupabaseSyncService {
           await _saveLastSyncTimestamps('search_history');
         }
       }
-    } finally {
-      // End bulk operation to resume listeners
-      _endBulkOperation();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('_syncRecentChangesOnly exception: ${e.toString()}');
+      }
     }
   }
 
@@ -2723,9 +2745,6 @@ class SupabaseSyncService {
     }
 
     if (kDebugMode) debugPrint('=== DEBUG syncAll() STARTING ===');
-
-    // Start bulk operation to prevent listener interference during full sync
-    _startBulkOperation();
 
     // Set syncing status to show progress dialog
     final previousStatus = _syncStatus;
@@ -2753,9 +2772,6 @@ class SupabaseSyncService {
         // If was offline, keep offline
         syncStatusNotifier.value = _syncStatus;
       }
-
-      // End bulk operation to resume listeners
-      _endBulkOperation();
     }
 
     if (kDebugMode) {

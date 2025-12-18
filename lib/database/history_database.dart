@@ -282,7 +282,7 @@ class HistoryDatabase {
   }
 
   // Delete history item
-  static Future<void> deleteHistoryItem(int id) async {
+  static Future<void> deleteHistoryItem(int id, {bool skipSync = false}) async {
     try {
       // Get the history item data before deletion for sync
       final db = await getDatabase();
@@ -294,9 +294,11 @@ class HistoryDatabase {
         await db.delete(historyTable, where: '$colId = ?', whereArgs: [id]);
 
         // Queue delete operation for sync service
-        final historyData = historyItem.first;
-        SupabaseSyncService().markOperation(
-            'history', historyData['timestamp'] as int, 'delete', historyData);
+        if (!skipSync) {
+          final historyData = historyItem.first;
+          SupabaseSyncService().markOperation(
+              'history', historyData['timestamp'] as int, 'delete', historyData);
+        }
       }
     } catch (e) {
       if (kDebugMode) debugPrint('deleteHistoryItem exception: $e');
