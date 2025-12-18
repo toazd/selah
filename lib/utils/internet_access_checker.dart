@@ -12,7 +12,8 @@ class InternetAccessChecker {
   /// Returns false if device has no radio connectivity.
   /// Returns false if device appears connected but actual internet tests fail.
   /// Returns true only if both device connectivity exists AND internet access is validated.
-  static Future<bool> hasInternetAccess({Duration timeout = const Duration(seconds: 5)}) async {
+  static Future<bool> hasInternetAccess(
+      {Duration timeout = const Duration(seconds: 5)}) async {
     try {
       // Step 1: Quick basic connectivity check - required hardware level
       final connectivity = Connectivity();
@@ -29,7 +30,12 @@ class InternetAccessChecker {
       // Timeout prevents hanging on problematic networks
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId != null) {
-        await Supabase.instance.client.from('profiles').select('id').eq('id', userId).single().timeout(const Duration(seconds: 5));
+        await Supabase.instance.client
+            .from('profiles')
+            .select('id')
+            .eq('id', userId)
+            .single()
+            .timeout(const Duration(seconds: 3));
         return true;
       }
 

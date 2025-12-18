@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'supabase_sync_service.dart';
+import '../utils/internet_access_checker.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -86,6 +87,13 @@ class AuthService {
       if (kDebugMode) debugPrint('=== DEBUG signInWithUsername ===');
       if (kDebugMode) debugPrint('Attempting to sign in with username: $username');
 
+      // Check network connectivity before attempting authentication
+      final hasInternet = await InternetAccessChecker.hasInternetAccess();
+      if (!hasInternet) {
+        throw Exception(
+            'No internet connection. Please check your network settings and try again.');
+      }
+
       // Get the email associated with the username
       final userData = await _getUserByUsername(username);
       if (kDebugMode) {
@@ -144,6 +152,15 @@ class AuthService {
     } catch (e) {
       if (kDebugMode) debugPrint('ERROR in _getUserByUsername: $e');
       if (kDebugMode) debugPrint('Stack trace: ${e.toString()}');
+
+      // Enhanced error handling for network issues
+      if (e.toString().contains('NetworkError') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('Connection failed')) {
+        throw Exception(
+            'Network connection error. Please check your internet connection and try again.');
+      }
+
       return null;
     }
   }
