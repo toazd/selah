@@ -35,12 +35,14 @@ class HistoryDatabase {
   static Future<Database> _initDatabase() async {
     String dbPath;
     try {
-      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb &&
+          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - just open the database
         // Try both locations (same as bible database)
-        String path1 = join(Directory.current.path, 'assets/user_history.sqlite');
-        String path2 = join(
-            Directory.current.path, 'data/flutter_assets/assets/user_history.sqlite');
+        String path1 =
+            join(Directory.current.path, 'assets/user_history.sqlite');
+        String path2 = join(Directory.current.path,
+            'data/flutter_assets/assets/user_history.sqlite');
 
         if (await File(path1).exists()) {
           dbPath = path1;
@@ -50,7 +52,8 @@ class HistoryDatabase {
           // Use the flutter_assets location as default for new databases
           dbPath = path2;
           // Ensure directory exists
-          await Directory(join(Directory.current.path, 'data/flutter_assets/assets'))
+          await Directory(
+                  join(Directory.current.path, 'data/flutter_assets/assets'))
               .create(recursive: true);
         }
 
@@ -63,7 +66,8 @@ class HistoryDatabase {
             $colBook TEXT NOT NULL,
             $colChapter INTEGER NOT NULL,
             $colVerse INTEGER NOT NULL,
-            $colTimestamp INTEGER UNIQUE
+            $colTimestamp INTEGER UNIQUE,
+            uuid TEXT UNIQUE NULL
           )
         ''');
 
@@ -125,7 +129,8 @@ class HistoryDatabase {
     ''');
   }
 
-  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  static Future<void> _onUpgrade(
+      Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       // Add user cache table in version 2
       await db.execute('''
@@ -148,7 +153,8 @@ class HistoryDatabase {
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(record, 'history',
+      final isValid = await DataValidation.validateDatabaseRecord(
+          record, 'history',
           context: 'database query');
       if (isValid) {
         validResults.add(record);
@@ -193,7 +199,8 @@ class HistoryDatabase {
       final corruptIds = <int>[];
 
       for (final record in result) {
-        final isValid = await DataValidation.validateDatabaseRecord(record, 'history',
+        final isValid = await DataValidation.validateDatabaseRecord(
+            record, 'history',
             context: 'database query');
         if (isValid) {
           validResults.add(record);
@@ -217,19 +224,22 @@ class HistoryDatabase {
 
   // Add history
   static Future<void> addHistory(
-      String book, int chapter, int? verse, int timestamp, bool skipSync) async {
+      String book, int chapter, int? verse, int timestamp, bool skipSync,
+      {String? uuid}) async {
     // Validate data before saving to database
     final historyData = {
       'book': book,
       'chapter': chapter,
       'verse': verse,
       'timestamp': timestamp,
+      'uuid': uuid,
     };
 
-    final isValid =
-        await DataValidation.validateBeforeDatabaseWrite(historyData, 'history');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        historyData, 'history');
     if (!isValid) {
-      throw Exception('Invalid history data - failed validation. Operation rejected.');
+      throw Exception(
+          'Invalid history data - failed validation. Operation rejected.');
     }
 
     Database db = await getDatabase();
@@ -239,8 +249,8 @@ class HistoryDatabase {
     final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
     // Create a timestamp representing the start of this minute (hour:minute:00)
-    final DateTime minuteStart = DateTime(
-        dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute);
+    final DateTime minuteStart = DateTime(dateTime.year, dateTime.month,
+        dateTime.day, dateTime.hour, dateTime.minute);
     final int minuteStartTimestamp = minuteStart.millisecondsSinceEpoch;
 
     // Create a timestamp representing the start of the next minute
@@ -251,7 +261,13 @@ class HistoryDatabase {
       historyTable,
       where:
           '$colBook = ? AND $colChapter = ? AND $colVerse = ? AND $colTimestamp >= ? AND $colTimestamp < ?',
-      whereArgs: [book, chapter, verse, minuteStartTimestamp, nextMinuteTimestamp],
+      whereArgs: [
+        book,
+        chapter,
+        verse,
+        minuteStartTimestamp,
+        nextMinuteTimestamp
+      ],
     );
 
     // If no existing entry found for this minute, add the new history item
@@ -261,6 +277,7 @@ class HistoryDatabase {
         colChapter: chapter,
         colVerse: verse,
         colTimestamp: timestamp,
+        'uuid': uuid,
       });
 
       // Add a 1ms delay to ensure no two records have the same created_at or timestamp
@@ -274,15 +291,17 @@ class HistoryDatabase {
           'chapter': chapter,
           'verse': verse,
           'timestamp': timestamp,
+          'uuid': uuid,
         };
-        SupabaseSyncService().markOperation('history', timestamp, 'create', syncData);
+        SupabaseSyncService()
+            .markOperation('history', timestamp, 'create', syncData);
       }
     }
     // If an existing entry was found, skip adding this duplicate
   }
 
   // Delete history item
-  static Future<void> deleteHistoryItem(int id, {bool skipSync = false}) async {
+  static Future<void> deleteHistoryItem(int id, {String? uuid}) async {
     try {
       // Get the history item data before deletion for sync
       final db = await getDatabase();
@@ -294,11 +313,12 @@ class HistoryDatabase {
         await db.delete(historyTable, where: '$colId = ?', whereArgs: [id]);
 
         // Queue delete operation for sync service
-        if (!skipSync) {
-          final historyData = historyItem.first;
-          SupabaseSyncService().markOperation(
-              'history', historyData['timestamp'] as int, 'delete', historyData);
+        final historyData = Map<String, dynamic>.from(historyItem.first);
+        if (uuid != null) {
+          historyData['uuid'] = uuid;
         }
+        SupabaseSyncService().markOperation(
+            'history', historyData['timestamp'] as int, 'delete', historyData);
       }
     } catch (e) {
       if (kDebugMode) debugPrint('deleteHistoryItem exception: $e');

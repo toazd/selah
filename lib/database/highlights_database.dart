@@ -14,12 +14,14 @@ class HighlightsDatabase {
 
     String dbPath;
     try {
-      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb &&
+          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - just open the database
         // Try both locations (same as bible database)
-        String path1 = join(Directory.current.path, 'assets/user_highlights.sqlite');
-        String path2 = join(
-            Directory.current.path, 'data/flutter_assets/assets/user_highlights.sqlite');
+        String path1 =
+            join(Directory.current.path, 'assets/user_highlights.sqlite');
+        String path2 = join(Directory.current.path,
+            'data/flutter_assets/assets/user_highlights.sqlite');
 
         if (await File(path1).exists()) {
           dbPath = path1;
@@ -29,7 +31,8 @@ class HighlightsDatabase {
           // Use the flutter_assets location as default for new databases
           dbPath = path2;
           // Ensure directory exists
-          await Directory(join(Directory.current.path, 'data/flutter_assets/assets'))
+          await Directory(
+                  join(Directory.current.path, 'data/flutter_assets/assets'))
               .create(recursive: true);
         }
 
@@ -42,7 +45,8 @@ class HighlightsDatabase {
         if (!await File(dbPath).exists()) {
           try {
             // Copy from assets
-            ByteData data = await rootBundle.load('assets/user_highlights.sqlite');
+            ByteData data =
+                await rootBundle.load('assets/user_highlights.sqlite');
             List<int> bytes = data.buffer.asUint8List();
             await File(dbPath).writeAsBytes(bytes, flush: true);
           } catch (e) {
@@ -73,7 +77,8 @@ class HighlightsDatabase {
           end INTEGER NOT NULL,
           color INTEGER NOT NULL,
           created_at INTEGER UNIQUE,
-          updated_at INTEGER NOT NULL
+          updated_at INTEGER NOT NULL,
+          uuid TEXT UNIQUE NULL
         )
       ''');
 
@@ -86,14 +91,16 @@ class HighlightsDatabase {
   static Future<List<Map<String, dynamic>>> getHighlights() async {
     final db = await getDatabase();
 
-    final result = await db.query('user_highlights', orderBy: 'updated_at DESC');
+    final result =
+        await db.query('user_highlights', orderBy: 'updated_at DESC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight',
+      final isValid = await DataValidation.validateDatabaseRecord(
+          record, 'highlight',
           context: 'database query');
       if (isValid) {
         validResults.add(record);
@@ -125,7 +132,8 @@ class HighlightsDatabase {
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight',
+      final isValid = await DataValidation.validateDatabaseRecord(
+          record, 'highlight',
           context: 'database query');
       if (isValid) {
         validResults.add(record);
@@ -157,7 +165,8 @@ class HighlightsDatabase {
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight',
+      final isValid = await DataValidation.validateDatabaseRecord(
+          record, 'highlight',
           context: 'database query');
       if (isValid) {
         validResults.add(record);
@@ -186,6 +195,7 @@ class HighlightsDatabase {
     required int createdAt,
     required int updatedAt,
     required bool skipSync,
+    String? uuid,
   }) async {
     // Validate data before saving to database
     final highlightData = {
@@ -197,12 +207,14 @@ class HighlightsDatabase {
       'color': color,
       'created_at': createdAt,
       'updated_at': updatedAt,
+      'uuid': uuid,
     };
 
-    final isValid =
-        await DataValidation.validateBeforeDatabaseWrite(highlightData, 'highlight');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        highlightData, 'highlight');
     if (!isValid) {
-      throw Exception('Invalid highlight data - failed validation. Operation rejected.');
+      throw Exception(
+          'Invalid highlight data - failed validation. Operation rejected.');
     }
 
     final db = await getDatabase();
@@ -223,6 +235,7 @@ class HighlightsDatabase {
         'color': color,
         'created_at': createdAt,
         'updated_at': updatedAt,
+        'uuid': uuid,
       };
       SupabaseSyncService()
           .markOperation('highlight', createdAt.toInt(), 'create', syncData);
@@ -237,12 +250,14 @@ class HighlightsDatabase {
     required int end,
     required int color,
     int? updateAt,
+    String? uuid,
   }) async {
     final timestamp = updateAt ?? DateTime.now().millisecondsSinceEpoch;
 
     // Get existing record first for validation
     final db = await getDatabase();
-    final existing = await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
+    final existing =
+        await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
     if (existing.isEmpty) {
       throw Exception('Highlight with id $id not found');
     }
@@ -260,20 +275,24 @@ class HighlightsDatabase {
       'updated_at': timestamp,
     };
 
-    final isValid =
-        await DataValidation.validateBeforeDatabaseWrite(updateData, 'highlight');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        updateData, 'highlight');
     if (!isValid) {
-      throw Exception('Invalid highlight data - failed validation. Update rejected.');
+      throw Exception(
+          'Invalid highlight data - failed validation. Update rejected.');
     }
+
+    final updatedData = {
+      'start': start,
+      'end': end,
+      'color': color,
+      'updated_at': timestamp,
+      'uuid': uuid ?? existingData['uuid'],
+    };
 
     await db.update(
       'user_highlights',
-      {
-        'start': start,
-        'end': end,
-        'color': color,
-        'updated_at': timestamp,
-      },
+      updatedData,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -289,12 +308,13 @@ class HighlightsDatabase {
       'color': color,
       'updated_at': timestamp,
       'created_at': existingData['created_at'],
+      'uuid': uuid ?? existingData['uuid'],
     };
-    SupabaseSyncService().markOperation(
-        'highlight', existingData['created_at'] as int, 'update', highlightData);
+    SupabaseSyncService().markOperation('highlight',
+        existingData['created_at'] as int, 'update', highlightData);
   }
 
-  static Future<void> deleteHighlight(int id, {bool skipSync = false}) async {
+  static Future<void> deleteHighlight(int id, {String? uuid}) async {
     // Get the highlight data before deletion for sync
     final db = await getDatabase();
     final highlightToDelete =
@@ -304,12 +324,13 @@ class HighlightsDatabase {
     await db.delete('user_highlights', where: 'id = ?', whereArgs: [id]);
 
     // Queue delete operation for sync service
-    if (highlightToDelete.isNotEmpty && !skipSync) {
-      SupabaseSyncService().markOperation(
-          'highlight',
-          highlightToDelete.first['created_at'] as int,
-          'delete',
-          highlightToDelete.first);
+    if (highlightToDelete.isNotEmpty) {
+      final data = Map<String, dynamic>.from(highlightToDelete.first);
+      if (uuid != null) {
+        data['uuid'] = uuid;
+      }
+      SupabaseSyncService().markOperation('highlight',
+          highlightToDelete.first['created_at'] as int, 'delete', data);
     }
 
     // Note: Remote deletion happens when queued operations are processed
