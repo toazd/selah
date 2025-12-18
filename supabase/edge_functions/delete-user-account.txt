@@ -1,0 +1,80 @@
+Deno.serve(async (req) => {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
+  };
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  try {
+    // Get environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Missing environment variables');
+    }
+
+    // Parse request body to get userId
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const userId = requestBody.userId;
+    if (!userId) {
+      throw new Error('userId is required in request body');
+    }
+
+    // Delete profile FIRST (using service role key)
+    const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+    });
+
+    // Then delete user (using service role key)
+    const deleteUrl = `${supabaseUrl}/auth/v1/admin/users/${userId}`;
+    
+    const userResponse = await fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'apikey': serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!userResponse.ok) {
+      const errorText = await userResponse.text();
+      throw new Error(`Failed to delete user (${userResponse.status}): ${errorText}`);
+    }
+
+    // Success response
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Profile and user account deleted successfully'
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+});

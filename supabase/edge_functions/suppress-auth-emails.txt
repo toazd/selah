@@ -1,0 +1,10 @@
+Deno.serve(async (req: Request) => {
+  // Always return a JSON body 'true' with 200 OK so Supabase Auth treats the email as handled.
+  return new Response(JSON.stringify(true), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Connection": "keep-alive",
+    },
+  });
+});

@@ -1,10 +1,9 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
-import 'package:firebase_core/firebase_core.dart';
 //import 'package:selah/utils/tablet_mode_test_example.dart';
-import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:selah/utils/tablet_mode_test_example.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'supabase_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -24,7 +23,7 @@ import 'widgets/sync_dialog.dart';
 import 'widgets/verse_history_dialog.dart';
 import 'utils/preferences_constants.dart';
 import 'utils/snackbar_notification.dart';
-import 'services/firestore_sync_service.dart';
+import 'services/supabase_sync_service.dart';
 import 'services/auth_service.dart';
 import 'services/selah_import_service.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -44,7 +43,8 @@ import 'utils/tablet_mode_detector.dart';
 
 final appVersion = "0.7.0";
 
-final bool _isDesktop = (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
+final bool _isDesktop =
+    (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
 final ValueNotifier<bool> isVerticalTile = ValueNotifier(
   () {
     if (_isDesktop || kIsWeb) {
@@ -99,24 +99,31 @@ const List<String> availableFonts = [
 ];
 
 final ValueNotifier<Color> lightPrimaryColor = ValueNotifier(Colors.blueGrey);
-final ValueNotifier<Color> lightBackgroundColor = ValueNotifier(const Color.fromARGB(255, 255, 247, 203));
+final ValueNotifier<Color> lightBackgroundColor =
+    ValueNotifier(const Color.fromARGB(255, 255, 247, 203));
 final ValueNotifier<Color> lightTextColor = ValueNotifier(Colors.black);
 final ValueNotifier<Color> darkPrimaryColor = ValueNotifier(Colors.blueGrey);
 final ValueNotifier<Color> darkBackgroundColor = ValueNotifier(const Color(0xFF000010));
 final ValueNotifier<Color> darkTextColor = ValueNotifier(Colors.white);
 final ValueNotifier<bool> fullscreenNotifier = ValueNotifier(false);
 final ValueNotifier<int> maxVerticalScreens = ValueNotifier(defaultMaxVerticalScreens);
-final ValueNotifier<int> maxHorizontalScreens = ValueNotifier(defaultMaxHorizontalScreens);
-final ValueNotifier<List<Color>> highlightColorsNotifier = ValueNotifier<List<Color>>(defaultHighlightColors);
-final ValueNotifier<Color> lightHighlightColor = ValueNotifier(defaultLightHighlightColor);
+final ValueNotifier<int> maxHorizontalScreens =
+    ValueNotifier(defaultMaxHorizontalScreens);
+final ValueNotifier<List<Color>> highlightColorsNotifier =
+    ValueNotifier<List<Color>>(defaultHighlightColors);
+final ValueNotifier<Color> lightHighlightColor =
+    ValueNotifier(defaultLightHighlightColor);
 final ValueNotifier<Color> darkHighlightColor = ValueNotifier(defaultDarkHighlightColor);
-final ValueNotifier<Color> lightVerseReferenceColor = ValueNotifier(defaultLightVerseReferenceColor);
-final ValueNotifier<Color> darkVerseReferenceColor = ValueNotifier(defaultDarkVerseReferenceColor);
+final ValueNotifier<Color> lightVerseReferenceColor =
+    ValueNotifier(defaultLightVerseReferenceColor);
+final ValueNotifier<Color> darkVerseReferenceColor =
+    ValueNotifier(defaultDarkVerseReferenceColor);
 // Add: notes display mode (false = icon next to verse [default], true = inline below verse)
 final ValueNotifier<bool> showNotesInlineNotifier = ValueNotifier(defaultShowNotesInline);
 
 // Add: navigation bar display mode (false = hidden, true = visible [default])
-final ValueNotifier<bool> showNavigationBarNotifier = ValueNotifier(defaultShowNavigationBar);
+final ValueNotifier<bool> showNavigationBarNotifier =
+    ValueNotifier(defaultShowNavigationBar);
 
 // Time-based theme preferences (configurable)
 final ValueNotifier<int> dayStartHourNotifier = ValueNotifier(defaultDayStartHour);
@@ -126,9 +133,10 @@ final ValueNotifier<int> nightStartHourNotifier = ValueNotifier(defaultNightStar
 final ValueNotifier<bool> syncHighlightsNotifier = ValueNotifier(defaultSyncHighlights);
 final ValueNotifier<bool> syncNotesNotifier = ValueNotifier(defaultSyncNotes);
 final ValueNotifier<bool> syncHistoryNotifier = ValueNotifier(defaultSyncHistory);
-final ValueNotifier<bool> syncSearchHistoryNotifier = ValueNotifier(defaultSyncSearchHistory);
+final ValueNotifier<bool> syncSearchHistoryNotifier =
+    ValueNotifier(defaultSyncSearchHistory);
 
-// Firebase auth state
+// Supabase auth state
 final ValueNotifier<bool> isSignedIn = ValueNotifier(false);
 final ValueNotifier<User?> currentUser = ValueNotifier(null);
 
@@ -136,7 +144,8 @@ final ValueNotifier<User?> currentUser = ValueNotifier(null);
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 // Global scaffold messenger key for showing snackbars globally
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 // Global tablet mode detection service
 // Only used on Windows desktop to circumvent
@@ -154,7 +163,8 @@ class TabletModeService {
       _tabletModeNotifier!.addListener(() {
         final isTablet = _tabletModeNotifier!.value;
         if (kDebugMode) {
-          debugPrint('Tablet Mode Listener: ($isTablet) - ${isTablet ? "Tablet Mode" : "Laptop Mode"}');
+          debugPrint(
+              'Tablet Mode Listener: ($isTablet) - ${isTablet ? "Tablet Mode" : "Laptop Mode"}');
         }
       });
     }
@@ -165,7 +175,8 @@ class TabletModeService {
 }
 
 // Add: color hex helpers
-String _colorToHex(Color c) => '#${(c.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+String _colorToHex(Color c) =>
+    '#${(c.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
 
 Color _parseHexColor(String? hex, Color fallback) {
   if (hex == null) return fallback;
@@ -250,7 +261,8 @@ void _updateThemeBasedOnTime() {
   final currentHour = now.hour;
 
   // Determine if it's day or night using configurable hours
-  final isDayTime = currentHour >= dayStartHourNotifier.value && currentHour < nightStartHourNotifier.value;
+  final isDayTime = currentHour >= dayStartHourNotifier.value &&
+      currentHour < nightStartHourNotifier.value;
 
   // Update theme mode accordingly
   final newThemeMode = isDayTime ? ThemeMode.light : ThemeMode.dark;
@@ -267,7 +279,8 @@ String _getTimeBasedThemeStatus() {
   final currentHour = now.hour;
 
   // Determine if it's day or night using configurable hours
-  final isDayTime = currentHour >= dayStartHourNotifier.value && currentHour < nightStartHourNotifier.value;
+  final isDayTime = currentHour >= dayStartHourNotifier.value &&
+      currentHour < nightStartHourNotifier.value;
 
   if (isDayTime) {
     // Currently in light mode, show when dark mode starts
@@ -290,26 +303,48 @@ void main() async {
   // Initialize sqflite once at startup to prevent memory leaks
   _initializeSqflite();
 
-  // Initialize Firebase
+  // Initialize Supabase
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    await Supabase.initialize(
+      url: SupabaseConfig.supabaseUrl,
+      anonKey: SupabaseConfig.supabaseAnonKey,
     );
   } catch (e) {
-    if (kDebugMode) debugPrint('Firebase initializeApp exception: $e');
+    if (kDebugMode) debugPrint('Supabase initialize exception: ${e.toString()}');
   }
 
   // Listen to auth state changes
-  FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+  Supabase.instance.client.auth.onAuthStateChange.listen((AuthState data) async {
+    final user = data.session?.user;
     isSignedIn.value = user != null;
-
     currentUser.value = user;
 
-    // Maintain firestore sync services based on authentication state
-    if (user != null) {
-      await FirestoreSyncService().initialize(isLoginResync: false);
+    // Maintain Supabase sync services based on authentication state
+    if (isSignedIn.value) {
+      // Check if this is a fresh login (no existing session) vs app restart (existing session)
+      final prefs = await SharedPreferences.getInstance();
+      final lastLoginTime = prefs.getInt('lastLoginTime');
+
+      if (lastLoginTime == null) {
+        // Fresh login - store login time but DON'T initialize sync yet
+        // Let AuthScreen handle sync initialization after user confirms preferences
+        await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
+        if (kDebugMode) {
+          debugPrint(
+              'Fresh login detected - sync initialization deferred for user preference confirmation');
+        }
+      } else {
+        // App restart - initialize sync normally since preferences are already set
+        if (kDebugMode) {
+          debugPrint('App restart detected - initializing sync service normally');
+        }
+        await SupabaseSyncService().initialize(isLoginResync: true);
+      }
     } else {
-      FirestoreSyncService().dispose(); // Handles sign-out
+      // Sign out - clear last login time and dispose sync service
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('lastLoginTime');
+      SupabaseSyncService().dispose(); // Handles sign-out
     }
   });
 
@@ -340,7 +375,10 @@ void main() async {
 
 Future<bool> checkAtLeastOneSyncEnabled() {
   return Future.value(
-    syncHighlightsNotifier.value || syncNotesNotifier.value || syncHistoryNotifier.value || syncSearchHistoryNotifier.value,
+    syncHighlightsNotifier.value ||
+        syncNotesNotifier.value ||
+        syncHistoryNotifier.value ||
+        syncSearchHistoryNotifier.value,
   );
 }
 
@@ -409,7 +447,8 @@ Future<void> _loadAllPrefs() async {
         break;
       case 3:
         // Time-based theme - we'll handle this specially
-        themeModeNotifier.value = ThemeMode.light; // Default to light, will be updated by time check
+        themeModeNotifier.value =
+            ThemeMode.light; // Default to light, will be updated by time check
         _isTimeBasedThemeEnabled = true;
         break;
       default:
@@ -519,20 +558,25 @@ Future<void> _loadAllPrefs() async {
     );
 
     // Notes inline mode
-    showNotesInlineNotifier.value = prefs.getBool('showNotesInline') ?? defaultShowNotesInline;
+    showNotesInlineNotifier.value =
+        prefs.getBool('showNotesInline') ?? defaultShowNotesInline;
 
     // Navigation bar display mode
-    showNavigationBarNotifier.value = prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
+    showNavigationBarNotifier.value =
+        prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
 
     // Time-based theme preferences
     dayStartHourNotifier.value = prefs.getInt('dayStartHour') ?? defaultDayStartHour;
-    nightStartHourNotifier.value = prefs.getInt('nightStartHour') ?? defaultNightStartHour;
+    nightStartHourNotifier.value =
+        prefs.getInt('nightStartHour') ?? defaultNightStartHour;
 
     // Sync settings
-    syncHighlightsNotifier.value = prefs.getBool('syncHighlights') ?? defaultSyncHighlights;
+    syncHighlightsNotifier.value =
+        prefs.getBool('syncHighlights') ?? defaultSyncHighlights;
     syncNotesNotifier.value = prefs.getBool('syncNotes') ?? defaultSyncNotes;
     syncHistoryNotifier.value = prefs.getBool('syncHistory') ?? defaultSyncHistory;
-    syncSearchHistoryNotifier.value = prefs.getBool('syncSearchHistory') ?? defaultSyncSearchHistory;
+    syncSearchHistoryNotifier.value =
+        prefs.getBool('syncSearchHistory') ?? defaultSyncSearchHistory;
   } catch (_) {}
 }
 
@@ -710,11 +754,14 @@ class BibleStudyApp extends StatelessWidget {
                                               textStyle: TextStyle(
                                                 fontSize: uiFontSize,
                                                 fontFamily: uiFontFamily,
-                                                color: getAdaptiveTextColor(context, usePrimaryColor: false),
+                                                color: getAdaptiveTextColor(context,
+                                                    usePrimaryColor: false),
                                               ),
                                             ),
                                             switchTheme: SwitchThemeData(
-                                              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              thumbColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
@@ -722,11 +769,14 @@ class BibleStudyApp extends StatelessWidget {
                                                 }
                                                 return Colors.grey;
                                               }),
-                                              trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              trackColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
-                                                  return lightPrimaryColor.value.withValues(
+                                                  return lightPrimaryColor.value
+                                                      .withValues(
                                                     alpha: 0.5,
                                                   );
                                                 }
@@ -735,12 +785,16 @@ class BibleStudyApp extends StatelessWidget {
                                             ),
                                             sliderTheme: SliderThemeData(
                                               activeTrackColor: lightPrimaryColor.value,
-                                              inactiveTrackColor: lightPrimaryColor.value.withValues(alpha: 0.3),
+                                              inactiveTrackColor: lightPrimaryColor.value
+                                                  .withValues(alpha: 0.3),
                                               thumbColor: lightPrimaryColor.value,
-                                              valueIndicatorColor: lightPrimaryColor.value,
+                                              valueIndicatorColor:
+                                                  lightPrimaryColor.value,
                                             ),
                                             checkboxTheme: CheckboxThemeData(
-                                              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              fillColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
@@ -755,7 +809,11 @@ class BibleStudyApp extends StatelessWidget {
                                             elevatedButtonTheme: ElevatedButtonThemeData(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: lightPrimaryColor.value,
-                                                foregroundColor: lightPrimaryColor.value.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                                foregroundColor: lightPrimaryColor.value
+                                                            .computeLuminance() >
+                                                        0.5
+                                                    ? Colors.black
+                                                    : Colors.white,
                                               ),
                                             ),
                                             textButtonTheme: TextButtonThemeData(
@@ -765,10 +823,12 @@ class BibleStudyApp extends StatelessWidget {
                                             ),
                                             textSelectionTheme: TextSelectionThemeData(
                                               cursorColor: lightPrimaryColor.value,
-                                              selectionColor: lightPrimaryColor.value.withValues(
+                                              selectionColor:
+                                                  lightPrimaryColor.value.withValues(
                                                 alpha: 0.3,
                                               ),
-                                              selectionHandleColor: lightPrimaryColor.value,
+                                              selectionHandleColor:
+                                                  lightPrimaryColor.value,
                                             ),
                                             textTheme: TextTheme(
                                               bodyMedium: TextStyle(
@@ -816,11 +876,14 @@ class BibleStudyApp extends StatelessWidget {
                                               textStyle: TextStyle(
                                                 fontSize: uiFontSize,
                                                 fontFamily: uiFontFamily,
-                                                color: getAdaptiveTextColor(context, usePrimaryColor: true),
+                                                color: getAdaptiveTextColor(context,
+                                                    usePrimaryColor: true),
                                               ),
                                             ),
                                             switchTheme: SwitchThemeData(
-                                              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              thumbColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
@@ -828,11 +891,14 @@ class BibleStudyApp extends StatelessWidget {
                                                 }
                                                 return Colors.grey;
                                               }),
-                                              trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              trackColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
-                                                  return darkPrimaryColor.value.withValues(
+                                                  return darkPrimaryColor.value
+                                                      .withValues(
                                                     alpha: 0.5,
                                                   );
                                                 }
@@ -841,12 +907,15 @@ class BibleStudyApp extends StatelessWidget {
                                             ),
                                             sliderTheme: SliderThemeData(
                                               activeTrackColor: darkPrimaryColor.value,
-                                              inactiveTrackColor: darkPrimaryColor.value.withValues(alpha: 0.3),
+                                              inactiveTrackColor: darkPrimaryColor.value
+                                                  .withValues(alpha: 0.3),
                                               thumbColor: darkPrimaryColor.value,
                                               valueIndicatorColor: darkPrimaryColor.value,
                                             ),
                                             checkboxTheme: CheckboxThemeData(
-                                              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                              fillColor:
+                                                  WidgetStateProperty.resolveWith<Color>(
+                                                      (states) {
                                                 if (states.contains(
                                                   WidgetState.selected,
                                                 )) {
@@ -861,7 +930,11 @@ class BibleStudyApp extends StatelessWidget {
                                             elevatedButtonTheme: ElevatedButtonThemeData(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: darkPrimaryColor.value,
-                                                foregroundColor: darkPrimaryColor.value.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                                foregroundColor: darkPrimaryColor.value
+                                                            .computeLuminance() >
+                                                        0.5
+                                                    ? Colors.black
+                                                    : Colors.white,
                                               ),
                                             ),
                                             textButtonTheme: TextButtonThemeData(
@@ -871,10 +944,12 @@ class BibleStudyApp extends StatelessWidget {
                                             ),
                                             textSelectionTheme: TextSelectionThemeData(
                                               cursorColor: darkPrimaryColor.value,
-                                              selectionColor: darkPrimaryColor.value.withValues(
+                                              selectionColor:
+                                                  darkPrimaryColor.value.withValues(
                                                 alpha: 0.3,
                                               ),
-                                              selectionHandleColor: darkPrimaryColor.value,
+                                              selectionHandleColor:
+                                                  darkPrimaryColor.value,
                                             ),
                                             textTheme: TextTheme(
                                               bodyMedium: TextStyle(
@@ -959,10 +1034,10 @@ class _WindowManagerListener extends WindowListener {
       // Save all current app preferences
       await _saveAllCurrentPrefs();
 
-      // Check and perform Firebase Sync only if there are pending changes
-      if (FirebaseAuth.instance.currentUser != null) {
-        final syncService = FirestoreSyncService();
-        bool canConnect = await syncService.checkFirebaseConnection();
+      // Check and perform Supabase Sync only if there are pending changes
+      if (Supabase.instance.client.auth.currentUser != null) {
+        final syncService = SupabaseSyncService();
+        bool canConnect = await syncService.checkSupabaseConnection();
 
         if (canConnect) {
           // Show sync dialog
@@ -1048,8 +1123,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       LocalDataChangeNotifier.dispose();
 
       // Properly dispose sync service to handle retry queues
-      if (FirebaseAuth.instance.currentUser != null) {
-        FirestoreSyncService().dispose();
+      if (Supabase.instance.client.auth.currentUser != null) {
+        SupabaseSyncService().dispose();
       }
     } else if (state == AppLifecycleState.inactive) {
       // App in inactive state
@@ -1058,8 +1133,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     // Note: We handle paused separately in case the app gets suspended but not detached
     else if (state == AppLifecycleState.paused) {
       // App is going to background - stop connectivity monitoring to save battery
-      if (FirebaseAuth.instance.currentUser != null) {
-        FirestoreSyncService().stopConnectionMonitoring();
+      if (Supabase.instance.client.auth.currentUser != null) {
+        SupabaseSyncService().stopConnectionMonitoring();
       }
     }
     // Handle app returning to foreground - re-establish realtime listeners
@@ -1067,9 +1142,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       //
 
       // App is coming back to foreground - restart sync service for realtime listeners
-      if (FirebaseAuth.instance.currentUser != null) {
+      if (Supabase.instance.client.auth.currentUser != null) {
         try {
-          FirestoreSyncService().restartConnectionMonitoring();
+          SupabaseSyncService().restartConnectionMonitoring();
         } catch (e) {
           // Log error but don't block app foregrounding
         }
@@ -1098,7 +1173,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     //_syncStatusSubscription?.cancel();
 
     // Remove window listener if it exists
-    if ((Platform.isWindows || Platform.isLinux || Platform.isMacOS) && _windowListener != null) {
+    if ((Platform.isWindows || Platform.isLinux || Platform.isMacOS) &&
+        _windowListener != null) {
       windowManager.removeListener(_windowListener!);
     }
 
@@ -1123,7 +1199,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       double? width, height; //, minWidth, minHeight, maxWidth, maxHeight;
       bool maximized = false;
       if (!(Platform.isAndroid || Platform.isIOS)) {
-        maximized = prefs.getBool('windowMaximized') ?? false; // Default to un-maximized for better UX
+        maximized = prefs.getBool('windowMaximized') ??
+            false; // Default to un-maximized for better UX
         if (!maximized) {
           width = prefs.getDouble('windowWidth') ?? (screenSize.width * 0.9);
           height = prefs.getDouble('windowHeight') ?? (screenSize.height * 0.8);
@@ -1131,7 +1208,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       }
 
       final options = WindowOptions(
-        size: (!maximized && width != null && height != null) ? Size(width, height) : const Size(900, 700),
+        size: (!maximized && width != null && height != null)
+            ? Size(width, height)
+            : const Size(900, 700),
         center: true,
         //backgroundColor: Colors.transparent, // enabling this causes problems with shading on desktop
         skipTaskbar: false,
@@ -1402,7 +1481,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       builder: (context) {
         return VerseHistoryDialog(
           //screenIndex: screenIndex,
-          onUpdateLocation: (book, chapter, verse) => _updateLocation(screenIndex, book, chapter, verse),
+          onUpdateLocation: (book, chapter, verse) =>
+              _updateLocation(screenIndex, book, chapter, verse),
         );
       },
     );
@@ -1482,7 +1562,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                 child: Text(
                                   '${index + 1}',
                                   style: TextStyle(
-                                    color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                    color: color.computeLuminance() > 0.5
+                                        ? Colors.black
+                                        : Colors.white,
                                     fontWeight: FontWeight.normal,
                                     fontSize: uiFontSize,
                                     fontFamily: uiFontFamily,
@@ -1845,8 +1927,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         await windowManager.setFullScreen(fullscreenNotifier.value);
       } else {
         // Determine brightness for icon colors when toggling on mobile
-        final systemBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-        final bool isDarkTheme = themeModeNotifier.value == ThemeMode.dark || (themeModeNotifier.value == ThemeMode.system && systemBrightness == Brightness.dark);
+        final systemBrightness =
+            WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        final bool isDarkTheme = themeModeNotifier.value == ThemeMode.dark ||
+            (themeModeNotifier.value == ThemeMode.system &&
+                systemBrightness == Brightness.dark);
 
         if (fullscreenNotifier.value) {
           // Use immersiveSticky mode for more persistent fullscreen that resists keyboard appearance
@@ -1859,7 +1944,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
               statusBarColor: Colors.transparent,
               systemNavigationBarColor: Colors.transparent,
               statusBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
-              systemNavigationBarIconBrightness: isDarkTheme ? Brightness.light : Brightness.dark,
+              systemNavigationBarIconBrightness:
+                  isDarkTheme ? Brightness.light : Brightness.dark,
             ),
           );
         } else {
@@ -1884,7 +1970,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     return Scaffold(
       resizeToAvoidBottomInset: false,
       drawer: Drawer(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? darkBackgroundColor.value
+            : lightBackgroundColor.value,
         child: ValueListenableBuilder<String>(
           valueListenable: fontFamilyNotifier,
           builder: (context, fontFamily, _) {
@@ -1976,7 +2064,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             try {
                               await _saveAllCurrentPrefs();
                             } catch (e) {
-                              if (kDebugMode) debugPrint('_saveAllCurrentPrefs exception: $e');
+                              if (kDebugMode) {
+                                debugPrint(
+                                    '_saveAllCurrentPrefs exception: ${e.toString()}');
+                              }
                             }
                           },
                         );
@@ -2042,7 +2133,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                     ),
                   ),
                   ..._screenLocations.length > 1
-                      ? _screenLocations.asMap().entries.where((entry) => entry.key != 0).map(
+                      ? _screenLocations
+                          .asMap()
+                          .entries
+                          .where((entry) => entry.key != 0)
+                          .map(
                             (entry) => Column(
                               children: [
                                 const SizedBox(height: 16),
@@ -2122,7 +2217,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          fontSizeNotifier.value = (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
+                          fontSizeNotifier.value =
+                              (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
                           _saveFontPrefs();
                         },
                         //child: Text('-', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
@@ -2147,7 +2243,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: () {
-                          fontSizeNotifier.value = (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
+                          fontSizeNotifier.value =
+                              (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
                           _saveFontPrefs();
                         },
                         child: Icon(
@@ -2182,7 +2279,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                           color: getAdaptiveTextColor(context),
                         ),
                       ),
-                      value: _isTimeBasedThemeEnabled ? false : themeModeNotifier.value == ThemeMode.system,
+                      value: _isTimeBasedThemeEnabled
+                          ? false
+                          : themeModeNotifier.value == ThemeMode.system,
                       visualDensity: VisualDensity.compact,
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 0.0,
@@ -2207,7 +2306,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                           color: getAdaptiveTextColor(context),
                         ),
                       ),
-                      value: _isTimeBasedThemeEnabled ? false : themeModeNotifier.value == ThemeMode.light,
+                      value: _isTimeBasedThemeEnabled
+                          ? false
+                          : themeModeNotifier.value == ThemeMode.light,
                       visualDensity: VisualDensity.compact,
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 0.0,
@@ -2232,7 +2333,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                           color: getAdaptiveTextColor(context),
                         ),
                       ),
-                      value: _isTimeBasedThemeEnabled ? false : themeModeNotifier.value == ThemeMode.dark,
+                      value: _isTimeBasedThemeEnabled
+                          ? false
+                          : themeModeNotifier.value == ThemeMode.dark,
                       visualDensity: VisualDensity.compact,
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 0.0,
@@ -2337,7 +2440,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       children: [
                         Icon(
                           Icons.highlight,
-                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          color:
+                              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                           semanticLabel: 'Customize Highlights',
                         ),
                         const SizedBox(width: 8),
@@ -2360,7 +2464,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       children: [
                         Icon(
                           Icons.color_lens,
-                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          color:
+                              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                           semanticLabel: 'Customize Colors',
                         ),
                         const SizedBox(width: 8),
@@ -2424,7 +2529,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.sync,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Sign in to Sync Data',
                               ),
                               const SizedBox(width: 8),
@@ -2449,7 +2556,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       children: [
                         Icon(
                           Icons.save,
-                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          color:
+                              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                           semanticLabel: 'Export Selah Data',
                         ),
                         const SizedBox(width: 8),
@@ -2471,7 +2579,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       children: [
                         Icon(
                           Icons.drive_file_move,
-                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          color:
+                              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                           semanticLabel: 'Import Data',
                         ),
                         const SizedBox(width: 8),
@@ -2517,7 +2626,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             await _saveAllCurrentPrefs();
 
                             // Update listener state
-                            await FirestoreSyncService().updateListenerForCategory('highlights', val);
+                            await SupabaseSyncService()
+                                .updateListenerForCategory('highlights', val);
 
                             if (!val) {
                               // Disabling sync - only show confirmation dialog if user is signed in
@@ -2553,7 +2663,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               ),
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'cancel'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'cancel'),
                                         ),
                                         TextButton(
                                           child: Text(
@@ -2577,7 +2688,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               color: Colors.red,
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'delete'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'delete'),
                                         ),
                                       ],
                                     ),
@@ -2591,7 +2703,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                   return;
                                 } else if (result == 'delete') {
                                   // Delete remote data
-                                  await FirestoreSyncService().deleteAllRemoteHighlights();
+                                  await SupabaseSyncService().deleteAllRemoteHighlights();
                                 } else if (result == 'keep') {
                                   // Keep remote data - do nothing, sync already disabled
                                 }
@@ -2599,7 +2711,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               // If not signed in, just leave sync disabled without dialog
                             } else {
                               // Enabling sync - upload existing local data
-                              await FirestoreSyncService().syncHighlights();
+                              await SupabaseSyncService().syncHighlights();
                             }
                           },
                         ),
@@ -2622,7 +2734,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             await _saveAllCurrentPrefs();
 
                             // Update listener state
-                            await FirestoreSyncService().updateListenerForCategory('notes', val);
+                            await SupabaseSyncService()
+                                .updateListenerForCategory('notes', val);
 
                             if (!val) {
                               // Disabling sync - only show confirmation dialog if user is signed in
@@ -2658,7 +2771,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               ),
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'cancel'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'cancel'),
                                         ),
                                         TextButton(
                                           child: Text(
@@ -2682,7 +2796,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               color: Colors.red,
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'delete'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'delete'),
                                         ),
                                       ],
                                     ),
@@ -2696,7 +2811,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                   return;
                                 } else if (result == 'delete') {
                                   // Delete remote data
-                                  await FirestoreSyncService().deleteAllRemoteNotes();
+                                  await SupabaseSyncService().deleteAllRemoteNotes();
                                 } else if (result == 'keep') {
                                   // Keep remote data - do nothing, sync already disabled
                                 }
@@ -2704,7 +2819,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               // If not signed in, just leave sync disabled without dialog
                             } else {
                               // Enabling sync - upload existing local data
-                              await FirestoreSyncService().syncNotes();
+                              await SupabaseSyncService().syncNotes();
                             }
                           },
                         ),
@@ -2727,7 +2842,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             await _saveAllCurrentPrefs();
 
                             // Update listener state
-                            await FirestoreSyncService().updateListenerForCategory('history', val);
+                            await SupabaseSyncService()
+                                .updateListenerForCategory('history', val);
 
                             if (!val) {
                               // Disabling sync - only show confirmation dialog if user is signed in
@@ -2763,7 +2879,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               ),
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'cancel'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'cancel'),
                                         ),
                                         TextButton(
                                           child: Text(
@@ -2787,7 +2904,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               color: Colors.red,
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'delete'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'delete'),
                                         ),
                                       ],
                                     ),
@@ -2801,7 +2919,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                   return;
                                 } else if (result == 'delete') {
                                   // Delete remote data
-                                  await FirestoreSyncService().deleteAllRemoteHistory();
+                                  await SupabaseSyncService().deleteAllRemoteHistory();
                                 } else if (result == 'keep') {
                                   // Keep remote data - do nothing, sync already disabled
                                 }
@@ -2809,7 +2927,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               // If not signed in, just leave sync disabled without dialog
                             } else {
                               // Enabling sync - upload existing local data
-                              await FirestoreSyncService().syncHistory();
+                              await SupabaseSyncService().syncHistory();
                             }
                           },
                         ),
@@ -2832,7 +2950,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             await _saveAllCurrentPrefs();
 
                             // Update listener state
-                            await FirestoreSyncService().updateListenerForCategory(
+                            await SupabaseSyncService().updateListenerForCategory(
                               'searchHistory',
                               val,
                             );
@@ -2871,7 +2989,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               ),
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'cancel'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'cancel'),
                                         ),
                                         TextButton(
                                           child: Text(
@@ -2895,7 +3014,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                               color: Colors.red,
                                             ),
                                           ),
-                                          onPressed: () => Navigator.pop(context, 'delete'),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'delete'),
                                         ),
                                       ],
                                     ),
@@ -2909,7 +3029,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                                   return;
                                 } else if (result == 'delete') {
                                   // Delete remote data
-                                  await FirestoreSyncService().deleteAllRemoteSearchHistory();
+                                  await SupabaseSyncService()
+                                      .deleteAllRemoteSearchHistory();
                                 } else if (result == 'keep') {
                                   // Keep remote data - do nothing, sync already disabled
                                 }
@@ -2917,7 +3038,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               // If not signed in, just leave sync disabled without dialog
                             } else {
                               // Enabling sync - upload existing local data
-                              await FirestoreSyncService().syncSearchHistory();
+                              await SupabaseSyncService().syncSearchHistory();
                             }
                           },
                         ),
@@ -2945,7 +3066,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.sync,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Execute Manual Sync',
                               ),
                               const SizedBox(width: 8),
@@ -2990,7 +3113,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
                             try {
                               // Perform sync operation
-                              await FirestoreSyncService().triggerManualSync();
+                              await SupabaseSyncService().triggerManualSync();
 
                               if (context.mounted) {
                                 Navigator.pop(context); // Close progress dialog
@@ -3003,7 +3126,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               if (context.mounted) {
                                 showStyledSnackBar(
                                   context,
-                                  'Sync failed: $e',
+                                  'Sync failed: ${e.toString()}',
                                   isError: true,
                                 );
                               }
@@ -3020,7 +3143,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.edit,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Edit Saved Shared Preferences',
                               ),
                               const SizedBox(width: 8),
@@ -3049,8 +3174,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.settings_backup_restore,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                semanticLabel: 'Advanced - Reset Preferences and exit. A Restart is required for the changes to take effect.',
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
+                                semanticLabel:
+                                    'Advanced - Reset Preferences and exit. A Restart is required for the changes to take effect.',
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -3128,7 +3256,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.highlight_off,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Reset Highlights',
                               ),
                               const SizedBox(width: 8),
@@ -3192,10 +3322,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               ),
                             );
                             if (confirm == true) {
-                              final syncService = FirestoreSyncService();
+                              final syncService = SupabaseSyncService();
 
                               // Delete remote data first if logged in
-                              if (FirebaseAuth.instance.currentUser != null) {
+                              if (Supabase.instance.client.auth.currentUser != null) {
                                 await syncService.deleteAllRemoteHighlights();
                               }
 
@@ -3217,7 +3347,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.note_alt,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Reset Notes',
                               ),
                               const SizedBox(width: 8),
@@ -3281,10 +3413,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               ),
                             );
                             if (confirm == true) {
-                              final syncService = FirestoreSyncService();
+                              final syncService = SupabaseSyncService();
 
                               // Delete remote data first if logged in
-                              if (FirebaseAuth.instance.currentUser != null) {
+                              if (Supabase.instance.client.auth.currentUser != null) {
                                 await syncService.deleteAllRemoteNotes();
                               }
 
@@ -3306,7 +3438,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.history,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Reset Verse Reference History',
                               ),
                               const SizedBox(width: 8),
@@ -3370,10 +3504,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               ),
                             );
                             if (confirm == true) {
-                              final syncService = FirestoreSyncService();
+                              final syncService = SupabaseSyncService();
 
                               // Delete remote data first if logged in
-                              if (FirebaseAuth.instance.currentUser != null) {
+                              if (Supabase.instance.client.auth.currentUser != null) {
                                 await syncService.deleteAllRemoteHistory();
                               }
 
@@ -3392,7 +3526,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.history,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
                                 semanticLabel: 'Advanced - Reset Saved Searches',
                               ),
                               const SizedBox(width: 8),
@@ -3456,10 +3592,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                               ),
                             );
                             if (confirm == true) {
-                              final syncService = FirestoreSyncService();
+                              final syncService = SupabaseSyncService();
 
                               // Delete remote data first if logged in
-                              if (FirebaseAuth.instance.currentUser != null) {
+                              if (Supabase.instance.client.auth.currentUser != null) {
                                 await syncService.deleteAllRemoteSearchHistory();
                               }
 
@@ -3478,8 +3614,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                             children: [
                               Icon(
                                 Icons.restore_from_trash,
-                                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                                semanticLabel: 'Advanced - Reset Preferences, Highlights, History, Notes, and exit. A restart is required for the changes to take effect.',
+                                color: isDark
+                                    ? darkPrimaryColor.value
+                                    : lightPrimaryColor.value,
+                                semanticLabel:
+                                    'Advanced - Reset Preferences, Highlights, History, Notes, and exit. A restart is required for the changes to take effect.',
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -3574,7 +3713,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       initialBook: _screenLocations[i]['book'],
                       initialChapter: _screenLocations[i]['chapter'],
                       initialVerse: _screenLocations[i]['verse'],
-                      onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
+                      onLocationChanged: (book, chapter, verse) =>
+                          _updateLocation(i, book, chapter, verse),
                       onOpenDrawer: () => Scaffold.of(context).openDrawer(),
                       onShowHistory: () => _showHistoryDialog(context, i),
                       onShowSearch: () async {
@@ -3588,9 +3728,12 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                           ),
                         ).then((searchResult) {
                           // Handle returned verse location from search screen
-                          if (searchResult != null && searchResult is Map<String, dynamic>) {
-                            final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
-                            final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
+                          if (searchResult != null &&
+                              searchResult is Map<String, dynamic>) {
+                            final verseLocation =
+                                searchResult['verseLocation'] as Map<String, dynamic>?;
+                            final targetScreenIndex =
+                                searchResult['targetScreenIndex'] as int?;
 
                             if (verseLocation != null && targetScreenIndex != null) {
                               final book = verseLocation['book'] as String?;
@@ -3629,7 +3772,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                       initialBook: _screenLocations[i]['book'],
                       initialChapter: _screenLocations[i]['chapter'],
                       initialVerse: _screenLocations[i]['verse'],
-                      onLocationChanged: (book, chapter, verse) => _updateLocation(i, book, chapter, verse),
+                      onLocationChanged: (book, chapter, verse) =>
+                          _updateLocation(i, book, chapter, verse),
                       onOpenDrawer: () => Scaffold.of(context).openDrawer(),
                       onShowHistory: () => _showHistoryDialog(context, i),
                       onShowSearch: () async {
@@ -3643,9 +3787,12 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                           ),
                         ).then((searchResult) {
                           // Handle returned verse location from search screen
-                          if (searchResult != null && searchResult is Map<String, dynamic>) {
-                            final verseLocation = searchResult['verseLocation'] as Map<String, dynamic>?;
-                            final targetScreenIndex = searchResult['targetScreenIndex'] as int?;
+                          if (searchResult != null &&
+                              searchResult is Map<String, dynamic>) {
+                            final verseLocation =
+                                searchResult['verseLocation'] as Map<String, dynamic>?;
+                            final targetScreenIndex =
+                                searchResult['targetScreenIndex'] as int?;
 
                             if (verseLocation != null && targetScreenIndex != null) {
                               final book = verseLocation['book'] as String?;
@@ -3701,51 +3848,64 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
   Future<void> _resetEverythingAndExit() async {
     try {
-      final syncService = FirestoreSyncService();
+      final syncService = SupabaseSyncService();
 
       // Delete remote data first if logged in
-      if (FirebaseAuth.instance.currentUser != null) {
+      if (Supabase.instance.client.auth.currentUser != null) {
         await syncService.deleteAllRemoteHighlights();
         await syncService.deleteAllRemoteNotes();
         await syncService.deleteAllRemoteHistory();
         await syncService.deleteAllRemoteSearchHistory();
       }
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit Firestore/sync exception: $e');
+      if (kDebugMode) {
+        debugPrint('_resetEverythingAndExit Firestore/sync exception: ${e.toString()}');
+      }
     }
 
     try {
       await _clearPreferences();
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit _clearPreferences exception: $e');
+      if (kDebugMode) {
+        debugPrint(
+            '_resetEverythingAndExit _clearPreferences exception: ${e.toString()}');
+      }
     }
 
     try {
       final dbHighlights = await HighlightsDatabase.getDatabase();
       await dbHighlights.delete('user_highlights');
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit dbHighlights exception: $e');
+      if (kDebugMode) {
+        debugPrint('_resetEverythingAndExit dbHighlights exception: ${e.toString()}');
+      }
     }
 
     try {
       final dbHistory = await HistoryDatabase.getDatabase();
       await dbHistory.delete('history');
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit dbHistory exception: $e');
+      if (kDebugMode) {
+        debugPrint('_resetEverythingAndExit dbHistory exception: ${e.toString()}');
+      }
     }
 
     try {
       final dbNotes = await NotesDatabase.getDatabase();
       await dbNotes.delete('user_notes');
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit dbNotes exception: $e');
+      if (kDebugMode) {
+        debugPrint('_resetEverythingAndExit dbNotes exception: ${e.toString()}');
+      }
     }
 
     try {
       final dbSearchHistory = await SearchDatabase.getDatabase();
       await dbSearchHistory.delete('search_history');
     } catch (e) {
-      if (kDebugMode) debugPrint('_resetEverythingAndExit dbSearchHistory exception: $e');
+      if (kDebugMode) {
+        debugPrint('_resetEverythingAndExit dbSearchHistory exception: ${e.toString()}');
+      }
     }
 
     // Exit the app immediately (no need for UI refresh since app exits)
@@ -3820,7 +3980,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
     if (result == true) {
       try {
-        final Map<String, dynamic> newPrefs = jsonDecode(controller.text) as Map<String, dynamic>;
+        final Map<String, dynamic> newPrefs =
+            jsonDecode(controller.text) as Map<String, dynamic>;
         await prefs.clear();
         for (final entry in newPrefs.entries) {
           final k = entry.key;
@@ -3842,8 +4003,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         }
         // Reload max screens after saving (platform-specific defaults)
         final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-        maxVerticalScreens.value = prefs.getInt('maxVerticalScreens') ?? (isMobile ? 1 : 4);
-        maxHorizontalScreens.value = prefs.getInt('maxHorizontalScreens') ?? (isMobile ? 3 : 4);
+        maxVerticalScreens.value =
+            prefs.getInt('maxVerticalScreens') ?? (isMobile ? 1 : 4);
+        maxHorizontalScreens.value =
+            prefs.getInt('maxHorizontalScreens') ?? (isMobile ? 3 : 4);
       } catch (e) {
         // Guard: use context.mounted for the provided BuildContext
         if (!context.mounted) return;
@@ -3864,7 +4027,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         _invisibleElevatedButtonNode.requestFocus();
       } else {
         if (kDebugMode) {
-          debugPrint('Changing focus failed:\nmounted: $mounted\ncanRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
+          debugPrint(
+              'Changing focus failed:\nmounted: $mounted\ncanRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
         }
       }
     });
@@ -4050,7 +4214,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         });
 
         // B. Let user choose export location
-        final timestamp = DateTime.now().toString().replaceAll(RegExp(r'[:.]'), '-').substring(0, 19);
+        final timestamp =
+            DateTime.now().toString().replaceAll(RegExp(r'[:.]'), '-').substring(0, 19);
         final fileName = 'Selah_$timestamp.zip';
 
         // This is an awaitable user interaction that keeps the dialog on screen
@@ -4110,7 +4275,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                 style: TextStyle(color: Colors.red),
               ),
               content: Text(
-                'Failed to export data: $e',
+                'Failed to export data: ${e.toString()}',
                 style: TextStyle(
                   fontSize: uiFontSize,
                   fontFamily: uiFontFamily,
@@ -4429,7 +4594,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
     try {
       await AuthService().signOut();
-      FirestoreSyncService().dispose();
+      SupabaseSyncService().dispose();
       if (confirm) {
         // Erase data
         final dbHighlights = await HighlightsDatabase.getDatabase();
@@ -4458,7 +4623,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       }
     } catch (e) {
       if (context.mounted) {
-        showStyledSnackBar(context, 'Sign out failed: $e', isError: true);
+        showStyledSnackBar(context, 'Sign out failed: ${e.toString()}', isError: true);
       }
     }
   }
@@ -4563,7 +4728,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
             TextButton(
               onPressed: () {
                 // Validate passwords
-                if (_currentPasswordController.text.isEmpty || _newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty) {
+                if (_currentPasswordController.text.isEmpty ||
+                    _newPasswordController.text.isEmpty ||
+                    _confirmPasswordController.text.isEmpty) {
                   return;
                 }
 
@@ -4670,7 +4837,8 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                 Icons.warning,
                 color: Colors.red,
                 size: 48,
-                semanticLabel: 'Delete Account Warning Dialog - this action cannot be undone.',
+                semanticLabel:
+                    'Delete Account Warning Dialog - this action cannot be undone.',
               ),
               const SizedBox(height: 16),
               Text(
@@ -4994,27 +5162,31 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     if (user == null) return null;
 
     // First check the cached username
-    final cachedUsername = await FirestoreSyncService.getCachedUsername();
+    final cachedUsername = await SupabaseSyncService.getCachedUsername();
 
     // If cached username is available and not "Unknown", return it
     if (cachedUsername != null && cachedUsername != 'Unknown') {
       return cachedUsername;
     }
 
-    // If cached is "Unknown", check if we can access Firebase before trying
+    // If cached is "Unknown", check if we can access Supabase before trying
     if (cachedUsername == 'Unknown') {
-      final canConnect = await FirestoreSyncService().checkFirebaseConnection();
+      final canConnect = await SupabaseSyncService().checkSupabaseConnection();
       if (!canConnect) {
         return 'Unknown'; // Can't access, show Unknown
       }
     }
 
-    // Try to fetch from Firestore and cache it
+    // Try to fetch from Supabase and cache it
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      final username = doc.data()?['username'];
+      final response = await Supabase.instance.client
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single();
+      final username = response['username'];
       // Cache the username for offline use
-      await FirestoreSyncService().setCachedUsername(username ?? 'Unknown');
+      await SupabaseSyncService().setCachedUsername(username ?? 'Unknown');
       return username;
     } catch (e) {
       return cachedUsername ?? 'Unknown';
@@ -5030,11 +5202,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     final maxTouchPoints = await TabletModeDetector.getMaximumTouchPoints();
     final deviceInfo = await TabletModeDetector.getDeviceInfo();
 
-    debugPrint('=== Tablet Mode Detection ===');
-    debugPrint('Tablet Mode: $isTablet');
-    debugPrint('Keyboard Attached: $hasKeyboard');
-    debugPrint('Touch Screen: $hasTouch');
-    debugPrint('Max Touch Points: $maxTouchPoints');
-    debugPrint('Device Info: $deviceInfo');
+    if (kDebugMode) debugPrint('=== Tablet Mode Detection ===');
+    if (kDebugMode) debugPrint('Tablet Mode: $isTablet');
+    if (kDebugMode) debugPrint('Keyboard Attached: $hasKeyboard');
+    if (kDebugMode) debugPrint('Touch Screen: $hasTouch');
+    if (kDebugMode) debugPrint('Max Touch Points: $maxTouchPoints');
+    if (kDebugMode) debugPrint('Device Info: $deviceInfo');
   }
 }

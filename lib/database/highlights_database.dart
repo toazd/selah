@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../utils/data_validation.dart';
 
@@ -91,8 +91,7 @@ class HighlightsDatabase {
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid =
-          await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -102,8 +101,7 @@ class HighlightsDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete('user_highlights', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -111,16 +109,14 @@ class HighlightsDatabase {
 
   static Future<List<Map<String, dynamic>>> getHighlightsForChapter(String book, int chapter) async {
     final db = await getDatabase();
-    final highlights = await db.query('user_highlights',
-        where: 'book = ? AND chapter = ?', whereArgs: [book, chapter], orderBy: 'verse ASC, start ASC');
+    final highlights = await db.query('user_highlights', where: 'book = ? AND chapter = ?', whereArgs: [book, chapter], orderBy: 'verse ASC, start ASC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid =
-          await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -130,8 +126,7 @@ class HighlightsDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete('user_highlights', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -139,18 +134,14 @@ class HighlightsDatabase {
 
   static Future<List<Map<String, dynamic>>> getHighlightsForVerse(String book, int chapter, int verse) async {
     final db = await getDatabase();
-    final highlights = await db.query('user_highlights',
-        where: 'book = ? AND chapter = ? AND verse = ?',
-        whereArgs: [book, chapter, verse],
-        orderBy: 'start ASC');
+    final highlights = await db.query('user_highlights', where: 'book = ? AND chapter = ? AND verse = ?', whereArgs: [book, chapter, verse], orderBy: 'start ASC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid =
-          await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -160,8 +151,7 @@ class HighlightsDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete('user_highlights', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -214,7 +204,7 @@ class HighlightsDatabase {
         'created_at': createdAt,
         'updated_at': updatedAt,
       };
-      FirestoreSyncService().markOperation('highlight', createdAt.toInt(), 'create', syncData);
+      SupabaseSyncService().markOperation('highlight', createdAt.toInt(), 'create', syncData);
     }
 
     return id;
@@ -278,8 +268,7 @@ class HighlightsDatabase {
       'updated_at': timestamp,
       'created_at': existingData['created_at'],
     };
-    FirestoreSyncService()
-        .markOperation('highlight', existingData['created_at'] as int, 'update', highlightData);
+    SupabaseSyncService().markOperation('highlight', existingData['created_at'] as int, 'update', highlightData);
   }
 
   static Future<void> deleteHighlight(int id) async {
@@ -292,8 +281,7 @@ class HighlightsDatabase {
 
     // Queue delete operation for sync service
     if (highlightToDelete.isNotEmpty) {
-      FirestoreSyncService().markOperation(
-          'highlight', highlightToDelete.first['created_at'] as int, 'delete', highlightToDelete.first);
+      SupabaseSyncService().markOperation('highlight', highlightToDelete.first['created_at'] as int, 'delete', highlightToDelete.first);
     }
 
     // Note: Remote deletion happens when queued operations are processed

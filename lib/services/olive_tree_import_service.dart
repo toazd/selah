@@ -10,7 +10,7 @@ import '../data/bible_data.dart';
 import '../widgets/olive_tree_import_dialogs.dart';
 import '../utils/note_storage_format.dart';
 import '../services/local_data_change_notifier.dart';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 
 /// Service for importing Olive Tree Bible data
 class OliveTreeImportService {
@@ -41,14 +41,12 @@ class OliveTreeImportService {
       Map<String, int>? colorMappings;
       if (selectedTypes.contains('highlights') && oliveTreeData.highlightCount > 0) {
         if (!context.mounted) return;
-        final oliveTreeColors = ColorMapper.extractUniqueColors(
-            oliveTreeData.highlights.map((h) => h.highlighterName).toList());
+        final oliveTreeColors = ColorMapper.extractUniqueColors(oliveTreeData.highlights.map((h) => h.highlighterName).toList());
         final currentHighlightColors = await ColorMapper.getCurrentHighlightColors();
         final initialMappings = await ColorMapper.generateColorMappings(oliveTreeColors);
 
         if (context.mounted) {
-          colorMappings = await _showColorMappingDialog(
-              context, oliveTreeColors, initialMappings, currentHighlightColors);
+          colorMappings = await _showColorMappingDialog(context, oliveTreeColors, initialMappings, currentHighlightColors);
         }
         if (colorMappings == null) return;
       }
@@ -57,8 +55,7 @@ class OliveTreeImportService {
       if (!context.mounted) return;
       final currentHighlightColors = await ColorMapper.getCurrentHighlightColors();
       if (context.mounted) {
-        await _performImport(context, oliveTreeData, selectedTypes, colorMappings ?? {},
-            currentHighlightColors);
+        await _performImport(context, oliveTreeData, selectedTypes, colorMappings ?? {}, currentHighlightColors);
       }
     } catch (e, stackTrace) {
       if (context.mounted) {
@@ -84,8 +81,7 @@ class OliveTreeImportService {
   }
 
   /// Show category selection dialog
-  static Future<List<String>?> _showCategorySelectionDialog(
-      BuildContext context, OliveTreeData data) async {
+  static Future<List<String>?> _showCategorySelectionDialog(BuildContext context, OliveTreeData data) async {
     return await showDialog<List<String>>(
       context: context,
       barrierDismissible: false,
@@ -123,8 +119,7 @@ class OliveTreeImportService {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          const OliveTreeImportProgressDialog(message: 'Importing data...'),
+      builder: (context) => const OliveTreeImportProgressDialog(message: 'Importing data...'),
     );
 
     try {
@@ -136,8 +131,7 @@ class OliveTreeImportService {
 
       // Import highlights if selected
       if (selectedTypes.contains('highlights')) {
-        final highlightResults = await _importHighlights(
-            data.highlights, colorMappings, currentHighlightColors);
+        final highlightResults = await _importHighlights(data.highlights, colorMappings, currentHighlightColors);
 
         // Manually merge results to avoid overwriting
         results['highlights'] = highlightResults['highlights'];
@@ -152,7 +146,7 @@ class OliveTreeImportService {
         final highlightCount = highlightResults['highlights'] as int;
         if (highlightCount > 1) {
           try {
-            await FirestoreSyncService().syncHighlights();
+            await SupabaseSyncService().syncHighlights();
           } catch (e) {
             //
           }
@@ -176,7 +170,7 @@ class OliveTreeImportService {
         final noteCount = noteResults['notes'] as int;
         if (noteCount > 1) {
           try {
-            await FirestoreSyncService().syncNotes();
+            await SupabaseSyncService().syncNotes();
           } catch (e) {
             //
           }
@@ -224,35 +218,27 @@ class OliveTreeImportService {
       // Validate required fields
       final validationError = _validateHighlightFields(highlight);
       if (validationError != null) {
-        failedRows.add(
-            FailedRow(rowData: _highlightToRowData(highlight), reason: validationError));
+        failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: validationError));
         continue;
       }
 
       // Check for range highlights
       if (highlight.referenceStart.trim() != highlight.referenceEnd.trim()) {
-        failedRows.add(FailedRow(
-            rowData: _highlightToRowData(highlight),
-            reason: 'Range highlights not supported'));
+        failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: 'Range highlights not supported'));
         continue;
       }
 
       try {
         // Check for invalid verse reference
         if (highlight.verseReference == null) {
-          final reason = highlight.content.trim().isEmpty
-              ? 'Empty content field'
-              : 'Invalid verse reference';
-          failedRows
-              .add(FailedRow(rowData: _highlightToRowData(highlight), reason: reason));
+          final reason = highlight.content.trim().isEmpty ? 'Empty content field' : 'Invalid verse reference';
+          failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: reason));
           continue;
         }
 
         // Check for null verse number
         if (highlight.verseReference!.verse == null) {
-          failedRows.add(FailedRow(
-              rowData: _highlightToRowData(highlight),
-              reason: 'Chapter-level references not supported (missing verse number)'));
+          failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: 'Chapter-level references not supported (missing verse number)'));
           continue;
         }
 
@@ -262,9 +248,7 @@ class OliveTreeImportService {
         // Find character positions in the verse text
         final positions = _findHighlightPositions(highlight);
         if (positions == null) {
-          failedRows.add(FailedRow(
-              rowData: _highlightToRowData(highlight),
-              reason: 'Could not find highlight text in verse'));
+          failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: 'Could not find highlight text in verse'));
           continue;
         }
 
@@ -296,8 +280,7 @@ class OliveTreeImportService {
 
         successCount++;
       } catch (e) {
-        failedRows.add(FailedRow(
-            rowData: _highlightToRowData(highlight), reason: 'Import error: $e'));
+        failedRows.add(FailedRow(rowData: _highlightToRowData(highlight), reason: 'Import error: $e'));
       }
     }
 
@@ -310,8 +293,7 @@ class OliveTreeImportService {
       return 'Missing required field: highlighter_name';
     }
     // Allow empty content only for whole verse highlights (when reference_start == reference_end)
-    if (highlight.content.trim().isEmpty &&
-        highlight.referenceStart.trim() != highlight.referenceEnd.trim()) {
+    if (highlight.content.trim().isEmpty && highlight.referenceStart.trim() != highlight.referenceEnd.trim()) {
       return 'Missing required field: content';
     }
     return null;
@@ -354,21 +336,17 @@ class OliveTreeImportService {
 
       // Check for invalid verse reference
       if (note.verseReference == null) {
-        failedRows.add(
-            FailedRow(rowData: _noteToRowData(note), reason: 'Invalid verse reference'));
+        failedRows.add(FailedRow(rowData: _noteToRowData(note), reason: 'Invalid verse reference'));
         continue;
       }
 
       // Check for null verse number
       if (note.verseReference!.verse == null) {
-        failedRows.add(FailedRow(
-            rowData: _noteToRowData(note),
-            reason: 'Chapter-level references not supported (missing verse number)'));
+        failedRows.add(FailedRow(rowData: _noteToRowData(note), reason: 'Chapter-level references not supported (missing verse number)'));
         continue;
       }
 
-      final verseKey =
-          '${note.verseReference!.book}_${note.verseReference!.chapter}_${note.verseReference!.verse}';
+      final verseKey = '${note.verseReference!.book}_${note.verseReference!.chapter}_${note.verseReference!.verse}';
       notesByVerse.putIfAbsent(verseKey, () => []).add(note);
     }
 
@@ -378,11 +356,9 @@ class OliveTreeImportService {
       final firstNote = verseNotes.first;
 
       // Check if the verse exists in the Bible data
-      if (!_verseExists(firstNote.verseReference!.book, firstNote.verseReference!.chapter,
-          firstNote.verseReference!.verse!)) {
+      if (!_verseExists(firstNote.verseReference!.book, firstNote.verseReference!.chapter, firstNote.verseReference!.verse!)) {
         for (final note in verseNotes) {
-          failedRows.add(FailedRow(
-              rowData: _noteToRowData(note), reason: 'Verse not found in Bible data'));
+          failedRows.add(FailedRow(rowData: _noteToRowData(note), reason: 'Verse not found in Bible data'));
         }
         continue;
       }
@@ -407,8 +383,7 @@ class OliveTreeImportService {
       } catch (e) {
         // Record ALL notes in the failed verse group
         for (final note in verseNotes) {
-          failedRows
-              .add(FailedRow(rowData: _noteToRowData(note), reason: 'Import error: $e'));
+          failedRows.add(FailedRow(rowData: _noteToRowData(note), reason: 'Import error: $e'));
         }
       }
     }
@@ -494,9 +469,7 @@ class OliveTreeImportService {
     int highlightLength = highlight.highlightedText.length;
     if (highlightIndex == -1) {
       // Try stripping leading verse number (e.g., "11 ") from highlightedText for single verse highlights
-      final strippedHighlightedText = highlight.highlightedText
-          .replaceFirst(RegExp(r'^\d+ '), '')
-          .replaceAll('\n', ' ');
+      final strippedHighlightedText = highlight.highlightedText.replaceFirst(RegExp(r'^\d+ '), '').replaceAll('\n', ' ');
       highlightIndex = verseText.indexOf(strippedHighlightedText);
       if (highlightIndex != -1) {
         highlightLength = strippedHighlightedText.length;
@@ -505,8 +478,7 @@ class OliveTreeImportService {
       }
     }
 
-    return _HighlightPosition(
-        start: highlightIndex, end: highlightIndex + highlightLength);
+    return _HighlightPosition(start: highlightIndex, end: highlightIndex + highlightLength);
   }
 
   /// Check if a verse exists in the Bible data
@@ -522,11 +494,9 @@ class OliveTreeImportService {
   }
 
   /// Remove existing highlights that overlap with the new highlight range
-  static Future<void> _removeOverlappingHighlights(
-      String book, int chapter, int verse, int newStart, int newEnd) async {
+  static Future<void> _removeOverlappingHighlights(String book, int chapter, int verse, int newStart, int newEnd) async {
     // Get existing highlights for this verse
-    final existingHighlights =
-        await HighlightsDatabase.getHighlightsForVerse(book, chapter, verse);
+    final existingHighlights = await HighlightsDatabase.getHighlightsForVerse(book, chapter, verse);
 
     // Find overlapping highlights
     final overlappingIds = <int>[];
@@ -555,9 +525,7 @@ class OliveTreeImportService {
         constraints: const BoxConstraints(maxWidth: 400),
         title: const Text('Import Error', style: TextStyle(color: Colors.red)),
         content: Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
-        ],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
       ),
     );
   }

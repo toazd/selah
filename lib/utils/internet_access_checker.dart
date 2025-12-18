@@ -1,6 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Utility for validating actual internet access beyond basic radio connectivity.
 /// Handles the connectivity_plus limitation where device may be "connected" but
@@ -22,18 +21,15 @@ class InternetAccessChecker {
         return false; // No radio/ethernet - impossible to have internet
       }
 
-      // Step 2: Validate actual internet access with a lightweight Firebase probe
+      // Step 2: Validate actual internet access with a lightweight Supabase probe
       // This tests for cases where connectivity status shows connected but
       // internet access is blocked (captive portals, authentication required, etc.)
 
-      final firestore = FirebaseFirestore.instance;
-
-      // Use a minimal test document read to validate connection
+      // Use a minimal test query to validate connection
       // Timeout prevents hanging on problematic networks
-      final userUid = FirebaseAuth.instance.currentUser?.uid;
-      if (userUid != null) {
-        await firestore.collection('users').doc(userUid).get().timeout(const Duration(seconds: 5));
-
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await Supabase.instance.client.from('profiles').select('id').eq('id', userId).single().timeout(const Duration(seconds: 5));
         return true;
       }
 

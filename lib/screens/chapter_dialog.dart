@@ -6,7 +6,7 @@ import '../main.dart';
 import '../utils/book_name_converter.dart';
 import '../utils/verse_display_utils.dart';
 import '../services/local_data_change_notifier.dart';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import '../utils/snackbar_notification.dart';
@@ -136,22 +136,21 @@ class _ChapterDialogState extends State<ChapterDialog> {
     final bgColor = isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
 
     final hsl = HSLColor.fromColor(bgColor);
-    final adjustedLightness =
-        hsl.lightness > 0.5 ? (hsl.lightness - 0.03).clamp(0.0, 1.0) : (hsl.lightness + 0.03).clamp(0.0, 1.0);
+    final adjustedLightness = hsl.lightness > 0.5 ? (hsl.lightness - 0.03).clamp(0.0, 1.0) : (hsl.lightness + 0.03).clamp(0.0, 1.0);
 
     return hsl.withLightness(adjustedLightness).toColor();
   }
 
   void _setupDataListeners() {
     // Listen to sync service streams for real-time updates
-    _highlightsSubscription = FirestoreSyncService.highlightsChangedStream.listen((_) async {
+    _highlightsSubscription = SupabaseSyncService.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
       if (mounted) {
         setState(() {});
       }
     });
 
-    _notesSubscription = FirestoreSyncService.notesChangedStream.listen((_) async {
+    _notesSubscription = SupabaseSyncService.notesChangedStream.listen((_) async {
       await _loadNotes();
       if (mounted) setState(() {});
     });
@@ -335,8 +334,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
               child: Container(
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius:
-                      BorderRadius.only(bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)),
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)),
                 ),
                 child: _loading
                     ? Center(child: CircularProgressIndicator())
@@ -357,8 +355,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
   }
 
   void _showChapterVerseMenu(BuildContext context, int verseNumber) {
-    final verseData =
-        _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
+    final verseData = _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
     final verseText = verseData['text'] as String? ?? '';
 
     // Filter out red letter tags <r> and </r>, and pilcrow symbols
@@ -376,8 +373,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     _notes.containsKey(verseNumber) ? 'Edit Note' : 'Add Note',
-                    style: TextStyle(
-                        fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -393,8 +389,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     'Copy Verse $verseNumber',
-                    style: TextStyle(
-                        fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () async {
                     Navigator.of(context).pop();
@@ -414,8 +409,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     'Copy Multiple Verses',
-                    style: TextStyle(
-                        fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -473,8 +467,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
   }
 
   void _enterHighlightMode(BuildContext context, int verseNumber) async {
-    final verseData =
-        _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
+    final verseData = _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
     final rawVerseText = verseData['text'] as String? ?? '';
 
     await showHighlightDialog(

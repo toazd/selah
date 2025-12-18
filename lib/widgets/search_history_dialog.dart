@@ -4,6 +4,7 @@ import 'dart:async';
 import '../database/search_database.dart';
 import '../utils/snackbar_notification.dart'; // For showStyledSnackBar
 import '../services/local_data_change_notifier.dart'; // For notifications
+import '../services/supabase_sync_service.dart'; // For sync service streams
 import '../utils/preferences_constants.dart'; // For uiFontSize and uiFontFamily
 import '../main.dart'; // For getAdaptiveTextColor
 
@@ -29,6 +30,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
   // Stream subscriptions for real-time updates
   late StreamSubscription _localSearchHistorySubscription;
+  late StreamSubscription _syncSearchHistorySubscription;
 
   @override
   void initState() {
@@ -37,7 +39,17 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
     _scrollController.addListener(_onScroll);
 
     // Listen to local data change notifier for immediate local search history updates
-    _localSearchHistorySubscription = LocalDataChangeNotifier.searchHistoryChangedStream.listen((_) async {
+    _localSearchHistorySubscription =
+        LocalDataChangeNotifier.searchHistoryChangedStream.listen((_) async {
+      await _loadInitialSearchHistory();
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
+    // Listen to sync service streams for remote search history updates from other devices
+    _syncSearchHistorySubscription =
+        SupabaseSyncService.searchHistoryChangedStream.listen((_) async {
       await _loadInitialSearchHistory();
       if (mounted) {
         setState(() {});
@@ -49,6 +61,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
   void dispose() {
     _scrollController.dispose();
     _localSearchHistorySubscription.cancel();
+    _syncSearchHistorySubscription.cancel();
     super.dispose();
   }
 
@@ -73,11 +86,13 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
     setState(() => _isLoading = true);
     try {
-      final moreSearchHistory = await SearchDatabase.getSearchHistoryPaginated(_currentOffset, _pageSize);
+      final moreSearchHistory =
+          await SearchDatabase.getSearchHistoryPaginated(_currentOffset, _pageSize);
 
       if (mounted) {
         setState(() {
-          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)..addAll(moreSearchHistory);
+          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)
+            ..addAll(moreSearchHistory);
           _currentOffset = _searchHistoryItems.length;
           _hasMoreData = moreSearchHistory.length == _pageSize;
         });
@@ -93,7 +108,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMoreSearchHistory();
     }
   }
@@ -120,16 +136,25 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
       context: context,
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
-        content: Text('Are you sure you want to clear all search history? This action cannot be undone.',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        content: Text(
+            'Are you sure you want to clear all search history? This action cannot be undone.',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
             child: Text('Cancel',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Clear', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Clear',
+                style: TextStyle(
+                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -152,15 +177,23 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
         content: Text('Delete this search history item?',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
             child: Text('Cancel',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Delete', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Delete',
+                style: TextStyle(
+                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -171,13 +204,15 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
       try {
         await SearchDatabase.deleteSearchHistoryItem(itemId);
         setState(() {
-          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)..removeAt(indexInList);
+          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)
+            ..removeAt(indexInList);
           _currentOffset = _searchHistoryItems.length;
         });
         LocalDataChangeNotifier.notifySearchHistoryChanged();
       } catch (e) {
         if (mounted) {
-          showStyledSnackBar(context, 'Failed to delete search history item: $e', isError: true);
+          showStyledSnackBar(context, 'Failed to delete search history item: $e',
+              isError: true);
         }
       }
     }
@@ -192,7 +227,10 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
         child: _searchHistoryItems.isEmpty && !_isLoading
             ? Center(
                 child: Text('Saved searches will appear here.',
-                    style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
+                    style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))))
             : ListView.builder(
                 controller: _scrollController,
                 itemCount: _searchHistoryItems.length + (_hasMoreData ? 1 : 0),
@@ -212,7 +250,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                   // Add date header for first entry or when date changes
                   if (i == 0) {
                     // Always show date header for the first entry
-                    final currentDate = DateTime.fromMillisecondsSinceEpoch(_searchHistoryItems[i]['timestamp']);
+                    final currentDate = DateTime.fromMillisecondsSinceEpoch(
+                        _searchHistoryItems[i]['timestamp']);
                     widgets.add(
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -230,8 +269,10 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                     );
                   } else {
                     // For subsequent entries, check if date changed from previous entry
-                    final currentDate = DateTime.fromMillisecondsSinceEpoch(_searchHistoryItems[i]['timestamp']);
-                    final previousDate = DateTime.fromMillisecondsSinceEpoch(_searchHistoryItems[i - 1]['timestamp']);
+                    final currentDate = DateTime.fromMillisecondsSinceEpoch(
+                        _searchHistoryItems[i]['timestamp']);
+                    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+                        _searchHistoryItems[i - 1]['timestamp']);
 
                     if (currentDate.year != previousDate.year ||
                         currentDate.month != previousDate.month ||
@@ -280,27 +321,39 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
                   String? customBookFilter = h['customBookFilter'] as String?;
                   if (customBookFilter != null && customBookFilter.isNotEmpty) {
-                    customBookFilter = customBookFilter.replaceAll(' ', '\u00A0').replaceAll('-', '\u2011');
+                    customBookFilter = customBookFilter
+                        .replaceAll(' ', '\u00A0')
+                        .replaceAll('-', '\u2011');
                   }
 
                   // Check raw bookFilterType before processing
-                  if (bookFilterType == 'Custom Range' && customBookFilter != null && customBookFilter.isNotEmpty) {
+                  if (bookFilterType == 'Custom Range' &&
+                      customBookFilter != null &&
+                      customBookFilter.isNotEmpty) {
                     enabledOptions.add('Book\u00A0filter: $customBookFilter');
-                  } else if (bookFilterType != null && bookFilterType.isNotEmpty && bookFilterType != 'All Books') {
+                  } else if (bookFilterType != null &&
+                      bookFilterType.isNotEmpty &&
+                      bookFilterType != 'All Books') {
                     // Process for display
-                    String displayValue = bookFilterType.replaceAll(' ', '\u00A0').replaceAll('/', '\uFeFF/\uFeFF');
+                    String displayValue = bookFilterType
+                        .replaceAll(' ', '\u00A0')
+                        .replaceAll('/', '\uFeFF/\uFeFF');
                     enabledOptions.add('Book\u00A0filter:\u00A0$displayValue');
                   }
 
                   // Create the formatted display text
-                  final optionsText = enabledOptions.isNotEmpty ? enabledOptions.join(', ') : '';
+                  final optionsText =
+                      enabledOptions.isNotEmpty ? enabledOptions.join(', ') : '';
                   //debugPrint('optionsText: "$optionsText"');
 
                   // Search history dialog
                   final listTile = ListTile(
                       subtitle: Text.rich(
                         TextSpan(
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context)),
                           children: <TextSpan>[
                             TextSpan(
                               text: query,
@@ -315,13 +368,17 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                               TextSpan(
                                 text: optionsText,
                                 style: TextStyle(
-                                    fontSize: uiFontSize - 4, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                                    fontSize: uiFontSize - 4,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context)),
                               ),
                             if (optionsText.isNotEmpty) const TextSpan(text: '\n'),
                             TextSpan(
                                 text: dateStr,
                                 style: TextStyle(
-                                    fontSize: uiFontSize - 6, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                                    fontSize: uiFontSize - 6,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context))),
                           ],
                         ),
                       ),
@@ -345,11 +402,16 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
           children: [
             TextButton(
               onPressed: _clearSearchHistory,
-              child: Text('Clear', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+              child: Text('Clear',
+                  style: TextStyle(
+                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
             ),
             TextButton(
               child: Text('Close',
-                  style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               onPressed: () => Navigator.pop(context),
             ),
           ],

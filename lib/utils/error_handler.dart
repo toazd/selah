@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'snackbar_notification.dart';
 
 // Error types for categorization
@@ -177,12 +178,20 @@ class ErrorHandler {
     Map<String, dynamic>? context,
     BuildContext? buildContext,
   }) async {
-    final message = 'Sync operation failed';
+    // Build more descriptive message based on context
+    String message = 'Sync operation failed';
+    ErrorSeverity severity = ErrorSeverity.medium;
+
+    // Enhanced error message with detailed context
+    final errorDetails = _buildSyncErrorDetails(error, context);
+    message = errorDetails['message'];
+    severity = errorDetails['severity'];
+
     await handleError(
         AppError(
           message: message,
           type: ErrorType.sync,
-          severity: ErrorSeverity.medium,
+          severity: severity,
           originalError: error,
           stackTrace: StackTrace.current,
           context: context,
@@ -190,10 +199,118 @@ class ErrorHandler {
         context: buildContext);
   }
 
+  // Build detailed sync error message with context
+  static Map<String, dynamic> _buildSyncErrorDetails(
+      dynamic error, Map<String, dynamic>? context) {
+    String message = 'Sync operation failed';
+    ErrorSeverity severity = ErrorSeverity.medium;
+
+    try {
+      // Check if this is a realtime subscription error (less critical)
+      if (context != null && context.containsKey('table')) {
+        final tableName = context['table'];
+        message =
+            'Realtime sync for $tableName encountered an issue (sync will continue)';
+        severity = ErrorSeverity.low; // Realtime errors are less critical
+
+        // Add specific error details if available
+        if (error is RealtimeSubscribeException) {
+          message =
+              'Realtime sync for $tableName failed: ${error.status} - ${error.details ?? 'no details'} (sync will continue)';
+        } else if (error != null) {
+          message =
+              'Realtime sync for $tableName failed: ${error.toString()} (sync will continue)';
+        }
+      }
+      // Check if this is a specific error type that we can identify
+      else if (error is RealtimeSubscribeException) {
+        message =
+            'Realtime subscription error: ${error.status} - ${error.details ?? 'no details'} (sync will continue)';
+        severity = ErrorSeverity.low;
+      }
+      // For other sync errors, provide more context if available
+      else if (error != null) {
+        final errorString = error.toString();
+
+        // Add operation context if available
+        String operationContext = '';
+        if (context != null) {
+          if (context.containsKey('operation')) {
+            operationContext = ' during ${context['operation']}';
+          } else if (context.containsKey('type')) {
+            operationContext = ' for ${context['type']}';
+          }
+        }
+
+        if (errorString.contains('timeout') || errorString.contains('Timeout')) {
+          message = 'Sync timeout occurred$operationContext (sync will retry)';
+          severity = ErrorSeverity.low;
+        } else if (errorString.contains('connection') ||
+            errorString.contains('Connection')) {
+          message = 'Sync connection issue$operationContext (sync will retry)';
+          severity = ErrorSeverity.low;
+        } else if (errorString.contains('network') || errorString.contains('Network')) {
+          message =
+              'Sync network error$operationContext: ${error.toString()} (sync will retry)';
+          severity = ErrorSeverity.medium;
+        } else if (errorString.contains('permission') ||
+            errorString.contains('Permission') ||
+            errorString.contains('authentication') ||
+            errorString.contains('Authentication')) {
+          message = 'Sync authentication error$operationContext: ${error.toString()}';
+          severity = ErrorSeverity.high;
+        } else if (errorString.contains('database') ||
+            errorString.contains('Database') ||
+            errorString.contains('table') ||
+            errorString.contains('Table')) {
+          message = 'Sync database error$operationContext: ${error.toString()}';
+          severity = ErrorSeverity.high;
+        } else {
+          // Generic error with full details
+          message = 'Sync error$operationContext: ${error.toString()}';
+          severity = ErrorSeverity.medium;
+        }
+      }
+    } catch (e) {
+      // Fallback if error processing itself fails
+      message = 'Sync operation failed: unable to process error details';
+      severity = ErrorSeverity.medium;
+    }
+
+    return {
+      'message': message,
+      'severity': severity,
+    };
+  }
+
   // Internal error logging
   static void _logError(AppError error) {
-    // Basic console logging - could be extended to file logging, crash reporting, etc.
-    if (kDebugMode) debugPrint('ErrorHandler _logError: $error');
+    // Enhanced console logging with full error details
+    final buffer = StringBuffer();
+    buffer.writeln('=== ErrorHandler._logError ===');
+    buffer.writeln('Message: ${error.message}');
+    buffer.writeln('Type: ${error.type}');
+    buffer.writeln('Severity: ${error.severity}');
+
+    if (error.originalError != null) {
+      buffer.writeln('Original Error: ${error.originalError}');
+    }
+
+    if (error.context != null && error.context!.isNotEmpty) {
+      buffer.writeln('Context:');
+      error.context!.forEach((key, value) {
+        buffer.writeln('  $key: $value');
+      });
+    }
+
+    if (error.stackTrace != null) {
+      buffer.writeln('Stack Trace:');
+      buffer.writeln(error.stackTrace.toString());
+    }
+
+    buffer.writeln('=================');
+
+    if (kDebugMode) debugPrint(buffer.toString());
   }
 
   // Format error message for user display

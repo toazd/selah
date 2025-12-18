@@ -1,7 +1,7 @@
 import 'package:path/path.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
@@ -99,8 +99,7 @@ class NotesDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_notes',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete('user_notes', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -108,8 +107,7 @@ class NotesDatabase {
 
   static Future<Map<String, dynamic>?> getNoteForVerse(String book, int chapter, int verse) async {
     final db = await getDatabase();
-    final result = await db.query('user_notes',
-        where: 'book = ? AND chapter = ? AND verse = ?', whereArgs: [book, chapter, verse], limit: 1);
+    final result = await db.query('user_notes', where: 'book = ? AND chapter = ? AND verse = ?', whereArgs: [book, chapter, verse], limit: 1);
 
     if (result.isNotEmpty) {
       final record = result.first;
@@ -197,7 +195,7 @@ class NotesDatabase {
           'created_at': existing['created_at'],
           'updated_at': updatedAt,
         };
-        FirestoreSyncService().markOperation('note', existing['created_at'] as int, 'update', syncData);
+        SupabaseSyncService().markOperation('note', existing['created_at'] as int, 'update', syncData);
       }
 
       return existing['id'] as int;
@@ -219,7 +217,7 @@ class NotesDatabase {
           'created_at': createdAt,
           'updated_at': updatedAt,
         };
-        await FirestoreSyncService().markOperation('note', createdAt.toInt(), 'create', syncData);
+        await SupabaseSyncService().markOperation('note', createdAt.toInt(), 'create', syncData);
       }
 
       return id;
@@ -237,8 +235,7 @@ class NotesDatabase {
     // Queue delete operation for sync service
     if (!skipSync) {
       if (noteToDelete.isNotEmpty) {
-        FirestoreSyncService()
-            .markOperation('note', noteToDelete.first['created_at'] as int, 'delete', noteToDelete.first);
+        SupabaseSyncService().markOperation('note', noteToDelete.first['created_at'] as int, 'delete', noteToDelete.first);
       }
     }
 
@@ -247,8 +244,7 @@ class NotesDatabase {
 
   static Future<List<Map<String, dynamic>>> getNotesForChapter(String book, int chapter) async {
     final db = await getDatabase();
-    final result =
-        await db.query('user_notes', where: 'book = ? AND chapter = ?', whereArgs: [book, chapter]);
+    final result = await db.query('user_notes', where: 'book = ? AND chapter = ?', whereArgs: [book, chapter]);
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
@@ -265,8 +261,7 @@ class NotesDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_notes',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete('user_notes', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -11,7 +11,7 @@ class HistoryDatabase {
 
   // Database table name
   static const String historyTable = 'history';
-  static const String searchHistoryTable = 'search_history';
+  //static const String searchHistoryTable = 'search_history';
   static const String userCacheTable = 'user_cache';
 
   // History table columns
@@ -39,7 +39,8 @@ class HistoryDatabase {
         // FFI is already initialized in main.dart - just open the database
         // Try both locations (same as bible database)
         String path1 = join(Directory.current.path, 'assets/user_history.sqlite');
-        String path2 = join(Directory.current.path, 'data/flutter_assets/assets/user_history.sqlite');
+        String path2 = join(
+            Directory.current.path, 'data/flutter_assets/assets/user_history.sqlite');
 
         if (await File(path1).exists()) {
           dbPath = path1;
@@ -49,7 +50,8 @@ class HistoryDatabase {
           // Use the flutter_assets location as default for new databases
           dbPath = path2;
           // Ensure directory exists
-          await Directory(join(Directory.current.path, 'data/flutter_assets/assets')).create(recursive: true);
+          await Directory(join(Directory.current.path, 'data/flutter_assets/assets'))
+              .create(recursive: true);
         }
 
         _database = await databaseFactory.openDatabase(dbPath);
@@ -61,22 +63,6 @@ class HistoryDatabase {
             $colBook TEXT NOT NULL,
             $colChapter INTEGER NOT NULL,
             $colVerse INTEGER NOT NULL,
-            $colTimestamp INTEGER UNIQUE
-          )
-        ''');
-
-        // Create search history table if it doesn't exist
-        await _database!.execute('''
-          CREATE TABLE IF NOT EXISTS $searchHistoryTable (
-            $colId INTEGER PRIMARY KEY AUTOINCREMENT,
-            query TEXT NOT NULL,
-            useRegex INTEGER NOT NULL,
-            useNearby INTEGER NOT NULL,
-            useWholeWord INTEGER NOT NULL,
-            useRedLetter INTEGER NOT NULL,
-            caseSensitive INTEGER NOT NULL,
-            bookFilterType TEXT NOT NULL,
-            customBookFilter TEXT NOT NULL,
             $colTimestamp INTEGER UNIQUE
           )
         ''');
@@ -137,22 +123,6 @@ class HistoryDatabase {
         $colValue TEXT
       )
     ''');
-
-    // Create search history table
-    await db.execute('''
-    CREATE TABLE $searchHistoryTable (
-      $colId INTEGER PRIMARY KEY AUTOINCREMENT,
-      query TEXT NOT NULL,
-      useRegex INTEGER NOT NULL,
-      useNearby INTEGER NOT NULL,
-      useWholeWord INTEGER NOT NULL,
-      useRedLetter INTEGER NOT NULL,
-      caseSensitive INTEGER NOT NULL,
-      bookFilterType TEXT NOT NULL,
-      customBookFilter TEXT NOT NULL,
-      $colTimestamp INTEGER UNIQUE
-    )
-  ''');
   }
 
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -178,8 +148,8 @@ class HistoryDatabase {
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid =
-          await DataValidation.validateDatabaseRecord(record, 'history', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'history',
+          context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -190,20 +160,22 @@ class HistoryDatabase {
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
       await db.delete(historyTable,
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
+          whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
   // Get history with pagination (for performance with large datasets)
-  static Future<List<Map<String, dynamic>>> getHistoryPaginated(int offset, int limit) async {
+  static Future<List<Map<String, dynamic>>> getHistoryPaginated(
+      int offset, int limit) async {
     Database db = await getDatabase();
 
     try {
       // First verify database integrity
-      final tableExists =
-          await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$historyTable'");
+      final tableExists = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='$historyTable'");
 
       if (tableExists.isEmpty) {
         await _onCreate(db, 1);
@@ -221,8 +193,8 @@ class HistoryDatabase {
       final corruptIds = <int>[];
 
       for (final record in result) {
-        final isValid =
-            await DataValidation.validateDatabaseRecord(record, 'history', context: 'database query');
+        final isValid = await DataValidation.validateDatabaseRecord(record, 'history',
+            context: 'database query');
         if (isValid) {
           validResults.add(record);
         } else {
@@ -233,7 +205,8 @@ class HistoryDatabase {
       // Delete corrupt records
       if (corruptIds.isNotEmpty) {
         await db.delete(historyTable,
-            where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+            where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
+            whereArgs: corruptIds);
       }
 
       return validResults;
@@ -243,7 +216,8 @@ class HistoryDatabase {
   }
 
   // Add history
-  static Future<void> addHistory(String book, int chapter, int? verse, int timestamp, bool skipSync) async {
+  static Future<void> addHistory(
+      String book, int chapter, int? verse, int timestamp, bool skipSync) async {
     // Validate data before saving to database
     final historyData = {
       'book': book,
@@ -252,33 +226,59 @@ class HistoryDatabase {
       'timestamp': timestamp,
     };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(historyData, 'history');
+    final isValid =
+        await DataValidation.validateBeforeDatabaseWrite(historyData, 'history');
     if (!isValid) {
       throw Exception('Invalid history data - failed validation. Operation rejected.');
     }
 
     Database db = await getDatabase();
-    await db.insert(historyTable, {
-      colBook: book,
-      colChapter: chapter,
-      colVerse: verse,
-      colTimestamp: timestamp,
-    });
 
-    // Add a 1ms delay to ensure no two records have the same created_at or timestamp
-    await Future.delayed(Duration(milliseconds: 1));
+    // Check for existing entry with same book, chapter, verse, and hour:minute timestamp
+    // to prevent duplicates in display (which only shows hour:minute precision)
+    final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
-    if (!skipSync) {
-      // Queue history operation for sync
-      final syncData = {
-        'id': timestamp.toString(),
-        'book': book,
-        'chapter': chapter,
-        'verse': verse,
-        'timestamp': timestamp,
-      };
-      FirestoreSyncService().markOperation('history', timestamp, 'create', syncData);
+    // Create a timestamp representing the start of this minute (hour:minute:00)
+    final DateTime minuteStart = DateTime(
+        dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute);
+    final int minuteStartTimestamp = minuteStart.millisecondsSinceEpoch;
+
+    // Create a timestamp representing the start of the next minute
+    final DateTime nextMinuteStart = minuteStart.add(Duration(minutes: 1));
+    final int nextMinuteTimestamp = nextMinuteStart.millisecondsSinceEpoch;
+
+    final existingEntries = await db.query(
+      historyTable,
+      where:
+          '$colBook = ? AND $colChapter = ? AND $colVerse = ? AND $colTimestamp >= ? AND $colTimestamp < ?',
+      whereArgs: [book, chapter, verse, minuteStartTimestamp, nextMinuteTimestamp],
+    );
+
+    // If no existing entry found for this minute, add the new history item
+    if (existingEntries.isEmpty) {
+      await db.insert(historyTable, {
+        colBook: book,
+        colChapter: chapter,
+        colVerse: verse,
+        colTimestamp: timestamp,
+      });
+
+      // Add a 1ms delay to ensure no two records have the same created_at or timestamp
+      await Future.delayed(Duration(milliseconds: 1));
+
+      if (!skipSync) {
+        // Queue history operation for sync
+        final syncData = {
+          'id': timestamp, // Keep as int for history items
+          'book': book,
+          'chapter': chapter,
+          'verse': verse,
+          'timestamp': timestamp,
+        };
+        SupabaseSyncService().markOperation('history', timestamp, 'create', syncData);
+      }
     }
+    // If an existing entry was found, skip adding this duplicate
   }
 
   // Delete history item
@@ -286,7 +286,8 @@ class HistoryDatabase {
     try {
       // Get the history item data before deletion for sync
       final db = await getDatabase();
-      final historyItem = await db.query(historyTable, where: '$colId = ?', whereArgs: [id]);
+      final historyItem =
+          await db.query(historyTable, where: '$colId = ?', whereArgs: [id]);
 
       if (historyItem.isNotEmpty) {
         // Delete locally first
@@ -294,8 +295,8 @@ class HistoryDatabase {
 
         // Queue delete operation for sync service
         final historyData = historyItem.first;
-        FirestoreSyncService()
-            .markOperation('history', historyData['timestamp'] as int, 'delete', historyData);
+        SupabaseSyncService().markOperation(
+            'history', historyData['timestamp'] as int, 'delete', historyData);
       }
     } catch (e) {
       if (kDebugMode) debugPrint('deleteHistoryItem exception: $e');

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
-import '../services/firestore_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
 
 class SearchDatabase {
@@ -143,8 +143,7 @@ class SearchDatabase {
     final corruptIds = <int>[];
 
     for (final record in results) {
-      final isValid =
-          await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -154,8 +153,7 @@ class SearchDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete(searchHistoryTable,
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+      await db.delete(searchHistoryTable, where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -194,8 +192,7 @@ class SearchDatabase {
       final corruptIds = <int>[];
 
       for (final record in results) {
-        final isValid =
-            await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
+        final isValid = await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
         if (isValid) {
           validResults.add(record);
         } else {
@@ -205,8 +202,7 @@ class SearchDatabase {
 
       // Delete corrupt records
       if (corruptIds.isNotEmpty) {
-        await db.delete(searchHistoryTable,
-            where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+        await db.delete(searchHistoryTable, where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
       }
 
       return validResults;
@@ -272,7 +268,7 @@ class SearchDatabase {
         'customBookFilter': customBookFilter,
         'timestamp': timestamp,
       };
-      FirestoreSyncService().markOperation('search_history', timestamp, 'create', syncData);
+      SupabaseSyncService().markOperation('search_history', timestamp, 'create', syncData);
     }
 
     // Add a 1ms delay to ensure no two records have the same timestamp
@@ -306,7 +302,7 @@ class SearchDatabase {
           'timestamp': item[colTimestamp],
         };
 
-        FirestoreSyncService().markOperation('search_history', item[colTimestamp] as int, 'delete', syncData);
+        SupabaseSyncService().markOperation('search_history', item[colTimestamp] as int, 'delete', syncData);
       } catch (e) {
         if (kDebugMode) debugPrint('deleteSearchHistoryItem markOperation exception: $e');
       }

@@ -4,7 +4,7 @@ import 'dart:async';
 import '../database/history_database.dart';
 import '../utils/snackbar_notification.dart'; // For showStyledSnackBar
 import '../services/local_data_change_notifier.dart'; // For notifications
-import '../services/firestore_sync_service.dart'; // For FirestoreSyncService
+import '../services/supabase_sync_service.dart';
 import '../utils/preferences_constants.dart'; // For uiFontSize and uiFontFamily
 import '../utils/book_name_converter.dart'; // For book name conversion
 import '../main.dart'; // For getAdaptiveTextColor
@@ -48,7 +48,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
     _scrollController.addListener(_onScroll);
 
     // Listen to Firestore sync service changes for remote history updates
-    _firestoreHistorySubscription = FirestoreSyncService.historyChangedStream.listen((_) async {
+    _firestoreHistorySubscription = SupabaseSyncService.historyChangedStream.listen((_) async {
       await _loadInitialHistory();
       if (mounted) {
         setState(() {});
@@ -151,8 +151,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
             style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
@@ -181,12 +180,10 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
       context: context,
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
-        content: Text('Delete this history item?',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        content: Text('Delete this history item?', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
@@ -225,8 +222,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
             style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
@@ -246,9 +242,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
 
         setState(() {
           // Remove deleted items from the list
-          _historyItems = List<Map<String, dynamic>>.from(_historyItems)
-              .where((item) => !_selectedItemIds.contains(item['id']))
-              .toList();
+          _historyItems = List<Map<String, dynamic>>.from(_historyItems).where((item) => !_selectedItemIds.contains(item['id'])).toList();
           _currentOffset = _historyItems.length;
           _selectedItemIds.clear();
           _isSelectMode = false; // Exit select mode after deletion
@@ -276,10 +270,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
         width: 300,
         height: MediaQuery.of(context).size.height * 0.9,
         child: _historyItems.isEmpty && !_isLoading
-            ? Center(
-                child: Text('No history yet.',
-                    style: TextStyle(
-                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
+            ? Center(child: Text('No history yet.', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
             : ListView.builder(
                 controller: _scrollController,
                 itemCount: _historyItems.length + (_hasMoreData ? 1 : 0),
@@ -320,9 +311,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                     final currentDate = DateTime.fromMillisecondsSinceEpoch(_historyItems[i]['timestamp']);
                     final previousDate = DateTime.fromMillisecondsSinceEpoch(_historyItems[i - 1]['timestamp']);
 
-                    if (currentDate.year != previousDate.year ||
-                        currentDate.month != previousDate.month ||
-                        currentDate.day != previousDate.day) {
+                    if (currentDate.year != previousDate.year || currentDate.month != previousDate.month || currentDate.day != previousDate.day) {
                       widgets.add(Divider());
                       widgets.add(
                         Padding(
@@ -349,9 +338,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
 
                   // Convert short book name to full book name for display
                   final fullBookName = h['bookLongName'] as String;
-                  final locStr = h['verse'] != null && h['verse'] != 0
-                      ? '$fullBookName ${h['chapter']}:${h['verse']}'
-                      : '$fullBookName ${h['chapter']}:1';
+                  final locStr = h['verse'] != null && h['verse'] != 0 ? '$fullBookName ${h['chapter']}:${h['verse']}' : '$fullBookName ${h['chapter']}:1';
 
                   final listTile = ListTile(
                       leading: _isSelectMode
@@ -370,24 +357,14 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                           : null,
                       subtitle: Text.rich(
                         TextSpan(
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                           children: <TextSpan>[
                             TextSpan(
                               text: locStr,
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  fontWeight: FontWeight.bold,
-                                  color: getAdaptiveTextColor(context)),
+                              style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, fontWeight: FontWeight.bold, color: getAdaptiveTextColor(context)),
                             ),
                             const TextSpan(text: '\n'),
-                            TextSpan(
-                                text: dateStr,
-                                style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: getAdaptiveTextColor(context))),
+                            TextSpan(text: dateStr, style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                           ],
                         ),
                       ),
@@ -441,9 +418,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                   ),
                   TextButton(
                     onPressed: _toggleSelectMode,
-                    child: Text('Done',
-                        style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    child: Text('Done', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                   ),
                 ],
               ),
@@ -454,22 +429,17 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                 children: [
                   TextButton(
                     onPressed: _clearHistory,
-                    child: Text('Clear',
-                        style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                    child: Text('Clear', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
                   ),
                   Row(
                     children: [
                       TextButton(
                         onPressed: _toggleSelectMode,
-                        child: Text('Select',
-                            style: TextStyle(
-                                fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        child: Text('Select', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       ),
                       const SizedBox(width: 8),
                       TextButton(
-                        child: Text('Close',
-                            style: TextStyle(
-                                fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        child: Text('Close', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],

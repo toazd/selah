@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../main.dart';
 import '../utils/preferences_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/firestore_sync_service.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import '../services/supabase_sync_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -73,27 +74,53 @@ class _AuthScreenState extends State<AuthScreen> {
         await _showSyncDialog();
 
         // Show sync progress dialog during initialization
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text('Syncing your data...',
-                      style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                ],
-              ),
-            ),
-          );
-        }
+        // if (mounted) {
+        //   showDialog(
+        //     context: context,
+        //     barrierDismissible: false,
+        //     builder: (context) => AlertDialog(
+        //       content: Column(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           CircularProgressIndicator(),
+        //           const SizedBox(height: 16),
+        //           Text('Initializing sync service...', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        //         ],
+        //       ),
+        //     ),
+        //   );
+        // }
 
-        // Initialize sync service (includes full sync)
-        await FirestoreSyncService().initialize(isLoginResync: true);
+        // Initialize sync service AFTER user has confirmed preferences
+        //if (mounted) {
+        // Show sync progress dialog during initialization
+        //   showDialog(
+        //     context: context,
+        //     barrierDismissible: false,
+        //     builder: (context) => AlertDialog(
+        //       content: Column(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           CircularProgressIndicator(),
+        //           const SizedBox(height: 16),
+        //           Text('Initializing sync service...', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        //         ],
+        //       ),
+        //     ),
+        //   );
+        // }
+
+        try {
+          if (kDebugMode) debugPrint('About to initialize SupabaseSyncService after user confirmed preferences...');
+
+          final syncService = SupabaseSyncService();
+          await syncService.initialize(isLoginResync: true);
+
+          if (kDebugMode) debugPrint('SyncService.initialize() completed successfully');
+        } catch (e) {
+          if (kDebugMode) debugPrint('SyncService.initialize() FAILED: $e');
+          // Continue even if sync fails - user can still use the app
+        }
 
         // Dismiss sync progress dialog and navigate back
         if (mounted) {
@@ -130,16 +157,13 @@ class _AuthScreenState extends State<AuthScreen> {
               children: [
                 Text(
                   'Choose which categories of data that you want to sync. You can change these settings later in the main options drawer.',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                  style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                 ),
                 const SizedBox(height: 16),
                 ValueListenableBuilder<bool>(
                   valueListenable: syncHighlightsNotifier,
                   builder: (context, value, child) => SwitchListTile(
-                    title: Text('Highlights',
-                        style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    title: Text('Highlights', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncHighlightsNotifier.value = val;
@@ -149,9 +173,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ValueListenableBuilder<bool>(
                   valueListenable: syncNotesNotifier,
                   builder: (context, value, child) => SwitchListTile(
-                    title: Text('Notes',
-                        style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    title: Text('Notes', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncNotesNotifier.value = val;
@@ -161,9 +183,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ValueListenableBuilder<bool>(
                   valueListenable: syncHistoryNotifier,
                   builder: (context, value, child) => SwitchListTile(
-                    title: Text('Verse History',
-                        style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    title: Text('Verse History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncHistoryNotifier.value = val;
@@ -173,9 +193,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ValueListenableBuilder<bool>(
                   valueListenable: syncSearchHistoryNotifier,
                   builder: (context, value, child) => SwitchListTile(
-                    title: Text('Search History',
-                        style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    title: Text('Search History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncSearchHistoryNotifier.value = val;
@@ -187,9 +205,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           actions: [
             TextButton(
-              child: Text('Continue',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              child: Text('Continue', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               onPressed: () async {
                 // Check if all syncs are disabled using shared method
                 final atLeastOneEnabled = await checkAtLeastOneSyncEnabled();
@@ -264,8 +280,7 @@ class _AuthScreenState extends State<AuthScreen> {
           size: 32,
           color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
         ),
-        title: Text(_isSignUp ? 'Sign up' : 'Sign in',
-            style: TextStyle(fontSize: uiFontSize + 4, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        title: Text(_isSignUp ? 'Sign up' : 'Sign in', style: TextStyle(fontSize: uiFontSize + 4, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -285,11 +300,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 children: [
                   Text(
                     _isSignUp ? 'Create an account' : 'Sign in to sync your data',
-                    style: TextStyle(
-                        fontSize: uiFontSize + 8,
-                        fontFamily: uiFontFamily,
-                        fontWeight: FontWeight.bold,
-                        color: getAdaptiveTextColor(context)),
+                    style: TextStyle(fontSize: uiFontSize + 8, fontFamily: uiFontFamily, fontWeight: FontWeight.bold, color: getAdaptiveTextColor(context)),
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -309,13 +320,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Username',
-                      labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      labelStyle: TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
-                      errorText:
-                          _errorMessage?.contains('username') == true || _errorMessage?.contains('Username') == true
-                              ? _errorMessage
-                              : null,
+                      errorText: _errorMessage?.contains('username') == true || _errorMessage?.contains('Username') == true ? _errorMessage : null,
                     ),
                     keyboardType: TextInputType.text,
                     onSubmitted: (_) => _authenticate(),
@@ -328,8 +335,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Password',
-                      labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      labelStyle: TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
                       errorText: _errorMessage?.contains('password') == true ? _errorMessage : null,
                     ),
@@ -337,9 +343,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     onSubmitted: (_) => _authenticate(),
                   ),
                   const SizedBox(height: 24),
-                  if (_errorMessage != null &&
-                      !_errorMessage!.contains('username') &&
-                      !_errorMessage!.contains('password'))
+                  if (_errorMessage != null && !_errorMessage!.contains('username') && !_errorMessage!.contains('password'))
                     Text(
                       _errorMessage!,
                       style: TextStyle(color: Colors.red, fontSize: uiFontSize + 4, fontFamily: uiFontFamily),
@@ -373,10 +377,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ? CircularProgressIndicator()
                         : Text(
                             _isSignUp ? 'Sign up' : 'Sign in',
-                            style: TextStyle(
-                                fontSize: uiFontSize + 2,
-                                fontFamily: uiFontFamily,
-                                color: getAdaptiveTextColor(context, usePrimaryColor: true)),
+                            style: TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true)),
                           ),
                   ),
                   const SizedBox(height: 16),
@@ -389,8 +390,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     },
                     child: Text(
                       _isSignUp ? 'Already have an account? Sign in' : 'Don\'t have an account? Sign up',
-                      style: TextStyle(
-                          fontSize: uiFontSize + 6, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      style: TextStyle(fontSize: uiFontSize + 6, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                     ),
                   ),
                 ],

@@ -7,7 +7,7 @@ const double defaultFontSize = 22.0;
 const String defaultFontFamily = 'IBM Plex Sans';
 const double defaultLineHeight = 1.2;
 // TODO: remove usage throughout app if not needed
-const double defaultHighlightAlpha = 0.9; // Not user-configurable
+const double defaultHighlightAlpha = 0.90; // Not user-configurable
 
 // Color defaults in hex
 const String defaultLightPrimaryColorHex = '#FF607D8B';
@@ -19,7 +19,8 @@ const String defaultDarkTextColorHex = '#FFC2C5C7'; //'#FF6D6866';
 const String defaultLightHighlightColorHex = '#FFFFD400';
 const String defaultDarkHighlightColorHex = '#FF1B295F'; //'#FF383F41';
 const String defaultLightVerseReferenceColorHex = '#FF2196F3'; // Colors.blue
-const String defaultDarkVerseReferenceColorHex = '#FF09610C'; // Color.fromARGB(255, 9, 97, 12)
+const String defaultDarkVerseReferenceColorHex =
+    '#FF09610C'; // Color.fromARGB(255, 9, 97, 12)
 // Hex => Integer conversions for ValueNotifiers that require colors as ints
 Color get defaultLightPrimaryColor => hexToColor(defaultLightPrimaryColorHex);
 Color get defaultLightBackgroundColor => hexToColor(defaultLightBackgroundColorHex);
@@ -29,7 +30,8 @@ Color get defaultDarkBackgroundColor => hexToColor(defaultDarkBackgroundColorHex
 Color get defaultDarkTextColor => hexToColor(defaultDarkTextColorHex);
 Color get defaultLightHighlightColor => hexToColor(defaultLightHighlightColorHex);
 Color get defaultDarkHighlightColor => hexToColor(defaultDarkHighlightColorHex);
-Color get defaultLightVerseReferenceColor => hexToColor(defaultLightVerseReferenceColorHex);
+Color get defaultLightVerseReferenceColor =>
+    hexToColor(defaultLightVerseReferenceColorHex);
 Color get defaultDarkVerseReferenceColor => hexToColor(defaultDarkVerseReferenceColorHex);
 
 // Helper function to convert hex string to Color
@@ -69,9 +71,9 @@ const bool defaultShowNotesInline = true;
 const bool defaultShowNavigationBar = true;
 
 // Sync retry delay constants (shared by all sync retry systems)
-const int syncRetryDelay1Seconds = 5; // First retry delay
-const int syncRetryDelay2Seconds = 15; // Second retry delay
-const int syncRetryDelay3Seconds = 30; // Third retry delay
+const int syncRetryDelay1Seconds = 1; // First retry delay
+const int syncRetryDelay2Seconds = 3; // Second retry delay
+const int syncRetryDelay3Seconds = 5; // Third retry delay
 
 const bool defaultSyncHighlights = true;
 const bool defaultSyncNotes = true;
