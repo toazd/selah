@@ -46,7 +46,7 @@ jobs:
     - name: Get flutter dependencies
       run: flutter pub get
 
-    - name: Install Linux build dependencies
+    - name: Install Linux build dependencies & packaging tools
       run: |
         sudo apt-get update
         sudo apt-get full-upgrade -y
@@ -57,7 +57,13 @@ jobs:
           pkg-config \
           libgtk-3-dev \
           libblkid-dev \
-          liblzma-dev
+          liblzma-dev \
+          ruby \
+          ruby-dev \
+          build-essential \
+          rpm
+        sudo snap refresh --quiet
+        sudo gem install fpm
 
     - name: Build Linux release
       run: |
@@ -65,12 +71,6 @@ jobs:
           --release \
           --target lib/main.dart \
           --dart-define=BUILD_NUMBER=${{ github.run_number }}
-
-    - name: Install packaging tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ruby ruby-dev build-essential rpm
-        sudo gem install fpm
 
     - name: Create packages
       run: |
