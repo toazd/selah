@@ -54,31 +54,31 @@ jobs:
         
     - name: Set iOS platform version
       run: |
-        # Handle iOS platform specification for Firebase SDK 12.4.0
+        # Set minimum iOS version for app compatibility
         if grep -q "platform :ios" ios/Podfile; then
           # Extract current iOS version from Podfile
           CURRENT_VERSION=$(grep "platform :ios" ios/Podfile | sed -n "s/.*'\([0-9.]*\)'.*/\1/p")
           echo "📱 Current iOS platform version: $CURRENT_VERSION"
           
-          # Check if version is less than 15.0
-          if [[ "$(printf '%s\n' "15.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "15.0" ]]; then
-            echo "🔧 Updating iOS platform to 15.0 (current: $CURRENT_VERSION)"
+          # Check if version is less than 13.0 (minimum for modern apps)
+          if [[ "$(printf '%s\n' "13.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "13.0" ]]; then
+            echo "🔧 Updating iOS platform to 13.0 (current: $CURRENT_VERSION)"
             # Create temp file with new platform line at top
-            echo "platform :ios, '15.0'" > ios/Podfile.tmp
+            echo "platform :ios, '13.0'" > ios/Podfile.tmp
 
             # Add all original content EXCEPT the old platform line
             grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
 
             # Replace original with updated temp file
             mv ios/Podfile.tmp ios/Podfile
-            echo "✅ iOS platform updated to 15.0 for Firebase compatibility"
+            echo "✅ iOS platform updated to 13.0 for app compatibility"
           else
             echo "✅ iOS platform version $CURRENT_VERSION is sufficient"
           fi
         else
-          echo "🔧 Adding iOS 15.0 platform specification..."
-          sed -i '' '1i platform :ios, '\''15.0'\''' ios/Podfile
-          echo "✅ iOS platform set to 15.0 for Firebase compatibility"
+          echo "🔧 Adding iOS 13.0 platform specification..."
+          sed -i '' '1i platform :ios, '\''13.0'\''' ios/Podfile
+          echo "✅ iOS platform set to 13.0 for app compatibility"
         fi
         
     - name: Get iOS dependencies
@@ -157,8 +157,8 @@ jobs:
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** iOS (iPhone/iPad)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
-        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
-        echo "- **iOS Target:** 15.0 (Firebase SDK 12.4.0 compatible)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
+        echo "- **iOS Target:** 13.0 (modern app compatibility)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
         echo "- **IPA:** Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa (iOS App Package, unsigned for sideloading)" >> $GITHUB_STEP_SUMMARY
@@ -175,7 +175,7 @@ jobs:
         echo "- This is a debug build using free provisioning profiles" >> $GITHUB_STEP_SUMMARY
         echo "- The app will need to be reinstalled every 7 days" >> $GITHUB_STEP_SUMMARY
         echo "- Make sure your iPhone XR is connected and trusted" >> $GITHUB_STEP_SUMMARY
-        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- Supabase authentication and database will work with this build" >> $GITHUB_STEP_SUMMARY
         echo "- If installation fails, try restarting your iPhone and Sideloadly" >> $GITHUB_STEP_SUMMARY
         echo "- **Auto-fixes Applied:** iOS platform files regenerated, iOS target set to 15.0" >> $GITHUB_STEP_SUMMARY
         echo "- **Version Logic:** Automatically updates iOS target to 15.0 if lower" >> $GITHUB_STEP_SUMMARY

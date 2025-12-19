@@ -46,6 +46,18 @@ jobs:
     - name: Get flutter dependencies
       run: flutter pub get
 
+    - name: Install Linux build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          cmake \
+          ninja-build \
+          pkg-config \
+          libgtk-3-dev \
+          libblkid-dev \
+          liblzma-dev
+
     - name: Build Linux release
       run: |
         flutter build linux \
@@ -125,7 +137,7 @@ jobs:
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Linux (x64)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
-        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Packages:**" >> $GITHUB_STEP_SUMMARY
         echo "- **.tar.gz:** Generic Linux (any distribution)" >> $GITHUB_STEP_SUMMARY
@@ -140,5 +152,5 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
         echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
-        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- Supabase authentication and database will work with this build" >> $GITHUB_STEP_SUMMARY
         echo "- Desktop integration includes window management and file access" >> $GITHUB_STEP_SUMMARY

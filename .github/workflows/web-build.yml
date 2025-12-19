@@ -82,7 +82,7 @@ jobs:
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Web (HTML/CSS/JS)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
-        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Build Output:**" >> $GITHUB_STEP_SUMMARY
         echo "- **Directory:** build/web/ (ready for deployment)" >> $GITHUB_STEP_SUMMARY
@@ -104,7 +104,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
         echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
-        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- Supabase authentication and database will work with this build" >> $GITHUB_STEP_SUMMARY
         echo "- Web build includes PWA capabilities" >> $GITHUB_STEP_SUMMARY
         echo "- SQLite database uses WebAssembly (sqflite_common_ffi_web)" >> $GITHUB_STEP_SUMMARY
         echo "- Ensure web server supports history API fallback for routing" >> $GITHUB_STEP_SUMMARY

@@ -94,7 +94,7 @@ jobs:
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Android" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
-        echo "- **Firebase:** Enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "- **Min SDK:** 22 (Android 5.1+)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
@@ -113,7 +113,7 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY
         echo "- These are test builds for development purposes" >> $GITHUB_STEP_SUMMARY
-        echo "- Firebase authentication and Firestore will work with this build" >> $GITHUB_STEP_SUMMARY
+        echo "- Supabase authentication and database will work with this build" >> $GITHUB_STEP_SUMMARY
         echo "- App requires Android 5.1 or higher" >> $GITHUB_STEP_SUMMARY
         echo "- Enable 'Install unknown apps' permission for your browser/file manager" >> $GITHUB_STEP_SUMMARY
         echo "- If installation fails, check device storage and try restarting the device" >> $GITHUB_STEP_SUMMARY
