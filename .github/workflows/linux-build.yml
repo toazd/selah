@@ -80,41 +80,39 @@ jobs:
         BUILD_DIR="build/linux/x64/release/bundle"
         OUTPUT_DIR="build/packages"
 
-        mkdir -p $OUTPUT_DIR
+        mkdir -p "$OUTPUT_DIR"
 
         # Create .tar.gz (generic Linux)
         echo "📦 Creating .tar.gz package..."
-        cd $BUILD_DIR
-        tar -czf "$OUTPUT_DIR/Selah-${VERSION}.tar.gz" *
-        cd ../../..
+        tar -czf "$OUTPUT_DIR/Selah-${VERSION}.tar.gz" -C "$BUILD_DIR" .
 
         # Create .deb package (Debian/Ubuntu)
         echo "📦 Creating .deb package..."
         fpm -s dir -t deb \
-          -n $APP_NAME \
-          -v $VERSION \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
           --deb-priority optional \
           --category utils \
           --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
           --url "https://github.com/toazd/selah" \
           --maintainer "Selah Team" \
           --license "Unlicense" \
-          -p $OUTPUT_DIR \
-          -C $BUILD_DIR \
+          -p "$OUTPUT_DIR" \
+          -C "$BUILD_DIR" \
           .
 
         # Create .rpm package (Red Hat/Fedora)
         echo "📦 Creating .rpm package..."
         fpm -s dir -t rpm \
-          -n $APP_NAME \
-          -v $VERSION \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
           --rpm-os linux \
           --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
           --url "https://github.com/toazd/selah" \
           --maintainer "Selah Team" \
           --license "Unlicense" \
-          -p $OUTPUT_DIR \
-          -C $BUILD_DIR \
+          -p "$OUTPUT_DIR" \
+          -C "$BUILD_DIR" \
           .
 
         echo "✅ All packages created in $OUTPUT_DIR"
