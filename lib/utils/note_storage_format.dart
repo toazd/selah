@@ -66,7 +66,7 @@ class NoteStorageFormat {
       // turned into an <a href INSIDE of the <img> tag and then of course the <img> doesn't
       // load because it's not valid HTML)
       document.setCustomRules([
-        FormatLinkAtCaretPositionRule(),
+        //FormatLinkAtCaretPositionRule(),
         ResolveLineFormatRule(),
         ResolveInlineFormatRule(),
         ResolveImageFormatRule(),

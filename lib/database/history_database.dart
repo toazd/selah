@@ -116,7 +116,8 @@ class HistoryDatabase {
         $colBook TEXT,
         $colChapter INTEGER,
         $colVerse INTEGER,
-        $colTimestamp INTEGER UNIQUE
+        $colTimestamp INTEGER UNIQUE,
+        uuid TEXT UNIQUE NULL
       )
     ''');
 

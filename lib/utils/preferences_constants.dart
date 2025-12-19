@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 const int defaultThemeMode = 0; // ThemeMode.system
 const double defaultFontSize = 22.0;
 const String defaultFontFamily = 'IBM Plex Sans';
+const String defaultNoteFontFamily = 'Scope One';
 const double defaultLineHeight = 1.2;
 // TODO: remove usage throughout app if not needed
 const double defaultHighlightAlpha = 0.90; // Not user-configurable
@@ -23,16 +24,20 @@ const String defaultDarkVerseReferenceColorHex =
     '#FF09610C'; // Color.fromARGB(255, 9, 97, 12)
 // Hex => Integer conversions for ValueNotifiers that require colors as ints
 Color get defaultLightPrimaryColor => hexToColor(defaultLightPrimaryColorHex);
-Color get defaultLightBackgroundColor => hexToColor(defaultLightBackgroundColorHex);
+Color get defaultLightBackgroundColor =>
+    hexToColor(defaultLightBackgroundColorHex);
 Color get defaultLightTextColor => hexToColor(defaultLightTextColorHex);
 Color get defaultDarkPrimaryColor => hexToColor(defaultDarkPrimaryColorHex);
-Color get defaultDarkBackgroundColor => hexToColor(defaultDarkBackgroundColorHex);
+Color get defaultDarkBackgroundColor =>
+    hexToColor(defaultDarkBackgroundColorHex);
 Color get defaultDarkTextColor => hexToColor(defaultDarkTextColorHex);
-Color get defaultLightHighlightColor => hexToColor(defaultLightHighlightColorHex);
+Color get defaultLightHighlightColor =>
+    hexToColor(defaultLightHighlightColorHex);
 Color get defaultDarkHighlightColor => hexToColor(defaultDarkHighlightColorHex);
 Color get defaultLightVerseReferenceColor =>
     hexToColor(defaultLightVerseReferenceColorHex);
-Color get defaultDarkVerseReferenceColor => hexToColor(defaultDarkVerseReferenceColorHex);
+Color get defaultDarkVerseReferenceColor =>
+    hexToColor(defaultDarkVerseReferenceColorHex);
 
 // Helper function to convert hex string to Color
 Color hexToColor(String hexString) {
