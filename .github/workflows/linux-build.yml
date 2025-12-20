@@ -128,7 +128,7 @@ jobs:
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         
         # Create desktop file
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
         
         fpm -s dir -t deb \
           -n "$APP_NAME" \
@@ -177,7 +177,7 @@ jobs:
         # This preserves Flutter's directory structure while allowing system-wide access
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
         
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
