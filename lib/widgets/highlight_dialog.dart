@@ -1,5 +1,4 @@
 // Reusable highlight dialog widget extracted from bible_screen.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:selah/utils/snackbar_notification.dart';
 import '../main.dart';
@@ -8,6 +7,7 @@ import '../utils/highlight_text_color_adjustments.dart';
 import '../database/highlights_database.dart';
 import '../utils/preferences_constants.dart';
 import '../services/local_data_change_notifier.dart';
+import '../utils/error_handler.dart';
 import '../utils/font_size_adjustments.dart';
 
 /// Highlight dialog widget for selecting and applying text highlights
@@ -37,8 +37,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
   ValueNotifier<int?> selectedColorIndexNotifier = ValueNotifier(null);
   ValueNotifier<int?> pressedColorIndexNotifier = ValueNotifier(null);
 
-  String get _fullyCleanedVerseText =>
-      widget.rawVerseText.replaceAll(RegExp(r'</?r>'), ''); //.replaceAll('¶ ', '');
+  String get _fullyCleanedVerseText => widget.rawVerseText.replaceAll(RegExp(r'</?r>'), ''); //.replaceAll('¶ ', '');
 
   @override
   void initState() {
@@ -78,9 +77,11 @@ class _HighlightDialogState extends State<HighlightDialog> {
       if (mounted) {
         showStyledSnackBar(context, 'HighlightDialog _loadCurrentHighlights exception: $e');
       }
-      if (kDebugMode) {
-        debugPrint('HighlightDialog _loadCurrentHighlights exception: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'HighlightDialog _loadCurrentHighlights exception',
+        context: {'widget': 'HighlightDialog', 'method': '_loadCurrentHighlights'},
+      );
     }
   }
 
@@ -109,8 +110,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
               widget.rawVerseText,
               rawText,
               baseStyle.copyWith(
-                fontSize:
-                    FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
+                fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
               ),
               verseNumber,
               Theme.of(context).scaffoldBackgroundColor,
@@ -199,18 +199,15 @@ class _HighlightDialogState extends State<HighlightDialog> {
       builder: (context) => AlertDialog(
         //title: Text('Edit Highlight'),
         content: Text('Delete this highlight?',
-            style: TextStyle(
-                fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
             child: Text('No',
-                style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: Text('Yes',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Yes', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
             onPressed: () async {
               final highlightId = highlight['id'] as int;
 
@@ -254,9 +251,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
               children: [
                 Text('Select text:',
                     style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -273,9 +268,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                 const SizedBox(height: 32),
                 Text('Choose highlight color:',
                     style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                 const SizedBox(height: 8),
                 ValueListenableBuilder<List<Color>>(
                   valueListenable: highlightColorsNotifier,
@@ -322,9 +315,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
                                         //   width: selectedIndex == index ? 3 : 1,
                                         // ),
                                         border: Border.all(
-                                          color: pressedIndex == index
-                                              ? getAdaptiveTextColor(context)
-                                              : Colors.blueGrey,
+                                          color:
+                                              pressedIndex == index ? getAdaptiveTextColor(context) : Colors.blueGrey,
                                           width: pressedIndex == index ? 3 : 2,
                                         ),
                                         borderRadius: BorderRadius.circular(6),
@@ -390,9 +382,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                   const SizedBox(height: 32),
                   Text('Remove existing highlights:',
                       style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context))),
+                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -409,9 +399,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                         // Convert raw positions to clean positions for substring
                         final cleanStart = convertRawPositionToClean(widget.rawVerseText, start);
                         final cleanEnd = convertRawPositionToClean(widget.rawVerseText, end);
-                        if (cleanStart >= 0 &&
-                            cleanEnd > cleanStart &&
-                            cleanEnd <= _fullyCleanedVerseText.length) {
+                        if (cleanStart >= 0 && cleanEnd > cleanStart && cleanEnd <= _fullyCleanedVerseText.length) {
                           highlightedText = _fullyCleanedVerseText.substring(cleanStart, cleanEnd);
                           // Truncate very long highlights for display
                           if (highlightedText.length > 20) {
@@ -450,8 +438,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                           ),
                           child: Text(
                             highlightedText,
-                            style: TextStyle(
-                                fontSize: uiFontSize, fontFamily: uiFontFamily, color: adjustedTextColor),
+                            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: adjustedTextColor),
                           ),
                         ),
                       );
@@ -473,9 +460,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                     },
                     child: Text('Finished',
                         style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                   ),
                 ),
               ],

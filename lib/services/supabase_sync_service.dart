@@ -23,8 +23,7 @@ StreamController<void>? _historyChangedController;
 StreamController<void>? _searchHistoryChangedController;
 
 /// Global notifier for UI to listen to sync status changes
-final ValueNotifier<SyncStatus> syncStatusNotifier =
-    ValueNotifier(SyncStatus.offline);
+final ValueNotifier<SyncStatus> syncStatusNotifier = ValueNotifier(SyncStatus.offline);
 
 // Prevent rapid initialize() calls
 bool _isInitialized = false;
@@ -152,20 +151,18 @@ class SupabaseSyncService {
     final searchHistoryTs = prefs.getInt('lastSearchHistorySync');
 
     if (highlightsTs != null) {
-      _lastHighlightsSyncSaved = await DataValidation.validateTimeStamp(
-          DateTime.fromMillisecondsSinceEpoch(highlightsTs));
+      _lastHighlightsSyncSaved =
+          await DataValidation.validateTimeStamp(DateTime.fromMillisecondsSinceEpoch(highlightsTs));
     }
     if (notesTs != null) {
-      _lastNotesSyncSaved = await DataValidation.validateTimeStamp(
-          DateTime.fromMillisecondsSinceEpoch(notesTs));
+      _lastNotesSyncSaved = await DataValidation.validateTimeStamp(DateTime.fromMillisecondsSinceEpoch(notesTs));
     }
     if (historyTs != null) {
-      _lastHistorySyncSaved = await DataValidation.validateTimeStamp(
-          DateTime.fromMillisecondsSinceEpoch(historyTs));
+      _lastHistorySyncSaved = await DataValidation.validateTimeStamp(DateTime.fromMillisecondsSinceEpoch(historyTs));
     }
     if (searchHistoryTs != null) {
-      _lastSearchHistorySyncSaved = await DataValidation.validateTimeStamp(
-          DateTime.fromMillisecondsSinceEpoch(searchHistoryTs));
+      _lastSearchHistorySyncSaved =
+          await DataValidation.validateTimeStamp(DateTime.fromMillisecondsSinceEpoch(searchHistoryTs));
     }
 
     // Initialize current session timestamps from persisted values
@@ -181,26 +178,22 @@ class SupabaseSyncService {
 
     if (category == 'highlights') {
       if (_lastHighlightsSync != null) {
-        await prefs.setInt(
-            'lastHighlightsSync', _lastHighlightsSync!.millisecondsSinceEpoch);
+        await prefs.setInt('lastHighlightsSync', _lastHighlightsSync!.millisecondsSinceEpoch);
         _lastHighlightsSyncSaved = _lastHighlightsSync;
       }
     } else if (category == 'notes') {
       if (_lastNotesSync != null) {
-        await prefs.setInt(
-            'lastNotesSync', _lastNotesSync!.millisecondsSinceEpoch);
+        await prefs.setInt('lastNotesSync', _lastNotesSync!.millisecondsSinceEpoch);
         _lastNotesSyncSaved = _lastNotesSync;
       }
     } else if (category == 'history') {
       if (_lastHistorySync != null) {
-        await prefs.setInt(
-            'lastHistorySync', _lastHistorySync!.millisecondsSinceEpoch);
+        await prefs.setInt('lastHistorySync', _lastHistorySync!.millisecondsSinceEpoch);
         _lastHistorySyncSaved = _lastHistorySync;
       }
     } else if (category == 'search_history') {
       if (_lastSearchHistorySync != null) {
-        await prefs.setInt('lastSearchHistorySync',
-            _lastSearchHistorySync!.millisecondsSinceEpoch);
+        await prefs.setInt('lastSearchHistorySync', _lastSearchHistorySync!.millisecondsSinceEpoch);
         _lastSearchHistorySyncSaved = _lastSearchHistorySync;
       }
     }
@@ -211,8 +204,7 @@ class SupabaseSyncService {
 
   // Public streams for UI to listen to - auto-recreate controllers if closed
   static Stream<void> get highlightsChangedStream {
-    if (_highlightsChangedController == null ||
-        _highlightsChangedController!.isClosed) {
+    if (_highlightsChangedController == null || _highlightsChangedController!.isClosed) {
       _highlightsChangedController = StreamController<void>.broadcast();
     }
     return _highlightsChangedController!.stream;
@@ -226,16 +218,14 @@ class SupabaseSyncService {
   }
 
   static Stream<void> get historyChangedStream {
-    if (_historyChangedController == null ||
-        _historyChangedController!.isClosed) {
+    if (_historyChangedController == null || _historyChangedController!.isClosed) {
       _historyChangedController = StreamController<void>.broadcast();
     }
     return _historyChangedController!.stream;
   }
 
   static Stream<void> get searchHistoryChangedStream {
-    if (_searchHistoryChangedController == null ||
-        _searchHistoryChangedController!.isClosed) {
+    if (_searchHistoryChangedController == null || _searchHistoryChangedController!.isClosed) {
       _searchHistoryChangedController = StreamController<void>.broadcast();
     }
     return _searchHistoryChangedController!.stream;
@@ -269,8 +259,7 @@ class SupabaseSyncService {
     if (highlightsJson != null) {
       try {
         final decoded = jsonDecode(highlightsJson) as List<dynamic>;
-        _highlightsPendingQueue.addAll(decoded
-            .map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
+        _highlightsPendingQueue.addAll(decoded.map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
       } catch (e) {
         // Invalid data, clear it
         await prefs.remove(_highlightsQueueKey);
@@ -281,8 +270,7 @@ class SupabaseSyncService {
     if (notesJson != null) {
       try {
         final decoded = jsonDecode(notesJson) as List<dynamic>;
-        _notesPendingQueue.addAll(decoded
-            .map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
+        _notesPendingQueue.addAll(decoded.map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
       } catch (e) {
         await prefs.remove(_notesQueueKey);
       }
@@ -292,8 +280,7 @@ class SupabaseSyncService {
     if (historyJson != null) {
       try {
         final decoded = jsonDecode(historyJson) as List<dynamic>;
-        _historyPendingQueue.addAll(decoded
-            .map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
+        _historyPendingQueue.addAll(decoded.map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
       } catch (e) {
         await prefs.remove(_historyQueueKey);
       }
@@ -303,8 +290,7 @@ class SupabaseSyncService {
     if (searchHistoryJson != null) {
       try {
         final decoded = jsonDecode(searchHistoryJson) as List<dynamic>;
-        _searchHistoryPendingQueue.addAll(decoded
-            .map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
+        _searchHistoryPendingQueue.addAll(decoded.map((op) => SyncOperation.fromMap(op as Map<String, dynamic>)));
       } catch (e) {
         // Invalid data, clear it
         await prefs.remove(_searchHistoryQueueKey);
@@ -316,36 +302,27 @@ class SupabaseSyncService {
   Future<void> _persistQueues() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString(_highlightsQueueKey,
-        jsonEncode(_highlightsPendingQueue.map((op) => op.toMap()).toList()));
-    await prefs.setString(_notesQueueKey,
-        jsonEncode(_notesPendingQueue.map((op) => op.toMap()).toList()));
-    await prefs.setString(_historyQueueKey,
-        jsonEncode(_historyPendingQueue.map((op) => op.toMap()).toList()));
+    await prefs.setString(_highlightsQueueKey, jsonEncode(_highlightsPendingQueue.map((op) => op.toMap()).toList()));
+    await prefs.setString(_notesQueueKey, jsonEncode(_notesPendingQueue.map((op) => op.toMap()).toList()));
+    await prefs.setString(_historyQueueKey, jsonEncode(_historyPendingQueue.map((op) => op.toMap()).toList()));
     await prefs.setString(
-        _searchHistoryQueueKey,
-        jsonEncode(
-            _searchHistoryPendingQueue.map((op) => op.toMap()).toList()));
+        _searchHistoryQueueKey, jsonEncode(_searchHistoryPendingQueue.map((op) => op.toMap()).toList()));
   }
 
   // Add operation to persistent queue by type (with enhanced deduplication)
   void _queueOperation(SyncOperation operation) {
     switch (operation.type) {
       case 'highlight':
-        _processEnhancedDeduplication(
-            operation, _highlightsPendingQueue, _matchesHighlight);
+        _processEnhancedDeduplication(operation, _highlightsPendingQueue, _matchesHighlight);
         break;
       case 'note':
-        _processEnhancedDeduplication(
-            operation, _notesPendingQueue, _matchesNote);
+        _processEnhancedDeduplication(operation, _notesPendingQueue, _matchesNote);
         break;
       case 'history':
-        _processEnhancedDeduplication(
-            operation, _historyPendingQueue, _matchesHistory);
+        _processEnhancedDeduplication(operation, _historyPendingQueue, _matchesHistory);
         break;
       case 'search_history':
-        _processEnhancedDeduplication(
-            operation, _searchHistoryPendingQueue, _matchesSearchHistory);
+        _processEnhancedDeduplication(operation, _searchHistoryPendingQueue, _matchesSearchHistory);
         break;
     }
     _persistQueues();
@@ -353,9 +330,7 @@ class SupabaseSyncService {
 
   // Enhanced de-duplication logic that handles operation conflicts intelligently
   void _processEnhancedDeduplication(
-      SyncOperation newOperation,
-      List<SyncOperation> queue,
-      bool Function(SyncOperation, SyncOperation) matcher) {
+      SyncOperation newOperation, List<SyncOperation> queue, bool Function(SyncOperation, SyncOperation) matcher) {
     // Find matching operations in queue
     final matchingIndices = <int>[];
     for (int i = 0; i < queue.length; i++) {
@@ -375,106 +350,84 @@ class SupabaseSyncService {
       final existingOperation = queue[index];
 
       // Handle create + delete = cancel both operations
-      if ((existingOperation.operation == 'create' &&
-              newOperation.operation == 'delete') ||
-          (existingOperation.operation == 'delete' &&
-              newOperation.operation == 'create')) {
+      if ((existingOperation.operation == 'create' && newOperation.operation == 'delete') ||
+          (existingOperation.operation == 'delete' && newOperation.operation == 'create')) {
         // Remove both operations (cancel them out)
         queue.removeAt(index);
         return; // Both operations are cancelled
       }
 
       // Handle create + update = merge into updated create
-      if ((existingOperation.operation == 'create' &&
-              newOperation.operation == 'update') ||
-          (existingOperation.operation == 'update' &&
-              newOperation.operation == 'create')) {
+      if ((existingOperation.operation == 'create' && newOperation.operation == 'update') ||
+          (existingOperation.operation == 'update' && newOperation.operation == 'create')) {
         // Keep the more recent one with updated timestamp
         final updatedOperation = newOperation.copyWith(
-            timestamp:
-                newOperation.timestamp.isAfter(existingOperation.timestamp)
-                    ? newOperation.timestamp
-                    : existingOperation.timestamp);
+            timestamp: newOperation.timestamp.isAfter(existingOperation.timestamp)
+                ? newOperation.timestamp
+                : existingOperation.timestamp);
         queue[index] = updatedOperation;
         return;
       }
 
       // Handle update + delete = convert to delete
-      if ((existingOperation.operation == 'update' &&
-              newOperation.operation == 'delete') ||
-          (existingOperation.operation == 'delete' &&
-              newOperation.operation == 'update')) {
+      if ((existingOperation.operation == 'update' && newOperation.operation == 'delete') ||
+          (existingOperation.operation == 'delete' && newOperation.operation == 'update')) {
         // Convert to delete operation with the most recent timestamp
         final deleteOperation = SyncOperation(
             id: newOperation.id,
             type: newOperation.type,
             operation: 'delete',
             data: newOperation.data,
-            timestamp:
-                newOperation.timestamp.isAfter(existingOperation.timestamp)
-                    ? newOperation.timestamp
-                    : existingOperation.timestamp);
+            timestamp: newOperation.timestamp.isAfter(existingOperation.timestamp)
+                ? newOperation.timestamp
+                : existingOperation.timestamp);
         queue[index] = deleteOperation;
         return;
       }
 
       // Handle delete + create = convert to create
-      if ((existingOperation.operation == 'delete' &&
-              newOperation.operation == 'create') ||
-          (existingOperation.operation == 'create' &&
-              newOperation.operation == 'delete')) {
+      if ((existingOperation.operation == 'delete' && newOperation.operation == 'create') ||
+          (existingOperation.operation == 'create' && newOperation.operation == 'delete')) {
         // Convert to create operation with the most recent timestamp
         final createOperation = SyncOperation(
             id: newOperation.id,
             type: newOperation.type,
             operation: 'create',
             data: newOperation.data,
-            timestamp:
-                newOperation.timestamp.isAfter(existingOperation.timestamp)
-                    ? newOperation.timestamp
-                    : existingOperation.timestamp);
+            timestamp: newOperation.timestamp.isAfter(existingOperation.timestamp)
+                ? newOperation.timestamp
+                : existingOperation.timestamp);
         queue[index] = createOperation;
         return;
       }
 
       // Handle update + create = keep the most recent
-      if ((existingOperation.operation == 'update' &&
-              newOperation.operation == 'create') ||
-          (existingOperation.operation == 'create' &&
-              newOperation.operation == 'update')) {
+      if ((existingOperation.operation == 'update' && newOperation.operation == 'create') ||
+          (existingOperation.operation == 'create' && newOperation.operation == 'update')) {
         final finalOperation =
-            newOperation.timestamp.isAfter(existingOperation.timestamp)
-                ? newOperation
-                : existingOperation;
+            newOperation.timestamp.isAfter(existingOperation.timestamp) ? newOperation : existingOperation;
         queue[index] = finalOperation;
         return;
       }
 
       // Handle update + update = keep the most recent
-      if (existingOperation.operation == 'update' &&
-          newOperation.operation == 'update') {
+      if (existingOperation.operation == 'update' && newOperation.operation == 'update') {
         final updatedOperation =
-            newOperation.timestamp.isAfter(existingOperation.timestamp)
-                ? newOperation
-                : existingOperation;
+            newOperation.timestamp.isAfter(existingOperation.timestamp) ? newOperation : existingOperation;
         queue[index] = updatedOperation;
         return;
       }
 
       // Handle delete + delete = keep only one delete
-      if (existingOperation.operation == 'delete' &&
-          newOperation.operation == 'delete') {
+      if (existingOperation.operation == 'delete' && newOperation.operation == 'delete') {
         // Remove the new delete since we already have one
         return;
       }
 
       // Handle create + create = keep the most recent
-      if (existingOperation.operation == 'create' &&
-          newOperation.operation == 'create') {
+      if (existingOperation.operation == 'create' && newOperation.operation == 'create') {
         final finalOperation =
-            newOperation.timestamp.isAfter(existingOperation.timestamp)
-                ? newOperation
-                : existingOperation;
+            newOperation.timestamp.isAfter(existingOperation.timestamp) ? newOperation : existingOperation;
         queue[index] = finalOperation;
         return;
       }
@@ -487,10 +440,7 @@ class SupabaseSyncService {
     final uuid1 = op1.data['uuid'] as String?;
     final uuid2 = op2.data['uuid'] as String?;
 
-    if (uuid1 != null &&
-        uuid2 != null &&
-        uuid1.isNotEmpty &&
-        uuid2.isNotEmpty) {
+    if (uuid1 != null && uuid2 != null && uuid1.isNotEmpty && uuid2.isNotEmpty) {
       return uuid1 == uuid2;
     }
 
@@ -510,10 +460,7 @@ class SupabaseSyncService {
     final uuid1 = op1.data['uuid'] as String?;
     final uuid2 = op2.data['uuid'] as String?;
 
-    if (uuid1 != null &&
-        uuid2 != null &&
-        uuid1.isNotEmpty &&
-        uuid2.isNotEmpty) {
+    if (uuid1 != null && uuid2 != null && uuid1.isNotEmpty && uuid2.isNotEmpty) {
       return uuid1 == uuid2;
     }
 
@@ -531,10 +478,7 @@ class SupabaseSyncService {
     final uuid1 = op1.data['uuid'] as String?;
     final uuid2 = op2.data['uuid'] as String?;
 
-    if (uuid1 != null &&
-        uuid2 != null &&
-        uuid1.isNotEmpty &&
-        uuid2.isNotEmpty) {
+    if (uuid1 != null && uuid2 != null && uuid1.isNotEmpty && uuid2.isNotEmpty) {
       return uuid1 == uuid2;
     }
 
@@ -552,10 +496,7 @@ class SupabaseSyncService {
     final uuid1 = op1.data['uuid'] as String?;
     final uuid2 = op2.data['uuid'] as String?;
 
-    if (uuid1 != null &&
-        uuid2 != null &&
-        uuid1.isNotEmpty &&
-        uuid2.isNotEmpty) {
+    if (uuid1 != null && uuid2 != null && uuid1.isNotEmpty && uuid2.isNotEmpty) {
       return uuid1 == uuid2;
     }
 
@@ -574,8 +515,7 @@ class SupabaseSyncService {
   }
 
   // Get current local data for an operation type - returns null if item no longer exists locally
-  Future<Map<String, dynamic>?> _getCurrentLocalData(
-      String type, Map<String, dynamic> operationData) async {
+  Future<Map<String, dynamic>?> _getCurrentLocalData(String type, Map<String, dynamic> operationData) async {
     switch (type) {
       case 'highlight':
         // Use uuid for lookup if available (for sync operations)
@@ -588,9 +528,7 @@ class SupabaseSyncService {
         // Fallback to created_at timestamp
         final createdAt = operationData['created_at'] as int;
         final localHighlights = await HighlightsDatabase.getHighlights();
-        return localHighlights
-            .where((h) => h['created_at'] == createdAt)
-            .firstOrNull;
+        return localHighlights.where((h) => h['created_at'] == createdAt).firstOrNull;
 
       case 'note':
         // Use uuid for lookup if available (for sync operations)
@@ -603,9 +541,7 @@ class SupabaseSyncService {
         // Fallback to created_at timestamp
         final createdAt = operationData['created_at'] as int;
         final localNotes = await NotesDatabase.getNotes();
-        return localNotes
-            .where((n) => n['created_at'] == createdAt)
-            .firstOrNull;
+        return localNotes.where((n) => n['created_at'] == createdAt).firstOrNull;
 
       case 'history':
         // Use uuid for lookup if available (for sync operations)
@@ -623,10 +559,7 @@ class SupabaseSyncService {
         final localHistory = await HistoryDatabase.getHistory();
         return localHistory
             .where((h) =>
-                h['timestamp'] == timestamp &&
-                h['book'] == book &&
-                h['chapter'] == chapter &&
-                h['verse'] == verse)
+                h['timestamp'] == timestamp && h['book'] == book && h['chapter'] == chapter && h['verse'] == verse)
             .firstOrNull;
 
       case 'search_history':
@@ -668,8 +601,8 @@ class SupabaseSyncService {
   }
 
   // Queue a specific operation persistently (replaces old queuing methods)
-  Future<void> _queuePersistentOperation(String operationKey, String type,
-      String operation, Map<String, dynamic> data) async {
+  Future<void> _queuePersistentOperation(
+      String operationKey, String type, String operation, Map<String, dynamic> data) async {
     // Only queue operations when user is logged in but offline (can't sync immediately)
     if (_currentUserId == null) {
       return;
@@ -681,23 +614,19 @@ class SupabaseSyncService {
     switch (type) {
       case 'highlight':
         existingOps = _highlightsPendingQueue;
-        operationTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(data['created_at'] as int);
+        operationTimestamp = DateTime.fromMillisecondsSinceEpoch(data['created_at'] as int);
         break;
       case 'note':
         existingOps = _notesPendingQueue;
-        operationTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(data['created_at'] as int);
+        operationTimestamp = DateTime.fromMillisecondsSinceEpoch(data['created_at'] as int);
         break;
       case 'history':
         existingOps = _historyPendingQueue;
-        operationTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(data['timestamp'] as int);
+        operationTimestamp = DateTime.fromMillisecondsSinceEpoch(data['timestamp'] as int);
         break;
       case 'search_history':
         existingOps = _searchHistoryPendingQueue;
-        operationTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(data['timestamp'] as int);
+        operationTimestamp = DateTime.fromMillisecondsSinceEpoch(data['timestamp'] as int);
         break;
       default:
         operationTimestamp = DateTime.now();
@@ -705,8 +634,7 @@ class SupabaseSyncService {
     }
 
     // Don't add duplicate operations
-    final isDuplicate = existingOps
-        .any((op) => op.id == operationKey && op.operation == operation);
+    final isDuplicate = existingOps.any((op) => op.id == operationKey && op.operation == operation);
     if (isDuplicate) {
       return;
     }
@@ -725,9 +653,7 @@ class SupabaseSyncService {
 
   // Process persistent queues when coming online
   Future<void> _processPendingQueues() async {
-    if (!isOnline ||
-        _currentUserId == null ||
-        !await InternetAccessChecker.hasInternetAccess()) {
+    if (!isOnline || _currentUserId == null || !await InternetAccessChecker.hasInternetAccess()) {
       return;
     }
 
@@ -753,8 +679,7 @@ class SupabaseSyncService {
       Map<String, dynamic>? uploadData = operation.data;
 
       if (operation.operation == 'create' || operation.operation == 'update') {
-        final currentLocal =
-            await _getCurrentLocalData(operation.type, operation.data);
+        final currentLocal = await _getCurrentLocalData(operation.type, operation.data);
         if (currentLocal == null) {
           // Item no longer exists locally - skip processing
           continue;
@@ -765,82 +690,90 @@ class SupabaseSyncService {
       try {
         switch (operation.type) {
           case 'highlight':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               try {
                 await _uploadHighlight(uploadData);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue highlights upload exception',
+                  context: {
+                    'class': 'SupabaseSyncService',
+                    'method': '_processPendingQueue',
+                    'operation': 'upload_highlight'
+                  },
+                );
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteHighlight(uploadData['created_at'] as int);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue highlights delete exception',
+                  context: {
+                    'class': 'SupabaseSyncService',
+                    'method': '_processPendingQueue',
+                    'operation': 'delete_highlight'
+                  },
+                );
               }
             }
             break;
           case 'note':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               try {
                 await _uploadNote(uploadData);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteNote(uploadData['created_at'] as int);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             }
             break;
           case 'history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               try {
                 await _uploadHistoryItem(uploadData);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteHistoryItem(uploadData['timestamp']);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             }
             break;
           case 'search_history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               try {
                 await _uploadSearchHistoryItem(uploadData);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteSearchHistoryItem(uploadData['timestamp']);
               } catch (e) {
-                if (kDebugMode) {
-                  debugPrint('_processPendingQueue exception: ${e.toString()}');
-                }
+                ErrorHandler.logError(e,
+                    customMessage: '_processPendingQueue exception',
+                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
               }
             }
             break;
@@ -850,9 +783,9 @@ class SupabaseSyncService {
         try {
           queue.add(operation);
         } catch (e) {
-          if (kDebugMode) {
-            debugPrint('_processPendingQueue exception: ${e.toString()}');
-          }
+          ErrorHandler.logError(e,
+              customMessage: '_processPendingQueue exception',
+              context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
         }
       }
     }
@@ -861,16 +794,11 @@ class SupabaseSyncService {
   // Initialize the sync service
   Future<void> initialize({bool isLoginResync = false}) async {
     if (_isInitialized) {
-      if (kDebugMode) {
-        debugPrint('SyncService.initialize() called but already initialized');
-      }
+      ErrorHandler.logError('SyncService.initialize() called but already initialized');
       return;
     }
 
-    if (kDebugMode) {
-      debugPrint(
-          'SyncService.initialize() starting... isLoginResync: $isLoginResync');
-    }
+    ErrorHandler.logError('SyncService.initialize() starting... isLoginResync: $isLoginResync');
 
     if (_currentUserId == null) {
       return;
@@ -887,8 +815,7 @@ class SupabaseSyncService {
     try {
       final hasConnection = await InternetAccessChecker.hasInternetAccess();
       if (hasConnection && _currentUserId != null) {
-        _syncStatus =
-            SyncStatus.online; // Connected and have user, assume online
+        _syncStatus = SyncStatus.online; // Connected and have user, assume online
       } else {
         _syncStatus = SyncStatus.offline; // No connection or no user
       }
@@ -930,22 +857,22 @@ class SupabaseSyncService {
         try {
           await syncHighlights();
         } catch (e) {
-          if (kDebugMode) debugPrint('$e');
+          ErrorHandler.logError(e, customMessage: 'syncHighlights() failed');
         }
         try {
           await syncNotes();
         } catch (e) {
-          if (kDebugMode) debugPrint('$e');
+          ErrorHandler.logError(e, customMessage: 'syncNotes() failed');
         }
         try {
           await syncHistory();
         } catch (e) {
-          if (kDebugMode) debugPrint('$e');
+          ErrorHandler.logError(e, customMessage: 'syncHistory() failed');
         }
         try {
           await syncSearchHistory();
         } catch (e) {
-          if (kDebugMode) debugPrint('$e');
+          ErrorHandler.logError(e, customMessage: 'syncSearchHistory() failed');
         }
       }
     } else if (!isLoginResync && _currentUserId != null && isOnline) {
@@ -961,7 +888,7 @@ class SupabaseSyncService {
     try {
       _startConnectionMonitoring();
     } catch (e) {
-      if (kDebugMode) debugPrint('$e');
+      ErrorHandler.logError(e, customMessage: '_startConnectionMonitoring failed');
     }
 
     // Cache the username after initialization
@@ -977,8 +904,7 @@ class SupabaseSyncService {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
       //final hasConnection = connectivityResult != ConnectivityResult.none;
-      final hasConnection =
-          !connectivityResult.contains(ConnectivityResult.none);
+      final hasConnection = !connectivityResult.contains(ConnectivityResult.none);
 
       if (hasConnection) {
         try {
@@ -989,9 +915,7 @@ class SupabaseSyncService {
           await _processPendingQueues();
         } catch (e) {
           // Connection test or setup failed - go offline but don't crash
-          if (kDebugMode) {
-            debugPrint('Connection setup failed: ${e.toString()}');
-          }
+          ErrorHandler.logError(e, customMessage: 'Connection setup failed');
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
         }
@@ -1001,7 +925,7 @@ class SupabaseSyncService {
       }
     } catch (e) {
       // Connectivity check failed - assume offline
-      if (kDebugMode) debugPrint('Connectivity check failed: ${e.toString()}');
+      ErrorHandler.logError(e, customMessage: 'Connectivity check failed');
       _syncStatus = SyncStatus.offline;
       syncStatusNotifier.value = SyncStatus.offline;
     }
@@ -1022,24 +946,16 @@ class SupabaseSyncService {
 
       // Try to access user's profile
       try {
-        final testQuery = _supabase
-            .from('profiles')
-            .select()
-            .eq('id', _currentUserId!)
-            .single();
+        final testQuery = _supabase.from('profiles').select().eq('id', _currentUserId!).single();
         await testQuery;
       } catch (e) {
         // Handle specific Supabase errors that can occur during network restoration
-        if (kDebugMode) {
-          debugPrint('Supabase profile access failed: ${e.toString()}');
-        }
+        ErrorHandler.logError(e, customMessage: 'Supabase profile access failed');
         rethrow;
       }
     } catch (e) {
       // Log the error but don't rethrow - let connectivity monitoring handle reconnection
-      if (kDebugMode) {
-        debugPrint('Supabase connection test failed: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'Supabase connection test failed');
       rethrow; // Still throw so calling code knows connection failed
     }
   }
@@ -1155,9 +1071,8 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          if (kDebugMode) {
-            debugPrint('Failed to setup highlights listener: ${e.toString()}');
-          }
+          ErrorHandler.logError(e,
+              customMessage: 'Failed to setup highlights listener', context: {'table': 'highlights'});
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1182,9 +1097,7 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          if (kDebugMode) {
-            debugPrint('Failed to setup notes listener: ${e.toString()}');
-          }
+          ErrorHandler.logError(e, customMessage: 'Failed to setup notes listener', context: {'table': 'notes'});
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1209,9 +1122,7 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          if (kDebugMode) {
-            debugPrint('Failed to setup history listener: ${e.toString()}');
-          }
+          ErrorHandler.logError(e, customMessage: 'Failed to setup history listener', context: {'table': 'history'});
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1236,18 +1147,14 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          if (kDebugMode) {
-            debugPrint(
-                'Failed to setup search history listener: ${e.toString()}');
-          }
+          ErrorHandler.logError(e,
+              customMessage: 'Failed to setup search history listener', context: {'table': 'search_history'});
           // Don't rethrow - continue with other listeners
         }
       }
     } catch (e) {
       _isListening = false;
-      if (kDebugMode) {
-        debugPrint('Error setting up realtime listeners: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'Error setting up realtime listeners');
       // Don't rethrow - let connectivity monitoring handle reconnection
     }
   }
@@ -1429,8 +1336,7 @@ class SupabaseSyncService {
   // }
 
   /// Update listener for a specific sync category without affecting others
-  Future<void> updateListenerForCategory(
-      String category, bool shouldEnable) async {
+  Future<void> updateListenerForCategory(String category, bool shouldEnable) async {
     if (_currentUserId == null || !isOnline || _isListening == false) return;
 
     switch (category) {
@@ -1455,9 +1361,7 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_handleHighlightsChange exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_handleHighlightsChange exception');
           }
         } else if (!shouldEnable && _highlightsChannel != null) {
           // Cancel highlights listener
@@ -1487,9 +1391,7 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_handleNotesChange exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_handleNotesChange exception');
           }
         } else if (!shouldEnable && _notesChannel != null) {
           // Cancel notes listener
@@ -1519,9 +1421,7 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_handleHistoryChange exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_handleHistoryChange exception');
           }
         } else if (!shouldEnable && _historyChannel != null) {
           // Cancel history listener
@@ -1551,10 +1451,7 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint(
-                  '_handleSearchHistoryChange exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_handleSearchHistoryChange exception');
           }
         } else if (!shouldEnable && _searchHistoryChannel != null) {
           // Cancel search history listener
@@ -1577,16 +1474,14 @@ class SupabaseSyncService {
       }
 
       // DEBUG: Log realtime handler invocation with detailed information
-      if (kDebugMode) {
-        debugPrint('=== DEBUG _handleHighlightsChange REALTIME ===');
-        debugPrint('Event type: ${payload.eventType}');
-        debugPrint('Table: ${payload.table}');
-        debugPrint('Schema: ${payload.schema}');
-        debugPrint('Old record: ${payload.oldRecord}');
-        debugPrint('New record: ${payload.newRecord}');
-        debugPrint('Payload details: ${payload.toString()}');
-        debugPrint('=== END DEBUG _handleHighlightsChange ===');
-      }
+      ErrorHandler.logError('Realtime highlights event', context: {
+        'eventType': payload.eventType,
+        'table': payload.table,
+        'schema': payload.schema,
+        'oldRecord': payload.oldRecord,
+        'newRecord': payload.newRecord,
+        'payload': payload.toString(),
+      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1601,53 +1496,38 @@ class SupabaseSyncService {
           final deletedRecord = payload.oldRecord;
 
           // Use uuid to find and delete the local record (only data available from Supabase realtime with RLS)
-          final uuid =
-              deletedRecord['id'] as String?; // Supabase returns id as UUID
+          final uuid = deletedRecord['id'] as String?; // Supabase returns id as UUID
 
-          if (kDebugMode) {
-            debugPrint('=== DEBUG _handleHighlightsChange DELETE ===');
-            debugPrint('UUID from payload: $uuid');
-            debugPrint('Deleted record: $deletedRecord');
-          }
+          ErrorHandler.logError('Realtime highlights delete event',
+              context: {'uuid': uuid, 'deletedRecord': deletedRecord.toString()});
 
           if (uuid != null && uuid.isNotEmpty) {
             // Use uuid to find and delete the local record
             final localHighlights = await HighlightsDatabase.getHighlights();
-            if (kDebugMode) {
-              debugPrint('Found ${localHighlights.length} local highlights');
-            }
-            final highlightToDelete = localHighlights.firstWhere(
-                (h) => h['uuid'] == uuid,
-                orElse: () => <String, dynamic>{});
+            ErrorHandler.logError('Found ${localHighlights.length} local highlights',
+                context: {'found': localHighlights.length});
+            final highlightToDelete =
+                localHighlights.firstWhere((h) => h['uuid'] == uuid, orElse: () => <String, dynamic>{});
             if (highlightToDelete.isNotEmpty) {
-              if (kDebugMode) {
-                debugPrint('Found highlight to delete with UUID: $uuid');
-                debugPrint('Local highlight ID: ${highlightToDelete['id']}');
-                debugPrint(
-                    'Local highlight created_at: ${highlightToDelete['created_at']}');
-              }
-              await HighlightsDatabase.deleteHighlight(
-                  highlightToDelete['id'] as int);
+              ErrorHandler.logError('Found highlight to delete', context: {
+                'uuid': uuid,
+                'id': highlightToDelete['id'],
+                'created_at': highlightToDelete['created_at'].toString()
+              });
+              await HighlightsDatabase.deleteHighlight(highlightToDelete['id'] as int);
               LocalDataChangeNotifier.notifyHighlightsChanged();
               _highlightsChangedController?.add(null);
-              if (kDebugMode) {
-                debugPrint('Successfully deleted highlight locally');
-              }
+              ErrorHandler.logError('Successfully deleted highlight locally');
             } else {
-              if (kDebugMode) {
-                debugPrint('No local highlight found with UUID: $uuid');
-              }
+              ErrorHandler.logError('No local highlight found with UUID: $uuid');
             }
           } else {
-            if (kDebugMode) {
-              debugPrint('UUID is null or empty, cannot delete');
-            }
+            ErrorHandler.logError('UUID is null or empty, cannot delete');
           }
           break;
         default:
-          if (kDebugMode) {
-            debugPrint('Unknown event type: ${payload.eventType}');
-          }
+          ErrorHandler.logError('Unknown event type',
+              context: {'eventType': payload.eventType, 'table': payload.table});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1670,15 +1550,15 @@ class SupabaseSyncService {
         return;
       }
 
-      // DEBUG: Log realtime handler invocation with detailed information
-      if (kDebugMode) {
-        debugPrint('=== DEBUG _handleNotesChange REALTIME ===');
-        debugPrint('Event type: ${payload.eventType}');
-        debugPrint('Table: ${payload.table}');
-        debugPrint('Schema: ${payload.schema}');
-        debugPrint('Old record: ${payload.oldRecord}');
-        debugPrint('New record: ${payload.newRecord}');
-      }
+      // Log realtime handler invocation with structured details
+      ErrorHandler.logError('Realtime notes event', context: {
+        'eventType': payload.eventType,
+        'table': payload.table,
+        'schema': payload.schema,
+        'oldRecord': payload.oldRecord,
+        'newRecord': payload.newRecord,
+        'payload': payload.toString(),
+      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1693,14 +1573,12 @@ class SupabaseSyncService {
           final deletedRecord = payload.oldRecord;
 
           // Use uuid to find and delete the local record (only data available from Supabase realtime with RLS)
-          final uuid =
-              deletedRecord['id'] as String?; // Supabase returns id as UUID
+          final uuid = deletedRecord['id'] as String?; // Supabase returns id as UUID
 
           if (uuid != null && uuid.isNotEmpty) {
             // Use uuid to find and delete the local record
             final localNotes = await NotesDatabase.getNotes();
-            final noteToDelete = localNotes.firstWhere((n) => n['uuid'] == uuid,
-                orElse: () => <String, dynamic>{});
+            final noteToDelete = localNotes.firstWhere((n) => n['uuid'] == uuid, orElse: () => <String, dynamic>{});
             if (noteToDelete.isNotEmpty) {
               await NotesDatabase.deleteNote(noteToDelete['id'] as int);
               LocalDataChangeNotifier.notifyNotesChanged();
@@ -1709,9 +1587,7 @@ class SupabaseSyncService {
           }
           break;
         default:
-          if (kDebugMode) {
-            debugPrint('Unknown event type: ${payload.eventType}');
-          }
+          ErrorHandler.logError('Unknown event type: ${payload.eventType}', context: {'eventType': payload.eventType});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1734,17 +1610,15 @@ class SupabaseSyncService {
         return;
       }
 
-      // DEBUG: Log realtime handler invocation with detailed information
-      if (kDebugMode) {
-        debugPrint('=== DEBUG _handleHistoryChange REALTIME ===');
-        debugPrint('Event type: ${payload.eventType}');
-        debugPrint('Table: ${payload.table}');
-        debugPrint('Schema: ${payload.schema}');
-        debugPrint('Old record: ${payload.oldRecord}');
-        debugPrint('New record: ${payload.newRecord}');
-        debugPrint('Payload details: ${payload.toString()}');
-        debugPrint('=== END DEBUG _handleHistoryChange ===');
-      }
+      // Log realtime handler invocation with structured details
+      ErrorHandler.logError('Realtime history event', context: {
+        'eventType': payload.eventType,
+        'table': payload.table,
+        'schema': payload.schema,
+        'oldRecord': payload.oldRecord,
+        'newRecord': payload.newRecord,
+        'payload': payload.toString(),
+      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1759,27 +1633,22 @@ class SupabaseSyncService {
           final deletedRecord = payload.oldRecord;
 
           // Use uuid to find and delete the local record (only data available from Supabase realtime with RLS)
-          final uuid =
-              deletedRecord['id'] as String?; // Supabase returns id as UUID
+          final uuid = deletedRecord['id'] as String?; // Supabase returns id as UUID
 
           if (uuid != null && uuid.isNotEmpty) {
             // Use uuid to find and delete the local record
             final localHistory = await HistoryDatabase.getHistory();
-            final historyToDelete = localHistory.firstWhere(
-                (h) => h['uuid'] == uuid,
-                orElse: () => <String, dynamic>{});
+            final historyToDelete =
+                localHistory.firstWhere((h) => h['uuid'] == uuid, orElse: () => <String, dynamic>{});
             if (historyToDelete.isNotEmpty) {
-              await HistoryDatabase.deleteHistoryItem(
-                  historyToDelete['id'] as int);
+              await HistoryDatabase.deleteHistoryItem(historyToDelete['id'] as int);
               LocalDataChangeNotifier.notifyHistoryChanged();
               _historyChangedController?.add(null);
             }
           }
           break;
         default:
-          if (kDebugMode) {
-            debugPrint('Unknown event type: ${payload.eventType}');
-          }
+          ErrorHandler.logError('Unknown event type: ${payload.eventType}', context: {'eventType': payload.eventType});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1802,17 +1671,15 @@ class SupabaseSyncService {
         return;
       }
 
-      // DEBUG: Log realtime handler invocation with detailed information
-      if (kDebugMode) {
-        debugPrint('=== DEBUG _handleSearchHistoryChange REALTIME ===');
-        debugPrint('Event type: ${payload.eventType}');
-        debugPrint('Table: ${payload.table}');
-        debugPrint('Schema: ${payload.schema}');
-        debugPrint('Old record: ${payload.oldRecord}');
-        debugPrint('New record: ${payload.newRecord}');
-        debugPrint('Payload details: ${payload.toString()}');
-        debugPrint('=== END DEBUG _handleSearchHistoryChange ===');
-      }
+      // Log realtime handler invocation with structured details
+      ErrorHandler.logError('Realtime search history event', context: {
+        'eventType': payload.eventType,
+        'table': payload.table,
+        'schema': payload.schema,
+        'oldRecord': payload.oldRecord,
+        'newRecord': payload.newRecord,
+        'payload': payload.toString(),
+      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1827,27 +1694,23 @@ class SupabaseSyncService {
           final deletedRecord = payload.oldRecord;
 
           // Try to use uuid first (from Supabase), fall back to timestamp
-          final uuid =
-              deletedRecord['id'] as String?; // Supabase returns id as UUID
+          final uuid = deletedRecord['id'] as String?; // Supabase returns id as UUID
 
           if (uuid != null && uuid.isNotEmpty) {
             // Use uuid to find and delete the local record (only data available from Supabase realtime with RLS)
             final localSearchHistory = await SearchDatabase.getSearchHistory();
-            final searchHistoryToDelete = localSearchHistory.firstWhere(
-                (s) => s['uuid'] == uuid,
-                orElse: () => <String, dynamic>{});
+            final searchHistoryToDelete =
+                localSearchHistory.firstWhere((s) => s['uuid'] == uuid, orElse: () => <String, dynamic>{});
             if (searchHistoryToDelete.isNotEmpty) {
-              await SearchDatabase.deleteSearchHistoryItem(
-                  searchHistoryToDelete['id'] as int);
+              await SearchDatabase.deleteSearchHistoryItem(searchHistoryToDelete['id'] as int);
               LocalDataChangeNotifier.notifySearchHistoryChanged();
               _searchHistoryChangedController?.add(null);
             }
           }
           break;
         default:
-          if (kDebugMode) {
-            debugPrint('Unknown event type: ${payload.eventType}');
-          }
+          ErrorHandler.logError('Unknown event type',
+              context: {'eventType': payload.eventType, 'table': payload.table});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1966,53 +1829,40 @@ class SupabaseSyncService {
 
     try {
       // DEBUG: Log sync operation start
-      if (kDebugMode) {
-        debugPrint('=== DEBUG syncHighlights START ===');
-      }
+      ErrorHandler.logError('=== DEBUG syncHighlights START ===');
 
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
-      final baselineTime =
-          _lastHighlightsSync ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final baselineTime = _lastHighlightsSync ?? DateTime.fromMillisecondsSinceEpoch(0);
 
       // Get local highlights - all for sync logic
       final localHighlights = await HighlightsDatabase.getHighlights();
 
       // Filter for recent changes if not forced
       final highlightsToSync = localHighlights
-          .where((h) =>
-              (h['updated_at'] ?? h['created_at'] ?? 0) >
-              baselineTime.millisecondsSinceEpoch)
+          .where((h) => (h['updated_at'] ?? h['created_at'] ?? 0) > baselineTime.millisecondsSinceEpoch)
           .toList();
 
       // Upload local changes
       if (highlightsToSync.isNotEmpty) {
         // Get remote highlights for comparison
-        final remoteHighlightsResponse = await _supabase
-            .from('highlights')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteHighlights =
-            List<Map<String, dynamic>>.from(remoteHighlightsResponse);
+        final remoteHighlightsResponse = await _supabase.from('highlights').select().eq('user_id', _currentUserId!);
+        final remoteHighlights = List<Map<String, dynamic>>.from(remoteHighlightsResponse);
 
         // Sync logic: collect highlights that need uploading
         final highlightsToUpload = <Map<String, dynamic>>[];
 
         for (final highlight in highlightsToSync) {
           final highlightId = highlight['created_at'];
-          final remoteDoc = remoteHighlights
-              .where((h) => h['created_at'] == highlightId)
-              .firstOrNull;
+          final remoteDoc = remoteHighlights.where((h) => h['created_at'] == highlightId).firstOrNull;
 
           if (remoteDoc == null) {
             // New highlight - needs upload
             highlightsToUpload.add(highlight);
           } else {
             // Check if local is newer
-            final localTime =
-                highlight['updated_at'] ?? highlight['created_at'] ?? 0;
-            final remoteTime =
-                remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
+            final localTime = highlight['updated_at'] ?? highlight['created_at'] ?? 0;
+            final remoteTime = remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
 
             if (localTime > remoteTime) {
               highlightsToUpload.add(highlight);
@@ -2023,14 +1873,11 @@ class SupabaseSyncService {
         // Upload highlights
         if (highlightsToUpload.isNotEmpty) {
           try {
-            if (kDebugMode) {
-              debugPrint('Uploading ${highlightsToUpload.length} highlights');
-            }
+            ErrorHandler.logError('Uploading ${highlightsToUpload.length} highlights',
+                context: {'uploading': highlightsToUpload.length});
             await _batchUploadHighlights(highlightsToUpload);
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_batchUploadHighlights exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_batchUploadHighlights exception');
             // If batch upload fails, queue each operation individually for retry
             for (final highlight in highlightsToUpload) {
               _enqueueFailedOperation(SyncOperation(
@@ -2038,8 +1885,7 @@ class SupabaseSyncService {
                 type: 'highlight',
                 operation: 'create',
                 data: highlight,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    highlight['created_at'] as int),
+                timestamp: DateTime.fromMillisecondsSinceEpoch(highlight['created_at'] as int),
               ));
             }
           }
@@ -2048,17 +1894,11 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastHighlightsSyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('highlights')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('updated_at', lastSyncMs);
+      final query = _supabase.from('highlights').select().eq('user_id', _currentUserId!).gt('updated_at', lastSyncMs);
       final snapshot = await query;
       if (snapshot.isNotEmpty) {
-        if (kDebugMode) {
-          debugPrint(
-              'Downloading ${snapshot.length} highlight changes from remote');
-        }
+        ErrorHandler.logError('Downloading ${snapshot.length} highlight changes from remote',
+            context: {'downloaded': snapshot.length});
         await _downloadHighlights(snapshot);
       }
 
@@ -2071,13 +1911,9 @@ class SupabaseSyncService {
       // Save timestamps to preferences - only for highlights
       await _saveLastSyncTimestamps('highlights');
 
-      if (kDebugMode) {
-        debugPrint('=== DEBUG syncHighlights COMPLETE ===');
-      }
+      ErrorHandler.logError('=== DEBUG syncHighlights COMPLETE ===');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('syncHighlights exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncHighlights exception');
     }
   }
 
@@ -2091,17 +1927,15 @@ class SupabaseSyncService {
       int skipCount = 0;
 
       // DEBUG: Log download operation start (only for problematic data types)
-      if (kDebugMode) {
-        debugPrint('DEBUG: _downloadHighlights processing ${docs.length} docs');
-      }
+      ErrorHandler.logError('DEBUG: _downloadHighlights processing ${docs.length} docs',
+          context: {'docs': docs.length});
 
       // Get local highlights - match by created_at timestamp only
       final localHighlights = await HighlightsDatabase.getHighlights();
 
       for (final data in docs) {
         // Validate data before processing
-        if (!await DataValidation.validateHighlightData(data,
-            context: 'download highlight')) {
+        if (!await DataValidation.validateHighlightData(data, context: 'download highlight')) {
           // Delete corrupt remote document
           final docId = data['created_at'] as int;
 
@@ -2114,12 +1948,8 @@ class SupabaseSyncService {
         final remoteCreatedAt = data['created_at'] as int;
 
         // Match highlights by created_at timestamp
-        final localHighlight = localHighlights
-            .where((h) => h['created_at'] == remoteCreatedAt)
-            .firstOrNull;
-        final localTime = (localHighlight?['updated_at'] ??
-            localHighlight?['created_at'] ??
-            0) as int;
+        final localHighlight = localHighlights.where((h) => h['created_at'] == remoteCreatedAt).firstOrNull;
+        final localTime = (localHighlight?['updated_at'] ?? localHighlight?['created_at'] ?? 0) as int;
 
         // Only update if remote is newer or new
         if (localHighlight == null || remoteTime > localTime) {
@@ -2132,8 +1962,7 @@ class SupabaseSyncService {
             'color': data['color'] as int,
             'created_at': remoteCreatedAt,
             'updated_at': remoteTime,
-            'uuid': data['id']
-                as String?, // Store Supabase UUID for delete operations
+            'uuid': data['id'] as String?, // Store Supabase UUID for delete operations
           });
 
           if (localHighlight == null) {
@@ -2171,10 +2000,8 @@ class SupabaseSyncService {
       }
 
       // DEBUG: Log download operation completion (only for problematic data types)
-      if (kDebugMode) {
-        debugPrint(
-            'DEBUG: _downloadHighlights done - new:$newCount, update:$updateCount, skip:$skipCount');
-      }
+      ErrorHandler.logError('DEBUG: _downloadHighlights done - new:$newCount, update:$updateCount, skip:$skipCount',
+          context: {'new': newCount, 'update': updateCount, 'skip': skipCount});
 
       // Only notify if there were actual changes
       if (hasChanges && processedCount > 0) {
@@ -2202,14 +2029,11 @@ class SupabaseSyncService {
       int skipCount = 0;
 
       // DEBUG: Log download operation start (only for problematic data types)
-      if (kDebugMode) {
-        debugPrint('DEBUG: _downloadNotes processing ${docs.length} docs');
-      }
+      ErrorHandler.logError('DEBUG: _downloadNotes processing ${docs.length} docs', context: {'docs': docs.length});
 
       for (final data in docs) {
         // Validate data before processing
-        if (!await DataValidation.validateNoteData(data,
-            context: 'download note')) {
+        if (!await DataValidation.validateNoteData(data, context: 'download note')) {
           // Delete corrupt remote document
           final docId = data['created_at'] as int;
 
@@ -2218,8 +2042,7 @@ class SupabaseSyncService {
           continue; // Skip processing this document
         }
 
-        final remoteTime =
-            (data['updated_at'] ?? data['created_at'] ?? 0) as int;
+        final remoteTime = (data['updated_at'] ?? data['created_at'] ?? 0) as int;
 
         // For notes, check by verse location since database uses book/chapter/verse
         final book = data['book'] as String;
@@ -2227,10 +2050,8 @@ class SupabaseSyncService {
         final verse = data['verse'] as int;
         final noteText = data['note_text'] as String;
 
-        final localNote =
-            await NotesDatabase.getNoteForVerse(book, chapter, verse);
-        final localTime =
-            (localNote?['updated_at'] ?? localNote?['created_at'] ?? 0) as int;
+        final localNote = await NotesDatabase.getNoteForVerse(book, chapter, verse);
+        final localTime = (localNote?['updated_at'] ?? localNote?['created_at'] ?? 0) as int;
 
         if (localNote == null || remoteTime > localTime) {
           // Convert to Delta format before storing
@@ -2249,8 +2070,7 @@ class SupabaseSyncService {
               noteText: deltaNoteText,
               createdAt: data['created_at'] as int,
               skipSync: true,
-              uuid: data['id']
-                  as String?); // Store Supabase UUID for delete operations
+              uuid: data['id'] as String?); // Store Supabase UUID for delete operations
           hasChanges = true;
           processedCount++;
         } else {
@@ -2259,10 +2079,8 @@ class SupabaseSyncService {
       }
 
       // DEBUG: Log download operation completion (only for problematic data types)
-      if (kDebugMode) {
-        debugPrint(
-            'DEBUG: _downloadNotes done - new:$newCount, update:$updateCount, skip:$skipCount');
-      }
+      ErrorHandler.logError('DEBUG: _downloadNotes done - new:$newCount, update:$updateCount, skip:$skipCount',
+          context: {'new': newCount, 'update': updateCount, 'skip': skipCount});
 
       // Only notify if there were actual changes
       if (hasChanges && processedCount > 0) {
@@ -2285,16 +2103,14 @@ class SupabaseSyncService {
     try {
       // Get all local history once for efficiency
       final localHistory = await HistoryDatabase.getHistory();
-      final localTimestamps =
-          Set<int>.from(localHistory.map((h) => h['timestamp'] as int));
+      final localTimestamps = Set<int>.from(localHistory.map((h) => h['timestamp'] as int));
 
       bool hasChanges = false;
       int processedCount = 0;
 
       for (final data in docs) {
         // Validate data before processing
-        if (!await DataValidation.validateHistoryData(data,
-            context: 'download history')) {
+        if (!await DataValidation.validateHistoryData(data, context: 'download history')) {
           // Delete corrupt remote document
           final docId = data['timestamp'];
           await deleteRemoteHistoryItem(docId);
@@ -2341,16 +2157,14 @@ class SupabaseSyncService {
     try {
       // Get all local search history once for efficiency
       final localSearchHistory = await SearchDatabase.getSearchHistory();
-      final localTimestamps =
-          Set<int>.from(localSearchHistory.map((h) => h['timestamp'] as int));
+      final localTimestamps = Set<int>.from(localSearchHistory.map((h) => h['timestamp'] as int));
 
       bool hasChanges = false;
       int processedCount = 0;
 
       for (final data in docs) {
         // Validate data before processing
-        if (!await DataValidation.validateSearchHistoryData(data,
-            context: 'download search_history')) {
+        if (!await DataValidation.validateSearchHistoryData(data, context: 'download search_history')) {
           // Delete corrupt remote document
           final docId = data['timestamp'];
           await deleteRemoteSearchHistoryItem(docId);
@@ -2381,10 +2195,7 @@ class SupabaseSyncService {
             hasChanges = true;
             processedCount++;
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint(
-                  '_downloadSearchHistory addSearchHistory exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_downloadSearchHistory addSearchHistory exception');
           }
         }
       }
@@ -2411,33 +2222,24 @@ class SupabaseSyncService {
 
     try {
       // Get all remote UUIDs
-      final remoteResponse = await _supabase
-          .from(_getTableName(type))
-          .select('id')
-          .eq('user_id', _currentUserId!);
-      final remoteUuids =
-          Set<String>.from(remoteResponse.map((r) => r['id'] as String));
+      final remoteResponse = await _supabase.from(_getTableName(type)).select('id').eq('user_id', _currentUserId!);
+      final remoteUuids = Set<String>.from(remoteResponse.map((r) => r['id'] as String));
 
       // Get local records with UUIDs
       final localRecords = await _getLocalRecords(type);
-      final localRecordsWithUuid = localRecords
-          .where((r) => r['uuid'] != null && (r['uuid'] as String).isNotEmpty)
-          .toList();
-      final localUuids = Set<String>.from(
-          localRecordsWithUuid.map((r) => r['uuid'] as String));
+      final localRecordsWithUuid =
+          localRecords.where((r) => r['uuid'] != null && (r['uuid'] as String).isNotEmpty).toList();
+      final localUuids = Set<String>.from(localRecordsWithUuid.map((r) => r['uuid'] as String));
 
       // Find deleted: local UUIDs not in remote
       final deletedUuids = localUuids.difference(remoteUuids);
 
       if (deletedUuids.isNotEmpty) {
-        if (kDebugMode) {
-          debugPrint(
-              'Detected ${deletedUuids.length} remote deletions for $type');
-        }
+        ErrorHandler.logError('Detected ${deletedUuids.length} remote deletions for $type',
+            context: {'deleted': deletedUuids.length, 'type': type});
 
         for (final uuid in deletedUuids) {
-          final record =
-              localRecordsWithUuid.firstWhere((r) => r['uuid'] == uuid);
+          final record = localRecordsWithUuid.firstWhere((r) => r['uuid'] == uuid);
           await _deleteLocalRecord(type, record['id'] as int);
         }
 
@@ -2445,10 +2247,7 @@ class SupabaseSyncService {
         _notifyChange(type);
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-            '_detectRemoteDeletions exception for $type: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_detectRemoteDeletions exception for $type', context: {'type': type});
     }
   }
 
@@ -2529,8 +2328,7 @@ class SupabaseSyncService {
     if (_currentUserId == null) return;
 
     // Validate data before uploading to prevent sending corrupt data to Supabase
-    final isValid =
-        await DataValidation.validateBeforeUpload(highlight, 'highlight');
+    final isValid = await DataValidation.validateBeforeUpload(highlight, 'highlight');
     if (!isValid) {
       return;
     }
@@ -2553,16 +2351,12 @@ class SupabaseSyncService {
     }
 
     try {
-      final response = await _supabase
-          .from('highlights')
-          .upsert(dataToInsert, onConflict: 'created_at')
-          .select('id')
-          .maybeSingle();
+      final response =
+          await _supabase.from('highlights').upsert(dataToInsert, onConflict: 'created_at').select('id').maybeSingle();
 
       // If the local highlight didn't have a UUID, update it with the one from Supabase
       final supabaseUuid = response?['id'] as String?;
-      if (supabaseUuid != null &&
-          (highlight['uuid'] == null || highlight['uuid'].isEmpty)) {
+      if (supabaseUuid != null && (highlight['uuid'] == null || highlight['uuid'].isEmpty)) {
         // Update the local highlight with the UUID from Supabase
         await HighlightsDatabase.updateHighlight(
             id: highlight['id'] as int,
@@ -2573,20 +2367,18 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      if (kDebugMode) debugPrint('_uploadHighlight exception: ${e.toString()}');
+      ErrorHandler.logError(e, customMessage: '_uploadHighlight exception');
     }
   }
 
   // Batch upload multiple highlights to Supabase
-  Future<void> _batchUploadHighlights(
-      List<Map<String, dynamic>> highlights) async {
+  Future<void> _batchUploadHighlights(List<Map<String, dynamic>> highlights) async {
     if (_currentUserId == null || highlights.isEmpty) return;
 
     // Validate all highlights first
     final validHighlights = <Map<String, dynamic>>[];
     for (final highlight in highlights) {
-      final isValid =
-          await DataValidation.validateBeforeUpload(highlight, 'highlight');
+      final isValid = await DataValidation.validateBeforeUpload(highlight, 'highlight');
       if (isValid) {
         validHighlights.add(highlight);
       }
@@ -2607,16 +2399,13 @@ class SupabaseSyncService {
               'created_at': highlight['created_at'],
               'updated_at': highlight['updated_at'],
               // Include UUID if it exists to preserve the same record ID across syncs
-              if (highlight['uuid'] != null && highlight['uuid'].isNotEmpty)
-                'id': highlight['uuid'],
+              if (highlight['uuid'] != null && highlight['uuid'].isNotEmpty) 'id': highlight['uuid'],
             })
         .toList();
 
     try {
-      final response = await _supabase
-          .from('highlights')
-          .upsert(dataToInsert, onConflict: 'created_at')
-          .select('id, created_at');
+      final response =
+          await _supabase.from('highlights').upsert(dataToInsert, onConflict: 'created_at').select('id, created_at');
 
       // Update local highlights with UUIDs from Supabase for records that didn't have them
       for (final uploadedRecord in response) {
@@ -2624,14 +2413,12 @@ class SupabaseSyncService {
         final createdAt = uploadedRecord['created_at'] as int;
 
         // Find the corresponding local highlight
-        final localHighlight = validHighlights.firstWhere(
-            (h) => h['created_at'] == createdAt,
-            orElse: () => <String, dynamic>{});
+        final localHighlight =
+            validHighlights.firstWhere((h) => h['created_at'] == createdAt, orElse: () => <String, dynamic>{});
 
         if (localHighlight.isNotEmpty &&
             supabaseUuid != null &&
-            (localHighlight['uuid'] == null ||
-                localHighlight['uuid'].isEmpty)) {
+            (localHighlight['uuid'] == null || localHighlight['uuid'].isEmpty)) {
           // Update the local highlight with the UUID from Supabase
           await HighlightsDatabase.updateHighlight(
               id: localHighlight['id'] as int,
@@ -2643,9 +2430,7 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_batchUploadHighlights exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_batchUploadHighlights exception');
 
       // Re-throw the original error to trigger retry mechanism
       rethrow;
@@ -2656,11 +2441,7 @@ class SupabaseSyncService {
   Future<void> deleteRemoteHighlight(int createdAt) async {
     if (_currentUserId == null) return;
 
-    await _supabase
-        .from('highlights')
-        .delete()
-        .eq('user_id', _currentUserId!)
-        .eq('created_at', createdAt);
+    await _supabase.from('highlights').delete().eq('user_id', _currentUserId!).eq('created_at', createdAt);
   }
 
   // Sync notes to Supabase
@@ -2685,33 +2466,24 @@ class SupabaseSyncService {
       final localNotes = await NotesDatabase.getNotes();
 
       // Filter for recent changes if not forced
-      final baselineTime =
-          _lastNotesSync ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final baselineTime = _lastNotesSync ?? DateTime.fromMillisecondsSinceEpoch(0);
       final notesToSync = localNotes
-          .where((n) =>
-              (n['updated_at'] ?? n['created_at'] ?? 0) >
-              baselineTime.millisecondsSinceEpoch)
+          .where((n) => (n['updated_at'] ?? n['created_at'] ?? 0) > baselineTime.millisecondsSinceEpoch)
           .toList();
 
       // Always perform bi-directional sync regardless of local changes
 
       if (notesToSync.isNotEmpty) {
         // Get remote notes for comparison
-        final remoteNotesResponse = await _supabase
-            .from('notes')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteNotes =
-            List<Map<String, dynamic>>.from(remoteNotesResponse);
+        final remoteNotesResponse = await _supabase.from('notes').select().eq('user_id', _currentUserId!);
+        final remoteNotes = List<Map<String, dynamic>>.from(remoteNotesResponse);
 
         // Sync logic: collect notes that need uploading
         final notesToUpload = <Map<String, dynamic>>[];
 
         for (final note in notesToSync) {
           final localTimestamp = note['created_at'] as int;
-          final remoteDoc = remoteNotes
-              .where((n) => n['created_at'] == localTimestamp)
-              .firstOrNull;
+          final remoteDoc = remoteNotes.where((n) => n['created_at'] == localTimestamp).firstOrNull;
 
           if (remoteDoc == null) {
             // New note - needs upload
@@ -2719,8 +2491,7 @@ class SupabaseSyncService {
           } else {
             // Check if local is newer
             final localTime = note['updated_at'] ?? note['created_at'] ?? 0;
-            final remoteTime =
-                remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
+            final remoteTime = remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
 
             if (localTime > remoteTime) {
               notesToUpload.add(note);
@@ -2733,9 +2504,7 @@ class SupabaseSyncService {
           try {
             await _batchUploadNotes(notesToUpload);
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_batchUploadNotes exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_batchUploadNotes exception');
 
             // If batch upload fails, queue each operation individually for retry
             for (final note in notesToUpload) {
@@ -2744,8 +2513,7 @@ class SupabaseSyncService {
                 type: 'note',
                 operation: 'create',
                 data: note,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    note['created_at'] as int),
+                timestamp: DateTime.fromMillisecondsSinceEpoch(note['created_at'] as int),
               ));
             }
           }
@@ -2754,11 +2522,7 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('notes')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('updated_at', lastSyncMs);
+      final query = _supabase.from('notes').select().eq('user_id', _currentUserId!).gt('updated_at', lastSyncMs);
       final snapshot = await query;
       if (snapshot.isNotEmpty) {
         await _downloadNotes(snapshot);
@@ -2803,16 +2567,12 @@ class SupabaseSyncService {
     }
 
     try {
-      final response = await _supabase
-          .from('notes')
-          .upsert(dataToInsert, onConflict: 'created_at')
-          .select('id')
-          .maybeSingle();
+      final response =
+          await _supabase.from('notes').upsert(dataToInsert, onConflict: 'created_at').select('id').maybeSingle();
 
       // If the local note didn't have a UUID, update it with the one from Supabase
       final supabaseUuid = response?['id'] as String?;
-      if (supabaseUuid != null &&
-          (note['uuid'] == null || note['uuid'].isEmpty)) {
+      if (supabaseUuid != null && (note['uuid'] == null || note['uuid'].isEmpty)) {
         // Update the local note with the UUID from Supabase
         await NotesDatabase.addOrUpdateNote(
             book: note['book'] as String,
@@ -2824,7 +2584,7 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      if (kDebugMode) debugPrint('_uploadNote exception: ${e.toString()}');
+      ErrorHandler.logError(e, customMessage: '_uploadNote exception');
     }
   }
 
@@ -2832,11 +2592,7 @@ class SupabaseSyncService {
   Future<void> deleteRemoteNote(int createdAt) async {
     if (_currentUserId == null) return;
 
-    await _supabase
-        .from('notes')
-        .delete()
-        .eq('user_id', _currentUserId!)
-        .eq('created_at', createdAt);
+    await _supabase.from('notes').delete().eq('user_id', _currentUserId!).eq('created_at', createdAt);
   }
 
   // Batch upload multiple notes to Supabase
@@ -2865,15 +2621,12 @@ class SupabaseSyncService {
               'created_at': note['created_at'],
               'updated_at': note['updated_at'],
               // Include UUID if it exists to preserve the same record ID across syncs
-              if (note['uuid'] != null && note['uuid'].isNotEmpty)
-                'id': note['uuid'],
+              if (note['uuid'] != null && note['uuid'].isNotEmpty) 'id': note['uuid'],
             })
         .toList();
     try {
-      final response = await _supabase
-          .from('notes')
-          .upsert(dataToInsert, onConflict: 'created_at')
-          .select('id, created_at');
+      final response =
+          await _supabase.from('notes').upsert(dataToInsert, onConflict: 'created_at').select('id, created_at');
 
       // Update local notes with UUIDs from Supabase for records that didn't have them
       for (final uploadedRecord in response) {
@@ -2881,13 +2634,9 @@ class SupabaseSyncService {
         final createdAt = uploadedRecord['created_at'] as int;
 
         // Find the corresponding local note
-        final localNote = validNotes.firstWhere(
-            (n) => n['created_at'] == createdAt,
-            orElse: () => <String, dynamic>{});
+        final localNote = validNotes.firstWhere((n) => n['created_at'] == createdAt, orElse: () => <String, dynamic>{});
 
-        if (localNote.isNotEmpty &&
-            supabaseUuid != null &&
-            (localNote['uuid'] == null || localNote['uuid'].isEmpty)) {
+        if (localNote.isNotEmpty && supabaseUuid != null && (localNote['uuid'] == null || localNote['uuid'].isEmpty)) {
           // Update the local note with the UUID from Supabase
           await NotesDatabase.addOrUpdateNote(
               book: localNote['book'] as String,
@@ -2900,9 +2649,7 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_batchUploadNotes exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_batchUploadNotes exception');
     }
   }
 
@@ -2926,34 +2673,26 @@ class SupabaseSyncService {
     try {
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
-      final baselineTime =
-          _lastSearchHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final baselineTime = _lastSearchHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
       final localSearchHistory = await SearchDatabase.getSearchHistory();
 
       // Filter for recent changes if not forced
-      final searchHistoryToSync = localSearchHistory
-          .where((h) =>
-              (h['timestamp'] ?? 0) > baselineTime.millisecondsSinceEpoch)
-          .toList();
+      final searchHistoryToSync =
+          localSearchHistory.where((h) => (h['timestamp'] ?? 0) > baselineTime.millisecondsSinceEpoch).toList();
 
       // Upload local changes
       if (searchHistoryToSync.isNotEmpty) {
         // Get remote search history
-        final remoteSearchHistoryResponse = await _supabase
-            .from('search_history')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteSearchHistory =
-            List<Map<String, dynamic>>.from(remoteSearchHistoryResponse);
+        final remoteSearchHistoryResponse =
+            await _supabase.from('search_history').select().eq('user_id', _currentUserId!);
+        final remoteSearchHistory = List<Map<String, dynamic>>.from(remoteSearchHistoryResponse);
 
         // Sync logic: collect search history items that need uploading
         final searchHistoryItemsToUpload = <Map<String, dynamic>>[];
 
         for (final searchHistoryItem in searchHistoryToSync) {
           final localTime = searchHistoryItem['timestamp'] ?? 0;
-          final remoteDoc = remoteSearchHistory
-              .where((s) => s['timestamp'] == localTime)
-              .firstOrNull;
+          final remoteDoc = remoteSearchHistory.where((s) => s['timestamp'] == localTime).firstOrNull;
 
           if (remoteDoc == null) {
             // New search history item - needs upload
@@ -2973,10 +2712,7 @@ class SupabaseSyncService {
           try {
             await _batchUploadSearchHistory(searchHistoryItemsToUpload);
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint(
-                  '_batchUploadSearchHistory exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_batchUploadSearchHistory exception');
 
             // If batch upload fails, queue each operation individually for retry
             for (final searchHistoryItem in searchHistoryItemsToUpload) {
@@ -2985,8 +2721,7 @@ class SupabaseSyncService {
                 type: 'search_history',
                 operation: 'create',
                 data: searchHistoryItem,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    searchHistoryItem['timestamp'] as int),
+                timestamp: DateTime.fromMillisecondsSinceEpoch(searchHistoryItem['timestamp'] as int),
               ));
             }
           }
@@ -2994,13 +2729,9 @@ class SupabaseSyncService {
       }
 
       // Download remote changes newer than last sync for bidirectional sync
-      final lastSyncMs =
-          _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('search_history')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('timestamp', lastSyncMs);
+      final lastSyncMs = _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
+      final query =
+          _supabase.from('search_history').select().eq('user_id', _currentUserId!).gt('timestamp', lastSyncMs);
       final snapshot = await query;
       if (snapshot.isNotEmpty) {
         await _downloadSearchHistory(snapshot);
@@ -3015,22 +2746,18 @@ class SupabaseSyncService {
       // Save timestamps to preferences - only for search_history
       await _saveLastSyncTimestamps('search_history');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('syncSearchHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncSearchHistory exception');
     }
   }
 
   // Batch upload multiple search history items to Supabase
-  Future<void> _batchUploadSearchHistory(
-      List<Map<String, dynamic>> searchHistoryItems) async {
+  Future<void> _batchUploadSearchHistory(List<Map<String, dynamic>> searchHistoryItems) async {
     if (_currentUserId == null || searchHistoryItems.isEmpty) return;
 
     // Validate all search history items first
     final validSearchHistoryItems = <Map<String, dynamic>>[];
     for (final searchHistoryItem in searchHistoryItems) {
-      final isValid = await DataValidation.validateBeforeUpload(
-          searchHistoryItem, 'search_history');
+      final isValid = await DataValidation.validateBeforeUpload(searchHistoryItem, 'search_history');
       if (isValid) {
         validSearchHistoryItems.add(searchHistoryItem);
       }
@@ -3043,35 +2770,22 @@ class SupabaseSyncService {
         .map((searchHistoryItem) => {
               'user_id': _currentUserId,
               'query': searchHistoryItem['query'] ?? '',
-              'useRegex': searchHistoryItem['useRegex'] is bool
-                  ? searchHistoryItem['useRegex']
-                  : false,
-              'useNearby': searchHistoryItem['useNearby'] is bool
-                  ? searchHistoryItem['useNearby']
-                  : false,
-              'useWholeWord': searchHistoryItem['useWholeWord'] is bool
-                  ? searchHistoryItem['useWholeWord']
-                  : false,
-              'useRedLetter': searchHistoryItem['useRedLetter'] is bool
-                  ? searchHistoryItem['useRedLetter']
-                  : false,
-              'caseSensitive': searchHistoryItem['caseSensitive'] is bool
-                  ? searchHistoryItem['caseSensitive']
-                  : false,
+              'useRegex': searchHistoryItem['useRegex'] is bool ? searchHistoryItem['useRegex'] : false,
+              'useNearby': searchHistoryItem['useNearby'] is bool ? searchHistoryItem['useNearby'] : false,
+              'useWholeWord': searchHistoryItem['useWholeWord'] is bool ? searchHistoryItem['useWholeWord'] : false,
+              'useRedLetter': searchHistoryItem['useRedLetter'] is bool ? searchHistoryItem['useRedLetter'] : false,
+              'caseSensitive': searchHistoryItem['caseSensitive'] is bool ? searchHistoryItem['caseSensitive'] : false,
               'bookFilterType': searchHistoryItem['bookFilterType'] ?? '',
               'customBookFilter': searchHistoryItem['customBookFilter'] ?? '',
               'timestamp': searchHistoryItem['timestamp'],
               // Include UUID if it exists to preserve the same record ID across syncs
-              if (searchHistoryItem['uuid'] != null &&
-                  searchHistoryItem['uuid'].isNotEmpty)
+              if (searchHistoryItem['uuid'] != null && searchHistoryItem['uuid'].isNotEmpty)
                 'id': searchHistoryItem['uuid'],
             })
         .toList();
     try {
-      final response = await _supabase
-          .from('search_history')
-          .upsert(dataToInsert, onConflict: 'timestamp')
-          .select('id, timestamp');
+      final response =
+          await _supabase.from('search_history').upsert(dataToInsert, onConflict: 'timestamp').select('id, timestamp');
 
       // Update local search history items with UUIDs from Supabase for records that didn't have them
       for (final uploadedRecord in response) {
@@ -3079,14 +2793,12 @@ class SupabaseSyncService {
         final timestamp = uploadedRecord['timestamp'] as int;
 
         // Find the corresponding local search history item
-        final localSearchHistoryItem = validSearchHistoryItems.firstWhere(
-            (s) => s['timestamp'] == timestamp,
-            orElse: () => <String, dynamic>{});
+        final localSearchHistoryItem =
+            validSearchHistoryItems.firstWhere((s) => s['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
 
         if (localSearchHistoryItem.isNotEmpty &&
             supabaseUuid != null &&
-            (localSearchHistoryItem['uuid'] == null ||
-                localSearchHistoryItem['uuid'].isEmpty)) {
+            (localSearchHistoryItem['uuid'] == null || localSearchHistoryItem['uuid'].isEmpty)) {
           // Update the local search history item with the UUID from Supabase
           await SearchDatabase.addSearchHistory(
               localSearchHistoryItem['query'] as String,
@@ -3103,9 +2815,7 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_batchUploadSearchHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_batchUploadSearchHistory exception');
 
       // Re-throw the original error to trigger retry mechanism
       rethrow;
@@ -3132,34 +2842,25 @@ class SupabaseSyncService {
     try {
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
-      final baselineTime =
-          _lastHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final baselineTime = _lastHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
       final localHistory = await HistoryDatabase.getHistory();
 
       // Filter for recent changes if not forced
-      final historyToSync = localHistory
-          .where((h) =>
-              (h['timestamp'] ?? 0) > baselineTime.millisecondsSinceEpoch)
-          .toList();
+      final historyToSync =
+          localHistory.where((h) => (h['timestamp'] ?? 0) > baselineTime.millisecondsSinceEpoch).toList();
 
       // Upload local changes
       if (historyToSync.isNotEmpty) {
         // Get remote history
-        final remoteHistoryResponse = await _supabase
-            .from('history')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteHistory =
-            List<Map<String, dynamic>>.from(remoteHistoryResponse);
+        final remoteHistoryResponse = await _supabase.from('history').select().eq('user_id', _currentUserId!);
+        final remoteHistory = List<Map<String, dynamic>>.from(remoteHistoryResponse);
 
         // Sync logic: collect history items that need uploading
         final historyItemsToUpload = <Map<String, dynamic>>[];
 
         for (final historyItem in historyToSync) {
           final localTime = historyItem['timestamp'] ?? 0;
-          final remoteDoc = remoteHistory
-              .where((h) => h['timestamp'] == localTime)
-              .firstOrNull;
+          final remoteDoc = remoteHistory.where((h) => h['timestamp'] == localTime).firstOrNull;
 
           if (remoteDoc == null) {
             // New history item - needs upload
@@ -3179,9 +2880,7 @@ class SupabaseSyncService {
           try {
             await _batchUploadHistory(historyItemsToUpload);
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint('_batchUploadHistory exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: '_batchUploadHistory exception');
 
             // If batch upload fails, queue each operation individually for retry
             for (final historyItem in historyItemsToUpload) {
@@ -3190,8 +2889,7 @@ class SupabaseSyncService {
                 type: 'history',
                 operation: 'create',
                 data: historyItem,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    historyItem['timestamp'] as int),
+                timestamp: DateTime.fromMillisecondsSinceEpoch(historyItem['timestamp'] as int),
               ));
             }
           }
@@ -3200,11 +2898,7 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('history')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('timestamp', lastSyncMs);
+      final query = _supabase.from('history').select().eq('user_id', _currentUserId!).gt('timestamp', lastSyncMs);
       final snapshot = await query;
       if (snapshot.isNotEmpty) {
         await _downloadHistory(snapshot);
@@ -3219,9 +2913,7 @@ class SupabaseSyncService {
       // Save timestamps to preferences - only for history
       await _saveLastSyncTimestamps('history');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('syncHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncHistory exception');
     }
   }
 
@@ -3230,8 +2922,7 @@ class SupabaseSyncService {
     if (_currentUserId == null) return;
 
     // Validate data before uploading to prevent sending corrupt data to Supabase
-    final isValid =
-        await DataValidation.validateBeforeUpload(historyItem, 'history');
+    final isValid = await DataValidation.validateBeforeUpload(historyItem, 'history');
     if (!isValid) {
       return;
     }
@@ -3250,29 +2941,19 @@ class SupabaseSyncService {
     }
 
     try {
-      final response = await _supabase
-          .from('history')
-          .upsert(dataToInsert, onConflict: 'timestamp')
-          .select('id')
-          .maybeSingle();
+      final response =
+          await _supabase.from('history').upsert(dataToInsert, onConflict: 'timestamp').select('id').maybeSingle();
 
       // If the local history item didn't have a UUID, update it with the one from Supabase
       final supabaseUuid = response?['id'] as String?;
-      if (supabaseUuid != null &&
-          (historyItem['uuid'] == null || historyItem['uuid'].isEmpty)) {
+      if (supabaseUuid != null && (historyItem['uuid'] == null || historyItem['uuid'].isEmpty)) {
         // Update the local history item with the UUID from Supabase
-        await HistoryDatabase.addHistory(
-            historyItem['book'] as String,
-            historyItem['chapter'] as int,
-            historyItem['verse'] as int?,
-            historyItem['timestamp'] as int,
-            true, // skipSync to avoid recursion
+        await HistoryDatabase.addHistory(historyItem['book'] as String, historyItem['chapter'] as int,
+            historyItem['verse'] as int?, historyItem['timestamp'] as int, true, // skipSync to avoid recursion
             uuid: supabaseUuid);
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_uploadHistoryItem exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_uploadHistoryItem exception');
     }
   }
 
@@ -3280,23 +2961,17 @@ class SupabaseSyncService {
   Future<void> deleteRemoteHistoryItem(int historyId) async {
     if (_currentUserId == null) return;
 
-    await _supabase
-        .from('history')
-        .delete()
-        .eq('user_id', _currentUserId!)
-        .eq('timestamp', historyId);
+    await _supabase.from('history').delete().eq('user_id', _currentUserId!).eq('timestamp', historyId);
   }
 
   // Batch upload multiple history items to Supabase
-  Future<void> _batchUploadHistory(
-      List<Map<String, dynamic>> historyItems) async {
+  Future<void> _batchUploadHistory(List<Map<String, dynamic>> historyItems) async {
     if (_currentUserId == null || historyItems.isEmpty) return;
 
     // Validate all history items first
     final validHistoryItems = <Map<String, dynamic>>[];
     for (final historyItem in historyItems) {
-      final isValid =
-          await DataValidation.validateBeforeUpload(historyItem, 'history');
+      final isValid = await DataValidation.validateBeforeUpload(historyItem, 'history');
       if (isValid) {
         validHistoryItems.add(historyItem);
       }
@@ -3313,16 +2988,13 @@ class SupabaseSyncService {
               'verse': historyItem['verse'],
               'timestamp': historyItem['timestamp'],
               // Include UUID if it exists to preserve the same record ID across syncs
-              if (historyItem['uuid'] != null && historyItem['uuid'].isNotEmpty)
-                'id': historyItem['uuid'],
+              if (historyItem['uuid'] != null && historyItem['uuid'].isNotEmpty) 'id': historyItem['uuid'],
             })
         .toList();
 
     try {
-      final response = await _supabase
-          .from('history')
-          .upsert(dataToInsert, onConflict: 'timestamp')
-          .select('id, timestamp');
+      final response =
+          await _supabase.from('history').upsert(dataToInsert, onConflict: 'timestamp').select('id, timestamp');
 
       // Update local history items with UUIDs from Supabase for records that didn't have them
       for (final uploadedRecord in response) {
@@ -3330,14 +3002,12 @@ class SupabaseSyncService {
         final timestamp = uploadedRecord['timestamp'] as int;
 
         // Find the corresponding local history item
-        final localHistoryItem = validHistoryItems.firstWhere(
-            (h) => h['timestamp'] == timestamp,
-            orElse: () => <String, dynamic>{});
+        final localHistoryItem =
+            validHistoryItems.firstWhere((h) => h['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
 
         if (localHistoryItem.isNotEmpty &&
             supabaseUuid != null &&
-            (localHistoryItem['uuid'] == null ||
-                localHistoryItem['uuid'].isEmpty)) {
+            (localHistoryItem['uuid'] == null || localHistoryItem['uuid'].isEmpty)) {
           // Update the local history item with the UUID from Supabase
           await HistoryDatabase.addHistory(
               localHistoryItem['book'] as String,
@@ -3349,9 +3019,7 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_batchUploadHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_batchUploadHistory exception');
     }
   }
 
@@ -3368,13 +3036,9 @@ class SupabaseSyncService {
 
       // Query and download highlights updated since last sync
       if (highlightsEnabled) {
-        final baselineTime =
-            _lastHighlightsSyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('highlights')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('updated_at', baselineTime);
+        final baselineTime = _lastHighlightsSyncSaved?.millisecondsSinceEpoch ?? 0;
+        final query =
+            _supabase.from('highlights').select().eq('user_id', _currentUserId!).gt('updated_at', baselineTime);
         final snapshot = await query;
 
         if (snapshot.isNotEmpty) {
@@ -3389,11 +3053,7 @@ class SupabaseSyncService {
       // Query and download notes updated since last sync
       if (notesEnabled) {
         final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('notes')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('updated_at', lastSyncMs);
+        final query = _supabase.from('notes').select().eq('user_id', _currentUserId!).gt('updated_at', lastSyncMs);
         final snapshot = await query;
 
         if (snapshot.isNotEmpty) {
@@ -3408,11 +3068,7 @@ class SupabaseSyncService {
       // Query and download history items since last sync
       if (historyEnabled) {
         final lastSyncMs = _lastHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('history')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('timestamp', lastSyncMs);
+        final query = _supabase.from('history').select().eq('user_id', _currentUserId!).gt('timestamp', lastSyncMs);
         final snapshot = await query;
 
         if (snapshot.isNotEmpty) {
@@ -3426,13 +3082,9 @@ class SupabaseSyncService {
 
       // Query and download search history items since last sync
       if (searchHistoryEnabled) {
-        final lastSyncMs =
-            _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('search_history')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('timestamp', lastSyncMs);
+        final lastSyncMs = _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
+        final query =
+            _supabase.from('search_history').select().eq('user_id', _currentUserId!).gt('timestamp', lastSyncMs);
         final snapshot = await query;
 
         if (snapshot.isNotEmpty) {
@@ -3444,20 +3096,18 @@ class SupabaseSyncService {
         await _detectRemoteDeletions('search_history');
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_syncRecentChangesOnly exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_syncRecentChangesOnly exception');
     }
   }
 
   // Sync all data types
   Future<void> syncAll() async {
     if (_currentUserId == null) {
-      if (kDebugMode) debugPrint('syncAll() called but _currentUserId is null');
+      ErrorHandler.logError('syncAll() called but _currentUserId is null');
       return;
     }
 
-    if (kDebugMode) debugPrint('=== DEBUG syncAll() STARTING ===');
+    ErrorHandler.logError('=== DEBUG syncAll() STARTING ===');
 
     // Set syncing status to show progress dialog
     final previousStatus = _syncStatus;
@@ -3472,7 +3122,7 @@ class SupabaseSyncService {
       await syncHistory();
       await syncSearchHistory();
     } catch (e) {
-      if (kDebugMode) debugPrint('_syncAll exception: ${e.toString()}');
+      ErrorHandler.logError(e, customMessage: '_syncAll exception');
     } finally {
       // Restore previous status
       _syncStatus = previousStatus;
@@ -3486,9 +3136,7 @@ class SupabaseSyncService {
       }
     }
 
-    if (kDebugMode) {
-      debugPrint('=== DEBUG syncAll() COMPLETE ===');
-    }
+    ErrorHandler.logError('=== DEBUG syncAll() COMPLETE ===');
   }
 
   // Start connection monitoring using event-driven connectivity changes
@@ -3497,8 +3145,7 @@ class SupabaseSyncService {
     if (_connectivitySubscription != null) return;
 
     // Listen to connectivity changes instead of polling
-    _connectivitySubscription = _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> result) async {
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> result) async {
       try {
         // Debounce rapid connectivity changes (network fluctuations)
         await Future.delayed(const Duration(seconds: 1));
@@ -3511,10 +3158,7 @@ class SupabaseSyncService {
             await _checkConnectionAndSetup();
           } catch (e) {
             // Handle connection setup errors gracefully
-            if (kDebugMode) {
-              debugPrint(
-                  'Connection setup failed during connectivity change: ${e.toString()}');
-            }
+            ErrorHandler.logError(e, customMessage: 'Connection setup failed during connectivity change');
             _syncStatus = SyncStatus.offline;
             syncStatusNotifier.value = _syncStatus;
             await ErrorHandler.handleNetworkError(e);
@@ -3523,14 +3167,11 @@ class SupabaseSyncService {
           // Connection lost
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
-          await ErrorHandler.handle('No network connection',
-              type: ErrorType.network, severity: ErrorSeverity.medium);
+          await ErrorHandler.handle('No network connection', type: ErrorType.network, severity: ErrorSeverity.medium);
         }
       } catch (e) {
         // Handle connectivity monitoring errors gracefully
-        if (kDebugMode) {
-          debugPrint('Connectivity monitoring error: ${e.toString()}');
-        }
+        ErrorHandler.logError(e, customMessage: 'Connectivity monitoring error');
         await ErrorHandler.handleNetworkError(e);
         _syncStatus = SyncStatus.offline;
         syncStatusNotifier.value = _syncStatus;
@@ -3546,20 +3187,17 @@ class SupabaseSyncService {
         } else {
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
-          await ErrorHandler.handle('No network connection',
-              type: ErrorType.network, severity: ErrorSeverity.medium);
+          await ErrorHandler.handle('No network connection', type: ErrorType.network, severity: ErrorSeverity.medium);
         }
       } catch (e) {
         // Handle initial connectivity check errors gracefully
-        if (kDebugMode) {
-          debugPrint('Initial connectivity check failed: ${e.toString()}');
-        }
+        ErrorHandler.logError(e, customMessage: 'Initial connectivity check failed');
         _syncStatus = SyncStatus.offline;
         syncStatusNotifier.value = _syncStatus;
       }
     }).catchError((e) async {
       // Handle connectivity check errors gracefully
-      if (kDebugMode) debugPrint('Connectivity check error: ${e.toString()}');
+      ErrorHandler.logError(e, customMessage: 'Connectivity check error');
       _syncStatus = SyncStatus.offline;
       syncStatusNotifier.value = _syncStatus;
     });
@@ -3588,8 +3226,7 @@ class SupabaseSyncService {
 
       if (remoteDocResponse == null) {
         // Remote document doesn't exist - upload local version
-        final isValid =
-            await DataValidation.validateBeforeUpload(highlight, 'highlight');
+        final isValid = await DataValidation.validateBeforeUpload(highlight, 'highlight');
         if (isValid) {
           await _uploadHighlight(highlight);
         }
@@ -3599,20 +3236,15 @@ class SupabaseSyncService {
       final remoteDoc = remoteDocResponse;
 
       // Remote document exists - compare timestamps
-      final isValidRemote = await DataValidation.validateHighlightData(
-          remoteDoc,
-          context: 'single highlight sync');
+      final isValidRemote = await DataValidation.validateHighlightData(remoteDoc, context: 'single highlight sync');
 
       if (isValidRemote) {
-        final localTime =
-            highlight['updated_at'] ?? highlight['created_at'] ?? 0;
-        final remoteTime =
-            remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
+        final localTime = highlight['updated_at'] ?? highlight['created_at'] ?? 0;
+        final remoteTime = remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
 
         if (localTime > remoteTime) {
           // Local is newer - upload local version
-          final isValid =
-              await DataValidation.validateBeforeUpload(highlight, 'highlight');
+          final isValid = await DataValidation.validateBeforeUpload(highlight, 'highlight');
           if (isValid) {
             await _uploadHighlight(highlight);
           }
@@ -3623,8 +3255,7 @@ class SupabaseSyncService {
         // If timestamps equal, no action needed (already in sync)
       } else {
         // Invalid remote data - upload local to overwrite
-        final isValid =
-            await DataValidation.validateBeforeUpload(highlight, 'highlight');
+        final isValid = await DataValidation.validateBeforeUpload(highlight, 'highlight');
         if (isValid) {
           await _uploadHighlight(highlight);
         }
@@ -3635,9 +3266,7 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadHighlight(highlight);
       // }
-      if (kDebugMode) {
-        debugPrint('syncSingleHighlight exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncSingleHighlight exception');
       rethrow;
     }
   }
@@ -3650,12 +3279,8 @@ class SupabaseSyncService {
 
     try {
       // Query only the specific remote document
-      final remoteDocResponse = await _supabase
-          .from('notes')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .eq('created_at', docId)
-          .maybeSingle();
+      final remoteDocResponse =
+          await _supabase.from('notes').select().eq('user_id', _currentUserId!).eq('created_at', docId).maybeSingle();
 
       if (remoteDocResponse == null) {
         // Remote document doesn't exist - upload local version
@@ -3669,18 +3294,15 @@ class SupabaseSyncService {
       final remoteDoc = remoteDocResponse;
 
       // Remote document exists - compare timestamps
-      final isValidRemote = await DataValidation.validateNoteData(remoteDoc,
-          context: 'single note sync');
+      final isValidRemote = await DataValidation.validateNoteData(remoteDoc, context: 'single note sync');
 
       if (isValidRemote) {
         final localTime = note['updated_at'] ?? note['created_at'] ?? 0;
-        final remoteTime =
-            remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
+        final remoteTime = remoteDoc['updated_at'] ?? remoteDoc['created_at'] ?? 0;
 
         if (localTime > remoteTime) {
           // Local is newer - upload local version
-          final isValid =
-              await DataValidation.validateBeforeUpload(note, 'note');
+          final isValid = await DataValidation.validateBeforeUpload(note, 'note');
           if (isValid) {
             await _uploadNote(note);
           }
@@ -3714,17 +3336,12 @@ class SupabaseSyncService {
 
     try {
       // Query only the specific remote document
-      final remoteDocResponse = await _supabase
-          .from('history')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .eq('timestamp', docId)
-          .maybeSingle();
+      final remoteDocResponse =
+          await _supabase.from('history').select().eq('user_id', _currentUserId!).eq('timestamp', docId).maybeSingle();
 
       if (remoteDocResponse == null) {
         // Remote document doesn't exist - upload local version
-        final isValid =
-            await DataValidation.validateBeforeUpload(historyItem, 'history');
+        final isValid = await DataValidation.validateBeforeUpload(historyItem, 'history');
         if (isValid) {
           await _uploadHistoryItem(historyItem);
         }
@@ -3734,8 +3351,7 @@ class SupabaseSyncService {
       final remoteDoc = remoteDocResponse;
 
       // Remote document exists - compare timestamps
-      final isValidRemote = await DataValidation.validateHistoryData(remoteDoc,
-          context: 'single history sync');
+      final isValidRemote = await DataValidation.validateHistoryData(remoteDoc, context: 'single history sync');
 
       if (isValidRemote) {
         final localTime = historyItem['timestamp'] ?? 0;
@@ -3743,8 +3359,7 @@ class SupabaseSyncService {
 
         if (localTime > remoteTime) {
           // Local is newer - upload local version
-          final isValid =
-              await DataValidation.validateBeforeUpload(historyItem, 'history');
+          final isValid = await DataValidation.validateBeforeUpload(historyItem, 'history');
           if (isValid) {
             await _uploadHistoryItem(historyItem);
           }
@@ -3755,8 +3370,7 @@ class SupabaseSyncService {
         // If timestamps equal, no action needed (already in sync)
       } else {
         // Invalid remote data - upload local to overwrite
-        final isValid =
-            await DataValidation.validateBeforeUpload(historyItem, 'history');
+        final isValid = await DataValidation.validateBeforeUpload(historyItem, 'history');
         if (isValid) {
           await _uploadHistoryItem(historyItem);
         }
@@ -3767,16 +3381,13 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadHistoryItem(historyItem);
       // }
-      if (kDebugMode) {
-        debugPrint('syncSingleHistoryItem exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncSingleHistoryItem exception');
       rethrow;
     }
   }
 
   // Sync single search history item efficiently with bidirectional conflict resolution
-  Future<void> syncSingleSearchHistoryItem(
-      Map<String, dynamic> searchHistoryItem) async {
+  Future<void> syncSingleSearchHistoryItem(Map<String, dynamic> searchHistoryItem) async {
     if (_currentUserId == null || !isOnline) return;
 
     final docId = searchHistoryItem['timestamp'] as int;
@@ -3792,8 +3403,7 @@ class SupabaseSyncService {
 
       if (remoteDocResponse == null) {
         // Remote document doesn't exist - upload local version
-        final isValid = await DataValidation.validateBeforeUpload(
-            searchHistoryItem, 'search_history');
+        final isValid = await DataValidation.validateBeforeUpload(searchHistoryItem, 'search_history');
         if (isValid) {
           await _uploadSearchHistoryItem(searchHistoryItem);
         }
@@ -3803,9 +3413,8 @@ class SupabaseSyncService {
       final remoteDoc = remoteDocResponse;
 
       // Remote document exists - compare timestamps
-      final isValidRemote = await DataValidation.validateSearchHistoryData(
-          remoteDoc,
-          context: 'single search_history sync');
+      final isValidRemote =
+          await DataValidation.validateSearchHistoryData(remoteDoc, context: 'single search_history sync');
 
       if (isValidRemote) {
         final localTime = searchHistoryItem['timestamp'] ?? 0;
@@ -3813,8 +3422,7 @@ class SupabaseSyncService {
 
         if (localTime > remoteTime) {
           // Local is newer - upload local version
-          final isValid = await DataValidation.validateBeforeUpload(
-              searchHistoryItem, 'search_history');
+          final isValid = await DataValidation.validateBeforeUpload(searchHistoryItem, 'search_history');
           if (isValid) {
             await _uploadSearchHistoryItem(searchHistoryItem);
           }
@@ -3825,8 +3433,7 @@ class SupabaseSyncService {
         // If timestamps equal, no action needed (already in sync)
       } else {
         // Invalid remote data - upload local to overwrite
-        final isValid = await DataValidation.validateBeforeUpload(
-            searchHistoryItem, 'search_history');
+        final isValid = await DataValidation.validateBeforeUpload(searchHistoryItem, 'search_history');
         if (isValid) {
           await _uploadSearchHistoryItem(searchHistoryItem);
         }
@@ -3838,16 +3445,13 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadSearchHistoryItem(searchHistoryItem);
       // }
-      if (kDebugMode) {
-        debugPrint('syncSingleSearchHistoryItem exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'syncSingleSearchHistoryItem exception');
       rethrow;
     }
   }
 
   // Unified operation marking method (handles all sync categories: highlight, note, history, search_history)
-  Future<void> markOperation(String type, int itemId, String operation,
-      Map<String, dynamic> data) async {
+  Future<void> markOperation(String type, int itemId, String operation, Map<String, dynamic> data) async {
     // Set appropriate sync flag based on type
     switch (type) {
       case 'highlight':
@@ -3880,9 +3484,7 @@ class SupabaseSyncService {
             try {
               await deleteRemoteHighlight(data['created_at'] as int);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint('deleteRemoteHighlight exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'deleteRemoteHighlight exception');
               rethrow;
             }
             break;
@@ -3890,19 +3492,14 @@ class SupabaseSyncService {
             try {
               await deleteRemoteNote(data['created_at'] as int);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint('deleteRemoteNote exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'deleteRemoteNote exception');
               rethrow;
             }
           case 'history':
             try {
               await deleteRemoteHistoryItem(itemId);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint(
-                    'deleteRemoteHistoryItem exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'deleteRemoteHistoryItem exception');
               rethrow;
             }
             break;
@@ -3910,10 +3507,7 @@ class SupabaseSyncService {
             try {
               await deleteRemoteSearchHistoryItem(itemId);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint(
-                    'deleteRemoteSearchHistoryItem exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'deleteRemoteSearchHistoryItem exception');
               rethrow;
             }
             break;
@@ -3925,9 +3519,7 @@ class SupabaseSyncService {
             try {
               await syncSingleHighlight(data);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint('syncSingleHighlight exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'syncSingleHighlight exception');
               rethrow;
             }
             break;
@@ -3935,9 +3527,7 @@ class SupabaseSyncService {
             try {
               await syncSingleNote(data);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint('syncSingleNote exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'syncSingleNote exception');
               rethrow;
             }
             break;
@@ -3945,9 +3535,7 @@ class SupabaseSyncService {
             try {
               await syncSingleHistoryItem(data);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint('syncSingleHistoryItem exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'syncSingleHistoryItem exception');
               rethrow;
             }
             break;
@@ -3955,10 +3543,7 @@ class SupabaseSyncService {
             try {
               await syncSingleSearchHistoryItem(data);
             } catch (e) {
-              if (kDebugMode) {
-                debugPrint(
-                    'syncSingleSearchHistoryItem exception: ${e.toString()}');
-              }
+              ErrorHandler.logError(e, customMessage: 'syncSingleSearchHistoryItem exception');
               rethrow;
             }
             break;
@@ -3979,8 +3564,7 @@ class SupabaseSyncService {
         case 'search_history':
           final timestampValue = data['timestamp'];
           id = timestampValue.toString();
-          timestamp =
-              DateTime.fromMillisecondsSinceEpoch(timestampValue as int);
+          timestamp = DateTime.fromMillisecondsSinceEpoch(timestampValue as int);
           break;
         default:
           id = '0';
@@ -4037,11 +3621,7 @@ class SupabaseSyncService {
 
     try {
       // Test basic Supabase connectivity by attempting a small read
-      await _supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', _currentUserId!)
-          .single();
+      await _supabase.from('profiles').select('id').eq('id', _currentUserId!).single();
       return true;
     } catch (e) {
       return false;
@@ -4070,10 +3650,7 @@ class SupabaseSyncService {
   Future<void> deleteAllRemoteSearchHistory() async {
     if (_currentUserId == null) return;
 
-    await _supabase
-        .from('search_history')
-        .delete()
-        .eq('user_id', _currentUserId!);
+    await _supabase.from('search_history').delete().eq('user_id', _currentUserId!);
   }
 
   // Cache the username locally for offline display
@@ -4081,11 +3658,7 @@ class SupabaseSyncService {
     if (_currentUserId == null) return;
 
     try {
-      final response = await _supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', _currentUserId!)
-          .single();
+      final response = await _supabase.from('profiles').select('username').eq('id', _currentUserId!).single();
       final username = response['username'] as String?;
       await HistoryDatabase.setCachedUsername(username ?? 'Unknown');
     } catch (e) {
@@ -4109,13 +3682,11 @@ class SupabaseSyncService {
   }
 
   // Upload single search history item to Supabase
-  Future<void> _uploadSearchHistoryItem(
-      Map<String, dynamic> searchHistoryItem) async {
+  Future<void> _uploadSearchHistoryItem(Map<String, dynamic> searchHistoryItem) async {
     if (_currentUserId == null) return;
 
     // Validate data before uploading to prevent sending corrupt data to Supabase
-    final isValid = await DataValidation.validateBeforeUpload(
-        searchHistoryItem, 'search_history');
+    final isValid = await DataValidation.validateBeforeUpload(searchHistoryItem, 'search_history');
     if (!isValid) {
       return;
     }
@@ -4123,29 +3694,18 @@ class SupabaseSyncService {
     final dataToInsert = {
       'user_id': _currentUserId,
       'query': searchHistoryItem['query'] ?? '',
-      'useRegex': searchHistoryItem['useRegex'] is bool
-          ? searchHistoryItem['useRegex']
-          : false,
-      'useNearby': searchHistoryItem['useNearby'] is bool
-          ? searchHistoryItem['useNearby']
-          : false,
-      'useWholeWord': searchHistoryItem['useWholeWord'] is bool
-          ? searchHistoryItem['useWholeWord']
-          : false,
-      'useRedLetter': searchHistoryItem['useRedLetter'] is bool
-          ? searchHistoryItem['useRedLetter']
-          : false,
-      'caseSensitive': searchHistoryItem['caseSensitive'] is bool
-          ? searchHistoryItem['caseSensitive']
-          : false,
+      'useRegex': searchHistoryItem['useRegex'] is bool ? searchHistoryItem['useRegex'] : false,
+      'useNearby': searchHistoryItem['useNearby'] is bool ? searchHistoryItem['useNearby'] : false,
+      'useWholeWord': searchHistoryItem['useWholeWord'] is bool ? searchHistoryItem['useWholeWord'] : false,
+      'useRedLetter': searchHistoryItem['useRedLetter'] is bool ? searchHistoryItem['useRedLetter'] : false,
+      'caseSensitive': searchHistoryItem['caseSensitive'] is bool ? searchHistoryItem['caseSensitive'] : false,
       'bookFilterType': searchHistoryItem['bookFilterType'] ?? '',
       'customBookFilter': searchHistoryItem['customBookFilter'] ?? '',
       'timestamp': searchHistoryItem['timestamp'] ?? 0,
     };
 
     // Include UUID if it exists to preserve the same record ID across syncs
-    if (searchHistoryItem['uuid'] != null &&
-        searchHistoryItem['uuid'].isNotEmpty) {
+    if (searchHistoryItem['uuid'] != null && searchHistoryItem['uuid'].isNotEmpty) {
       dataToInsert['id'] = searchHistoryItem['uuid'];
     }
 
@@ -4158,9 +3718,7 @@ class SupabaseSyncService {
 
       // If the local search history item didn't have a UUID, update it with the one from Supabase
       final supabaseUuid = response?['id'] as String?;
-      if (supabaseUuid != null &&
-          (searchHistoryItem['uuid'] == null ||
-              searchHistoryItem['uuid'].isEmpty)) {
+      if (supabaseUuid != null && (searchHistoryItem['uuid'] == null || searchHistoryItem['uuid'].isEmpty)) {
         // Update the local search history item with the UUID from Supabase
         await SearchDatabase.addSearchHistory(
             searchHistoryItem['query'] as String,
@@ -4176,9 +3734,7 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_uploadSearchHistoryItem exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: '_uploadSearchHistoryItem exception');
 
       // Re-throw the original error
       rethrow;
@@ -4189,17 +3745,12 @@ class SupabaseSyncService {
   Future<void> deleteRemoteSearchHistoryItem(int searchHistoryId) async {
     if (_currentUserId == null) return;
 
-    await _supabase
-        .from('search_history')
-        .delete()
-        .eq('user_id', _currentUserId!)
-        .eq('timestamp', searchHistoryId);
+    await _supabase.from('search_history').delete().eq('user_id', _currentUserId!).eq('timestamp', searchHistoryId);
   }
 
   // Add failed operation to retry queue for later retry
   void _enqueueFailedOperation(SyncOperation operation) {
-    final operationWithRetryCount =
-        operation.copyWith(retryCount: operation.retryCount + 1);
+    final operationWithRetryCount = operation.copyWith(retryCount: operation.retryCount + 1);
     _retryQueue.add(operationWithRetryCount);
 
     _startRetryTimer();
@@ -4216,20 +3767,16 @@ class SupabaseSyncService {
     final Duration delay;
     switch (nextRetry.retryCount) {
       case 1:
-        delay =
-            Duration(seconds: syncRetryDelay1Seconds); // First retry: 1 second
+        delay = Duration(seconds: syncRetryDelay1Seconds); // First retry: 1 second
         break;
       case 2:
-        delay = Duration(
-            seconds: syncRetryDelay2Seconds); // Second retry: 15 seconds
+        delay = Duration(seconds: syncRetryDelay2Seconds); // Second retry: 15 seconds
         break;
       case 3:
-        delay = Duration(
-            seconds: syncRetryDelay3Seconds); // Third retry: 30 seconds
+        delay = Duration(seconds: syncRetryDelay3Seconds); // Third retry: 30 seconds
         break;
       default:
-        delay = Duration
-            .zero; // After 3 retries, process immediately to move to persistent queue
+        delay = Duration.zero; // After 3 retries, process immediately to move to persistent queue
     }
 
     _retryTimer = Timer(delay, _processRetryQueue);
@@ -4248,40 +3795,35 @@ class SupabaseSyncService {
       // Check if this operation has exceeded max retries
       if (operation.retryCount >= 3) {
         // Move to persistent queue instead of retrying
-        _queuePersistentOperation(
-            operation.id, operation.type, operation.operation, operation.data);
+        _queuePersistentOperation(operation.id, operation.type, operation.operation, operation.data);
         continue;
       }
 
       try {
         switch (operation.type) {
           case 'highlight':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               await _uploadHighlight(operation.data);
             } else if (operation.operation == 'delete') {
               await deleteRemoteHighlight(operation.data['created_at'] as int);
             }
             break;
           case 'note':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               await _uploadNote(operation.data);
             } else if (operation.operation == 'delete') {
               await deleteRemoteNote(operation.data['created_at'] as int);
             }
             break;
           case 'history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               await _uploadHistoryItem(operation.data);
             } else if (operation.operation == 'delete') {
               await deleteRemoteHistoryItem(operation.data['timestamp']);
             }
             break;
           case 'search_history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
+            if (operation.operation == 'create' || operation.operation == 'update') {
               await _uploadSearchHistoryItem(operation.data);
             } else if (operation.operation == 'delete') {
               await deleteRemoteSearchHistoryItem(operation.data['timestamp']);
@@ -4396,10 +3938,7 @@ class SupabaseSyncService {
       // Sync any changes that occurred while app was paused
       await syncRecentChangesOnly();
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-            'onAppResumed _syncRecentChangesOnly exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(e, customMessage: 'onAppResumed _syncRecentChangesOnly exception');
     }
   }
 }

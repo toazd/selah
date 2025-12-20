@@ -39,6 +39,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
 //import 'package:flutter_onscreen_keyboard/flutter_onscreen_keyboard.dart';
+import 'utils/error_handler.dart';
 
 final appVersion = "0.7.0";
 
@@ -152,9 +153,10 @@ class TabletModeService {
       _tabletModeNotifier = TabletModeDetector.createTabletModeNotifier();
       _tabletModeNotifier!.addListener(() {
         final isTablet = _tabletModeNotifier!.value;
-        if (kDebugMode) {
-          debugPrint('Tablet Mode Listener: ($isTablet) - ${isTablet ? "Tablet Mode" : "Laptop Mode"}');
-        }
+        ErrorHandler.logError(
+          'Tablet Mode Listener: ($isTablet) - ${isTablet ? "Tablet Mode" : "Laptop Mode"}',
+          context: {'class': 'TabletModeService', 'method': 'initializeNotifier', 'isTablet': isTablet},
+        );
       });
     }
   }
@@ -178,9 +180,10 @@ class ShutdownCoordinator {
     }
 
     _isShuttingDown = true;
-    if (kDebugMode) {
-      debugPrint('Beginning coordinated shutdown');
-    }
+    ErrorHandler.logError(
+      'Beginning coordinated shutdown',
+      context: {'class': 'ShutdownCoordinator', 'method': 'beginShutdown'},
+    );
 
     return _shutdownCompleter.future;
   }
@@ -208,7 +211,11 @@ Color _parseHexColor(String? hex, Color fallback) {
     try {
       return Color(int.parse(h, radix: 16));
     } catch (e) {
-      if (kDebugMode) debugPrint('_parseHexColor exception: ${e.toString()}');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_parseHexColor exception',
+        context: {'class': 'main.dart', 'method': '_parseHexColor', 'hex': hex},
+      );
     }
   }
   return fallback;
@@ -332,9 +339,10 @@ void main() async {
       anonKey: SupabaseConfig.supabaseAnonKey,
     );
   } catch (e) {
-    if (kDebugMode) {
-      debugPrint('Supabase initialize exception: ${e.toString()}');
-    }
+    ErrorHandler.logError(
+      'Supabase initialize exception: ${e.toString()}',
+      context: {'class': 'main.dart', 'method': 'main', 'error': e.toString()},
+    );
   }
 
   // Listen to auth state changes
@@ -353,14 +361,16 @@ void main() async {
         // Fresh login - store login time but DON'T initialize sync yet
         // Let AuthScreen handle sync initialization after user confirms preferences
         await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
-        if (kDebugMode) {
-          debugPrint('Fresh login detected - sync initialization deferred for user preference confirmation');
-        }
+        ErrorHandler.logError(
+          'Fresh login detected - sync initialization deferred for user preference confirmation',
+          context: {'class': 'main.dart', 'method': 'main', 'loginType': 'fresh'},
+        );
       } else {
         // App restart - initialize sync normally since preferences are already set
-        if (kDebugMode) {
-          debugPrint('App restart detected - initializing sync service normally');
-        }
+        ErrorHandler.logError(
+          'App restart detected - initializing sync service normally',
+          context: {'class': 'main.dart', 'method': 'main', 'loginType': 'restart'},
+        );
         await SupabaseSyncService().initialize(isLoginResync: true);
       }
     } else {
@@ -555,9 +565,10 @@ Future<void> _loadAllPrefs() async {
           highlightColorsNotifier.value = parsedColors;
         }
       } catch (e) {
-        if (kDebugMode) {
-          debugPrint('prefs.getStringList(\'highlightColors\') exception: ${e.toString()}');
-        }
+        ErrorHandler.logError(
+          'prefs.getStringList(\'highlightColors\') exception: ${e.toString()}',
+          context: {'class': 'main.dart', 'method': '_loadAllPrefs'},
+        );
       }
     }
 
@@ -604,7 +615,11 @@ Future<void> _loadAllPrefs() async {
     // Layout preference
     isVerticalTile.value = prefs.getBool('isVerticalTile') ?? isVerticalTile.value;
   } catch (e) {
-    if (kDebugMode) debugPrint('_loadAllPrefs exception: ${e.toString()}');
+    ErrorHandler.logError(
+      e,
+      customMessage: '_loadAllPrefs exception',
+      context: {'class': 'main.dart', 'method': '_loadAllPrefs'},
+    );
   }
 }
 
@@ -621,9 +636,11 @@ Future<void> _saveAllCurrentPrefs() async {
         isMaximized = await windowManager.isMaximized();
       } catch (e) {
         // Window may be destroyed during shutdown, use default value
-        if (kDebugMode) {
-          debugPrint('Failed to get window maximized state during shutdown: ${e.toString()}');
-        }
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Failed to get window maximized state during shutdown',
+          context: {'class': 'main.dart', 'method': '_saveAllCurrentPrefs'},
+        );
         isMaximized = false;
       }
 
@@ -631,9 +648,11 @@ Future<void> _saveAllCurrentPrefs() async {
         size = await windowManager.getSize();
       } catch (e) {
         // Window may be destroyed during shutdown, use default value
-        if (kDebugMode) {
-          debugPrint('Failed to get window size during shutdown: ${e.toString()}');
-        }
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Failed to get window size during shutdown',
+          context: {'class': 'main.dart', 'method': '_saveAllCurrentPrefs'},
+        );
 
         size = const Size(900, 700);
       }
@@ -716,9 +735,11 @@ Future<void> _saveAllCurrentPrefs() async {
     // This line replaces all the individual `await` keywords
     await Future.wait(saveOperations);
   } catch (e) {
-    if (kDebugMode) {
-      debugPrint('_saveAllCurrentPrefs exception: ${e.toString()}');
-    }
+    ErrorHandler.logError(
+      e,
+      customMessage: '_saveAllCurrentPrefs exception',
+      context: {'class': 'main.dart', 'method': '_saveAllCurrentPrefs'},
+    );
   }
 }
 
@@ -1068,9 +1089,11 @@ class _WindowManagerListener extends WindowListener {
         await _saveAllCurrentPrefs();
       } catch (e) {
         // Continue closing even if saving preferences fails
-        if (kDebugMode) {
-          debugPrint('Failed to save preferences during shutdown: ${e.toString()}');
-        }
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Failed to save preferences during shutdown',
+          context: {'class': 'main.dart', 'method': 'onWindowEvent'},
+        );
       }
 
       // Check and perform Supabase Sync only if there are pending changes
@@ -1093,9 +1116,11 @@ class _WindowManagerListener extends WindowListener {
             await syncService.syncAll();
           } catch (e) {
             // Continue closing even if sync fails
-            if (kDebugMode) {
-              debugPrint('Sync failed during shutdown: ${e.toString()}');
-            }
+            ErrorHandler.logError(
+              e,
+              customMessage: 'Sync failed during shutdown',
+              context: {'class': 'main.dart', 'method': 'onWindowEvent'},
+            );
           } finally {
             // Dismiss the sync dialog after sync completes
             if (navigatorKey.currentState?.canPop() ?? false) {
@@ -1133,23 +1158,6 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
   bool _wasMaximizedBeforeFullscreen = false; // Track maximized state before fullscreen
   final FocusNode _invisibleElevatedButtonNode = FocusNode();
 
-  // TODO: test to make sure this isn't needed on mobile
-  // @override
-  // void didChangeMetrics() {
-  //   super.didChangeMetrics();
-
-  //   // Reapply fullscreen if keyboard appeared and fullscreen is enabled
-  //   if (!kIsWeb &&
-  //       (fullscreenNotifier.value && (Platform.isAndroid || Platform.isIOS))) {
-  //     // Small delay to ensure keyboard animation is complete
-  //     Future.delayed(Duration(milliseconds: 100), () {
-  //       if (mounted && fullscreenNotifier.value) {
-  //         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  //       }
-  //     });
-  //   }
-  // }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -1157,7 +1165,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
       // Handle mobile app termination/backgrounding to ensure sync service cleanup
       if (state == AppLifecycleState.detached) {
-        if (kDebugMode) debugPrint('AppLifecycleState.detached');
+        ErrorHandler.logError(
+          'AppLifecycleState.detached',
+          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+        );
         // App is being terminated/killed - save preferences and dispose sync service
         _saveAllCurrentPrefs(); // Save preferences like desktop close handler does
 
@@ -1169,12 +1180,18 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           SupabaseSyncService().dispose();
         }
       } else if (state == AppLifecycleState.inactive) {
-        if (kDebugMode) debugPrint('AppLifecycleState.inactive');
+        ErrorHandler.logError(
+          'AppLifecycleState.inactive',
+          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+        );
         // App in inactive state
       }
       // Note: We handle paused separately in case the app gets suspended but not detached
       else if (state == AppLifecycleState.paused) {
-        if (kDebugMode) debugPrint('AppLifecycleState.paused');
+        ErrorHandler.logError(
+          'AppLifecycleState.paused',
+          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+        );
         // App is going to background - stop connectivity monitoring to save battery
         if (Supabase.instance.client.auth.currentUser != null) {
           SupabaseSyncService().stopConnectionMonitoring();
@@ -1182,26 +1199,31 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       }
       // Handle app returning to foreground - re-establish realtime listeners
       else if (state == AppLifecycleState.resumed) {
-        if (kDebugMode) debugPrint('AppLifecycleState.resumed');
+        ErrorHandler.logError(
+          'AppLifecycleState.resumed',
+          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+        );
 
         // App is coming back to foreground - restart sync service for realtime listeners
         if (Supabase.instance.client.auth.currentUser != null) {
           try {
             SupabaseSyncService().restartConnectionMonitoring();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint(
-                  'AppLifecycleState.resumed SupabaseSyncService().restartConnectionMonitoring exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(
+              e,
+              customMessage: 'AppLifecycleState.resumed SupabaseSyncService().restartConnectionMonitoring exception',
+              context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+            );
           }
 
           try {
             SupabaseSyncService().syncRecentChangesOnly();
           } catch (e) {
-            if (kDebugMode) {
-              debugPrint(
-                  'AppLifecycleState.resumed SupabaseSyncService().syncRecentChangesOnly exception: ${e.toString()}');
-            }
+            ErrorHandler.logError(
+              e,
+              customMessage: 'AppLifecycleState.resumed SupabaseSyncService().syncRecentChangesOnly exception',
+              context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
+            );
           }
         }
       }
@@ -2036,9 +2058,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
       // Only proceed if window manager is still valid
       if (!_windowManagerInitialized) {
-        if (kDebugMode) {
-          debugPrint('Window manager not ready, skipping fullscreen change');
-        }
+        ErrorHandler.logError(
+          'Window manager not ready, skipping fullscreen change',
+          context: {'class': 'main.dart', 'method': '_applyFullscreen'},
+        );
         return;
       }
 
@@ -3992,53 +4015,65 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
         await syncService.deleteAllRemoteSearchHistory();
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit Firestore/sync exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit Firestore/sync exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     try {
       await _clearPreferences();
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit _clearPreferences exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit _clearPreferences exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     try {
       final dbHighlights = await HighlightsDatabase.getDatabase();
       await dbHighlights.delete('user_highlights');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit dbHighlights exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit dbHighlights exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     try {
       final dbHistory = await HistoryDatabase.getDatabase();
       await dbHistory.delete('history');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit dbHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit dbHistory exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     try {
       final dbNotes = await NotesDatabase.getDatabase();
       await dbNotes.delete('user_notes');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit dbNotes exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit dbNotes exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     try {
       final dbSearchHistory = await SearchDatabase.getDatabase();
       await dbSearchHistory.delete('search_history');
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('_resetEverythingAndExit dbSearchHistory exception: ${e.toString()}');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: '_resetEverythingAndExit dbSearchHistory exception',
+        context: {'class': 'main.dart', 'method': '_resetEverythingAndExit'},
+      );
     }
 
     // Exit the app immediately (no need for UI refresh since app exits)
@@ -4153,13 +4188,16 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     // This is to circumvent a bug on windows desktop touchscreens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _invisibleElevatedButtonNode.canRequestFocus) {
-        if (kDebugMode) debugPrint('Changing focus to fix bug');
+        ErrorHandler.logError(
+          'Changing focus to fix bug',
+          context: {'class': 'main.dart', 'method': '_showEditPreferencesDialog'},
+        );
         _invisibleElevatedButtonNode.requestFocus();
       } else {
-        if (kDebugMode) {
-          debugPrint(
-              'Changing focus failed:\nmounted: $mounted\ncanRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-        }
+        ErrorHandler.logError(
+          'Changing focus failed:\nmounted: $mounted\ncanRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}',
+          context: {'class': 'main.dart', 'method': '_showEditPreferencesDialog'},
+        );
       }
     });
   }
@@ -5322,11 +5360,29 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     final maxTouchPoints = await TabletModeDetector.getMaximumTouchPoints();
     final deviceInfo = await TabletModeDetector.getDeviceInfo();
 
-    if (kDebugMode) debugPrint('=== Tablet Mode Detection ===');
-    if (kDebugMode) debugPrint('Tablet Mode: $isTablet');
-    if (kDebugMode) debugPrint('Keyboard Attached: $hasKeyboard');
-    if (kDebugMode) debugPrint('Touch Screen: $hasTouch');
-    if (kDebugMode) debugPrint('Max Touch Points: $maxTouchPoints');
-    if (kDebugMode) debugPrint('Device Info: $deviceInfo');
+    ErrorHandler.logError(
+      '=== Tablet Mode Detection ===',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
+    ErrorHandler.logError(
+      'Tablet Mode: $isTablet',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
+    ErrorHandler.logError(
+      'Keyboard Attached: $hasKeyboard',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
+    ErrorHandler.logError(
+      'Touch Screen: $hasTouch',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
+    ErrorHandler.logError(
+      'Max Touch Points: $maxTouchPoints',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
+    ErrorHandler.logError(
+      'Device Info: $deviceInfo',
+      context: {'class': 'main.dart', 'method': 'main'},
+    );
   }
 }

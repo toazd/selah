@@ -200,8 +200,7 @@ class ErrorHandler {
   }
 
   // Build detailed sync error message with context
-  static Map<String, dynamic> _buildSyncErrorDetails(
-      dynamic error, Map<String, dynamic>? context) {
+  static Map<String, dynamic> _buildSyncErrorDetails(dynamic error, Map<String, dynamic>? context) {
     String message = 'Sync operation failed';
     ErrorSeverity severity = ErrorSeverity.medium;
 
@@ -209,8 +208,7 @@ class ErrorHandler {
       // Check if this is a realtime subscription error (less critical)
       if (context != null && context.containsKey('table')) {
         final tableName = context['table'];
-        message =
-            'Realtime sync for $tableName encountered an issue (sync will continue)';
+        message = 'Realtime sync for $tableName encountered an issue (sync will continue)';
         severity = ErrorSeverity.low; // Realtime errors are less critical
 
         // Add specific error details if available
@@ -218,8 +216,7 @@ class ErrorHandler {
           message =
               'Realtime sync for $tableName failed: ${error.status} - ${error.details ?? 'no details'} (sync will continue)';
         } else if (error != null) {
-          message =
-              'Realtime sync for $tableName failed: ${error.toString()} (sync will continue)';
+          message = 'Realtime sync for $tableName failed: ${error.toString()} (sync will continue)';
         }
       }
       // Check if this is a specific error type that we can identify
@@ -245,13 +242,11 @@ class ErrorHandler {
         if (errorString.contains('timeout') || errorString.contains('Timeout')) {
           message = 'Sync timeout occurred$operationContext (sync will retry)';
           severity = ErrorSeverity.low;
-        } else if (errorString.contains('connection') ||
-            errorString.contains('Connection')) {
+        } else if (errorString.contains('connection') || errorString.contains('Connection')) {
           message = 'Sync connection issue$operationContext (sync will retry)';
           severity = ErrorSeverity.low;
         } else if (errorString.contains('network') || errorString.contains('Network')) {
-          message =
-              'Sync network error$operationContext: ${error.toString()} (sync will retry)';
+          message = 'Sync network error$operationContext: ${error.toString()} (sync will retry)';
           severity = ErrorSeverity.medium;
         } else if (errorString.contains('permission') ||
             errorString.contains('Permission') ||
@@ -311,6 +306,28 @@ class ErrorHandler {
     buffer.writeln('=================');
 
     if (kDebugMode) debugPrint(buffer.toString());
+
+    // Windows-only temporary debug log: write to user's Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
+    if (Platform.isWindows) {
+      try {
+        final userProfile = Platform.environment['USERPROFILE'] ?? '.';
+        final logsDir = Directory('$userProfile${Platform.pathSeparator}Documents${Platform.pathSeparator}SelahLogs');
+        if (!logsDir.existsSync()) {
+          logsDir.createSync(recursive: true);
+        }
+
+        final now = DateTime.now();
+        final datePart = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final file = File('${logsDir.path}${Platform.pathSeparator}selah_debug_$datePart.log');
+        final timestamp = now.toIso8601String();
+        final entry = '[$timestamp] ${buffer.toString()}\n';
+
+        file.writeAsStringSync(entry, mode: FileMode.append, flush: true);
+      } catch (e) {
+        // If file logging fails, fall back to console (do not throw)
+        if (kDebugMode) debugPrint('Error writing Windows debug log: $e');
+      }
+    }
   }
 
   // Format error message for user display

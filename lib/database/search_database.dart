@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
+import '../utils/error_handler.dart';
 
 class SearchDatabase {
   static Database? _database;
@@ -95,7 +96,7 @@ class SearchDatabase {
         throw Exception('Unsupported platform');
       }
     } catch (e) {
-      throw Exception('Database error: $e');
+      throw Exception('Database error: ${e.toString()}');
     }
   }
 
@@ -316,9 +317,11 @@ class SearchDatabase {
 
         SupabaseSyncService().markOperation('search_history', item[colTimestamp] as int, 'delete', syncData);
       } catch (e) {
-        if (kDebugMode) {
-          debugPrint('deleteSearchHistoryItem markOperation exception: $e');
-        }
+        ErrorHandler.logError(
+          e,
+          customMessage: 'deleteSearchHistoryItem markOperation exception',
+          context: {'class': 'SearchDatabase', 'method': 'deleteSearchHistoryItem', 'id': id},
+        );
       }
     }
   }

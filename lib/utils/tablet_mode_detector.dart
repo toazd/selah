@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'tablet_mode_method_channel.dart';
 import 'tablet_mode_platform_interface.dart';
+import 'error_handler.dart';
 
 /// Utility class for detecting tablet mode and device capabilities.
 ///
@@ -130,31 +131,37 @@ class TabletModeDetector {
   /// Manually triggers a tablet mode detection and notification for testing
   /// This is useful for debugging when automatic detection isn't working
   static Future<void> testTabletModeDetection() async {
-    if (kDebugMode) {
-      debugPrint('=== MANUAL TABLET MODE TEST ===');
-    }
+    ErrorHandler.logError(
+      '=== MANUAL TABLET MODE TEST ===',
+      context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
+    );
 
     try {
       // Get current tablet mode
       final isTablet = await isTabletMode();
-      if (kDebugMode) {
-        debugPrint('Current tablet mode: $isTablet');
-      }
+      ErrorHandler.logError(
+        'Current tablet mode: $isTablet',
+        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection', 'isTablet': isTablet},
+      );
 
       // Manually trigger the stream update
       tabletModeChanges?.listen((mode) {
-        if (kDebugMode) {
-          debugPrint('Stream update triggered manually: $mode');
-        }
+        ErrorHandler.logError(
+          'Stream update triggered manually: $mode',
+          context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection', 'mode': mode},
+        );
       }).cancel(); // Cancel immediately after testing
 
-      if (kDebugMode) {
-        debugPrint('Manual tablet mode test completed');
-      }
+      ErrorHandler.logError(
+        'Manual tablet mode test completed',
+        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
+      );
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Manual tablet mode test failed: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Manual tablet mode test failed',
+        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
+      );
     }
   }
 }

@@ -6,6 +6,7 @@ import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
 import '../utils/platform_paths.dart';
+import '../utils/error_handler.dart';
 
 class HistoryDatabase {
   static Database? _database;
@@ -94,10 +95,22 @@ class HistoryDatabase {
         );
         return _database!;
       } else {
+        ErrorHandler.logError(
+          null,
+          customMessage: 'Unsupported platform',
+          type: ErrorType.system,
+          context: {'class': 'HistoryDatabase', 'method': '_initDatabase'},
+        );
         throw Exception('Unsupported platform');
       }
     } catch (e) {
-      throw Exception('Database error: $e');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Database init error',
+        type: ErrorType.system,
+        context: {'class': 'HistoryDatabase', 'method': '_initDatabase'},
+      );
+      throw Exception('Database error: ${e.toString()}');
     }
   }
 
@@ -291,7 +304,11 @@ class HistoryDatabase {
         SupabaseSyncService().markOperation('history', historyData['timestamp'] as int, 'delete', historyData);
       }
     } catch (e) {
-      if (kDebugMode) debugPrint('deleteHistoryItem exception: $e');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'deleteHistoryItem exception',
+        context: {'class': 'HistoryDatabase', 'method': 'deleteHistoryItem', 'id': id},
+      );
     }
   }
 
@@ -305,7 +322,11 @@ class HistoryDatabase {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } catch (e) {
-      if (kDebugMode) debugPrint('setCachedUsername exception: $e');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'setCachedUsername exception',
+        context: {'class': 'HistoryDatabase', 'method': 'setCachedUsername', 'username': username},
+      );
     }
   }
 

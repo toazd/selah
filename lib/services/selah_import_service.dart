@@ -15,6 +15,7 @@ import '../services/local_data_change_notifier.dart';
 import '../utils/note_storage_format.dart';
 import '../utils/preferences_constants.dart';
 import '../utils/snackbar_notification.dart';
+import '../utils/error_handler.dart';
 
 /// Get adaptive text color based on background color and theme
 Color getAdaptiveTextColor(BuildContext context, {Color? backgroundColor, bool usePrimaryColor = false}) {
@@ -414,7 +415,11 @@ class SelahImportService {
           try {
             await syncService.syncSearchHistory();
           } catch (e) {
-            if (kDebugMode) debugPrint('_ImportSelectedData syncSearchHistory exception: ${e.toString()}');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_ImportSelectedData syncSearchHistory exception',
+              context: {'class': 'SelahImportService', 'method': '_importSelectedData'},
+            );
           }
         }
 

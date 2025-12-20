@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'dart:math';
+import 'error_handler.dart';
 
 /// Centralized data validation utility for user data (highlights, notes, history)
 /// Provides validation functions to prevent data corruption throughout the app
@@ -43,10 +42,17 @@ class DataValidation {
       // }
 
       if (!isValidBook || !isValidChapter || !isValidVerse || !isValidColor) {
-        if (kDebugMode) {
-          debugPrint(
-              'DEBUG: Invalid $context highlight data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, color=$color');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Invalid $context highlight data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, color=$color',
+          context: {
+            'class': 'DataValidation',
+            'context': context,
+            'book': book,
+            'chapter': chapter,
+            'verse': verse,
+            'color': color
+          },
+        );
         return false;
       }
 
@@ -64,9 +70,11 @@ class DataValidation {
       //if (kDebugMode) debugPrint('DEBUG: $context highlight data validation PASSED');
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception during $context highlight validation: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Exception during $context highlight validation',
+        context: {'class': 'DataValidation', 'context': context},
+      );
       return false;
     }
   }
@@ -87,17 +95,18 @@ class DataValidation {
       final isValidVerse = verse != null && verse > 0;
       final isValidNoteText = noteText is String && noteText.trim().isNotEmpty;
 
-      // if (kDebugMode) {
-      //   debugPrint(
-      //       'DEBUG: $context note validation results - book=$isValidBook, chapter=$isValidChapter, verse=$isValidVerse, note_text=$isValidNoteText');
-      // }
-
       if (!isValidBook || !isValidChapter || !isValidVerse || !isValidNoteText) {
-        if (kDebugMode) {
-          final truncatedNote = noteText is String ? noteText.substring(0, min(100, noteText.length)) : '';
-          debugPrint(
-              'DEBUG: Invalid $context note data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, note_text=$truncatedNote');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Invalid $context note data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, note_text=$noteText',
+          context: {
+            'class': 'DataValidation',
+            'context': context,
+            'book': book,
+            'chapter': chapter,
+            'verse': verse,
+            'noteText': noteText
+          },
+        );
         return false;
       }
 
@@ -105,9 +114,15 @@ class DataValidation {
       if (documentId != null) {
         final expectedDocId = (data['created_at'] as int?)?.toString();
         if (expectedDocId == null || documentId != expectedDocId) {
-          if (kDebugMode) {
-            debugPrint('DEBUG: $context document ID mismatch - expected: $expectedDocId, got: $documentId');
-          }
+          ErrorHandler.logError(
+            'DEBUG: $context document ID mismatch - expected: $expectedDocId, got: $documentId',
+            context: {
+              'class': 'DataValidation',
+              'context': context,
+              'expectedDocId': expectedDocId,
+              'documentId': documentId
+            },
+          );
           return false;
         }
       }
@@ -115,9 +130,11 @@ class DataValidation {
       //if (kDebugMode) debugPrint('DEBUG: $context note data validation PASSED');
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception during $context note validation: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Exception during $context note validation',
+        context: {'class': 'DataValidation', 'context': context},
+      );
       return false;
     }
   }
@@ -147,10 +164,17 @@ class DataValidation {
       // }
 
       if (!isValidBook || !isValidChapter || !isValidTimestamp) {
-        if (kDebugMode) {
-          debugPrint(
-              'DEBUG: Invalid $context history data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, timestamp=$timestamp');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Invalid $context history data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, timestamp=$timestamp',
+          context: {
+            'class': 'DataValidation',
+            'context': context,
+            'book': book,
+            'chapter': chapter,
+            'verse': verse,
+            'timestamp': timestamp
+          },
+        );
         return false;
       }
 
@@ -158,9 +182,15 @@ class DataValidation {
       if (documentId != null) {
         final expectedDocId = (data['timestamp'] as int?)?.toString();
         if (expectedDocId == null || documentId != expectedDocId) {
-          if (kDebugMode) {
-            debugPrint('DEBUG: $context document ID mismatch - expected: $expectedDocId, got: $documentId');
-          }
+          ErrorHandler.logError(
+            'DEBUG: $context document ID mismatch - expected: $expectedDocId, got: $documentId',
+            context: {
+              'class': 'DataValidation',
+              'context': context,
+              'expectedDocId': expectedDocId,
+              'documentId': documentId
+            },
+          );
           return false;
         }
       }
@@ -168,9 +198,11 @@ class DataValidation {
       //if (kDebugMode) debugPrint('DEBUG: $context history data validation PASSED');
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception during $context history validation: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Exception during $context history validation',
+        context: {'class': 'DataValidation', 'context': context},
+      );
       return false;
     }
   }
@@ -205,18 +237,27 @@ class DataValidation {
       final isValidCustomFilter = customBookFilter is String; // Can be empty but must be string
 
       if (!isValidQuery || !isValidTimestamp || !isValidOptions || !isValidFilterType || !isValidCustomFilter) {
-        if (kDebugMode) {
-          debugPrint(
-              'DEBUG: Invalid $context search data rejected - query=$query, timestamp=$timestamp, options_valid=$isValidOptions, filter_type=$bookFilterType');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Invalid $context search data rejected - query=$query, timestamp=$timestamp, options_valid=$isValidOptions, filter_type=$bookFilterType',
+          context: {
+            'class': 'DataValidation',
+            'context': context,
+            'query': query,
+            'timestamp': timestamp,
+            'isValidOptions': isValidOptions,
+            'filterType': bookFilterType
+          },
+        );
         return false;
       }
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception during $context validation: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Exception during $context validation',
+        context: {'class': 'DataValidation', 'context': context},
+      );
       return false;
     }
   }
@@ -231,18 +272,21 @@ class DataValidation {
       // Check if timestamp can be converted to valid DateTime
 
       if (!isValidTimeStamp) {
-        if (kDebugMode) {
-          debugPrint('DEBUG: Invalid timestamp rejected: $timeStamp (converted: ${timeStamp.toIso8601String()})');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Invalid timestamp rejected: $timeStamp (converted: ${timeStamp.toIso8601String()})',
+          context: {'class': 'DataValidation', 'method': 'validateTimeStamp', 'timestamp': timeStamp.toIso8601String()},
+        );
         return null;
       }
 
       return timeStamp;
     } catch (e) {
       // Invalid timestamp that can't be converted
-      if (kDebugMode) {
-        debugPrint('DEBUG: Invalid timestamp rejected: $timeStamp, exception: $e');
-      }
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Invalid timestamp rejected: $timeStamp',
+        context: {'class': 'DataValidation', 'method': 'validateTimeStamp', 'timestamp': timeStamp.toIso8601String()},
+      );
       return null;
     }
   }
@@ -261,9 +305,10 @@ class DataValidation {
       case 'search_history':
         return await validateSearchHistoryData(record, context: '$context $dataType');
       default:
-        if (kDebugMode) {
-          debugPrint('DEBUG: Unknown data type for validation: $dataType');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Unknown data type for validation: $dataType',
+          context: {'class': 'DataValidation', 'method': 'validateDatabaseRecord', 'dataType': dataType},
+        );
         return false;
     }
   }
@@ -282,9 +327,15 @@ class DataValidation {
       case 'search_history':
         return await validateSearchHistoryData(data, context: '$context $dataType');
       default:
-        if (kDebugMode) {
-          debugPrint('DEBUG: Unknown data type for $context validation: $dataType');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Unknown data type for $context validation: $dataType',
+          context: {
+            'class': 'DataValidation',
+            'method': 'validateBeforeDatabaseWrite',
+            'context': context,
+            'dataType': dataType
+          },
+        );
         return false;
     }
   }
@@ -303,9 +354,15 @@ class DataValidation {
       case 'search_history':
         return await validateSearchHistoryData(data, context: '$context $dataType');
       default:
-        if (kDebugMode) {
-          debugPrint('DEBUG: Unknown data type for $context validation: $dataType');
-        }
+        ErrorHandler.logError(
+          'DEBUG: Unknown data type for $context validation: $dataType',
+          context: {
+            'class': 'DataValidation',
+            'method': 'validateBeforeUpload',
+            'context': context,
+            'dataType': dataType
+          },
+        );
         return false;
     }
   }

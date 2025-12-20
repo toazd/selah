@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'supabase_sync_service.dart';
 import '../utils/internet_access_checker.dart';
+import '../utils/error_handler.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -13,14 +13,11 @@ class AuthService {
     if (error is AuthException) {
       switch (error.message) {
         case 'User already registered':
-          return Exception(
-              'An account with this email already exists. Please sign in instead.');
+          return Exception('An account with this email already exists. Please sign in instead.');
         case 'Invalid login credentials':
-          return Exception(
-              'Invalid username or password. Please check your credentials.');
+          return Exception('Invalid username or password. Please check your credentials.');
         case 'Email not confirmed':
-          return Exception(
-              'Please check your email and confirm your account before signing in.');
+          return Exception('Please check your email and confirm your account before signing in.');
         case 'Too many requests':
           return Exception('Too many failed attempts. Please try again later.');
         case 'Signup is disabled':
@@ -39,7 +36,7 @@ class AuthService {
       await SupabaseSyncService().prepareForSignOut();
       await _supabase.auth.signOut();
     } catch (e) {
-      throw Exception('Sign out failed: $e');
+      throw Exception('Sign out failed: ${e.toString()}');
     }
   }
 
@@ -47,16 +44,19 @@ class AuthService {
   Future<User?> signUpWithUsername(String username, String password) async {
     try {
       // Check if username already exists using RPC to bypass RLS
+      // This requires the database function created using supabase/get_user_email_by_username.sql
       try {
-        final response = await _supabase.rpc('get_user_email_by_username',
-            params: {'username_param': username}).single();
+        final response =
+            await _supabase.rpc('get_user_email_by_username', params: {'username_param': username}).single();
         if (response['email'] != null) {
-          throw Exception(
-              'That username is already taken. Please choose a different one.');
+          throw Exception('That username is already taken. Please choose a different one.');
         }
       } catch (e) {
         // If RPC fails or no user found, continue with signup
-        if (kDebugMode) debugPrint('Username check: $e');
+        ErrorHandler.logError(
+          'Username check: ${e.toString()}',
+          context: {'class': 'AuthService', 'method': 'signUpWithUsername', 'username': username},
+        );
       }
 
       // Generate unique email
@@ -84,46 +84,62 @@ class AuthService {
   // Username/Password Sign In
   Future<User?> signInWithUsername(String username, String password) async {
     try {
-      if (kDebugMode) debugPrint('=== DEBUG signInWithUsername ===');
-      if (kDebugMode) debugPrint('Attempting to sign in with username: $username');
+      ErrorHandler.logError(
+        '=== DEBUG signInWithUsername ===',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
+      );
+      ErrorHandler.logError(
+        'Attempting to sign in with username: $username',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
+      );
 
       // Check network connectivity before attempting authentication
       final hasInternet = await InternetAccessChecker.hasInternetAccess();
       if (!hasInternet) {
-        throw Exception(
-            'No internet connection. Please check your network settings and try again.');
+        throw Exception('No internet connection. Please check your network settings and try again.');
       }
 
       // Get the email associated with the username
       final userData = await _getUserByUsername(username);
-      if (kDebugMode) {
-        debugPrint('userData from _getUserByUsername: ${userData?.toString()}');
-      }
+      ErrorHandler.logError(
+        'userData from _getUserByUsername: ${userData?.toString()}',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'userData': userData?.toString()},
+      );
 
       if (userData == null) {
-        if (kDebugMode) debugPrint('No user data found for username: $username');
-        throw Exception(
-            'No account found with this username. If you want this username please sign up first.');
+        ErrorHandler.logError(
+          'No user data found for username: $username',
+          context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
+        );
+        throw Exception('No account found with this username. If you want this username please sign up first.');
       }
 
       final email = userData['email'];
-      if (kDebugMode) debugPrint('Found email for username: $email');
+      ErrorHandler.logError(
+        'Found email for username: $email',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username, 'email': email},
+      );
 
       // Sign in with the email and password
-      if (kDebugMode) {
-        debugPrint('Attempting Supabase signInWithPassword with email: $email');
-      }
+      ErrorHandler.logError(
+        'Attempting Supabase signInWithPassword with email: $email',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'email': email},
+      );
       final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      if (kDebugMode) {
-        debugPrint('Sign in successful! User: ${response.user?.toString()}');
-      }
+      ErrorHandler.logError(
+        'Sign in successful! User: ${response.user?.toString()}',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'userId': response.user?.id},
+      );
       return response.user;
     } catch (e) {
-      if (kDebugMode) debugPrint('ERROR in signInWithUsername: $e');
+      ErrorHandler.logError(
+        'ERROR in signInWithUsername: $e',
+        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'error': e.toString()},
+      );
       throw _handleAuthError(e);
     }
   }
@@ -131,17 +147,31 @@ class AuthService {
   // Helper method to get user email by username using RPC to bypass RLS
   Future<Map<String, dynamic>?> _getUserByUsername(String username) async {
     try {
-      if (kDebugMode) debugPrint('=== DEBUG _getUserByUsername ===');
-      if (kDebugMode) debugPrint('Looking up username: $username');
+      ErrorHandler.logError(
+        '=== DEBUG _getUserByUsername ===',
+        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
+      );
+      ErrorHandler.logError(
+        'Looking up username: $username',
+        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
+      );
 
       // Use RPC function to get email by username (bypasses RLS)
-      if (kDebugMode) debugPrint('Calling RPC function get_user_email_by_username');
-      final response = await _supabase.rpc('get_user_email_by_username',
-          params: {'username_param': username}).single();
-      if (kDebugMode) debugPrint('RPC response: ${response.toString()}');
+      ErrorHandler.logError(
+        'Calling RPC function get_user_email_by_username',
+        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
+      );
+      final response = await _supabase.rpc('get_user_email_by_username', params: {'username_param': username}).single();
+      ErrorHandler.logError(
+        'RPC response: ${response.toString()}',
+        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'response': response.toString()},
+      );
 
       if (response['email'] == null) {
-        if (kDebugMode) debugPrint('No email found for username: $username');
+        ErrorHandler.logError(
+          'No email found for username: $username',
+          context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
+        );
         return null;
       }
 
@@ -150,15 +180,25 @@ class AuthService {
         'email': response['email'],
       };
     } catch (e) {
-      if (kDebugMode) debugPrint('ERROR in _getUserByUsername: $e');
-      if (kDebugMode) debugPrint('Stack trace: ${e.toString()}');
+      ErrorHandler.logError(
+        'ERROR in _getUserByUsername: $e',
+        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username, 'error': e.toString()},
+      );
+      ErrorHandler.logError(
+        'Stack trace: ${e.toString()}',
+        context: {
+          'class': 'AuthService',
+          'method': '_getUserByUsername',
+          'username': username,
+          'stackTrace': e.toString()
+        },
+      );
 
       // Enhanced error handling for network issues
       if (e.toString().contains('NetworkError') ||
           e.toString().contains('SocketException') ||
           e.toString().contains('Connection failed')) {
-        throw Exception(
-            'Network connection error. Please check your internet connection and try again.');
+        throw Exception('Network connection error. Please check your internet connection and try again.');
       }
 
       return null;
@@ -182,23 +222,20 @@ class AuthService {
       if (e is AuthException) {
         switch (e.message) {
           case 'Password should be at least 6 characters':
-            throw Exception(
-                'The new password is too weak. Please choose a stronger password.');
+            throw Exception('The new password is too weak. Please choose a stronger password.');
           case 'session_not_found':
           case 'refresh_token_not_found':
             throw Exception(
                 'Your session has expired. Please sign out and sign back in before changing your password.');
           default:
-            throw Exception(
-                'Password change failed. Please sign out and sign back in to try again.');
+            throw Exception('Password change failed. Please sign out and sign back in to try again.');
         }
       }
-      throw Exception('Password change failed: $e');
+      throw Exception('Password change failed: ${e.toString()}');
     }
   }
 
   // Delete account
-  // Replace the deleteAccount method with this:
   Future<void> deleteAccount(String password) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
@@ -214,8 +251,7 @@ class AuthService {
       await syncService.deleteAllRemoteSearchHistory();
 
       // Call Edge Function to delete the auth user (secure - uses service role on server)
-      final response = await _supabase.functions
-          .invoke('delete-user-account', body: {'userId': user.id});
+      final response = await _supabase.functions.invoke('delete-user-account', body: {'userId': user.id});
 
       // Check if Edge Function call succeeded
       if (response.data == null || response.data['success'] != true) {
@@ -232,13 +268,21 @@ class AuthService {
       await prefs.remove('lastNotesSync');
       await prefs.remove('lastHistorySync');
       await prefs.remove('lastSearchHistorySync');
-      await prefs.remove('pendingHighlightsQueue');
-      await prefs.remove('pendingNotesQueue');
-      await prefs.remove('pendingHistoryQueue');
-      await prefs.remove('pendingSearchHistoryQueue');
+      // These should only be cleared if the user chooses to do so,
+      // which they currently cannot do except by manually editing
+      // the shared preferences. If they are online these should have
+      // been processed already otherwise we have a bigger problem.
+      //
+      // await prefs.remove('pendingHighlightsQueue');
+      // await prefs.remove('pendingNotesQueue');
+      // await prefs.remove('pendingHistoryQueue');
+      // await prefs.remove('pendingSearchHistoryQueue');
     } catch (e) {
-      if (kDebugMode) debugPrint('Account deletion failed: $e');
-      throw Exception('Account deletion failed: $e');
+      ErrorHandler.logError(
+        'Account deletion failed: ${e.toString()}',
+        context: {'class': 'AuthService', 'method': 'deleteAccount', 'error': e.toString()},
+      );
+      throw Exception('Account deletion failed: ${e.toString()}');
     }
   }
 

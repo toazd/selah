@@ -55,7 +55,7 @@ class NotesDatabase {
       }
 
       if (_db == null) {
-        throw Exception('Failed to open database at $dbPath');
+        throw Exception('Failed to open database at "$dbPath"');
       }
 
       // Create table if it doesn't exist
@@ -74,7 +74,7 @@ class NotesDatabase {
 
       return _db!;
     } catch (e) {
-      throw Exception('Database error: $e');
+      throw Exception('Database error: ${e.toString()}');
     }
   }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:flutter/services.dart';
+import 'package:selah/utils/error_handler.dart';
+import 'package:selah/utils/snackbar_notification.dart';
 import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -55,7 +57,7 @@ class HighlightsDatabase {
       }
 
       if (_db == null) {
-        throw Exception('Failed to open database at $dbPath');
+        throw Exception('Failed to open database at "$dbPath"');
       }
 
       // Create table if it doesn't exist
@@ -231,7 +233,7 @@ class HighlightsDatabase {
     final db = await getDatabase();
     final existing = await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
     if (existing.isEmpty) {
-      throw Exception('Highlight with id $id not found');
+      throw Exception('Highlight with id "$id" not found');
     }
 
     // Validate data before updating (merge with existing data for complete validation)

@@ -25,6 +25,7 @@ import '../utils/note_storage_format.dart';
 import '../utils/verse_reference_linker.dart';
 import '../utils/bible_utils.dart';
 import '../screens/note_screen.dart';
+import '../utils/error_handler.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -130,9 +131,11 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         operations.removeLast();
       }
 
-      final operationsMap = operations.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
+      final operationsMap =
+          operations.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
 
-      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
+      final converter = QuillDeltaToHtmlConverter(
+          operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
 
       final html = converter.convert();
       return _stripHtmlTags(html).replaceAll('¶ ', '');
@@ -149,7 +152,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
       // Convert operations to the expected format
       final operationsList = deltaWithLinks.toDelta().toList();
 
-      final operationsMap = operationsList.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
+      final operationsMap = operationsList
+          .map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes})
+          .toList();
 
       final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
 
@@ -601,8 +606,20 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
       verseText = verseData['text'] as String? ?? '';
     } catch (e) {
       verseText = 'Verse not found';
-      if (kDebugMode) debugPrint('$book $chapter:$verse');
-      if (kDebugMode) debugPrint('$e');
+      ErrorHandler.logError(
+        '$book $chapter:$verse',
+        context: {
+          'class': 'NoteSearchScreen',
+          'method': '_showNoteSearchResultActionMenu',
+          'book': book,
+          'chapter': chapter,
+          'verse': verse
+        },
+      );
+      ErrorHandler.logError(
+        '$e',
+        context: {'class': 'NoteSearchScreen', 'method': '_showNoteSearchResultActionMenu', 'error': e.toString()},
+      );
     }
 
     final copyText = '$bookName $chapter:$verse\n$verseText';
@@ -617,7 +634,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               title: Center(
                   child: Text(
                 'Goto Verse',
-                style: TextStyle(fontFamily: fontFamilyNotifier.value, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 10,
+                    color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
                 Navigator.of(context).pop();
@@ -628,7 +648,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               title: Center(
                   child: Text(
                 'Copy Verse',
-                style: TextStyle(fontFamily: fontFamilyNotifier.value, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 10,
+                    color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
                 Clipboard.setData(ClipboardData(text: copyText)).then((_) {
@@ -647,7 +670,16 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   // Navigate to verse in the source bible screen
   void _gotoVerse(String? book, int? chapter, int? verse) {
     if (book == null || chapter == null || verse == null) {
-      if (kDebugMode) debugPrint('_gotoVerse null return: book:"$book" chapter:"$chapter" verse:"$verse"');
+      ErrorHandler.logError(
+        '_gotoVerse null return: book:"$book" chapter:"$chapter" verse:"$verse"',
+        context: {
+          'class': 'NoteSearchScreen',
+          'method': '_gotoVerse',
+          'book': book,
+          'chapter': chapter,
+          'verse': verse
+        },
+      );
       return;
     }
 
@@ -669,14 +701,27 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
     try {
       HistoryDatabase.addHistory(book, chapter, verse, DateTime.now().millisecondsSinceEpoch, false);
     } catch (e) {
-      if (kDebugMode) debugPrint('_gotoVerse addHistory exception: $e');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_gotoVerse addHistory exception',
+        context: {
+          'class': 'NoteSearchScreen',
+          'method': '_gotoVerse',
+          'book': book,
+          'chapter': chapter,
+          'verse': verse
+        },
+      );
     }
   }
 
   // Open NoteScreen for editing notes in search screen context
   Future<void> _openNoteFromSearch(String book, int chapter, int verse, String? existingNote) async {
     await Navigator.push(
-        context, MaterialPageRoute(builder: (_) => NoteScreen(book: book, chapter: chapter, verse: verse, existingNote: existingNote))); // Use provided existing note
+        context,
+        MaterialPageRoute(
+            builder: (_) => NoteScreen(
+                book: book, chapter: chapter, verse: verse, existingNote: existingNote))); // Use provided existing note
   }
 
   String _formatNumber(int? number) {
@@ -693,7 +738,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   Widget build(BuildContext context) {
     super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value);
+    final barColor = _adjustBarColor(
+        Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
@@ -707,8 +753,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         title: (_totalMatches != null && _totalVerses != null)
             ? Center(
                 child: ResponsiveText(
-                text: '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'note' : 'notes'}',
-                style: TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                text:
+                    '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'note' : 'notes'}',
+                style:
+                    TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
@@ -735,7 +783,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         ],
       ),
       endDrawer: Drawer(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+        backgroundColor:
+            Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
         child: SingleChildScrollView(
             child: Column(
           children: [
@@ -746,11 +795,15 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                 color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
               toolbarHeight: 60,
-              backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? darkBackgroundColor.value
+                  : lightBackgroundColor.value,
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text('Regex', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Regex',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {
@@ -767,7 +820,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               },
             ),
             SwitchListTile(
-              title: Text('Whole word', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Whole word',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _useWholeWord,
               onChanged: (val) async {
                 setState(() {
@@ -782,7 +837,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               },
             ),
             SwitchListTile(
-              title: Text('Case-sensitive', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              title: Text('Case-sensitive',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               value: _caseSensitive,
               onChanged: (val) async {
                 setState(() {
@@ -802,7 +859,11 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Text(
                 'Book Filter',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, fontWeight: FontWeight.normal, color: getAdaptiveTextColor(context)),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    fontWeight: FontWeight.normal,
+                    color: getAdaptiveTextColor(context)),
               ),
             ),
             const SizedBox(height: 8),
@@ -817,7 +878,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       value: category,
                       child: Text(
                         category,
-                        style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                        style: TextStyle(
+                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       ),
                     );
                   }),
@@ -825,7 +887,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                     value: 'Custom Range',
                     child: Text(
                       'Custom Range',
-                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      style: TextStyle(
+                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                     ),
                   ),
                 ],
@@ -887,7 +950,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                           color: Colors.red,
                         ),
                       ),
-                      style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                      style: TextStyle(
+                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
                       onChanged: (value) {
                         _customBookFilter = value;
                         _updateBookFilter();
@@ -909,26 +973,37 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                           _onSearch();
                         }
                       },
-                      child: Text('Apply', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                      child: Text('Apply',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
                     ),
                   ),
                   if (_bookFilterType == 'Custom Range') ...[
                     const SizedBox(height: 16),
                     ListTile(
                         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                      Text('Custom range help:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      Text('Custom range help:',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 16),
                       Text('• Both short and long book names are supported.',
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
-                      Text('• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      Text(
+                          '• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       Text('• Multiple ranges must be separated by a comma (,)',
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       Text('• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     ]))
                   ],
                 ],
@@ -936,7 +1011,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
           ],
         )),
       ),
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+      backgroundColor:
+          Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
       body: SafeArea(
         child: Container(
             color: barColor,
@@ -989,7 +1065,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                         _onSearchDebounce?.cancel();
                       }
                       _onSearchDebounce = Timer(Duration(milliseconds: 500), () {
-                        if (_controller.text.isNotEmpty && _controller.text.length > 1 && (_controller.text.split('"').length - 1) % 2 == 0) {
+                        if (_controller.text.isNotEmpty &&
+                            _controller.text.length > 1 &&
+                            (_controller.text.split('"').length - 1) % 2 == 0) {
                           _onSearch();
                         }
                       });
@@ -1043,7 +1121,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       child: Text('Reset',
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
@@ -1052,7 +1133,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       child: Text('Search',
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
                     ),
                   ]),
                   const SizedBox(height: 8),
@@ -1075,19 +1159,28 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                   children: [
                                     CircularProgressIndicator(),
                                     const SizedBox(height: 16),
-                                    Text('Searching notes...🔎', style: TextStyle(fontSize: uiFontSize + 8, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                                    Text('Searching notes...🔎',
+                                        style: TextStyle(
+                                            fontSize: uiFontSize + 8,
+                                            fontFamily: uiFontFamily,
+                                            color: getAdaptiveTextColor(context))),
                                   ],
                                 ),
                               )
                             : (_searchResults.isEmpty && (_controller.text.split('"').length - 1) % 2 == 0)
                                 ? Center(
                                     child: Text('No matches found in your notes 🧐',
-                                        style: TextStyle(fontSize: uiFontSize + 8, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
+                                        style: TextStyle(
+                                            fontSize: uiFontSize + 8,
+                                            fontFamily: uiFontFamily,
+                                            color: getAdaptiveTextColor(context))))
                                 : ValueListenableBuilder<double>(
                                     valueListenable: fontSizeNotifier,
                                     builder: (context, fontSize, child) {
                                       return RawScrollbar(
-                                          thumbColor: isDark ? darkPrimaryColor.value.withValues(alpha: 0.3) : lightPrimaryColor.value.withValues(alpha: 0.5),
+                                          thumbColor: isDark
+                                              ? darkPrimaryColor.value.withValues(alpha: 0.3)
+                                              : lightPrimaryColor.value.withValues(alpha: 0.5),
                                           thumbVisibility: false,
                                           trackVisibility: false,
                                           thickness: 16.0,
@@ -1111,7 +1204,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                                     child: Container(
                                                       color: barColor,
                                                       width: double.infinity,
-                                                      padding: EdgeInsets.only(left: 0.0, top: 0.0, bottom: 0.0, right: 18.0),
+                                                      padding: EdgeInsets.only(
+                                                          left: 0.0, top: 0.0, bottom: 0.0, right: 18.0),
                                                       child: Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
@@ -1121,17 +1215,22 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                                               Text(
                                                                 '${result['bookLongName'] as String} ${result['chapter']}:${result['verse']}',
                                                                 style: TextStyle(
-                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize),
+                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(
+                                                                      fontFamilyNotifier.value, fontSize),
                                                                   fontWeight: FontWeight.bold,
-                                                                  color: Theme.of(context).brightness == Brightness.dark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                                                  color: Theme.of(context).brightness == Brightness.dark
+                                                                      ? darkPrimaryColor.value
+                                                                      : lightPrimaryColor.value,
                                                                 ),
                                                               ),
                                                               const SizedBox(height: 4),
                                                               // Display the verse text with bible screen styling
                                                               FutureBuilder<List<Map<String, dynamic>>>(
-                                                                future: BibleDatabase.getVerses(result['book'] as String, result['chapter'] as int),
+                                                                future: BibleDatabase.getVerses(
+                                                                    result['book'] as String, result['chapter'] as int),
                                                                 builder: (context, snapshot) {
-                                                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                                                  if (snapshot.connectionState ==
+                                                                      ConnectionState.waiting) {
                                                                     return SizedBox.shrink();
                                                                   }
                                                                   if (snapshot.hasError || !snapshot.hasData) {
@@ -1141,7 +1240,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                                                   final verses = snapshot.data!;
                                                                   final verseData = verses.firstWhere(
                                                                     (v) => v['verse'] == result['verse'],
-                                                                    orElse: () => <String, dynamic>{} as Map<String, Object>,
+                                                                    orElse: () =>
+                                                                        <String, dynamic>{} as Map<String, Object>,
                                                                   );
 
                                                                   if (verseData.isEmpty) {
@@ -1154,9 +1254,13 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                                                     verseNumber: result['verse'] as int,
                                                                     rawVerseText: verseData['text'] as String,
                                                                     baseTextStyle: TextStyle(
-                                                                      fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize),
+                                                                      fontSize: FontSizeAdjustments.getAdjustedSize(
+                                                                          fontFamilyNotifier.value, fontSize),
                                                                       fontFamily: fontFamilyNotifier.value,
-                                                                      color: Theme.of(context).brightness == Brightness.dark ? darkTextColor.value : lightTextColor.value,
+                                                                      color: Theme.of(context).brightness ==
+                                                                              Brightness.dark
+                                                                          ? darkTextColor.value
+                                                                          : lightTextColor.value,
                                                                     ),
                                                                     backgroundColor: barColor,
                                                                     noteForVerse: {},
@@ -1184,8 +1288,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                                                   url,
                                                                   element,
                                                                   navigateToVerse: _gotoVerse,
-                                                                  onVerseLinkRecursion: null, // Infinite recursion enabled by default in handleVerseLink
-                                                                  onNoteIconTap: _openNoteFromSearch, // so notes work in nested dialogs
+                                                                  onVerseLinkRecursion:
+                                                                      null, // Infinite recursion enabled by default in handleVerseLink
+                                                                  onNoteIconTap:
+                                                                      _openNoteFromSearch, // so notes work in nested dialogs
                                                                   onNoteEditTap: _openNoteFromSearch,
                                                                 ),
                                                               ),
