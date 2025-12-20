@@ -4,7 +4,7 @@ import '../main.dart'; // For color notifiers
 import '../utils/book_name_converter.dart'; // For book name conversion
 
 class BibleScreenHeader extends StatelessWidget {
-  final bool showViewMenu;
+  //final bool showViewMenu;
   final VoidCallback? onOpenDrawer;
   final VoidCallback? onShowHistory;
   final Future<void> Function()? onShowSearch;
@@ -16,7 +16,7 @@ class BibleScreenHeader extends StatelessWidget {
 
   const BibleScreenHeader({
     super.key,
-    required this.showViewMenu,
+    //required this.showViewMenu,
     this.onOpenDrawer,
     this.onShowHistory,
     this.onShowSearch,
@@ -30,8 +30,7 @@ class BibleScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(
-        isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
+    final barColor = _adjustBarColor(isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
 
     return Container(
       // decoration: BoxDecoration(
@@ -46,30 +45,32 @@ class BibleScreenHeader extends StatelessWidget {
         children: [
           // Leading area
           SizedBox(
-            //width: 48.0,
-            child: showViewMenu
-                ? IconButton(
-                    icon: Icon(
-                      Icons.menu,
-                      semanticLabel: 'Main Options Menu',
-                    ),
-                    tooltip: 'Options',
-                    onPressed: onOpenDrawer,
-                    iconSize: 32,
-                    padding: EdgeInsets.all(8),
-                    color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                  )
-                : SizedBox(width: 48.0), // 32 + 8 + 8
-          ),
+              //width: 48.0,
+              // child: showViewMenu
+              //     ? IconButton(
+              //         icon: Icon(
+              //           Icons.menu,
+              //           semanticLabel: 'Main Options Menu',
+              //         ),
+              //         tooltip: 'Options',
+              //         onPressed: onOpenDrawer,
+              //         iconSize: 32,
+              //         padding: EdgeInsets.all(8),
+              //         color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              //       )
+              //     : SizedBox(width: 48.0), // 32 + 8 + 8
+              child: IconButton(
+            icon: Icon(
+              Icons.menu,
+              semanticLabel: 'Main Options Menu',
+            ),
+            tooltip: 'Options',
+            onPressed: onOpenDrawer,
+            iconSize: 32,
+            padding: EdgeInsets.all(8),
+            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+          )),
 
-          // Title area (centered)
-          //Expanded(
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTitleButton(context),
-          ),
-
-          // Actions area
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -84,6 +85,19 @@ class BibleScreenHeader extends StatelessWidget {
                 padding: EdgeInsets.all(8),
                 color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
+            ],
+          ),
+          // Title area (centered)
+          //Expanded(
+          Flexible(
+            fit: FlexFit.tight,
+            child: _buildTitleButton(context),
+          ),
+
+          // Actions area
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               // TODO: Uncomment if bookmark functionality is added
               // IconButton(
               //   icon: Icon(
@@ -131,8 +145,7 @@ class BibleScreenHeader extends StatelessWidget {
 
   Widget _buildTitleButton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(
-        isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
+    final barColor = _adjustBarColor(isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
 
     return Center(
       child: LayoutBuilder(
@@ -155,9 +168,7 @@ class BibleScreenHeader extends StatelessWidget {
             }
 
             // If fullBookName is true display the longBookName (Genesis), otherwise use the short name (Gen)
-            final name = fullBookName
-                ? BookNameConverter.shortNameToLongName(selectedBook!)
-                : selectedBook;
+            final name = fullBookName ? BookNameConverter.shortNameToLongName(selectedBook!) : selectedBook;
 
             // Show just the book name and chapter number
             return '$name ${selectedChapter!}';
@@ -177,13 +188,11 @@ class BibleScreenHeader extends StatelessWidget {
 
           // Button padding we will apply below
           const double horizontalPad = 16.0;
-          final availableForText =
-              (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
+          final availableForText = (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
 
           final fullTitle = makeTitle(fullBookName: true);
           final shortTitle = makeTitle(fullBookName: false);
-          final label =
-              textWidth(fullTitle, style) <= availableForText ? fullTitle : shortTitle;
+          final label = textWidth(fullTitle, style) <= availableForText ? fullTitle : shortTitle;
 
           return ElevatedButton(
             style: ElevatedButton.styleFrom(

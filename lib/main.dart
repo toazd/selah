@@ -3848,7 +3848,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                         });
                       },
                       // Show options on the first screen explicitly
-                      showViewMenu: i == 0,
+                      //showViewMenu: i == 0,
                       // Add: pass notes inline mode
                       showNotesInline: showNotesInlineNotifier,
                     ),
@@ -3903,7 +3903,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
                         });
                       },
                       // Show options menu on the first screen only
-                      showViewMenu: i == 0,
+                      //showViewMenu: i == 0,
                       // Add: pass notes inline mode
                       showNotesInline: showNotesInlineNotifier,
                     ),
