@@ -1056,7 +1056,8 @@ class _WindowManagerListener extends WindowListener {
       final BuildContext? currentContext = navigatorKey.currentContext;
 
       if (currentContext == null) {
-        //await windowManager.destroy();
+        // DO NOT use any of these on shutdown or it will cause segfaults on linux
+        // await windowManager.destroy();
         // await windowManager.setPreventClose(false);
         // windowManager.close();
         exit(0);
@@ -1111,7 +1112,9 @@ class _WindowManagerListener extends WindowListener {
       LocalDataChangeNotifier.dispose();
 
       // This only runs after all saving and syncing is complete.
-      //await windowManager.destroy();
+
+      // DO NOT use any of these on shutdown or it will cause segfaults on linux
+      // await windowManager.destroy();
       // await windowManager.setPreventClose(false);
       // await windowManager.close();
       exit(0);
