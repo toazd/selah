@@ -76,7 +76,7 @@ class HighlightsDatabase {
 
       return _db!;
     } catch (e) {
-      throw Exception('Database error: $e');
+      throw Exception('Highlights Database error: $e');
     }
   }
 

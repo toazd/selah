@@ -408,6 +408,16 @@ class SelahImportService {
         await _importSearchHistory(data['searchHistory'] as List<dynamic>, isMergeMode);
         LocalDataChangeNotifier.notifySearchHistoryChanged();
 
+        // Trigger sync after search history is imported to maintain continuity
+        final searchHistoryCount = (data['searchHistory'] as List<dynamic>).length;
+        if (searchHistoryCount > 0) {
+          try {
+            await syncService.syncSearchHistory();
+          } catch (e) {
+            if (kDebugMode) debugPrint('_ImportSelectedData syncSearchHistory exception: ${e.toString()}');
+          }
+        }
+
         results['searchHistory'] = true;
       } catch (e) {
         results['searchHistory'] = false;
@@ -437,6 +447,7 @@ class SelahImportService {
         createdAt: highlight['created_at'] as int,
         updatedAt: highlight['updated_at'] as int,
         skipSync: true,
+        uuid: highlight['uuid'] as String?, // Preserve UUID for sync continuity
       );
     }
   }
@@ -460,6 +471,7 @@ class SelahImportService {
         verse: note['verse'] as int,
         noteText: deltaNoteText,
         skipSync: true,
+        uuid: note['uuid'] as String?, // Preserve UUID for sync continuity
       );
     }
   }
@@ -480,6 +492,7 @@ class SelahImportService {
         entry['verse'] as int?,
         entry['timestamp'] as int,
         false,
+        uuid: entry['uuid'] as String?, // Preserve UUID for sync continuity
       );
     }
   }
@@ -510,6 +523,7 @@ class SelahImportService {
         entry['bookFilterType'] as String,
         entry['customBookFilter'] as String,
         entry['timestamp'] as int,
+        uuid: entry['uuid'] as String?, // Preserve UUID for sync continuity
       );
     }
   }
