@@ -64,8 +64,7 @@ jobs:
           ruby \
           ruby-dev \
           build-essential \
-          rpm \
-          patchelf
+          rpm
         sudo snap refresh
         sudo gem install fpm
 
@@ -100,32 +99,36 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/bin"
         mkdir -p "$TEMP_DIR/usr/share/applications"
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
-        mkdir -p "$TEMP_DIR/usr/share/selah"
+        mkdir -p "$TEMP_DIR/opt/selah"
         
-        # Move executable to /usr/bin
-        mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
-        chmod +x "$TEMP_DIR/usr/bin/selah"
-        
-        # Set RPATH so the executable can find its shared libraries
-        echo "🔧 Setting RPATH for shared library discovery..."
-        patchelf --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
-        patchelf --force-rpath --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
-        
-        # Move data and lib to /usr/share/selah
+        # Copy icon BEFORE moving data directory
+        if [ -f "$TEMP_DIR/data/flutter_assets/assets/icon.png" ]; then
+          :
+        else
+          ls -lah "$TEMP_DIR/"
+          ls -lah "$TEMP_DIR/data/"
+          ls -lah "$TEMP_DIR/data/flutter_assets/"
+          ls -lah "$TEMP_DIR/data/flutter_assets/assets/"
+        fi
+
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+
+        # Move the entire Flutter bundle to /opt/selah
+        # This preserves all relative paths that Flutter expects
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
-          mv "$TEMP_DIR/data" "$TEMP_DIR/usr/share/selah/"
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
         fi
         if [ -d "$TEMP_DIR/lib" ]; then
-          mv "$TEMP_DIR/lib" "$TEMP_DIR/usr/share/selah/"
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
         fi
+        
+        # Create symlink from /usr/bin/selah to the actual executable
+        # This preserves Flutter's directory structure while allowing system-wide access
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         
         # Create desktop file
         printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
-        
-        # Copy icon if it exists
-        if [ -f "$TEMP_DIR/data/flutter_assets/assets/icon.png" ]; then
-          cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
-        fi
         
         fpm -s dir -t deb \
           -n "$APP_NAME" \
@@ -141,7 +144,7 @@ jobs:
           usr/bin/selah \
           usr/share/applications/selah.desktop \
           usr/share/icons/ \
-          usr/share/selah/ \
+          opt/selah/ \
           
         # Cleanup temp directory
         rm -rf "$TEMP_DIR"
@@ -155,28 +158,26 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/bin"
         mkdir -p "$TEMP_DIR/usr/share/applications"
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
-        mkdir -p "$TEMP_DIR/usr/share/selah"
+        mkdir -p "$TEMP_DIR/opt/selah"
         
-        mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
-        chmod +x "$TEMP_DIR/usr/bin/selah"
+        # Copy icon BEFORE moving data directory
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
         
-        # Set RPATH so the executable can find its shared libraries
-        echo "🔧 Setting RPATH for shared library discovery..."
-        patchelf --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
-        patchelf --force-rpath --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
-        
+        # Move the entire Flutter bundle to /opt/selah
+        # This preserves all relative paths that Flutter expects
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
-          mv "$TEMP_DIR/data" "$TEMP_DIR/usr/share/selah/"
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
         fi
         if [ -d "$TEMP_DIR/lib" ]; then
-          mv "$TEMP_DIR/lib" "$TEMP_DIR/usr/share/selah/"
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
         fi
+        
+        # Create symlink from /usr/bin/selah to the actual executable
+        # This preserves Flutter's directory structure while allowing system-wide access
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         
         printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
-        
-        if [ -f "$TEMP_DIR/data/flutter_assets/assets/icon.png" ]; then
-          cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
-        fi
         
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
@@ -191,7 +192,7 @@ jobs:
           usr/bin/selah \
           usr/share/applications/selah.desktop \
           usr/share/icons/ \
-          usr/share/selah/ \
+          opt/selah/ \
           
         rm -rf "$TEMP_DIR"
 
