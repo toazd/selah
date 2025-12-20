@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:flutter/services.dart';
-import 'package:selah/utils/error_handler.dart';
-import 'package:selah/utils/snackbar_notification.dart';
 import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
