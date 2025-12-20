@@ -64,7 +64,8 @@ jobs:
           ruby \
           ruby-dev \
           build-essential \
-          rpm
+          rpm \
+          patchelf
         sudo snap refresh
         sudo gem install fpm
 
@@ -104,6 +105,11 @@ jobs:
         # Move executable to /usr/bin
         mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
         chmod +x "$TEMP_DIR/usr/bin/selah"
+        
+        # Set RPATH so the executable can find its shared libraries
+        echo "🔧 Setting RPATH for shared library discovery..."
+        patchelf --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
+        patchelf --force-rpath --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
         
         # Move data and lib to /usr/share/selah
         if [ -d "$TEMP_DIR/data" ]; then
@@ -153,6 +159,11 @@ jobs:
         
         mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
         chmod +x "$TEMP_DIR/usr/bin/selah"
+        
+        # Set RPATH so the executable can find its shared libraries
+        echo "🔧 Setting RPATH for shared library discovery..."
+        patchelf --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
+        patchelf --force-rpath --set-rpath '$ORIGIN/../share/selah/lib' "$TEMP_DIR/usr/bin/selah"
         
         if [ -d "$TEMP_DIR/data" ]; then
           mv "$TEMP_DIR/data" "$TEMP_DIR/usr/share/selah/"
