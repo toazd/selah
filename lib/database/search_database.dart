@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
 import '../utils/error_handler.dart';
+import '../utils/platform_paths.dart';
 
 class SearchDatabase {
   static Database? _database;
@@ -36,20 +38,15 @@ class SearchDatabase {
     String dbPath;
     try {
       if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-        // FFI is already initialized in main.dart - just open the database
-        // Try both locations (same as other databases)
-        String path1 = join(Directory.current.path, 'assets/user_search.sqlite');
-        String path2 = join(Directory.current.path, 'data/flutter_assets/assets/user_search.sqlite');
+        // FFI is already initialized in main.dart - open database in user data directory
+        dbPath = await PlatformPaths.getDatabasePath('user_search');
 
-        if (await File(path1).exists()) {
-          dbPath = path1;
-        } else if (await File(path2).exists()) {
-          dbPath = path2;
-        } else {
-          // Use the flutter_assets location as default for new databases
-          dbPath = path2;
-          // Ensure directory exists
-          await Directory(join(Directory.current.path, 'data/flutter_assets/assets')).create(recursive: true);
+        // If a bundled asset database exists, copy it to user data directory on first run
+        if (!await File(dbPath).exists()) {
+          final assetPath = await PlatformPaths.getAssetPath('user_search.sqlite');
+          if (await File(assetPath).exists()) {
+            await File(assetPath).copy(dbPath);
+          }
         }
 
         _database = await databaseFactory.openDatabase(dbPath);
@@ -73,9 +70,21 @@ class SearchDatabase {
 
         return _database!;
       } else if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        // Mobile: use database path
+        // Mobile: use database path from getDatabasesPath and copy from assets if available
         final databasesPath = await getDatabasesPath();
         dbPath = join(databasesPath, 'user_search.sqlite');
+
+        if (!await File(dbPath).exists()) {
+          try {
+            // Copy from assets
+            ByteData data = await rootBundle.load('assets/user_search.sqlite');
+            List<int> bytes = data.buffer.asUint8List();
+            await File(dbPath).writeAsBytes(bytes, flush: true);
+          } catch (e) {
+            // If not exists in assets, proceed to create new db
+          }
+        }
+
         return await openDatabase(
           dbPath,
           version: 1,
