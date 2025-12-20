@@ -81,7 +81,7 @@ jobs:
     - name: Upload Android APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        name: Selah-Android-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/artifacts/Selah-${{ env.APP_VERSION }}.apk
         retention-days: 90
 

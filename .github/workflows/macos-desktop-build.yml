@@ -99,7 +99,7 @@ jobs:
     - name: Upload macOS desktop artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        name: Selah-MacOS-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: |
           build/packages/Selah.app
           build/packages/Selah-${{ env.APP_VERSION }}.dmg
