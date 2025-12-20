@@ -1223,7 +1223,7 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     fullscreenNotifier.removeListener(_applyFullscreen);
 
     // Remove window listener if it exists
-    if ((Platform.isWindows || Platform.isLinux || Platform.isMacOS) && _windowListener != null) {
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS) && _windowListener != null) {
       windowManager.removeListener(_windowListener!);
     }
 
