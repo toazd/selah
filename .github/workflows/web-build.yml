@@ -69,7 +69,7 @@ jobs:
     - name: Upload Web build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        name: Selah-Web-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/web/
         retention-days: 90
 

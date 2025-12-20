@@ -144,7 +144,7 @@ jobs:
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Selah-${{ env.APP_VERSION }}-${{ github.run_number }}
+        name: Selah-iOS-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
         retention-days: 90
         

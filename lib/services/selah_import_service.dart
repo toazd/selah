@@ -66,13 +66,16 @@ class SelahImportService {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: Text('Reading Backup File', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            title: Text('Reading Backup File',
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text('Validating backup file...', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                Text('Validating backup file...',
+                    style: TextStyle(
+                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               ],
             ),
           ),
@@ -100,7 +103,10 @@ class SelahImportService {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              title: Center(child: Text('Importing Data', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)))),
+              title: Center(
+                  child: Text('Importing Data',
+                      style: TextStyle(
+                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)))),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -140,12 +146,16 @@ class SelahImportService {
           context: context,
           builder: (context) => AlertDialog(
             constraints: const BoxConstraints(maxWidth: 400),
-            title: const Text('Import Failed', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
-            content: Text('Failed to import data: $e', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            title: const Text('Import Failed',
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            content: Text('Failed to import data: $e',
+                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Ok', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                child: Text('Ok',
+                    style: TextStyle(
+                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               ),
             ],
           ),
@@ -184,7 +194,11 @@ class SelahImportService {
       final data = jsonDecode(jsonContent) as Map<String, dynamic>;
 
       // Validate structure
-      if (!data.containsKey('highlights') || !data.containsKey('notes') || !data.containsKey('history') || !data.containsKey('searchHistory') || !data.containsKey('exportInfo')) {
+      if (!data.containsKey('highlights') ||
+          !data.containsKey('notes') ||
+          !data.containsKey('history') ||
+          !data.containsKey('searchHistory') ||
+          !data.containsKey('exportInfo')) {
         throw Exception('Invalid backup file format');
       }
 
@@ -198,7 +212,8 @@ class SelahImportService {
   }
 
   /// Show import selection dialog with RadioGroup for merge/replace mode
-  static Future<Map<String, dynamic>> _showImportSelectionDialog(BuildContext context, Map<String, dynamic> importData) async {
+  static Future<Map<String, dynamic>> _showImportSelectionDialog(
+      BuildContext context, Map<String, dynamic> importData) async {
     final exportInfo = importData['exportInfo'] as Map<String, dynamic>;
     final availableTypes = Set<String>.from(exportInfo['dataTypes'] as List);
 
@@ -219,10 +234,15 @@ class SelahImportService {
                         isMergeMode
                             ? '📝 Merge Mode\n\nImported data will be merged with existing data. Conflicts will be resolved with imported data taking precedence.'
                             : '⚠️ Replace Mode\n\nExisting data for the selected categories will be erased before importing.',
-                        style: TextStyle(color: isMergeMode ? Colors.blue : Colors.red, fontFamily: uiFontFamily, fontSize: uiFontSize),
+                        style: TextStyle(
+                            color: isMergeMode ? Colors.blue : Colors.red,
+                            fontFamily: uiFontFamily,
+                            fontSize: uiFontSize),
                       ),
                       const SizedBox(height: 16),
-                      Text('Import Mode:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      Text('Import Mode:',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       RadioGroup<bool>(
                         groupValue: isMergeMode,
                         onChanged: (bool? value) {
@@ -235,13 +255,21 @@ class SelahImportService {
                         child: Column(
                           children: [
                             RadioListTile<bool>(
-                              title: Text('Replace existing data', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              title: Text('Replace existing data',
+                                  style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context))),
                               value: false, // REQUIRED: The value this tile represents
                               controlAffinity: ListTileControlAffinity.leading,
                               // groupValue and onChanged are handled by the parent RadioGroup.
                             ),
                             RadioListTile<bool>(
-                              title: Text('Merge with existing data', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              title: Text('Merge with existing data',
+                                  style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context))),
                               value: true, // REQUIRED: The value this tile represents
                               controlAffinity: ListTileControlAffinity.leading,
                               // groupValue and onChanged are handled by the parent RadioGroup.
@@ -250,13 +278,23 @@ class SelahImportService {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text('Available data in backup:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      Text('Available data in backup:',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       ...availableTypes.map((type) {
                         final count = _getDataTypeCount(importData, type);
                         return CheckboxListTile(
-                          title: Text(_getDataTypeDisplayName(type), style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                          subtitle: Text('$count items', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          title: Text(_getDataTypeDisplayName(type),
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                          subtitle: Text('$count items',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
                           value: selectedTypes.contains(type),
                           onChanged: (selected) {
                             setState(() {
@@ -274,14 +312,18 @@ class SelahImportService {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, null),
-                      child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      child: Text('Cancel',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, {
                         'selectedTypes': selectedTypes,
                         'isMergeMode': isMergeMode,
                       }),
-                      child: Text('Import Selected', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                      child: Text('Import Selected',
+                          style: TextStyle(
+                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
                     ),
                   ],
                 );
@@ -293,7 +335,8 @@ class SelahImportService {
   }
 
   /// Import selected data types
-  static Future<Map<String, bool>> _importSelectedData(Map<String, dynamic> data, Set<String> selectedTypes, bool isMergeMode, SupabaseSyncService syncService) async {
+  static Future<Map<String, bool>> _importSelectedData(
+      Map<String, dynamic> data, Set<String> selectedTypes, bool isMergeMode, SupabaseSyncService syncService) async {
     final results = <String, bool>{};
 
     // Import highlights if selected
@@ -450,13 +493,20 @@ class SelahImportService {
 
     // Import search history
     for (final entry in searchHistory) {
+      // Handle both boolean values (from newer exports) and integer values (for backwards compatibility)
+      bool parseBool(dynamic value) {
+        if (value is bool) return value;
+        if (value is int) return value == 1;
+        return false; // Default to false for any other type
+      }
+
       await SearchDatabase.addSearchHistory(
         entry['query'] as String,
-        (entry['useRegex'] as int?) == 1,
-        (entry['useNearby'] as int?) == 1,
-        (entry['useWholeWord'] as int?) == 1,
-        (entry['useRedLetter'] as int?) == 1,
-        (entry['caseSensitive'] as int?) == 1,
+        parseBool(entry['useRegex']),
+        parseBool(entry['useNearby']),
+        parseBool(entry['useWholeWord']),
+        parseBool(entry['useRedLetter']),
+        parseBool(entry['caseSensitive']),
         entry['bookFilterType'] as String,
         entry['customBookFilter'] as String,
         entry['timestamp'] as int,
@@ -514,23 +564,29 @@ class SelahImportService {
         context: context,
         builder: (context) => AlertDialog(
           constraints: const BoxConstraints(maxWidth: 400),
-          title: const Text('Import Completed with Errors', style: TextStyle(color: Colors.red, fontSize: uiFontSize, fontFamily: uiFontFamily)),
+          title: const Text('Import Completed with Errors',
+              style: TextStyle(color: Colors.red, fontSize: uiFontSize, fontFamily: uiFontFamily)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('The following items failed to import:', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              Text('The following items failed to import:',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               ...failed.map((type) => Text('❌ ${_getDataTypeDisplayName(type)}')),
               const SizedBox(height: 16),
               Text('Your existing data for failed items has been preserved.',
-                  style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Ok', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              child: Text('Ok',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             ),
           ],
         ),
@@ -546,7 +602,9 @@ class SelahImportService {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Ok', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+              child: Text('Ok',
+                  style:
+                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
             ),
           ],
         ),
