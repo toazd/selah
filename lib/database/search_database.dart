@@ -102,9 +102,21 @@ class SearchDatabase {
 
         return _database!;
       } else {
+        ErrorHandler.logError(
+          null,
+          customMessage: 'Unsupported platform',
+          type: ErrorType.system,
+          context: {'class': 'SearchDatabase', 'method': '_initDatabase'},
+        );
         throw Exception('Unsupported platform');
       }
     } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Database init error',
+        type: ErrorType.system,
+        context: {'class': 'SearchDatabase', 'method': '_initDatabase'},
+      );
       throw Exception('Database error: ${e.toString()}');
     }
   }
@@ -178,6 +190,14 @@ class SearchDatabase {
     Database db = await getDatabase();
 
     try {
+      // First verify database integrity
+      final tableExists =
+          await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$searchHistoryTable'");
+
+      if (tableExists.isEmpty) {
+        await _onCreate(db, 1);
+      }
+
       final result = await db.query(
         searchHistoryTable,
         orderBy: '$colTimestamp DESC',
