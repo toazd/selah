@@ -651,11 +651,11 @@ Future<void> _saveAllCurrentPrefs() async {
       prefs.setInt('nightStartHour', nightStartHourNotifier.value),
     ];
 
-    // Only save window state if not mobile
-    if (!kIsWeb && !(Platform.isAndroid || Platform.isIOS)) {
-      prefs.setDouble('windowWidth', size!.width);
+    // Only save window state if not mobile and we have valid values
+    if (!kIsWeb && !(Platform.isAndroid || Platform.isIOS) && isMaximized != null && size != null) {
+      prefs.setDouble('windowWidth', size.width);
       prefs.setDouble('windowHeight', size.height);
-      prefs.setBool('windowMaximized', isMaximized!);
+      prefs.setBool('windowMaximized', isMaximized);
     }
 
     // 2. Await the completion of ALL operations concurrently.
@@ -1002,12 +1002,22 @@ class _WindowManagerListener extends WindowListener {
       final BuildContext? currentContext = navigatorKey.currentContext;
 
       if (currentContext == null) {
-        await windowManager.destroy();
+        try {
+          await windowManager.destroy();
+        } catch (e) {
+          // Window manager may already be destroyed, ignore error
+          if (kDebugMode) debugPrint('Window manager destroy failed during shutdown: ${e.toString()}');
+        }
         return false;
       }
 
       // Save all current app preferences
-      await _saveAllCurrentPrefs();
+      try {
+        await _saveAllCurrentPrefs();
+      } catch (e) {
+        // Continue closing even if saving preferences fails
+        if (kDebugMode) debugPrint('Failed to save preferences during shutdown: ${e.toString()}');
+      }
 
       // Check and perform Supabase Sync only if there are pending changes
       if (Supabase.instance.client.auth.currentUser != null) {
@@ -1029,6 +1039,7 @@ class _WindowManagerListener extends WindowListener {
             await syncService.syncAll();
           } catch (e) {
             // Continue closing even if sync fails
+            if (kDebugMode) debugPrint('Sync failed during shutdown: ${e.toString()}');
           } finally {
             // Dismiss the sync dialog after sync completes
             if (navigatorKey.currentState?.canPop() ?? false) {
@@ -1045,7 +1056,12 @@ class _WindowManagerListener extends WindowListener {
       LocalDataChangeNotifier.dispose();
 
       // This only runs after all saving and syncing is complete.
-      await windowManager.destroy();
+      try {
+        await windowManager.destroy();
+      } catch (e) {
+        // Window manager may already be destroyed, ignore error
+        if (kDebugMode) debugPrint('Window manager destroy failed: ${e.toString()}');
+      }
 
       // Return false to prevent the OS from immediately closing the window.
       return false;
@@ -1056,7 +1072,15 @@ class _WindowManagerListener extends WindowListener {
   }
 
   @override
-  void onWindowClose() async {}
+  void onWindowClose() async {
+    // Add additional cleanup here if needed
+    try {
+      await windowManager.destroy();
+    } catch (e) {
+      // Ignore errors during window close cleanup
+      if (kDebugMode) debugPrint('Window close cleanup failed: ${e.toString()}');
+    }
+  }
 }
 
 class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObserver {
@@ -1965,31 +1989,49 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           _initWindowManager();
         }
 
+        // Only proceed if window manager is still valid
+        if (!_windowManagerInitialized) {
+          if (kDebugMode) debugPrint('Window manager not ready, skipping fullscreen change');
+          return;
+        }
+
         if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
           if (fullscreenNotifier.value) {
-            // Save maximized state before entering fullscreen
-            _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
+            try {
+              // Save maximized state before entering fullscreen
+              _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
 
-            bool isMaximized = _wasMaximizedBeforeFullscreen;
-            if (isMaximized) {
-              await windowManager.setFullScreen(false);
-              await windowManager.unmaximize();
+              bool isMaximized = _wasMaximizedBeforeFullscreen;
+              if (isMaximized) {
+                await windowManager.setFullScreen(false);
+                await windowManager.unmaximize();
+              }
+            } catch (e) {
+              if (kDebugMode) debugPrint('Failed to save maximized state before fullscreen: ${e.toString()}');
             }
           } else {
             // Exiting fullscreen: restore maximized state if needed
             await windowManager.setFullScreen(false);
 
             if (_wasMaximizedBeforeFullscreen) {
-              //await Future.delayed(Duration(milliseconds: 150));
-              await windowManager.show();
-              // TODO: this needs testing on linux and mac desktop
-              await windowManager.maximize();
-              _wasMaximizedBeforeFullscreen = false;
+              try {
+                //await Future.delayed(Duration(milliseconds: 150));
+                await windowManager.show();
+                // TODO: this needs testing on linux and mac desktop
+                await windowManager.maximize();
+                _wasMaximizedBeforeFullscreen = false;
+              } catch (e) {
+                if (kDebugMode) debugPrint('Failed to restore maximized state after fullscreen: ${e.toString()}');
+              }
             }
           }
         }
         // --- End: Fix for maximized window ---
-        await windowManager.setFullScreen(fullscreenNotifier.value);
+        try {
+          await windowManager.setFullScreen(fullscreenNotifier.value);
+        } catch (e) {
+          if (kDebugMode) debugPrint('Failed to set fullscreen state: ${e.toString()}');
+        }
       } else {
         // Determine brightness for icon colors when toggling on mobile
         // TODO: test on android/ios, no idea why this is here or if it's needed
