@@ -5,6 +5,7 @@ import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../utils/data_validation.dart';
+import '../utils/platform_paths.dart';
 
 class HighlightsDatabase {
   static Database? _db;
@@ -14,26 +15,18 @@ class HighlightsDatabase {
 
     String dbPath;
     try {
-      if (!kIsWeb &&
-          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - just open the database
-        // Try both locations (same as bible database)
-        String path1 =
-            join(Directory.current.path, 'assets/user_highlights.sqlite');
-        String path2 = join(Directory.current.path,
-            'data/flutter_assets/assets/user_highlights.sqlite');
+        // Use platform-specific user data directory
+        dbPath = await PlatformPaths.getDatabasePath('user_highlights');
 
-        if (await File(path1).exists()) {
-          dbPath = path1;
-        } else if (await File(path2).exists()) {
-          dbPath = path2;
-        } else {
-          // Use the flutter_assets location as default for new databases
-          dbPath = path2;
-          // Ensure directory exists
-          await Directory(
-                  join(Directory.current.path, 'data/flutter_assets/assets'))
-              .create(recursive: true);
+        // Check if database exists in assets (for initial setup)
+        if (!await File(dbPath).exists()) {
+          final assetPath = await PlatformPaths.getAssetPath('user_highlights.sqlite');
+          if (await File(assetPath).exists()) {
+            // Copy from assets to user data directory
+            await File(assetPath).copy(dbPath);
+          }
         }
 
         _db = await databaseFactory.openDatabase(dbPath);
@@ -45,8 +38,7 @@ class HighlightsDatabase {
         if (!await File(dbPath).exists()) {
           try {
             // Copy from assets
-            ByteData data =
-                await rootBundle.load('assets/user_highlights.sqlite');
+            ByteData data = await rootBundle.load('assets/user_highlights.sqlite');
             List<int> bytes = data.buffer.asUint8List();
             await File(dbPath).writeAsBytes(bytes, flush: true);
           } catch (e) {
@@ -91,17 +83,14 @@ class HighlightsDatabase {
   static Future<List<Map<String, dynamic>>> getHighlights() async {
     final db = await getDatabase();
 
-    final result =
-        await db.query('user_highlights', orderBy: 'updated_at DESC');
+    final result = await db.query('user_highlights', orderBy: 'updated_at DESC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'highlight',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -112,29 +101,23 @@ class HighlightsDatabase {
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
       await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
-  static Future<List<Map<String, dynamic>>> getHighlightsForChapter(
-      String book, int chapter) async {
+  static Future<List<Map<String, dynamic>>> getHighlightsForChapter(String book, int chapter) async {
     final db = await getDatabase();
     final highlights = await db.query('user_highlights',
-        where: 'book = ? AND chapter = ?',
-        whereArgs: [book, chapter],
-        orderBy: 'verse ASC, start ASC');
+        where: 'book = ? AND chapter = ?', whereArgs: [book, chapter], orderBy: 'verse ASC, start ASC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'highlight',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -145,29 +128,23 @@ class HighlightsDatabase {
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
       await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
-  static Future<List<Map<String, dynamic>>> getHighlightsForVerse(
-      String book, int chapter, int verse) async {
+  static Future<List<Map<String, dynamic>>> getHighlightsForVerse(String book, int chapter, int verse) async {
     final db = await getDatabase();
     final highlights = await db.query('user_highlights',
-        where: 'book = ? AND chapter = ? AND verse = ?',
-        whereArgs: [book, chapter, verse],
-        orderBy: 'start ASC');
+        where: 'book = ? AND chapter = ? AND verse = ?', whereArgs: [book, chapter, verse], orderBy: 'start ASC');
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in highlights) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'highlight',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'highlight', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -178,8 +155,7 @@ class HighlightsDatabase {
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
       await db.delete('user_highlights',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
@@ -210,11 +186,9 @@ class HighlightsDatabase {
       'uuid': uuid,
     };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(
-        highlightData, 'highlight');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(highlightData, 'highlight');
     if (!isValid) {
-      throw Exception(
-          'Invalid highlight data - failed validation. Operation rejected.');
+      throw Exception('Invalid highlight data - failed validation. Operation rejected.');
     }
 
     final db = await getDatabase();
@@ -237,8 +211,7 @@ class HighlightsDatabase {
         'updated_at': updatedAt,
         'uuid': uuid,
       };
-      SupabaseSyncService()
-          .markOperation('highlight', createdAt.toInt(), 'create', syncData);
+      SupabaseSyncService().markOperation('highlight', createdAt.toInt(), 'create', syncData);
     }
 
     return id;
@@ -256,8 +229,7 @@ class HighlightsDatabase {
 
     // Get existing record first for validation
     final db = await getDatabase();
-    final existing =
-        await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
+    final existing = await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
     if (existing.isEmpty) {
       throw Exception('Highlight with id $id not found');
     }
@@ -275,11 +247,9 @@ class HighlightsDatabase {
       'updated_at': timestamp,
     };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(
-        updateData, 'highlight');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(updateData, 'highlight');
     if (!isValid) {
-      throw Exception(
-          'Invalid highlight data - failed validation. Update rejected.');
+      throw Exception('Invalid highlight data - failed validation. Update rejected.');
     }
 
     final updatedData = {
@@ -310,15 +280,13 @@ class HighlightsDatabase {
       'created_at': existingData['created_at'],
       'uuid': uuid ?? existingData['uuid'],
     };
-    SupabaseSyncService().markOperation('highlight',
-        existingData['created_at'] as int, 'update', highlightData);
+    SupabaseSyncService().markOperation('highlight', existingData['created_at'] as int, 'update', highlightData);
   }
 
   static Future<void> deleteHighlight(int id, {String? uuid}) async {
     // Get the highlight data before deletion for sync
     final db = await getDatabase();
-    final highlightToDelete =
-        await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
+    final highlightToDelete = await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
 
     // Delete locally first
     await db.delete('user_highlights', where: 'id = ?', whereArgs: [id]);
@@ -329,8 +297,7 @@ class HighlightsDatabase {
       if (uuid != null) {
         data['uuid'] = uuid;
       }
-      SupabaseSyncService().markOperation('highlight',
-          highlightToDelete.first['created_at'] as int, 'delete', data);
+      SupabaseSyncService().markOperation('highlight', highlightToDelete.first['created_at'] as int, 'delete', data);
     }
 
     // Note: Remote deletion happens when queued operations are processed

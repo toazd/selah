@@ -5,6 +5,7 @@ import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
+import '../utils/platform_paths.dart';
 
 class HistoryDatabase {
   static Database? _database;
@@ -35,26 +36,18 @@ class HistoryDatabase {
   static Future<Database> _initDatabase() async {
     String dbPath;
     try {
-      if (!kIsWeb &&
-          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - just open the database
-        // Try both locations (same as bible database)
-        String path1 =
-            join(Directory.current.path, 'assets/user_history.sqlite');
-        String path2 = join(Directory.current.path,
-            'data/flutter_assets/assets/user_history.sqlite');
+        // Use platform-specific user data directory
+        dbPath = await PlatformPaths.getDatabasePath('user_history');
 
-        if (await File(path1).exists()) {
-          dbPath = path1;
-        } else if (await File(path2).exists()) {
-          dbPath = path2;
-        } else {
-          // Use the flutter_assets location as default for new databases
-          dbPath = path2;
-          // Ensure directory exists
-          await Directory(
-                  join(Directory.current.path, 'data/flutter_assets/assets'))
-              .create(recursive: true);
+        // Check if database exists in assets (for initial setup)
+        if (!await File(dbPath).exists()) {
+          final assetPath = await PlatformPaths.getAssetPath('user_history.sqlite');
+          if (await File(assetPath).exists()) {
+            // Copy from assets to user data directory
+            await File(assetPath).copy(dbPath);
+          }
         }
 
         _database = await databaseFactory.openDatabase(dbPath);
@@ -130,8 +123,7 @@ class HistoryDatabase {
     ''');
   }
 
-  static Future<void> _onUpgrade(
-      Database db, int oldVersion, int newVersion) async {
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       // Add user cache table in version 2
       await db.execute('''
@@ -154,9 +146,7 @@ class HistoryDatabase {
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'history',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'history', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -166,23 +156,20 @@ class HistoryDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete(historyTable,
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+      await db.delete(historyTable, where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
   // Get history with pagination (for performance with large datasets)
-  static Future<List<Map<String, dynamic>>> getHistoryPaginated(
-      int offset, int limit) async {
+  static Future<List<Map<String, dynamic>>> getHistoryPaginated(int offset, int limit) async {
     Database db = await getDatabase();
 
     try {
       // First verify database integrity
-      final tableExists = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='$historyTable'");
+      final tableExists =
+          await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$historyTable'");
 
       if (tableExists.isEmpty) {
         await _onCreate(db, 1);
@@ -200,9 +187,7 @@ class HistoryDatabase {
       final corruptIds = <int>[];
 
       for (final record in result) {
-        final isValid = await DataValidation.validateDatabaseRecord(
-            record, 'history',
-            context: 'database query');
+        final isValid = await DataValidation.validateDatabaseRecord(record, 'history', context: 'database query');
         if (isValid) {
           validResults.add(record);
         } else {
@@ -212,9 +197,7 @@ class HistoryDatabase {
 
       // Delete corrupt records
       if (corruptIds.isNotEmpty) {
-        await db.delete(historyTable,
-            where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-            whereArgs: corruptIds);
+        await db.delete(historyTable, where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
       }
 
       return validResults;
@@ -224,8 +207,7 @@ class HistoryDatabase {
   }
 
   // Add history
-  static Future<void> addHistory(
-      String book, int chapter, int? verse, int timestamp, bool skipSync,
+  static Future<void> addHistory(String book, int chapter, int? verse, int timestamp, bool skipSync,
       {String? uuid}) async {
     // Validate data before saving to database
     final historyData = {
@@ -236,11 +218,9 @@ class HistoryDatabase {
       'uuid': uuid,
     };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(
-        historyData, 'history');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(historyData, 'history');
     if (!isValid) {
-      throw Exception(
-          'Invalid history data - failed validation. Operation rejected.');
+      throw Exception('Invalid history data - failed validation. Operation rejected.');
     }
 
     Database db = await getDatabase();
@@ -250,8 +230,7 @@ class HistoryDatabase {
     final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
     // Create a timestamp representing the start of this minute (hour:minute:00)
-    final DateTime minuteStart = DateTime(dateTime.year, dateTime.month,
-        dateTime.day, dateTime.hour, dateTime.minute);
+    final DateTime minuteStart = DateTime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute);
     final int minuteStartTimestamp = minuteStart.millisecondsSinceEpoch;
 
     // Create a timestamp representing the start of the next minute
@@ -260,15 +239,8 @@ class HistoryDatabase {
 
     final existingEntries = await db.query(
       historyTable,
-      where:
-          '$colBook = ? AND $colChapter = ? AND $colVerse = ? AND $colTimestamp >= ? AND $colTimestamp < ?',
-      whereArgs: [
-        book,
-        chapter,
-        verse,
-        minuteStartTimestamp,
-        nextMinuteTimestamp
-      ],
+      where: '$colBook = ? AND $colChapter = ? AND $colVerse = ? AND $colTimestamp >= ? AND $colTimestamp < ?',
+      whereArgs: [book, chapter, verse, minuteStartTimestamp, nextMinuteTimestamp],
     );
 
     // If no existing entry found for this minute, add the new history item
@@ -294,8 +266,7 @@ class HistoryDatabase {
           'timestamp': timestamp,
           'uuid': uuid,
         };
-        SupabaseSyncService()
-            .markOperation('history', timestamp, 'create', syncData);
+        SupabaseSyncService().markOperation('history', timestamp, 'create', syncData);
       }
     }
     // If an existing entry was found, skip adding this duplicate
@@ -306,8 +277,7 @@ class HistoryDatabase {
     try {
       // Get the history item data before deletion for sync
       final db = await getDatabase();
-      final historyItem =
-          await db.query(historyTable, where: '$colId = ?', whereArgs: [id]);
+      final historyItem = await db.query(historyTable, where: '$colId = ?', whereArgs: [id]);
 
       if (historyItem.isNotEmpty) {
         // Delete locally first
@@ -318,8 +288,7 @@ class HistoryDatabase {
         if (uuid != null) {
           historyData['uuid'] = uuid;
         }
-        SupabaseSyncService().markOperation(
-            'history', historyData['timestamp'] as int, 'delete', historyData);
+        SupabaseSyncService().markOperation('history', historyData['timestamp'] as int, 'delete', historyData);
       }
     } catch (e) {
       if (kDebugMode) debugPrint('deleteHistoryItem exception: $e');

@@ -5,6 +5,7 @@ import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
+import '../utils/platform_paths.dart';
 
 class NotesDatabase {
   static Database? _db;
@@ -14,25 +15,18 @@ class NotesDatabase {
 
     String dbPath;
     try {
-      if (!kIsWeb &&
-          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - just open the database
-        // Try both locations (same as bible database)
-        String path1 = join(Directory.current.path, 'assets/user_notes.sqlite');
-        String path2 = join(Directory.current.path,
-            'data/flutter_assets/assets/user_notes.sqlite');
+        // Use platform-specific user data directory
+        dbPath = await PlatformPaths.getDatabasePath('user_notes');
 
-        if (await File(path1).exists()) {
-          dbPath = path1;
-        } else if (await File(path2).exists()) {
-          dbPath = path2;
-        } else {
-          // Use the flutter_assets location as default for new databases
-          dbPath = path2;
-          // Ensure directory exists
-          await Directory(
-                  join(Directory.current.path, 'data/flutter_assets/assets'))
-              .create(recursive: true);
+        // Check if database exists in assets (for initial setup)
+        if (!await File(dbPath).exists()) {
+          final assetPath = await PlatformPaths.getAssetPath('user_notes.sqlite');
+          if (await File(assetPath).exists()) {
+            // Copy from assets to user data directory
+            await File(assetPath).copy(dbPath);
+          }
         }
 
         _db = await databaseFactory.openDatabase(dbPath);
@@ -94,9 +88,7 @@ class NotesDatabase {
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'note',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'note', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -106,33 +98,25 @@ class NotesDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_notes',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+      await db.delete('user_notes', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
-  static Future<Map<String, dynamic>?> getNoteForVerse(
-      String book, int chapter, int verse) async {
+  static Future<Map<String, dynamic>?> getNoteForVerse(String book, int chapter, int verse) async {
     final db = await getDatabase();
     final result = await db.query('user_notes',
-        where: 'book = ? AND chapter = ? AND verse = ?',
-        whereArgs: [book, chapter, verse],
-        limit: 1);
+        where: 'book = ? AND chapter = ? AND verse = ?', whereArgs: [book, chapter, verse], limit: 1);
 
     if (result.isNotEmpty) {
       final record = result.first;
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'note',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'note', context: 'database query');
 
       if (!isValid) {
         // Delete corrupt record
 
-        await db
-            .delete('user_notes', where: 'id = ?', whereArgs: [record['id']]);
+        await db.delete('user_notes', where: 'id = ?', whereArgs: [record['id']]);
         return null;
       }
 
@@ -183,11 +167,9 @@ class NotesDatabase {
             'uuid': uuid,
           };
 
-    final isValid =
-        await DataValidation.validateBeforeDatabaseWrite(noteData, 'note');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(noteData, 'note');
     if (!isValid) {
-      throw Exception(
-          'Invalid note data - failed validation. Operation rejected.');
+      throw Exception('Invalid note data - failed validation. Operation rejected.');
     }
 
     if (existing != null) {
@@ -216,8 +198,7 @@ class NotesDatabase {
           'created_at': existing['created_at'],
           'updated_at': updatedAt,
         };
-        SupabaseSyncService().markOperation(
-            'note', existing['created_at'] as int, 'update', syncData);
+        SupabaseSyncService().markOperation('note', existing['created_at'] as int, 'update', syncData);
       }
 
       return existing['id'] as int;
@@ -239,8 +220,7 @@ class NotesDatabase {
           'created_at': createdAt,
           'updated_at': updatedAt,
         };
-        await SupabaseSyncService()
-            .markOperation('note', createdAt.toInt(), 'create', syncData);
+        await SupabaseSyncService().markOperation('note', createdAt.toInt(), 'create', syncData);
       }
 
       return id;
@@ -250,8 +230,7 @@ class NotesDatabase {
   static Future<void> deleteNote(int id, {skipSync = false}) async {
     // Get the note data before deletion for sync
     final db = await getDatabase();
-    final noteToDelete =
-        await db.query('user_notes', where: 'id = ?', whereArgs: [id]);
+    final noteToDelete = await db.query('user_notes', where: 'id = ?', whereArgs: [id]);
 
     // Delete locally first
     await db.delete('user_notes', where: 'id = ?', whereArgs: [id]);
@@ -259,31 +238,24 @@ class NotesDatabase {
     // Queue delete operation for sync service
     if (!skipSync) {
       if (noteToDelete.isNotEmpty) {
-        SupabaseSyncService().markOperation(
-            'note',
-            noteToDelete.first['created_at'] as int,
-            'delete',
-            noteToDelete.first);
+        SupabaseSyncService()
+            .markOperation('note', noteToDelete.first['created_at'] as int, 'delete', noteToDelete.first);
       }
     }
 
     // Note: Remote deletion happens when queued operations are processed
   }
 
-  static Future<List<Map<String, dynamic>>> getNotesForChapter(
-      String book, int chapter) async {
+  static Future<List<Map<String, dynamic>>> getNotesForChapter(String book, int chapter) async {
     final db = await getDatabase();
-    final result = await db.query('user_notes',
-        where: 'book = ? AND chapter = ?', whereArgs: [book, chapter]);
+    final result = await db.query('user_notes', where: 'book = ? AND chapter = ?', whereArgs: [book, chapter]);
 
     // Validate and filter out corrupt records
     final validResults = <Map<String, dynamic>>[];
     final corruptIds = <int>[];
 
     for (final record in result) {
-      final isValid = await DataValidation.validateDatabaseRecord(
-          record, 'note',
-          context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(record, 'note', context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -293,9 +265,7 @@ class NotesDatabase {
 
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
-      await db.delete('user_notes',
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
-          whereArgs: corruptIds);
+      await db.delete('user_notes', where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
     }
 
     return validResults;

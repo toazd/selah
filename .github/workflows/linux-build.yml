@@ -91,6 +91,36 @@ jobs:
 
         # Create .deb package (Debian/Ubuntu)
         echo "📦 Creating .deb package..."
+        # Copy bundle to temporary directory and reorganize for proper installation paths
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        
+        # Create proper directory structure for installation
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/usr/share/selah"
+        
+        # Move executable to /usr/bin
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
+        chmod +x "$TEMP_DIR/usr/bin/selah"
+        
+        # Move data and lib to /usr/share/selah
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/usr/share/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/usr/share/selah/"
+        fi
+        
+        # Create desktop file
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        
+        # Copy icon if it exists
+        if [ -f "$TEMP_DIR/data/flutter_assets/assets/icon.png" ]; then
+          cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        fi
+        
         fpm -s dir -t deb \
           -n "$APP_NAME" \
           -v "$VERSION" \
@@ -101,11 +131,42 @@ jobs:
           --maintainer "Selah Team" \
           --license "Unlicense" \
           -p "$OUTPUT_DIR" \
-          -C "$BUILD_DIR" \
-          .
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/selah.desktop \
+          usr/share/icons/ \
+          usr/share/selah/ \
+          
+        # Cleanup temp directory
+        rm -rf "$TEMP_DIR"
 
         # Create .rpm package (Red Hat/Fedora)
         echo "📦 Creating .rpm package..."
+        # Use similar structure for RPM
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/usr/share/selah"
+        
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/usr/bin/selah"
+        chmod +x "$TEMP_DIR/usr/bin/selah"
+        
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/usr/share/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/usr/share/selah/"
+        fi
+        
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=selah\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        
+        if [ -f "$TEMP_DIR/data/flutter_assets/assets/icon.png" ]; then
+          cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        fi
+        
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
           -v "$VERSION" \
@@ -115,8 +176,13 @@ jobs:
           --maintainer "Selah Team" \
           --license "Unlicense" \
           -p "$OUTPUT_DIR" \
-          -C "$BUILD_DIR" \
-          .
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/selah.desktop \
+          usr/share/icons/ \
+          usr/share/selah/ \
+          
+        rm -rf "$TEMP_DIR"
 
         echo "✅ All packages created in $OUTPUT_DIR"
 
