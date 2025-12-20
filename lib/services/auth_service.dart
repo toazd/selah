@@ -54,7 +54,8 @@ class AuthService {
       } catch (e) {
         // If RPC fails or no user found, continue with signup
         ErrorHandler.logError(
-          'Username check: ${e.toString()}',
+          e,
+          customMessage: 'RPC get_user_email_by_username lookup failed',
           context: {'class': 'AuthService', 'method': 'signUpWithUsername', 'username': username},
         );
       }
@@ -84,15 +85,6 @@ class AuthService {
   // Username/Password Sign In
   Future<User?> signInWithUsername(String username, String password) async {
     try {
-      ErrorHandler.logError(
-        '=== DEBUG signInWithUsername ===',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
-      );
-      ErrorHandler.logError(
-        'Attempting to sign in with username: $username',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
-      );
-
       // Check network connectivity before attempting authentication
       final hasInternet = await InternetAccessChecker.hasInternetAccess();
       if (!hasInternet) {
@@ -101,43 +93,28 @@ class AuthService {
 
       // Get the email associated with the username
       final userData = await _getUserByUsername(username);
-      ErrorHandler.logError(
-        'userData from _getUserByUsername: ${userData?.toString()}',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'userData': userData?.toString()},
-      );
 
       if (userData == null) {
         ErrorHandler.logError(
           'No user data found for username: $username',
           context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
         );
-        throw Exception('No account found with this username. If you want this username please sign up first.');
+        throw Exception('No account found with this username.');
       }
 
       final email = userData['email'];
-      ErrorHandler.logError(
-        'Found email for username: $email',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username, 'email': email},
-      );
 
       // Sign in with the email and password
-      ErrorHandler.logError(
-        'Attempting Supabase signInWithPassword with email: $email',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'email': email},
-      );
       final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      ErrorHandler.logError(
-        'Sign in successful! User: ${response.user?.toString()}',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'userId': response.user?.id},
-      );
       return response.user;
     } catch (e) {
       ErrorHandler.logError(
-        'ERROR in signInWithUsername: $e',
+        e,
+        customMessage: 'SignInWithUsername exception',
         context: {'class': 'AuthService', 'method': 'signInWithUsername', 'error': e.toString()},
       );
       throw _handleAuthError(e);
@@ -147,29 +124,13 @@ class AuthService {
   // Helper method to get user email by username using RPC to bypass RLS
   Future<Map<String, dynamic>?> _getUserByUsername(String username) async {
     try {
-      ErrorHandler.logError(
-        '=== DEBUG _getUserByUsername ===',
-        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
-      );
-      ErrorHandler.logError(
-        'Looking up username: $username',
-        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
-      );
-
       // Use RPC function to get email by username (bypasses RLS)
-      ErrorHandler.logError(
-        'Calling RPC function get_user_email_by_username',
-        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
-      );
       final response = await _supabase.rpc('get_user_email_by_username', params: {'username_param': username}).single();
-      ErrorHandler.logError(
-        'RPC response: ${response.toString()}',
-        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'response': response.toString()},
-      );
 
       if (response['email'] == null) {
         ErrorHandler.logError(
-          'No email found for username: $username',
+          null,
+          customMessage: 'No email found for username',
           context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
         );
         return null;
@@ -181,16 +142,12 @@ class AuthService {
       };
     } catch (e) {
       ErrorHandler.logError(
-        'ERROR in _getUserByUsername: $e',
-        context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username, 'error': e.toString()},
-      );
-      ErrorHandler.logError(
-        'Stack trace: ${e.toString()}',
+        e,
         context: {
           'class': 'AuthService',
           'method': '_getUserByUsername',
           'username': username,
-          'stackTrace': e.toString()
+          'error': e.toString(),
         },
       );
 

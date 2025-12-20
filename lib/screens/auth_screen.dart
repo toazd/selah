@@ -111,14 +111,13 @@ class _AuthScreenState extends State<AuthScreen> {
         // }
 
         try {
-          ErrorHandler.logError('About to initialize SupabaseSyncService after user confirmed preferences...');
-
           final syncService = SupabaseSyncService();
           await syncService.initialize(isLoginResync: true);
-
-          ErrorHandler.logError('SyncService.initialize() completed successfully');
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'SyncService.initialize() FAILED');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'SyncService.initialize() FAILED',
+          );
           // Continue even if sync fails - user can still use the app
         }
 

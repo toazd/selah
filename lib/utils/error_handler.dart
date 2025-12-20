@@ -308,6 +308,7 @@ class ErrorHandler {
     if (kDebugMode) debugPrint(buffer.toString());
 
     // Windows-only temporary debug log: write to user's Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
+    // TODO: remove for production builds
     if (Platform.isWindows) {
       try {
         final userProfile = Platform.environment['USERPROFILE'] ?? '.';

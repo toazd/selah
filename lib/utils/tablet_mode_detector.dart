@@ -131,31 +131,13 @@ class TabletModeDetector {
   /// Manually triggers a tablet mode detection and notification for testing
   /// This is useful for debugging when automatic detection isn't working
   static Future<void> testTabletModeDetection() async {
-    ErrorHandler.logError(
-      '=== MANUAL TABLET MODE TEST ===',
-      context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
-    );
-
     try {
       // Get current tablet mode
       final isTablet = await isTabletMode();
-      ErrorHandler.logError(
-        'Current tablet mode: $isTablet',
-        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection', 'isTablet': isTablet},
-      );
+      if (kDebugMode) debugPrint('isTablet: $isTablet');
 
       // Manually trigger the stream update
-      tabletModeChanges?.listen((mode) {
-        ErrorHandler.logError(
-          'Stream update triggered manually: $mode',
-          context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection', 'mode': mode},
-        );
-      }).cancel(); // Cancel immediately after testing
-
-      ErrorHandler.logError(
-        'Manual tablet mode test completed',
-        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
-      );
+      tabletModeChanges?.listen((mode) {}).cancel(); // Cancel immediately after testing
     } catch (e) {
       ErrorHandler.logError(
         e,

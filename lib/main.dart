@@ -151,53 +151,13 @@ class TabletModeService {
   void initializeNotifier() {
     if (!kIsWeb && Platform.isWindows) {
       _tabletModeNotifier = TabletModeDetector.createTabletModeNotifier();
-      _tabletModeNotifier!.addListener(() {
-        final isTablet = _tabletModeNotifier!.value;
-        ErrorHandler.logError(
-          'Tablet Mode Listener: ($isTablet) - ${isTablet ? "Tablet Mode" : "Laptop Mode"}',
-          context: {'class': 'TabletModeService', 'method': 'initializeNotifier', 'isTablet': isTablet},
-        );
-      });
+      _tabletModeNotifier!.addListener(() {});
     }
   }
 
   ValueNotifier<bool>? get notifier => _tabletModeNotifier;
   bool get isTablet => _tabletModeNotifier?.value ?? false;
 }
-
-// Global shutdown coordination to prevent race conditions during app exit
-class ShutdownCoordinator {
-  static final ShutdownCoordinator _instance = ShutdownCoordinator._internal();
-  factory ShutdownCoordinator() => _instance;
-  ShutdownCoordinator._internal();
-
-  bool _isShuttingDown = false;
-  final Completer<void> _shutdownCompleter = Completer<void>();
-
-  Future<void> beginShutdown() async {
-    if (_isShuttingDown) {
-      return _shutdownCompleter.future;
-    }
-
-    _isShuttingDown = true;
-    ErrorHandler.logError(
-      'Beginning coordinated shutdown',
-      context: {'class': 'ShutdownCoordinator', 'method': 'beginShutdown'},
-    );
-
-    return _shutdownCompleter.future;
-  }
-
-  bool get isShuttingDown => _isShuttingDown;
-
-  void completeShutdown() {
-    if (!_shutdownCompleter.isCompleted) {
-      _shutdownCompleter.complete();
-    }
-  }
-}
-
-final shutdownCoordinator = ShutdownCoordinator();
 
 // Add: color hex helpers
 String _colorToHex(Color c) => '#${(c.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
@@ -361,16 +321,8 @@ void main() async {
         // Fresh login - store login time but DON'T initialize sync yet
         // Let AuthScreen handle sync initialization after user confirms preferences
         await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
-        ErrorHandler.logError(
-          'Fresh login detected - sync initialization deferred for user preference confirmation',
-          context: {'class': 'main.dart', 'method': 'main', 'loginType': 'fresh'},
-        );
       } else {
         // App restart - initialize sync normally since preferences are already set
-        ErrorHandler.logError(
-          'App restart detected - initializing sync service normally',
-          context: {'class': 'main.dart', 'method': 'main', 'loginType': 'restart'},
-        );
         await SupabaseSyncService().initialize(isLoginResync: true);
       }
     } else {
@@ -1165,10 +1117,6 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
       // Handle mobile app termination/backgrounding to ensure sync service cleanup
       if (state == AppLifecycleState.detached) {
-        ErrorHandler.logError(
-          'AppLifecycleState.detached',
-          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
-        );
         // App is being terminated/killed - save preferences and dispose sync service
         _saveAllCurrentPrefs(); // Save preferences like desktop close handler does
 
@@ -1180,18 +1128,10 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
           SupabaseSyncService().dispose();
         }
       } else if (state == AppLifecycleState.inactive) {
-        ErrorHandler.logError(
-          'AppLifecycleState.inactive',
-          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
-        );
         // App in inactive state
       }
       // Note: We handle paused separately in case the app gets suspended but not detached
       else if (state == AppLifecycleState.paused) {
-        ErrorHandler.logError(
-          'AppLifecycleState.paused',
-          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
-        );
         // App is going to background - stop connectivity monitoring to save battery
         if (Supabase.instance.client.auth.currentUser != null) {
           SupabaseSyncService().stopConnectionMonitoring();
@@ -1199,11 +1139,6 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       }
       // Handle app returning to foreground - re-establish realtime listeners
       else if (state == AppLifecycleState.resumed) {
-        ErrorHandler.logError(
-          'AppLifecycleState.resumed',
-          context: {'class': 'main.dart', 'method': 'didChangeAppLifecycleState'},
-        );
-
         // App is coming back to foreground - restart sync service for realtime listeners
         if (Supabase.instance.client.auth.currentUser != null) {
           try {
@@ -2058,10 +1993,6 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
 
       // Only proceed if window manager is still valid
       if (!_windowManagerInitialized) {
-        ErrorHandler.logError(
-          'Window manager not ready, skipping fullscreen change',
-          context: {'class': 'main.dart', 'method': '_applyFullscreen'},
-        );
         return;
       }
 
@@ -4183,15 +4114,15 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
       }
     }
 
-    // THIS IS THE KEY ADDITION: Force focus away from the TextField after dialog closes
+    // Force focus away from the TextField after dialog closes
     // This executes no matter how the dialog was closed (Cancel, Save, or other means)
-    // This is to circumvent a bug on windows desktop touchscreens
+    // This is to circumvent an OSK bug on windows desktop touchscreens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _invisibleElevatedButtonNode.canRequestFocus) {
-        ErrorHandler.logError(
-          'Changing focus to fix bug',
-          context: {'class': 'main.dart', 'method': '_showEditPreferencesDialog'},
-        );
+        // ErrorHandler.logError(
+        //   'Changing focus to fix bug',
+        //   context: {'class': 'main.dart', 'method': '_showEditPreferencesDialog'},
+        // );
         _invisibleElevatedButtonNode.requestFocus();
       } else {
         ErrorHandler.logError(
@@ -5360,29 +5291,11 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     final maxTouchPoints = await TabletModeDetector.getMaximumTouchPoints();
     final deviceInfo = await TabletModeDetector.getDeviceInfo();
 
-    ErrorHandler.logError(
-      '=== Tablet Mode Detection ===',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
-    ErrorHandler.logError(
-      'Tablet Mode: $isTablet',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
-    ErrorHandler.logError(
-      'Keyboard Attached: $hasKeyboard',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
-    ErrorHandler.logError(
-      'Touch Screen: $hasTouch',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
-    ErrorHandler.logError(
-      'Max Touch Points: $maxTouchPoints',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
-    ErrorHandler.logError(
-      'Device Info: $deviceInfo',
-      context: {'class': 'main.dart', 'method': 'main'},
-    );
+    if (kDebugMode) debugPrint('=== Tablet Mode Detection ===');
+    if (kDebugMode) debugPrint('Tablet Mode: $isTablet');
+    if (kDebugMode) debugPrint('Keyboard Attached: $hasKeyboard');
+    if (kDebugMode) debugPrint('Touch Screen: $hasTouch');
+    if (kDebugMode) debugPrint('Max Touch Points: $maxTouchPoints');
+    if (kDebugMode) debugPrint('Device Info: $deviceInfo');
   }
 }

@@ -725,17 +725,21 @@ class SupabaseSyncService {
               try {
                 await _uploadNote(uploadData);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteNote(uploadData['created_at'] as int);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             }
             break;
@@ -744,17 +748,21 @@ class SupabaseSyncService {
               try {
                 await _uploadHistoryItem(uploadData);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteHistoryItem(uploadData['timestamp']);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             }
             break;
@@ -763,17 +771,21 @@ class SupabaseSyncService {
               try {
                 await _uploadSearchHistoryItem(uploadData);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             } else if (operation.operation == 'delete') {
               try {
                 await deleteRemoteSearchHistoryItem(uploadData['timestamp']);
               } catch (e) {
-                ErrorHandler.logError(e,
-                    customMessage: '_processPendingQueue exception',
-                    context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+                ErrorHandler.logError(
+                  e,
+                  customMessage: '_processPendingQueue exception',
+                  context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+                );
               }
             }
             break;
@@ -783,9 +795,11 @@ class SupabaseSyncService {
         try {
           queue.add(operation);
         } catch (e) {
-          ErrorHandler.logError(e,
-              customMessage: '_processPendingQueue exception',
-              context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation});
+          ErrorHandler.logError(
+            e,
+            customMessage: '_processPendingQueue exception',
+            context: {'operationId': operation.id, 'type': operation.type, 'operation': operation.operation},
+          );
         }
       }
     }
@@ -794,11 +808,8 @@ class SupabaseSyncService {
   // Initialize the sync service
   Future<void> initialize({bool isLoginResync = false}) async {
     if (_isInitialized) {
-      ErrorHandler.logError('SyncService.initialize() called but already initialized');
       return;
     }
-
-    ErrorHandler.logError('SyncService.initialize() starting... isLoginResync: $isLoginResync');
 
     if (_currentUserId == null) {
       return;
@@ -857,22 +868,34 @@ class SupabaseSyncService {
         try {
           await syncHighlights();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'syncHighlights() failed');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'syncHighlights() failed',
+          );
         }
         try {
           await syncNotes();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'syncNotes() failed');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'syncNotes() failed',
+          );
         }
         try {
           await syncHistory();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'syncHistory() failed');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'syncHistory() failed',
+          );
         }
         try {
           await syncSearchHistory();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'syncSearchHistory() failed');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'syncSearchHistory() failed',
+          );
         }
       }
     } else if (!isLoginResync && _currentUserId != null && isOnline) {
@@ -888,7 +911,10 @@ class SupabaseSyncService {
     try {
       _startConnectionMonitoring();
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_startConnectionMonitoring failed');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_startConnectionMonitoring failed',
+      );
     }
 
     // Cache the username after initialization
@@ -915,7 +941,10 @@ class SupabaseSyncService {
           await _processPendingQueues();
         } catch (e) {
           // Connection test or setup failed - go offline but don't crash
-          ErrorHandler.logError(e, customMessage: 'Connection setup failed');
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Connection setup failed',
+          );
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
         }
@@ -925,7 +954,10 @@ class SupabaseSyncService {
       }
     } catch (e) {
       // Connectivity check failed - assume offline
-      ErrorHandler.logError(e, customMessage: 'Connectivity check failed');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Connectivity check failed',
+      );
       _syncStatus = SyncStatus.offline;
       syncStatusNotifier.value = SyncStatus.offline;
     }
@@ -950,13 +982,18 @@ class SupabaseSyncService {
         await testQuery;
       } catch (e) {
         // Handle specific Supabase errors that can occur during network restoration
-        ErrorHandler.logError(e, customMessage: 'Supabase profile access failed');
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Supabase profile access failed',
+        );
         rethrow;
       }
     } catch (e) {
-      // Log the error but don't rethrow - let connectivity monitoring handle reconnection
-      ErrorHandler.logError(e, customMessage: 'Supabase connection test failed');
-      rethrow; // Still throw so calling code knows connection failed
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Supabase connection test failed',
+      );
+      rethrow;
     }
   }
 
@@ -1071,8 +1108,11 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          ErrorHandler.logError(e,
-              customMessage: 'Failed to setup highlights listener', context: {'table': 'highlights'});
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Failed to setup highlights listener',
+            context: {'table': 'highlights'},
+          );
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1097,7 +1137,11 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'Failed to setup notes listener', context: {'table': 'notes'});
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Failed to setup notes listener',
+            context: {'table': 'notes'},
+          );
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1122,7 +1166,11 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          ErrorHandler.logError(e, customMessage: 'Failed to setup history listener', context: {'table': 'history'});
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Failed to setup history listener',
+            context: {'table': 'history'},
+          );
           // Don't rethrow - continue with other listeners
         }
       }
@@ -1147,14 +1195,20 @@ class SupabaseSyncService {
               )
               .subscribe();
         } catch (e) {
-          ErrorHandler.logError(e,
-              customMessage: 'Failed to setup search history listener', context: {'table': 'search_history'});
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Failed to setup search history listener',
+            context: {'table': 'search_history'},
+          );
           // Don't rethrow - continue with other listeners
         }
       }
     } catch (e) {
       _isListening = false;
-      ErrorHandler.logError(e, customMessage: 'Error setting up realtime listeners');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Error setting up realtime listeners',
+      );
       // Don't rethrow - let connectivity monitoring handle reconnection
     }
   }
@@ -1361,7 +1415,10 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_handleHighlightsChange exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_handleHighlightsChange exception',
+            );
           }
         } else if (!shouldEnable && _highlightsChannel != null) {
           // Cancel highlights listener
@@ -1391,7 +1448,10 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_handleNotesChange exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_handleNotesChange exception',
+            );
           }
         } else if (!shouldEnable && _notesChannel != null) {
           // Cancel notes listener
@@ -1421,7 +1481,10 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_handleHistoryChange exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_handleHistoryChange exception',
+            );
           }
         } else if (!shouldEnable && _historyChannel != null) {
           // Cancel history listener
@@ -1451,7 +1514,10 @@ class SupabaseSyncService {
                 )
                 .subscribe();
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_handleSearchHistoryChange exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_handleSearchHistoryChange exception',
+            );
           }
         } else if (!shouldEnable && _searchHistoryChannel != null) {
           // Cancel search history listener
@@ -1473,16 +1539,6 @@ class SupabaseSyncService {
         return;
       }
 
-      // DEBUG: Log realtime handler invocation with detailed information
-      ErrorHandler.logError('Realtime highlights event', context: {
-        'eventType': payload.eventType,
-        'table': payload.table,
-        'schema': payload.schema,
-        'oldRecord': payload.oldRecord,
-        'newRecord': payload.newRecord,
-        'payload': payload.toString(),
-      });
-
       // Handle different event types
       switch (payload.eventType) {
         case PostgresChangeEvent.insert:
@@ -1498,36 +1554,20 @@ class SupabaseSyncService {
           // Use uuid to find and delete the local record (only data available from Supabase realtime with RLS)
           final uuid = deletedRecord['id'] as String?; // Supabase returns id as UUID
 
-          ErrorHandler.logError('Realtime highlights delete event',
-              context: {'uuid': uuid, 'deletedRecord': deletedRecord.toString()});
-
           if (uuid != null && uuid.isNotEmpty) {
             // Use uuid to find and delete the local record
             final localHighlights = await HighlightsDatabase.getHighlights();
-            ErrorHandler.logError('Found ${localHighlights.length} local highlights',
-                context: {'found': localHighlights.length});
+
             final highlightToDelete =
                 localHighlights.firstWhere((h) => h['uuid'] == uuid, orElse: () => <String, dynamic>{});
             if (highlightToDelete.isNotEmpty) {
-              ErrorHandler.logError('Found highlight to delete', context: {
-                'uuid': uuid,
-                'id': highlightToDelete['id'],
-                'created_at': highlightToDelete['created_at'].toString()
-              });
               await HighlightsDatabase.deleteHighlight(highlightToDelete['id'] as int);
               LocalDataChangeNotifier.notifyHighlightsChanged();
               _highlightsChangedController?.add(null);
-              ErrorHandler.logError('Successfully deleted highlight locally');
-            } else {
-              ErrorHandler.logError('No local highlight found with UUID: $uuid');
-            }
-          } else {
-            ErrorHandler.logError('UUID is null or empty, cannot delete');
-          }
+            } else {}
+          } else {}
           break;
         default:
-          ErrorHandler.logError('Unknown event type',
-              context: {'eventType': payload.eventType, 'table': payload.table});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1549,16 +1589,6 @@ class SupabaseSyncService {
       if (!notesEnabled) {
         return;
       }
-
-      // Log realtime handler invocation with structured details
-      ErrorHandler.logError('Realtime notes event', context: {
-        'eventType': payload.eventType,
-        'table': payload.table,
-        'schema': payload.schema,
-        'oldRecord': payload.oldRecord,
-        'newRecord': payload.newRecord,
-        'payload': payload.toString(),
-      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1587,7 +1617,6 @@ class SupabaseSyncService {
           }
           break;
         default:
-          ErrorHandler.logError('Unknown event type: ${payload.eventType}', context: {'eventType': payload.eventType});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1609,16 +1638,6 @@ class SupabaseSyncService {
       if (!historyEnabled) {
         return;
       }
-
-      // Log realtime handler invocation with structured details
-      ErrorHandler.logError('Realtime history event', context: {
-        'eventType': payload.eventType,
-        'table': payload.table,
-        'schema': payload.schema,
-        'oldRecord': payload.oldRecord,
-        'newRecord': payload.newRecord,
-        'payload': payload.toString(),
-      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1648,7 +1667,6 @@ class SupabaseSyncService {
           }
           break;
         default:
-          ErrorHandler.logError('Unknown event type: ${payload.eventType}', context: {'eventType': payload.eventType});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1670,16 +1688,6 @@ class SupabaseSyncService {
       if (!searchHistoryEnabled) {
         return;
       }
-
-      // Log realtime handler invocation with structured details
-      ErrorHandler.logError('Realtime search history event', context: {
-        'eventType': payload.eventType,
-        'table': payload.table,
-        'schema': payload.schema,
-        'oldRecord': payload.oldRecord,
-        'newRecord': payload.newRecord,
-        'payload': payload.toString(),
-      });
 
       // Handle different event types
       switch (payload.eventType) {
@@ -1709,8 +1717,6 @@ class SupabaseSyncService {
           }
           break;
         default:
-          ErrorHandler.logError('Unknown event type',
-              context: {'eventType': payload.eventType, 'table': payload.table});
       }
     } catch (e) {
       // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1829,7 +1835,6 @@ class SupabaseSyncService {
 
     try {
       // DEBUG: Log sync operation start
-      ErrorHandler.logError('=== DEBUG syncHighlights START ===');
 
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
@@ -1873,11 +1878,12 @@ class SupabaseSyncService {
         // Upload highlights
         if (highlightsToUpload.isNotEmpty) {
           try {
-            ErrorHandler.logError('Uploading ${highlightsToUpload.length} highlights',
-                context: {'uploading': highlightsToUpload.length});
             await _batchUploadHighlights(highlightsToUpload);
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_batchUploadHighlights exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_batchUploadHighlights exception',
+            );
             // If batch upload fails, queue each operation individually for retry
             for (final highlight in highlightsToUpload) {
               _enqueueFailedOperation(SyncOperation(
@@ -1897,8 +1903,6 @@ class SupabaseSyncService {
       final query = _supabase.from('highlights').select().eq('user_id', _currentUserId!).gt('updated_at', lastSyncMs);
       final snapshot = await query;
       if (snapshot.isNotEmpty) {
-        ErrorHandler.logError('Downloading ${snapshot.length} highlight changes from remote',
-            context: {'downloaded': snapshot.length});
         await _downloadHighlights(snapshot);
       }
 
@@ -1910,10 +1914,11 @@ class SupabaseSyncService {
 
       // Save timestamps to preferences - only for highlights
       await _saveLastSyncTimestamps('highlights');
-
-      ErrorHandler.logError('=== DEBUG syncHighlights COMPLETE ===');
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: 'syncHighlights exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncHighlights exception',
+      );
     }
   }
 
@@ -1922,13 +1927,8 @@ class SupabaseSyncService {
     try {
       bool hasChanges = false;
       int processedCount = 0;
-      int newCount = 0;
-      int updateCount = 0;
-      int skipCount = 0;
 
       // DEBUG: Log download operation start (only for problematic data types)
-      ErrorHandler.logError('DEBUG: _downloadHighlights processing ${docs.length} docs',
-          context: {'docs': docs.length});
 
       // Get local highlights - match by created_at timestamp only
       final localHighlights = await HighlightsDatabase.getHighlights();
@@ -1979,7 +1979,6 @@ class SupabaseSyncService {
               skipSync: true,
               uuid: highlightData['uuid'],
             );
-            newCount++;
           } else {
             // Update existing - use the local ID
             await HighlightsDatabase.updateHighlight(
@@ -1989,19 +1988,12 @@ class SupabaseSyncService {
               color: highlightData['color'],
               updateAt: highlightData['updated_at'] as int,
             );
-            updateCount++;
           }
 
           hasChanges = true;
           processedCount++;
-        } else {
-          skipCount++;
-        }
+        } else {}
       }
-
-      // DEBUG: Log download operation completion (only for problematic data types)
-      ErrorHandler.logError('DEBUG: _downloadHighlights done - new:$newCount, update:$updateCount, skip:$skipCount',
-          context: {'new': newCount, 'update': updateCount, 'skip': skipCount});
 
       // Only notify if there were actual changes
       if (hasChanges && processedCount > 0) {
@@ -2024,12 +2016,6 @@ class SupabaseSyncService {
     try {
       bool hasChanges = false;
       int processedCount = 0;
-      int newCount = 0;
-      int updateCount = 0;
-      int skipCount = 0;
-
-      // DEBUG: Log download operation start (only for problematic data types)
-      ErrorHandler.logError('DEBUG: _downloadNotes processing ${docs.length} docs', context: {'docs': docs.length});
 
       for (final data in docs) {
         // Validate data before processing
@@ -2057,12 +2043,6 @@ class SupabaseSyncService {
           // Convert to Delta format before storing
           final deltaNoteText = NoteStorageFormat.ensureDeltaFormat(noteText);
 
-          if (localNote == null) {
-            newCount++;
-          } else {
-            updateCount++;
-          }
-
           await NotesDatabase.addOrUpdateNote(
               book: book,
               chapter: chapter,
@@ -2073,14 +2053,8 @@ class SupabaseSyncService {
               uuid: data['id'] as String?); // Store Supabase UUID for delete operations
           hasChanges = true;
           processedCount++;
-        } else {
-          skipCount++;
         }
       }
-
-      // DEBUG: Log download operation completion (only for problematic data types)
-      ErrorHandler.logError('DEBUG: _downloadNotes done - new:$newCount, update:$updateCount, skip:$skipCount',
-          context: {'new': newCount, 'update': updateCount, 'skip': skipCount});
 
       // Only notify if there were actual changes
       if (hasChanges && processedCount > 0) {
@@ -2195,7 +2169,10 @@ class SupabaseSyncService {
             hasChanges = true;
             processedCount++;
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_downloadSearchHistory addSearchHistory exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_downloadSearchHistory addSearchHistory exception',
+            );
           }
         }
       }
@@ -2235,9 +2212,6 @@ class SupabaseSyncService {
       final deletedUuids = localUuids.difference(remoteUuids);
 
       if (deletedUuids.isNotEmpty) {
-        ErrorHandler.logError('Detected ${deletedUuids.length} remote deletions for $type',
-            context: {'deleted': deletedUuids.length, 'type': type});
-
         for (final uuid in deletedUuids) {
           final record = localRecordsWithUuid.firstWhere((r) => r['uuid'] == uuid);
           await _deleteLocalRecord(type, record['id'] as int);
@@ -2247,7 +2221,11 @@ class SupabaseSyncService {
         _notifyChange(type);
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_detectRemoteDeletions exception for $type', context: {'type': type});
+      ErrorHandler.logError(
+        e,
+        customMessage: '_detectRemoteDeletions exception for $type',
+        context: {'type': type},
+      );
     }
   }
 
@@ -2367,7 +2345,10 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_uploadHighlight exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_uploadHighlight exception',
+      );
     }
   }
 
@@ -2430,7 +2411,10 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_batchUploadHighlights exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_batchUploadHighlights exception',
+      );
 
       // Re-throw the original error to trigger retry mechanism
       rethrow;
@@ -2504,7 +2488,10 @@ class SupabaseSyncService {
           try {
             await _batchUploadNotes(notesToUpload);
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_batchUploadNotes exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_batchUploadNotes exception',
+            );
 
             // If batch upload fails, queue each operation individually for retry
             for (final note in notesToUpload) {
@@ -2584,7 +2571,10 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_uploadNote exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_uploadNote exception',
+      );
     }
   }
 
@@ -2649,7 +2639,10 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_batchUploadNotes exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_batchUploadNotes exception',
+      );
     }
   }
 
@@ -2712,7 +2705,10 @@ class SupabaseSyncService {
           try {
             await _batchUploadSearchHistory(searchHistoryItemsToUpload);
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_batchUploadSearchHistory exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_batchUploadSearchHistory exception',
+            );
 
             // If batch upload fails, queue each operation individually for retry
             for (final searchHistoryItem in searchHistoryItemsToUpload) {
@@ -2746,7 +2742,10 @@ class SupabaseSyncService {
       // Save timestamps to preferences - only for search_history
       await _saveLastSyncTimestamps('search_history');
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: 'syncSearchHistory exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncSearchHistory exception',
+      );
     }
   }
 
@@ -2815,7 +2814,10 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_batchUploadSearchHistory exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_batchUploadSearchHistory exception',
+      );
 
       // Re-throw the original error to trigger retry mechanism
       rethrow;
@@ -2880,7 +2882,10 @@ class SupabaseSyncService {
           try {
             await _batchUploadHistory(historyItemsToUpload);
           } catch (e) {
-            ErrorHandler.logError(e, customMessage: '_batchUploadHistory exception');
+            ErrorHandler.logError(
+              e,
+              customMessage: '_batchUploadHistory exception',
+            );
 
             // If batch upload fails, queue each operation individually for retry
             for (final historyItem in historyItemsToUpload) {
@@ -2913,7 +2918,10 @@ class SupabaseSyncService {
       // Save timestamps to preferences - only for history
       await _saveLastSyncTimestamps('history');
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: 'syncHistory exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncHistory exception',
+      );
     }
   }
 
@@ -2953,7 +2961,10 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_uploadHistoryItem exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_uploadHistoryItem exception',
+      );
     }
   }
 
@@ -3019,7 +3030,10 @@ class SupabaseSyncService {
         }
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_batchUploadHistory exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_batchUploadHistory exception',
+      );
     }
   }
 
@@ -3096,18 +3110,18 @@ class SupabaseSyncService {
         await _detectRemoteDeletions('search_history');
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_syncRecentChangesOnly exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_syncRecentChangesOnly exception',
+      );
     }
   }
 
   // Sync all data types
   Future<void> syncAll() async {
     if (_currentUserId == null) {
-      ErrorHandler.logError('syncAll() called but _currentUserId is null');
       return;
     }
-
-    ErrorHandler.logError('=== DEBUG syncAll() STARTING ===');
 
     // Set syncing status to show progress dialog
     final previousStatus = _syncStatus;
@@ -3122,7 +3136,10 @@ class SupabaseSyncService {
       await syncHistory();
       await syncSearchHistory();
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_syncAll exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_syncAll exception',
+      );
     } finally {
       // Restore previous status
       _syncStatus = previousStatus;
@@ -3135,8 +3152,6 @@ class SupabaseSyncService {
         syncStatusNotifier.value = _syncStatus;
       }
     }
-
-    ErrorHandler.logError('=== DEBUG syncAll() COMPLETE ===');
   }
 
   // Start connection monitoring using event-driven connectivity changes
@@ -3158,7 +3173,10 @@ class SupabaseSyncService {
             await _checkConnectionAndSetup();
           } catch (e) {
             // Handle connection setup errors gracefully
-            ErrorHandler.logError(e, customMessage: 'Connection setup failed during connectivity change');
+            ErrorHandler.logError(
+              e,
+              customMessage: 'Connection setup failed during connectivity change',
+            );
             _syncStatus = SyncStatus.offline;
             syncStatusNotifier.value = _syncStatus;
             await ErrorHandler.handleNetworkError(e);
@@ -3171,7 +3189,10 @@ class SupabaseSyncService {
         }
       } catch (e) {
         // Handle connectivity monitoring errors gracefully
-        ErrorHandler.logError(e, customMessage: 'Connectivity monitoring error');
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Connectivity monitoring error',
+        );
         await ErrorHandler.handleNetworkError(e);
         _syncStatus = SyncStatus.offline;
         syncStatusNotifier.value = _syncStatus;
@@ -3191,13 +3212,19 @@ class SupabaseSyncService {
         }
       } catch (e) {
         // Handle initial connectivity check errors gracefully
-        ErrorHandler.logError(e, customMessage: 'Initial connectivity check failed');
+        ErrorHandler.logError(
+          e,
+          customMessage: 'Initial connectivity check failed',
+        );
         _syncStatus = SyncStatus.offline;
         syncStatusNotifier.value = _syncStatus;
       }
     }).catchError((e) async {
       // Handle connectivity check errors gracefully
-      ErrorHandler.logError(e, customMessage: 'Connectivity check error');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'Connectivity check error',
+      );
       _syncStatus = SyncStatus.offline;
       syncStatusNotifier.value = _syncStatus;
     });
@@ -3266,7 +3293,10 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadHighlight(highlight);
       // }
-      ErrorHandler.logError(e, customMessage: 'syncSingleHighlight exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncSingleHighlight exception',
+      );
       rethrow;
     }
   }
@@ -3381,7 +3411,10 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadHistoryItem(historyItem);
       // }
-      ErrorHandler.logError(e, customMessage: 'syncSingleHistoryItem exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncSingleHistoryItem exception',
+      );
       rethrow;
     }
   }
@@ -3445,7 +3478,10 @@ class SupabaseSyncService {
       // if (isValid) {
       //   await _uploadSearchHistoryItem(searchHistoryItem);
       // }
-      ErrorHandler.logError(e, customMessage: 'syncSingleSearchHistoryItem exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'syncSingleSearchHistoryItem exception',
+      );
       rethrow;
     }
   }
@@ -3484,7 +3520,10 @@ class SupabaseSyncService {
             try {
               await deleteRemoteHighlight(data['created_at'] as int);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'deleteRemoteHighlight exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'deleteRemoteHighlight exception',
+              );
               rethrow;
             }
             break;
@@ -3492,14 +3531,20 @@ class SupabaseSyncService {
             try {
               await deleteRemoteNote(data['created_at'] as int);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'deleteRemoteNote exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'deleteRemoteNote exception',
+              );
               rethrow;
             }
           case 'history':
             try {
               await deleteRemoteHistoryItem(itemId);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'deleteRemoteHistoryItem exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'deleteRemoteHistoryItem exception',
+              );
               rethrow;
             }
             break;
@@ -3507,7 +3552,10 @@ class SupabaseSyncService {
             try {
               await deleteRemoteSearchHistoryItem(itemId);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'deleteRemoteSearchHistoryItem exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'deleteRemoteSearchHistoryItem exception',
+              );
               rethrow;
             }
             break;
@@ -3519,7 +3567,10 @@ class SupabaseSyncService {
             try {
               await syncSingleHighlight(data);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'syncSingleHighlight exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'syncSingleHighlight exception',
+              );
               rethrow;
             }
             break;
@@ -3527,7 +3578,10 @@ class SupabaseSyncService {
             try {
               await syncSingleNote(data);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'syncSingleNote exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'syncSingleNote exception',
+              );
               rethrow;
             }
             break;
@@ -3535,7 +3589,10 @@ class SupabaseSyncService {
             try {
               await syncSingleHistoryItem(data);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'syncSingleHistoryItem exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'syncSingleHistoryItem exception',
+              );
               rethrow;
             }
             break;
@@ -3543,7 +3600,10 @@ class SupabaseSyncService {
             try {
               await syncSingleSearchHistoryItem(data);
             } catch (e) {
-              ErrorHandler.logError(e, customMessage: 'syncSingleSearchHistoryItem exception');
+              ErrorHandler.logError(
+                e,
+                customMessage: 'syncSingleSearchHistoryItem exception',
+              );
               rethrow;
             }
             break;
@@ -3734,7 +3794,10 @@ class SupabaseSyncService {
             uuid: supabaseUuid);
       }
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: '_uploadSearchHistoryItem exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: '_uploadSearchHistoryItem exception',
+      );
 
       // Re-throw the original error
       rethrow;
@@ -3938,7 +4001,10 @@ class SupabaseSyncService {
       // Sync any changes that occurred while app was paused
       await syncRecentChangesOnly();
     } catch (e) {
-      ErrorHandler.logError(e, customMessage: 'onAppResumed _syncRecentChangesOnly exception');
+      ErrorHandler.logError(
+        e,
+        customMessage: 'onAppResumed _syncRecentChangesOnly exception',
+      );
     }
   }
 }

@@ -616,10 +616,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
           'verse': verse
         },
       );
-      ErrorHandler.logError(
-        '$e',
-        context: {'class': 'NoteSearchScreen', 'method': '_showNoteSearchResultActionMenu', 'error': e.toString()},
-      );
     }
 
     final copyText = '$bookName $chapter:$verse\n$verseText';
@@ -668,7 +664,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   }
 
   // Navigate to verse in the source bible screen
-  void _gotoVerse(String? book, int? chapter, int? verse) {
+  void _gotoVerse(String? book, int? chapter, int? verse) async {
     if (book == null || chapter == null || verse == null) {
       ErrorHandler.logError(
         '_gotoVerse null return: book:"$book" chapter:"$chapter" verse:"$verse"',

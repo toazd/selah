@@ -42,17 +42,6 @@ class DataValidation {
       // }
 
       if (!isValidBook || !isValidChapter || !isValidVerse || !isValidColor) {
-        ErrorHandler.logError(
-          'DEBUG: Invalid $context highlight data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, color=$color',
-          context: {
-            'class': 'DataValidation',
-            'context': context,
-            'book': book,
-            'chapter': chapter,
-            'verse': verse,
-            'color': color
-          },
-        );
         return false;
       }
 
@@ -96,17 +85,6 @@ class DataValidation {
       final isValidNoteText = noteText is String && noteText.trim().isNotEmpty;
 
       if (!isValidBook || !isValidChapter || !isValidVerse || !isValidNoteText) {
-        ErrorHandler.logError(
-          'DEBUG: Invalid $context note data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, note_text=$noteText',
-          context: {
-            'class': 'DataValidation',
-            'context': context,
-            'book': book,
-            'chapter': chapter,
-            'verse': verse,
-            'noteText': noteText
-          },
-        );
         return false;
       }
 
@@ -157,24 +135,14 @@ class DataValidation {
       // Reject if required fields are missing or invalid
       final isValidBook = book != null && book.trim().isNotEmpty;
       final isValidChapter = chapter != null && chapter > 0;
+      final isValidVerse = verse != null && verse > 0;
       final isValidTimestamp = timestamp != null && timestamp > 0;
 
       // if (kDebugMode) {
       //   debugPrint('DEBUG: $context history validation results - book=$isValidBook, chapter=$isValidChapter, timestamp=$isValidTimestamp');
       // }
 
-      if (!isValidBook || !isValidChapter || !isValidTimestamp) {
-        ErrorHandler.logError(
-          'DEBUG: Invalid $context history data rejected - missing/invalid required fields: book=$book, chapter=$chapter, verse=$verse, timestamp=$timestamp',
-          context: {
-            'class': 'DataValidation',
-            'context': context,
-            'book': book,
-            'chapter': chapter,
-            'verse': verse,
-            'timestamp': timestamp
-          },
-        );
+      if (!isValidBook || !isValidChapter || !isValidVerse || !isValidTimestamp) {
         return false;
       }
 
@@ -237,17 +205,6 @@ class DataValidation {
       final isValidCustomFilter = customBookFilter is String; // Can be empty but must be string
 
       if (!isValidQuery || !isValidTimestamp || !isValidOptions || !isValidFilterType || !isValidCustomFilter) {
-        ErrorHandler.logError(
-          'DEBUG: Invalid $context search data rejected - query=$query, timestamp=$timestamp, options_valid=$isValidOptions, filter_type=$bookFilterType',
-          context: {
-            'class': 'DataValidation',
-            'context': context,
-            'query': query,
-            'timestamp': timestamp,
-            'isValidOptions': isValidOptions,
-            'filterType': bookFilterType
-          },
-        );
         return false;
       }
 
@@ -272,10 +229,6 @@ class DataValidation {
       // Check if timestamp can be converted to valid DateTime
 
       if (!isValidTimeStamp) {
-        ErrorHandler.logError(
-          'DEBUG: Invalid timestamp rejected: $timeStamp (converted: ${timeStamp.toIso8601String()})',
-          context: {'class': 'DataValidation', 'method': 'validateTimeStamp', 'timestamp': timeStamp.toIso8601String()},
-        );
         return null;
       }
 
@@ -306,7 +259,7 @@ class DataValidation {
         return await validateSearchHistoryData(record, context: '$context $dataType');
       default:
         ErrorHandler.logError(
-          'DEBUG: Unknown data type for validation: $dataType',
+          'DEBUG: Unknown data type for validation: "$dataType"',
           context: {'class': 'DataValidation', 'method': 'validateDatabaseRecord', 'dataType': dataType},
         );
         return false;

@@ -969,11 +969,6 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
   }
 
   Future<void> _onSearch() async {
-    ErrorHandler.logError(
-      '_onSearch called at: ${DateTime.now().millisecondsSinceEpoch}',
-      context: {'class': 'SearchScreen', 'method': '_onSearch', 'timestamp': DateTime.now().millisecondsSinceEpoch},
-    );
-
     // Check for custom range errors first
     if (_bookFilterType == 'Custom Range' && _customRangeError != null) {
       ErrorHandler.logError(
