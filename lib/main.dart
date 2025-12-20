@@ -1056,17 +1056,10 @@ class _WindowManagerListener extends WindowListener {
       final BuildContext? currentContext = navigatorKey.currentContext;
 
       if (currentContext == null) {
-        try {
-          //await windowManager.destroy();
-          await windowManager.setPreventClose(false);
-          windowManager.close();
-        } catch (e) {
-          // Window manager may already be destroyed, ignore error
-          if (kDebugMode) {
-            debugPrint('Window manager destroy failed during shutdown: ${e.toString()}');
-          }
-        }
-        return false;
+        //await windowManager.destroy();
+        // await windowManager.setPreventClose(false);
+        // windowManager.close();
+        exit(0);
       }
 
       // Save all current app preferences
@@ -1118,20 +1111,10 @@ class _WindowManagerListener extends WindowListener {
       LocalDataChangeNotifier.dispose();
 
       // This only runs after all saving and syncing is complete.
-      try {
-        // destroy is too aggressive on linux and causes seg faults, don't use it
-        //await windowManager.destroy();
-        await windowManager.setPreventClose(false);
-        await windowManager.close();
-      } catch (e) {
-        // Window manager may already be destroyed, ignore error
-        if (kDebugMode) {
-          debugPrint('Window manager destroy failed: ${e.toString()}');
-        }
-      }
-
-      // Return false to prevent the OS from immediately closing the window.
-      return false;
+      //await windowManager.destroy();
+      // await windowManager.setPreventClose(false);
+      // await windowManager.close();
+      exit(0);
     } else {
       // For all other window events, allow default behavior
       return true;
