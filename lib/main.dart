@@ -624,7 +624,6 @@ Future<void> _saveAllCurrentPrefs() async {
         if (kDebugMode) {
           debugPrint('Failed to get window maximized state during shutdown: ${e.toString()}');
         }
-        print('Failed to get window maximized state during shutdown: ${e.toString()}');
         isMaximized = false;
       }
 
@@ -635,7 +634,6 @@ Future<void> _saveAllCurrentPrefs() async {
         if (kDebugMode) {
           debugPrint('Failed to get window size during shutdown: ${e.toString()}');
         }
-        print('Failed to get window size during shutdown: ${e.toString()}');
 
         size = const Size(900, 700);
       }
@@ -721,7 +719,6 @@ Future<void> _saveAllCurrentPrefs() async {
     if (kDebugMode) {
       debugPrint('_saveAllCurrentPrefs exception: ${e.toString()}');
     }
-    print('_saveAllCurrentPrefs exception: ${e.toString()}');
   }
 }
 
@@ -1060,13 +1057,14 @@ class _WindowManagerListener extends WindowListener {
 
       if (currentContext == null) {
         try {
-          await windowManager.destroy();
+          //await windowManager.destroy();
+          await windowManager.setPreventClose(false);
+          windowManager.close();
         } catch (e) {
           // Window manager may already be destroyed, ignore error
           if (kDebugMode) {
             debugPrint('Window manager destroy failed during shutdown: ${e.toString()}');
           }
-          print('Window manager destroy failed during shutdown: ${e.toString()}');
         }
         return false;
       }
@@ -1079,7 +1077,6 @@ class _WindowManagerListener extends WindowListener {
         if (kDebugMode) {
           debugPrint('Failed to save preferences during shutdown: ${e.toString()}');
         }
-        print('Failed to save preferences during shutdown: ${e.toString()}');
       }
 
       // Check and perform Supabase Sync only if there are pending changes
@@ -1105,7 +1102,6 @@ class _WindowManagerListener extends WindowListener {
             if (kDebugMode) {
               debugPrint('Sync failed during shutdown: ${e.toString()}');
             }
-            print('Sync failed during shutdown: ${e.toString()}');
           } finally {
             // Dismiss the sync dialog after sync completes
             if (navigatorKey.currentState?.canPop() ?? false) {
@@ -1123,13 +1119,15 @@ class _WindowManagerListener extends WindowListener {
 
       // This only runs after all saving and syncing is complete.
       try {
-        await windowManager.destroy();
+        // destroy is too aggressive on linux and causes seg faults, don't use it
+        //await windowManager.destroy();
+        await windowManager.setPreventClose(false);
+        await windowManager.close();
       } catch (e) {
         // Window manager may already be destroyed, ignore error
         if (kDebugMode) {
           debugPrint('Window manager destroy failed: ${e.toString()}');
         }
-        print('Window manager destroy failed: ${e.toString()}');
       }
 
       // Return false to prevent the OS from immediately closing the window.
