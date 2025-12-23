@@ -282,8 +282,104 @@ String _getTimeBasedThemeStatus() {
   }
 }
 
+// Single-instance enforcement for desktop platforms using a lock file.
+RandomAccessFile? _singleInstanceLockFile;
+
+/// Try to acquire an exclusive lock on a lock file in the system temp directory.
+/// Returns true if the lock was acquired (first instance), false if another
+/// instance already holds the lock (in which case the caller should exit).
+bool _acquireSingleInstanceLock() {
+  if (kIsWeb) return true;
+  if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) return true;
+
+  try {
+    final lockPath = path.join(Directory.systemTemp.path, 'selah_singleton.lock');
+    final lockFile = File(lockPath);
+    // Ensure file exists
+    if (!lockFile.existsSync()) lockFile.createSync(recursive: true);
+
+    // Open for append so the file isn't truncated and keep it open for lifetime
+    _singleInstanceLockFile = lockFile.openSync(mode: FileMode.append);
+
+    // Try to acquire an exclusive lock. If this fails, another process holds it.
+    _singleInstanceLockFile!.lockSync(FileLock.exclusive);
+
+    // Optionally write our PID so debugging/stale locks are easier to inspect
+    try {
+      // Truncate to ensure only our PID is present (avoid appending repeated values)
+      _singleInstanceLockFile!.truncateSync(0);
+      _singleInstanceLockFile!.writeFromSync(utf8.encode('$pid\n'));
+      _singleInstanceLockFile!.flushSync();
+    } catch (e) {
+      // Non-fatal if write fails; log for diagnostics
+      ErrorHandler.logError(e,
+          customMessage: 'Failed to write PID to lock file',
+          context: {'class': 'main.dart', 'method': '_acquireSingleInstanceLock'});
+    }
+
+    return true;
+  } on FileSystemException catch (_) {
+    // Lock failed - another instance likely running
+    stderr.writeln('Another instance of Selah is already running. Exiting.');
+    return false;
+  } catch (e, st) {
+    // Unknown failure — log but allow start to avoid blocking users
+    ErrorHandler.logError(e, customMessage: 'Single-instance check failure', context: {'stack': st.toString()});
+    return true;
+  }
+}
+
+void _releaseSingleInstanceLock() {
+  try {
+    _singleInstanceLockFile?.unlockSync();
+    _singleInstanceLockFile?.closeSync();
+    _singleInstanceLockFile = null;
+
+    final lockPath = path.join(Directory.systemTemp.path, 'selah_singleton.lock');
+    final lf = File(lockPath);
+    if (lf.existsSync()) {
+      // Best-effort cleanup; ignore failures
+      try {
+        lf.deleteSync();
+      } catch (_) {}
+    }
+  } catch (_) {}
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Enforce single instance on desktop platforms before doing any IO that may
+  // be blocked by multiple processes opening the same DB files.
+  if (!_acquireSingleInstanceLock()) {
+    // Exit gracefully to avoid file lock conflicts and crashes
+    exit(0);
+  }
+
+  // Register signal handlers to release lock on termination
+  // Note: SIGTERM is not supported on Windows; attempting to listen
+  // to it will throw a SignalException. Guard accordingly and log failures.
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    try {
+      ProcessSignal.sigint.watch().listen((_) {
+        _releaseSingleInstanceLock();
+        exit(0);
+      });
+    } catch (e, st) {
+      ErrorHandler.logError(e, customMessage: 'Failed to listen for SIGINT', context: {'stack': st.toString()});
+    }
+
+    if (!Platform.isWindows) {
+      try {
+        ProcessSignal.sigterm.watch().listen((_) {
+          _releaseSingleInstanceLock();
+          exit(0);
+        });
+      } catch (e, st) {
+        ErrorHandler.logError(e, customMessage: 'Failed to listen for SIGTERM', context: {'stack': st.toString()});
+      }
+    }
+  }
 
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
@@ -1033,6 +1129,9 @@ class _WindowManagerListener extends WindowListener {
         // await windowManager.destroy();
         // await windowManager.setPreventClose(false);
         // windowManager.close();
+        try {
+          _releaseSingleInstanceLock();
+        } catch (_) {}
         exit(0);
       }
 
@@ -1094,6 +1193,9 @@ class _WindowManagerListener extends WindowListener {
       // await windowManager.destroy();
       // await windowManager.setPreventClose(false);
       // await windowManager.close();
+      try {
+        _releaseSingleInstanceLock();
+      } catch (_) {}
       exit(0);
     } else {
       // For all other window events, allow default behavior
@@ -3930,6 +4032,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     if (Platform.isAndroid || Platform.isIOS) {
       SystemNavigator.pop();
     } else {
+      try {
+        _releaseSingleInstanceLock();
+      } catch (_) {}
       exit(0);
     }
   }
@@ -4011,6 +4116,9 @@ class _MultiBibleViewState extends State<MultiBibleView> with WidgetsBindingObse
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       SystemNavigator.pop();
     } else {
+      try {
+        _releaseSingleInstanceLock();
+      } catch (_) {}
       exit(0);
     }
   }
