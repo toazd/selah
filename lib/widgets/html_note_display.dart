@@ -9,7 +9,7 @@ import '../utils/note_storage_format.dart'; // import for note format handling
 import '../utils/verse_reference_linker.dart'; // import for link creation
 import '../main.dart'; // For global notifiers
 import '../utils/font_size_adjustments.dart';
-//import 'package:flutter/foundation.dart';
+
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:flutter_html_audio/flutter_html_audio.dart';
@@ -41,8 +41,7 @@ class HtmlNoteDisplay extends StatelessWidget {
 
         if (html.isEmpty) {
           // Empty notes are an error and should never happen
-          return Text('Error loading note (empty note detected)',
-              style: TextStyle(color: Colors.red));
+          return Text('Error loading note (empty note detected)', style: TextStyle(color: Colors.red));
         }
 
         //if (kDebugMode) debugPrint('HtmlNoteDisplay html: $html');
@@ -51,8 +50,7 @@ class HtmlNoteDisplay extends StatelessWidget {
 
         // Apply highlighting if regex is provided
         if (highlightRegex != null) {
-          cleanedHtml =
-              _addHighlightingToHtml(cleanedHtml, highlightRegex!, context);
+          cleanedHtml = _addHighlightingToHtml(cleanedHtml, highlightRegex!, context);
         }
 
         // This is needed to display the note closer to what the user actually typed and sees
@@ -145,10 +143,8 @@ class HtmlNoteDisplay extends StatelessWidget {
               margin: Margins.all(0.0),
               color: isDark
                   ? darkVerseReferenceColor.value
-                  : lightVerseReferenceColor
-                      .value, // Enables custom link colouring
-              textDecoration:
-                  TextDecoration.none, // Removes the underlines from the links
+                  : lightVerseReferenceColor.value, // Enables custom link colouring
+              textDecoration: TextDecoration.none, // Removes the underlines from the links
               fontSize: FontSize(FontSizeAdjustments.getAdjustedSize(
                   //fontFamilyNotifier.value,
                   currentNoteFontFamily,
@@ -182,8 +178,7 @@ class HtmlNoteDisplay extends StatelessWidget {
             ),
             // "div": Style(),
             "hr": Style(
-              margin: Margins.all(
-                  0.0), // the default hr has some crazy vertical margin setting, like 500px below it
+              margin: Margins.all(0.0), // the default hr has some crazy vertical margin setting, like 500px below it
             ),
           },
         );
@@ -198,33 +193,24 @@ class HtmlNoteDisplay extends StatelessWidget {
       final delta = Delta.fromJson(jsonDecode(deltaJson));
 
       // Add verse reference links if they don't already exist (now synchronous)
-      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(
-          Document.fromDelta(delta));
+      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(Document.fromDelta(delta));
 
       // Use the proper vsc_quill_delta_to_html package
       // Convert operations to the expected format
       final operations = deltaWithLinks.toDelta().toList();
 
       // Remove trailing newline that's added for editor compatibility but not needed for display
-      if (operations.isNotEmpty &&
-          operations.last.data == '\n' &&
-          operations.last.attributes == null) {
+      if (operations.isNotEmpty && operations.last.data == '\n' && operations.last.attributes == null) {
         operations.removeLast();
       }
 
-      final operationsMap = operations
-          .map((op) => {
-                'insert': op.data,
-                if (op.attributes != null) 'attributes': op.attributes
-              })
-          .toList();
+      final operationsMap =
+          operations.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
 
       //debugPrint('operationsMap: $operationsMap');
 
       final converter = QuillDeltaToHtmlConverter(
-          operationsMap,
-          ConverterOptions(
-              converterOptions: OpConverterOptions(encodeHtml: false)));
+          operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
 
       final html = converter.convert();
       return html;
@@ -236,21 +222,16 @@ class HtmlNoteDisplay extends StatelessWidget {
       final delta = Delta.fromJson(operations);
 
       // Add verse reference links if they don't already exist (now synchronous)
-      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(
-          Document.fromDelta(delta));
+      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(Document.fromDelta(delta));
 
       // Convert operations to the expected format
       final operationsList = deltaWithLinks.toDelta().toList();
 
       final operationsMap = operationsList
-          .map((op) => {
-                'insert': op.data,
-                if (op.attributes != null) 'attributes': op.attributes
-              })
+          .map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes})
           .toList();
 
-      final converter =
-          QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
+      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
 
       final html = converter.convert();
       return html;
@@ -258,18 +239,15 @@ class HtmlNoteDisplay extends StatelessWidget {
   }
 
   // Add highlighting to HTML content by wrapping search matches with styled spans
-  String _addHighlightingToHtml(
-      String htmlContent, RegExp regex, BuildContext context) {
+  String _addHighlightingToHtml(String htmlContent, RegExp regex, BuildContext context) {
     if (regex.pattern.isEmpty || !regex.hasMatch(htmlContent)) {
       return htmlContent;
     }
 
     // Get the highlight color based on theme
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final highlightColor =
-        isDark ? darkHighlightColor.value : lightHighlightColor.value;
-    final hexColor =
-        '#${highlightColor.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+    final highlightColor = isDark ? darkHighlightColor.value : lightHighlightColor.value;
+    final hexColor = '#${highlightColor.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
     final highlightStyle = 'background-color: $hexColor; font-weight: bold;';
 
     // Find all matches in the HTML content
@@ -286,8 +264,7 @@ class HtmlNoteDisplay extends StatelessWidget {
       final afterMatch = result.substring(match.end);
 
       // Count unclosed < and > tags before the match
-      int openTagsBefore = '<'.allMatches(beforeMatch).length -
-          '>'.allMatches(beforeMatch).length;
+      int openTagsBefore = '<'.allMatches(beforeMatch).length - '>'.allMatches(beforeMatch).length;
 
       // If we're inside a tag (unclosed <), skip this match
       if (openTagsBefore > 0) {
@@ -316,8 +293,7 @@ class HtmlNoteDisplay extends StatelessWidget {
       }
 
       // Apply highlighting
-      final highlightedText =
-          '<span style="$highlightStyle">${match.group(0)}</span>';
+      final highlightedText = '<span style="$highlightStyle">${match.group(0)}</span>';
       result = result.replaceRange(match.start, match.end, highlightedText);
     }
 

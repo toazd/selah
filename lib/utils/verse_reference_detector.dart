@@ -1,4 +1,3 @@
-import '../data/book_metadata.dart';
 import '../data/bible_data.dart';
 
 class VerseReference {
@@ -21,12 +20,7 @@ class VerseReference {
   });
 
   bool get isValid {
-    // Check if book exists
-    if (!bookMetadata.containsKey(book)) {
-      return false;
-    }
-
-    // Check if chapter exists in bible data
+    // Validate existence using bibleData (book -> chapter -> verse)
     final bookData = bibleData[book];
     if (bookData == null || !bookData.containsKey(chapter)) {
       return false;
@@ -103,7 +97,7 @@ class VerseReferenceDetector {
     'hab': 'Hab', 'habakkuk': 'Hab',
     'zep': 'Zep', 'zephaniah': 'Zep',
     'hag': 'Hag', 'haggai': 'Hag',
-    'zec': 'Zec', 'zechariah': 'Zec',
+    'zec': 'Zec', 'zechariah': 'Zec', 'zech': 'Zec',
     'mal': 'Mal', 'malachi': 'Mal',
     'mat': 'Mat', 'matthew': 'Mat',
     'mar': 'Mar', 'mark': 'Mar',
@@ -219,9 +213,7 @@ class VerseReferenceDetector {
       final endIndex = offset + match.end;
 
       // Check for conflicts with already used positions
-      if (hasConflict(startIndex, endIndex)) {
-        return null;
-      }
+      if (hasConflict(startIndex, endIndex)) {}
 
       // Parse verse specification based on pattern type
       final allVerseNumbers = <int>[];

@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter_quill/flutter_quill.dart' show Document, LinkAttribute;
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'verse_reference_detector.dart';
@@ -12,6 +14,7 @@ class VerseReferenceLinker {
 
       int currentPosition = 0;
       final endIndex = startIndex + length;
+      int coveredByLink = 0;
 
       for (final operation in operations) {
         final data = operation.data;
@@ -21,9 +24,17 @@ class VerseReferenceLinker {
 
         // Check if this operation overlaps with our target range
         if (opStart < endIndex && opEnd > startIndex) {
-          // Check if this operation has link attributes
-          if (operation.attributes != null && operation.attributes!.containsKey('link')) {
-            return true;
+          // Determine overlap portion
+          final overlapStart = opStart < startIndex ? startIndex : opStart;
+          final overlapEnd = opEnd > endIndex ? endIndex : opEnd;
+          final overlapLength = overlapEnd - overlapStart;
+
+          if (overlapLength > 0) {
+            // If this overlapping operation has a link attribute, count how many characters
+            // of the target range are already covered by a link.
+            if (operation.attributes != null && operation.attributes!.containsKey('link')) {
+              coveredByLink += overlapLength;
+            }
           }
         }
 
@@ -34,11 +45,14 @@ class VerseReferenceLinker {
           break;
         }
       }
+
+      // Only treat the range as already linked if every character is covered
+      final fullyLinked = coveredByLink >= length;
+      return fullyLinked;
     } catch (e) {
       // If we can't check, assume no link to be safe
       return false;
     }
-    return false;
   }
 
   /// Adds verse reference links to a Quill document for any plain text references
@@ -65,7 +79,6 @@ class VerseReferenceLinker {
           continue;
         }
 
-        // Add the reference as a link
         // For comma-separated verses, extract the full verse spec from originalText
         String verseSpec;
         if (reference.originalText.contains(',') && !reference.originalText.contains('-')) {
