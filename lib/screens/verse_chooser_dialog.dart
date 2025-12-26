@@ -231,7 +231,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
 
   Future<void> _loadVerses() async {
     if (_selectedBook != null && _selectedChapter != null) {
-      final verses = await BibleDatabase.getVerses(_selectedBook!, _selectedChapter!);
+      final verses =
+          await BibleDatabase.getVerses(_selectedBook!, _selectedChapter!);
       // Map to ints robustly and sort numerically
       final verseNums = verses.map((v) {
         final val = v['verse'];
@@ -307,7 +308,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       _selectedVerse = verse;
     });
     // For list mode, don't auto-navigate - only navigate when Go is pressed
-    if (_navigationMode != NavigationMode.list && _selectedBook != null && _selectedChapter != null && _selectedVerse != null) {
+    if (_navigationMode != NavigationMode.list &&
+        _selectedBook != null &&
+        _selectedChapter != null &&
+        _selectedVerse != null) {
       Navigator.pop(context, {
         'book': _selectedBook,
         'chapter': _selectedChapter,
@@ -354,8 +358,12 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       final showQuickJump = prefs.getBool(_prefsKeyShowQuickJump);
       if (mounted) {
         setState(() {
-          _tapMode = tapModeIdx != null ? TapMode.values[tapModeIdx] : TapMode.threeTap;
-          _navigationMode = navigationModeIdx != null ? NavigationMode.values[navigationModeIdx] : NavigationMode.grid;
+          _tapMode = tapModeIdx != null
+              ? TapMode.values[tapModeIdx]
+              : TapMode.threeTap;
+          _navigationMode = navigationModeIdx != null
+              ? NavigationMode.values[navigationModeIdx]
+              : NavigationMode.grid;
           _showQuickJump = showQuickJump ?? false;
         });
       }
@@ -398,7 +406,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       Navigator.pop(context, {
         'book': reference.book,
         'chapter': reference.chapter,
-        'verse': reference.verse ?? 1,
+        'verse': reference.verse,
       });
     } else {
       showStyledSnackBar(context, 'Invalid Verse Reference');
@@ -411,10 +419,14 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     return Padding(
       padding: const EdgeInsets.only(left: 44, right: 44, bottom: 16),
       child: TextField(
-        autofocus: false, // Don't autofocus, it's annoying on mobile/tablet mode
+        autofocus:
+            false, // Don't autofocus, it's annoying on mobile/tablet mode
         textAlign: TextAlign.center,
         maxLength: 25,
-        style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 6, color: getAdaptiveTextColor(context)),
+        style: TextStyle(
+            fontFamily: uiFontFamily,
+            fontSize: uiFontSize + 6,
+            color: getAdaptiveTextColor(context)),
         controller: _quickJumpController,
         decoration: InputDecoration(
           counterText: "",
@@ -424,11 +436,18 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
           //alignLabelWithHint: true,
           //floatingLabelBehavior: FloatingLabelBehavior.never,
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value, width: 2.0), // Example focused color (e.g., blue, slightly thicker)
+            borderSide: BorderSide(
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                width:
+                    2.0), // Example focused color (e.g., blue, slightly thicker)
           ),
           // Color when the TextField is not focused (but enabled)
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value, width: 1.0), // Example unfocused color (e.g., grey, thinner)
+            borderSide: BorderSide(
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                width: 1.0), // Example unfocused color (e.g., grey, thinner)
           ),
           suffixIcon: IconButton(
             icon: Icon(
@@ -439,7 +458,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
             onPressed: () {
               // Don't bother if empty
               // Don't bother if less than 5 characters (shortest book name + 1 space + 1 digit)
-              if (_quickJumpController.text.isNotEmpty && _quickJumpController.text.length >= 5) {
+              if (_quickJumpController.text.isNotEmpty &&
+                  _quickJumpController.text.length >= 5) {
                 _onQuickJumpSubmit(_quickJumpController.text);
               }
             },
@@ -458,7 +478,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
           children: [
             Text(
               'No books found! This is a critical error.\nUninstalling and reinstalling this app might fix this problem.',
-              style: TextStyle(color: Colors.red, fontSize: uiFontSize, fontFamily: uiFontFamily),
+              style: TextStyle(
+                  color: Colors.red,
+                  fontSize: uiFontSize,
+                  fontFamily: uiFontFamily),
             ),
           ],
         ),
@@ -478,11 +501,13 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0), // Padding remains around the whole content
+      padding: const EdgeInsets.all(
+          16.0), // Padding remains around the whole content
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center, // Makes items fill the width
+          crossAxisAlignment:
+              CrossAxisAlignment.center, // Makes items fill the width
           mainAxisSize: MainAxisSize.min,
           children: [
             // 1. Book Name Dropdown (NOW DropdownButton)
@@ -495,14 +520,16 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                 underline: Divider(
                   height: 1,
                   thickness: 1,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
                 // Remove the default underline
                 //underline: const SizedBox(),
 
                 icon: Icon(
                   Icons.menu_book_rounded,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
 
                 selectedItemBuilder: (context) {
@@ -510,7 +537,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     return Center(
                       child: Text(
                         BookNameConverter.shortNameToLongName(b),
-                        style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize),
+                        style: TextStyle(
+                            fontFamily: uiFontFamily, fontSize: uiFontSize),
                       ),
                     );
                   }).toList();
@@ -520,7 +548,12 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                   // DropdownMenuItem content remains centered
                   ..._books.map((b) => DropdownMenuItem(
                         value: b,
-                        child: Center(child: Text(BookNameConverter.shortNameToLongName(b), style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize))),
+                        child: Center(
+                            child: Text(
+                                BookNameConverter.shortNameToLongName(b),
+                                style: TextStyle(
+                                    fontFamily: uiFontFamily,
+                                    fontSize: uiFontSize))),
                       )),
                 ],
                 onChanged: (book) => _onBookSelected(book!),
@@ -538,16 +571,20 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                 underline: Divider(
                   height: 1,
                   thickness: 1,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
                 icon: Icon(
                   Icons.library_books_rounded,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
                 selectedItemBuilder: (context) {
                   return _chapters.map((c) {
                     return Center(
-                      child: Text('$c', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize)),
+                      child: Text('$c',
+                          style: TextStyle(
+                              fontFamily: uiFontFamily, fontSize: uiFontSize)),
                     );
                   }).toList();
                 },
@@ -556,7 +593,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     : _chapters
                         .map((c) => DropdownMenuItem(
                               value: c,
-                              child: Center(child: Text('$c', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize))),
+                              child: Center(
+                                  child: Text('$c',
+                                      style: TextStyle(
+                                          fontFamily: uiFontFamily,
+                                          fontSize: uiFontSize))),
                             ))
                         .toList(),
                 onChanged: (chapter) => _onChapterSelected(chapter!),
@@ -574,16 +615,20 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                 underline: Divider(
                   height: 1,
                   thickness: 1,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
                 icon: Icon(
                   Icons.pageview_rounded,
-                  color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
                 ),
                 selectedItemBuilder: (context) {
                   return _verses.map((v) {
                     return Center(
-                      child: Text('$v', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize)),
+                      child: Text('$v',
+                          style: TextStyle(
+                              fontFamily: uiFontFamily, fontSize: uiFontSize)),
                     );
                   }).toList();
                 },
@@ -592,7 +637,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     : _verses
                         .map((v) => DropdownMenuItem(
                               value: v,
-                              child: Center(child: Text('$v', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize))),
+                              child: Center(
+                                  child: Text('$v',
+                                      style: TextStyle(
+                                          fontFamily: uiFontFamily,
+                                          fontSize: uiFontSize))),
                             ))
                         .toList(),
                 onChanged: (verse) => _onVerseSelected(verse!),
@@ -602,7 +651,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
             SizedBox(height: 32), // Spacing before the button
 
             ElevatedButton(
-              onPressed: _selectedBook != null && _selectedChapter != null && _selectedVerse != null
+              onPressed: _selectedBook != null &&
+                      _selectedChapter != null &&
+                      _selectedVerse != null
                   ? () {
                       Navigator.pop(context, {
                         'book': _selectedBook,
@@ -611,7 +662,12 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       });
                     }
                   : null,
-              child: Text('Go', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+              child: Text('Go',
+                  style: TextStyle(
+                      fontFamily: uiFontFamily,
+                      fontSize: uiFontSize,
+                      color: getAdaptiveTextColor(context,
+                          usePrimaryColor: true))),
             ),
           ],
         ),
@@ -636,12 +692,21 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Enables manual\n book, chapter, and optional\nverse entry (eg. John 3).',
+                    Text(
+                        'Enables manual\n book, chapter, and optional\nverse entry (eg. John 3).',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: uiFontFamily,
+                            fontSize: uiFontSize,
+                            color: getAdaptiveTextColor(context))),
                     SizedBox(height: 16),
                     SwitchListTile(
-                      title: Text('Quick Jump', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                      title: Text('Quick Jump',
+                          style: TextStyle(
+                              fontFamily: uiFontFamily,
+                              fontSize: uiFontSize,
+                              color: getAdaptiveTextColor(context))),
                       value: localShowQuickJump,
                       onChanged: (bool value) {
                         setStateDialog(() => localShowQuickJump = value);
@@ -653,17 +718,29 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       color: getAdaptiveTextColor(context),
                     ),
                     SizedBox(height: 8),
-                    Text('When in grid mode\n3-Tap requires choosing\na verse number and\n2-Tap does not.',
+                    Text(
+                        'When in grid mode\n3-Tap requires choosing\na verse number and\n2-Tap does not.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: uiFontFamily,
+                            fontSize: uiFontSize,
+                            color: getAdaptiveTextColor(context))),
                     SizedBox(height: 16),
                     SwitchListTile(
-                      title: Text(localTapMode == TapMode.threeTap ? '3 Tap Mode' : '2 Tap Mode',
-                          style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                      title: Text(
+                          localTapMode == TapMode.threeTap
+                              ? '3 Tap Mode'
+                              : '2 Tap Mode',
+                          style: TextStyle(
+                              fontFamily: uiFontFamily,
+                              fontSize: uiFontSize,
+                              color: getAdaptiveTextColor(context))),
                       value: localTapMode == TapMode.threeTap,
                       onChanged: (bool value) {
                         setStateDialog(() {
-                          localTapMode = value ? TapMode.threeTap : TapMode.twoTap;
+                          localTapMode =
+                              value ? TapMode.threeTap : TapMode.twoTap;
                         });
                       },
                     ),
@@ -673,13 +750,24 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       color: getAdaptiveTextColor(context),
                     ),
                     SizedBox(height: 8),
-                    Text('Navigate books using\ndrop-down lists\nor a coloured grid.',
+                    Text(
+                        'Navigate books using\ndrop-down lists\nor a coloured grid.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: uiFontFamily,
+                            fontSize: uiFontSize,
+                            color: getAdaptiveTextColor(context))),
                     SizedBox(height: 16),
                     SwitchListTile(
-                      title: Text(localNavigationMode == NavigationMode.grid ? 'Grid' : 'List',
-                          style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                      title: Text(
+                          localNavigationMode == NavigationMode.grid
+                              ? 'Grid'
+                              : 'List',
+                          style: TextStyle(
+                              fontFamily: uiFontFamily,
+                              fontSize: uiFontSize,
+                              color: getAdaptiveTextColor(context))),
                       value: localNavigationMode == NavigationMode.grid,
                       onChanged: (bool value) {
                         setStateDialog(() {
@@ -695,7 +783,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                             _selectedChapter = 1;
                             _selectedVerse = 1;
                           }
-                          localNavigationMode = value ? NavigationMode.grid : NavigationMode.list;
+                          localNavigationMode =
+                              value ? NavigationMode.grid : NavigationMode.list;
                         });
                       },
                     ),
@@ -715,11 +804,19 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       _selectedVerse = null;
                     });
                   },
-                  child: Text('Reset', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: Colors.red)),
+                  child: Text('Reset',
+                      style: TextStyle(
+                          fontFamily: uiFontFamily,
+                          fontSize: uiFontSize,
+                          color: Colors.red)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                  child: Text('Cancel',
+                      style: TextStyle(
+                          fontFamily: uiFontFamily,
+                          fontSize: uiFontSize,
+                          color: getAdaptiveTextColor(context))),
                 ),
                 TextButton(
                   onPressed: () {
@@ -737,7 +834,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       return count++ == 2;
                     });
                   },
-                  child: Text('Save', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: getAdaptiveTextColor(context))),
+                  child: Text('Save',
+                      style: TextStyle(
+                          fontFamily: uiFontFamily,
+                          fontSize: uiFontSize,
+                          color: getAdaptiveTextColor(context))),
                 ),
               ],
             );
@@ -827,7 +928,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
                                               color: Colors.transparent,
-                                              borderRadius: BorderRadius.circular(6),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
                                               border: Border.all(
                                                 color: Colors.transparent,
                                                 width: 0.5,
@@ -846,15 +948,21 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                   }
 
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Center(child: buildBookWrap(otList)),
                                       Divider(
                                         thickness: 1,
                                         height: 16,
-                                        indent: MediaQuery.of(context).size.width * 0.01,
-                                        endIndent: MediaQuery.of(context).size.width * 0.01,
-                                        color: const Color.fromARGB(47, 158, 158, 158),
+                                        indent:
+                                            MediaQuery.of(context).size.width *
+                                                0.01,
+                                        endIndent:
+                                            MediaQuery.of(context).size.width *
+                                                0.01,
+                                        color: const Color.fromARGB(
+                                            47, 158, 158, 158),
                                       ),
                                       Center(child: buildBookWrap(ntList)),
                                     ],
@@ -862,19 +970,26 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                 }
 
                                 // Chapter selection (grid mode)
-                                if (_selectedBook != null && _selectedChapter == null) {
+                                if (_selectedBook != null &&
+                                    _selectedChapter == null) {
                                   final disp = _toDisplayKey(_selectedBook!);
-                                  final wide = MediaQuery.of(context).size.width >= 360;
-                                  final title = wide ? BookNameConverter.shortNameToLongName(_selectedBook!) : disp;
+                                  final wide =
+                                      MediaQuery.of(context).size.width >= 360;
+                                  final title = wide
+                                      ? BookNameConverter.shortNameToLongName(
+                                          _selectedBook!)
+                                      : disp;
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
                                           IconButton(
                                             icon: Icon(
                                               Icons.arrow_back,
-                                              color: selectedBookColor ?? txtColor,
+                                              color:
+                                                  selectedBookColor ?? txtColor,
                                               size: 32,
                                               semanticLabel: 'Back',
                                             ),
@@ -888,7 +1003,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: uiFontSize + 7,
-                                                color: selectedBookColor ?? txtColor,
+                                                color: selectedBookColor ??
+                                                    txtColor,
                                               ),
                                             ),
                                           ),
@@ -904,27 +1020,38 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                     child: Container(
                                                       width: 48,
                                                       height: 36,
-                                                      alignment: Alignment.center,
+                                                      alignment:
+                                                          Alignment.center,
                                                       decoration: BoxDecoration(
-                                                        color: Colors.transparent,
-                                                        borderRadius: BorderRadius.circular(6),
+                                                        color:
+                                                            Colors.transparent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6),
                                                         border: Border.all(
-                                                          color: Colors.transparent,
+                                                          color: Colors
+                                                              .transparent,
                                                           width: 0.5,
                                                         ),
                                                       ),
                                                       child: Text(
                                                         '$c',
-                                                        textAlign: TextAlign.center,
+                                                        textAlign:
+                                                            TextAlign.center,
                                                         style: TextStyle(
                                                           color: txtColor,
-                                                          fontWeight: FontWeight.normal,
-                                                          fontSize: uiFontSize + 7,
-                                                          fontFamily: fontFamilyNotifier.value,
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                          fontSize:
+                                                              uiFontSize + 7,
+                                                          fontFamily:
+                                                              fontFamilyNotifier
+                                                                  .value,
                                                         ),
                                                       ),
                                                     ),
-                                                    onTap: () => _onChapterSelected(c),
+                                                    onTap: () =>
+                                                        _onChapterSelected(c),
                                                   ))
                                               .toList(),
                                         ),
@@ -935,19 +1062,26 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                 }
 
                                 // Verse selection (grid mode)
-                                if (_selectedBook != null && _selectedChapter != null) {
+                                if (_selectedBook != null &&
+                                    _selectedChapter != null) {
                                   final disp = _toDisplayKey(_selectedBook!);
-                                  final wide = MediaQuery.of(context).size.width >= 360;
-                                  final bookLabel = wide ? BookNameConverter.shortNameToLongName(_selectedBook!) : disp;
+                                  final wide =
+                                      MediaQuery.of(context).size.width >= 360;
+                                  final bookLabel = wide
+                                      ? BookNameConverter.shortNameToLongName(
+                                          _selectedBook!)
+                                      : disp;
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
                                           IconButton(
                                             icon: Icon(
                                               Icons.arrow_back,
-                                              color: selectedBookColor ?? txtColor,
+                                              color:
+                                                  selectedBookColor ?? txtColor,
                                               size: 32,
                                               semanticLabel: 'Back',
                                             ),
@@ -961,8 +1095,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: uiFontSize + 7,
-                                                color: selectedBookColor ?? txtColor,
-                                                fontFamily: fontFamilyNotifier.value,
+                                                color: selectedBookColor ??
+                                                    txtColor,
+                                                fontFamily:
+                                                    fontFamilyNotifier.value,
                                               ),
                                             ),
                                           ),
@@ -978,12 +1114,17 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                     child: Container(
                                                       width: 48,
                                                       height: 36,
-                                                      alignment: Alignment.center,
+                                                      alignment:
+                                                          Alignment.center,
                                                       decoration: BoxDecoration(
-                                                        color: Colors.transparent,
-                                                        borderRadius: BorderRadius.circular(6),
+                                                        color:
+                                                            Colors.transparent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6),
                                                         border: Border.all(
-                                                          color: Colors.transparent,
+                                                          color: Colors
+                                                              .transparent,
                                                           width: 0.5,
                                                         ),
                                                       ),
@@ -991,13 +1132,18 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                         '$v',
                                                         style: TextStyle(
                                                           color: txtColor,
-                                                          fontSize: uiFontSize + 7,
-                                                          fontWeight: FontWeight.normal,
-                                                          fontFamily: fontFamilyNotifier.value,
+                                                          fontSize:
+                                                              uiFontSize + 7,
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                          fontFamily:
+                                                              fontFamilyNotifier
+                                                                  .value,
                                                         ),
                                                       ),
                                                     ),
-                                                    onTap: () => _onVerseSelected(v),
+                                                    onTap: () =>
+                                                        _onVerseSelected(v),
                                                   ))
                                               .toList(),
                                         ),
@@ -1013,7 +1159,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                         ],
                       ),
                     ),
-                    if (_selectedBook == null || _navigationMode == NavigationMode.list)
+                    if (_selectedBook == null ||
+                        _navigationMode == NavigationMode.list)
                       Positioned(
                         bottom: 0.0, // Keep it always at the bottom right
                         right: 0.0,
@@ -1025,7 +1172,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                             width: 32,
                             child: Icon(
                               Icons.settings,
-                              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                              color: isDark
+                                  ? darkPrimaryColor.value
+                                  : lightPrimaryColor.value,
                               size: 32,
                               semanticLabel: 'Verse Chooser Settings',
                             ),
