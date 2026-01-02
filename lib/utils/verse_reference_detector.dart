@@ -81,7 +81,7 @@ class VerseReferenceDetector {
     'psa': 'Psa', 'psalms': 'Psa', 'psalm': 'Psa', 'Psa': 'Psa',
     'pro': 'Pro', 'proverbs': 'Pro',
     'ecc': 'Ecc', 'ecclesiastes': 'Ecc',
-    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son', 'canticles': 'Son', 'cant': 'Son',
+    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son', 'canticles': 'Son', 'cant': 'Son',  'Sos': 'Son', 'sos': 'Son',
     'isa': 'Isa', 'isaiah': 'Isa',
     'jer': 'Jer', 'jeremiah': 'Jer',
     'lam': 'Lam', 'lamentations': 'Lam',
