@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:selah/utils/tablet_mode_detector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/bible_database.dart';
 import '../main.dart';
@@ -1104,7 +1105,12 @@ class _SearchScreenState extends State<SearchScreen> with AutomaticKeepAliveClie
       // the focus removed when we aren't done typing. when in tablet mode
       // we have to deal with it because the OSK bug is far more frustrating once
       // it is triggered (it opens the OSK on ANY UI interaction)
-      if (!kIsWeb && (Platform.isWindows && TabletModeService().isTablet)) {
+      //
+      // Check that the device is touch capable and has a physical keyboard to attempt
+      // to avoid triggering this when a 2-in-1 is in laptop mode (keyboard attached)    
+      // TODO: .isKeyboardAttached might not work as expected
+      //
+      if (!kIsWeb && (Platform.isWindows && TabletModeService().isTablet && await TabletModeDetector.hasTouchScreen() && await TabletModeDetector.isKeyboardAttached())) {
         // After a delay of 1s, check if any input was recieved in the last 1s, if not
         // then force the focus away to prevent the windows OSK bug
         Future.delayed(const Duration(milliseconds: 1000), () {

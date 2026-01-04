@@ -308,27 +308,27 @@ class ErrorHandler {
     if (kDebugMode) debugPrint(buffer.toString());
 
     // Windows-only temporary debug log: write to user's Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
-    // TODO: remove for production builds
-    if (Platform.isWindows) {
-      try {
-        final userProfile = Platform.environment['USERPROFILE'] ?? '.';
-        final logsDir = Directory('$userProfile${Platform.pathSeparator}Documents${Platform.pathSeparator}SelahLogs');
-        if (!logsDir.existsSync()) {
-          logsDir.createSync(recursive: true);
-        }
+    // remove for production builds
+    // if (Platform.isWindows) {
+    //   try {
+    //     final userProfile = Platform.environment['USERPROFILE'] ?? '.';
+    //     final logsDir = Directory('$userProfile${Platform.pathSeparator}Documents${Platform.pathSeparator}SelahLogs');
+    //     if (!logsDir.existsSync()) {
+    //       logsDir.createSync(recursive: true);
+    //     }
 
-        final now = DateTime.now();
-        final datePart = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-        final file = File('${logsDir.path}${Platform.pathSeparator}selah_debug_$datePart.log');
-        final timestamp = now.toIso8601String();
-        final entry = '[$timestamp] ${buffer.toString()}\n';
+    //     final now = DateTime.now();
+    //     final datePart = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    //     final file = File('${logsDir.path}${Platform.pathSeparator}selah_debug_$datePart.log');
+    //     final timestamp = now.toIso8601String();
+    //     final entry = '[$timestamp] ${buffer.toString()}\n';
 
-        file.writeAsStringSync(entry, mode: FileMode.append, flush: true);
-      } catch (e) {
-        // If file logging fails, fall back to console (do not throw)
-        if (kDebugMode) debugPrint('Error writing Windows debug log: $e');
-      }
-    }
+    //     file.writeAsStringSync(entry, mode: FileMode.append, flush: true);
+    //   } catch (e) {
+    //     // If file logging fails, fall back to console (do not throw)
+    //     if (kDebugMode) debugPrint('Error writing Windows debug log: $e');
+    //   }
+    // }
   }
 
   // Format error message for user display
