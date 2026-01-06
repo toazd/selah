@@ -2367,57 +2367,85 @@ class SupabaseSyncService {
 
     if (validHighlights.isEmpty) return;
 
-    // Prepare data for batch insert
-    final dataToInsert = validHighlights
-        .map((highlight) => {
-              'user_id': _currentUserId,
-              'book': highlight['book'],
-              'chapter': highlight['chapter'],
-              'verse': highlight['verse'],
-              'start': highlight['start'],
-              'end': highlight['end'],
-              'color': highlight['color'],
-              'created_at': highlight['created_at'],
-              'updated_at': highlight['updated_at'],
-              // Include UUID if it exists to preserve the same record ID across syncs
-              if (highlight['uuid'] != null && highlight['uuid'].isNotEmpty) 'id': highlight['uuid'],
-            })
-        .toList();
+    // Separate highlights into two groups:
+    // 1. Highlights WITH UUIDs (already synced to Supabase before) - can be upserted
+    // 2. Highlights WITHOUT UUIDs (new, created locally while offline) - must be inserted to get UUID from Supabase
+    final highlightsWithUuids = validHighlights.where((h) => h['uuid'] != null && (h['uuid'] as String).isNotEmpty).toList();
+    final highlightsWithoutUuids = validHighlights.where((h) => h['uuid'] == null || (h['uuid'] as String).isEmpty).toList();
 
-    try {
-      final response =
-          await _supabase.from('highlights').upsert(dataToInsert, onConflict: 'created_at').select('id, created_at');
+    // Upload highlights with UUIDs using upsert (updates existing or inserts if new)
+    if (highlightsWithUuids.isNotEmpty) {
+      try {
+        final dataToUpsert = highlightsWithUuids
+            .map((highlight) => {
+                  'id': highlight['uuid'],
+                  'user_id': _currentUserId,
+                  'book': highlight['book'],
+                  'chapter': highlight['chapter'],
+                  'verse': highlight['verse'],
+                  'start': highlight['start'],
+                  'end': highlight['end'],
+                  'color': highlight['color'],
+                  'created_at': highlight['created_at'],
+                  'updated_at': highlight['updated_at'],
+                })
+            .toList();
 
-      // Update local highlights with UUIDs from Supabase for records that didn't have them
-      for (final uploadedRecord in response) {
-        final supabaseUuid = uploadedRecord['id'] as String?;
-        final createdAt = uploadedRecord['created_at'] as int;
-
-        // Find the corresponding local highlight
-        final localHighlight =
-            validHighlights.firstWhere((h) => h['created_at'] == createdAt, orElse: () => <String, dynamic>{});
-
-        if (localHighlight.isNotEmpty &&
-            supabaseUuid != null &&
-            (localHighlight['uuid'] == null || localHighlight['uuid'].isEmpty)) {
-          // Update the local highlight with the UUID from Supabase
-          await HighlightsDatabase.updateHighlight(
-              id: localHighlight['id'] as int,
-              start: localHighlight['start'] as int,
-              end: localHighlight['end'] as int,
-              color: localHighlight['color'] as int,
-              updateAt: localHighlight['updated_at'] as int,
-              uuid: supabaseUuid);
-        }
+        await _supabase.from('highlights').upsert(dataToUpsert, onConflict: 'created_at').select('id, created_at');
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadHighlights exception (upsert with UUIDs)',
+        );
       }
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: '_batchUploadHighlights exception',
-      );
+    }
 
-      // Re-throw the original error to trigger retry mechanism
-      rethrow;
+    // Insert highlights without UUIDs (let Supabase generate the UUID via DEFAULT)
+    if (highlightsWithoutUuids.isNotEmpty) {
+      try {
+        final dataToInsert = highlightsWithoutUuids
+            .map((highlight) => {
+                  'user_id': _currentUserId,
+                  'book': highlight['book'],
+                  'chapter': highlight['chapter'],
+                  'verse': highlight['verse'],
+                  'start': highlight['start'],
+                  'end': highlight['end'],
+                  'color': highlight['color'],
+                  'created_at': highlight['created_at'],
+                  'updated_at': highlight['updated_at'],
+                  // DO NOT include 'id' field - let Supabase DEFAULT generate it
+                })
+            .toList();
+
+        final response = await _supabase.from('highlights').insert(dataToInsert).select('id, created_at');
+
+        // Update local highlights with UUIDs from Supabase
+        for (final uploadedRecord in response) {
+          final supabaseUuid = uploadedRecord['id'] as String?;
+          final createdAt = uploadedRecord['created_at'] as int;
+
+          // Find the corresponding local highlight
+          final localHighlight =
+              highlightsWithoutUuids.firstWhere((h) => h['created_at'] == createdAt, orElse: () => <String, dynamic>{});
+
+          if (localHighlight.isNotEmpty && supabaseUuid != null) {
+            // Update the local highlight with the UUID from Supabase
+            await HighlightsDatabase.updateHighlight(
+                id: localHighlight['id'] as int,
+                start: localHighlight['start'] as int,
+                end: localHighlight['end'] as int,
+                color: localHighlight['color'] as int,
+                updateAt: localHighlight['updated_at'] as int,
+                uuid: supabaseUuid);
+          }
+        }
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadHighlights exception (insert new highlights)',
+        );
+      }
     }
   }
 
@@ -2600,49 +2628,81 @@ class SupabaseSyncService {
 
     if (validNotes.isEmpty) return;
 
-    // Prepare data for batch insert
-    final dataToInsert = validNotes
-        .map((note) => {
-              'user_id': _currentUserId,
-              'book': note['book'],
-              'chapter': note['chapter'],
-              'verse': note['verse'],
-              'note_text': note['note_text'],
-              'created_at': note['created_at'],
-              'updated_at': note['updated_at'],
-              // Include UUID if it exists to preserve the same record ID across syncs
-              if (note['uuid'] != null && note['uuid'].isNotEmpty) 'id': note['uuid'],
-            })
-        .toList();
-    try {
-      final response =
-          await _supabase.from('notes').upsert(dataToInsert, onConflict: 'created_at').select('id, created_at');
+    // Separate notes into two groups:
+    // 1. Notes WITH UUIDs (already synced to Supabase before) - can be upserted
+    // 2. Notes WITHOUT UUIDs (new, created locally while offline) - must be inserted to get UUID from Supabase
+    final notesWithUuids = validNotes.where((note) => note['uuid'] != null && (note['uuid'] as String).isNotEmpty).toList();
+    final notesWithoutUuids = validNotes.where((note) => note['uuid'] == null || (note['uuid'] as String).isEmpty).toList();
 
-      // Update local notes with UUIDs from Supabase for records that didn't have them
-      for (final uploadedRecord in response) {
-        final supabaseUuid = uploadedRecord['id'] as String?;
-        final createdAt = uploadedRecord['created_at'] as int;
+    // Upload notes with UUIDs using upsert (updates existing or inserts if new)
+    if (notesWithUuids.isNotEmpty) {
+      try {
+        final dataToUpsert = notesWithUuids
+            .map((note) => {
+                  'id': note['uuid'],
+                  'user_id': _currentUserId,
+                  'book': note['book'],
+                  'chapter': note['chapter'],
+                  'verse': note['verse'],
+                  'note_text': note['note_text'],
+                  'created_at': note['created_at'],
+                  'updated_at': note['updated_at'],
+                })
+            .toList();
 
-        // Find the corresponding local note
-        final localNote = validNotes.firstWhere((n) => n['created_at'] == createdAt, orElse: () => <String, dynamic>{});
-
-        if (localNote.isNotEmpty && supabaseUuid != null && (localNote['uuid'] == null || localNote['uuid'].isEmpty)) {
-          // Update the local note with the UUID from Supabase
-          await NotesDatabase.addOrUpdateNote(
-              book: localNote['book'] as String,
-              chapter: localNote['chapter'] as int,
-              verse: localNote['verse'] as int,
-              noteText: localNote['note_text'] as String,
-              createdAt: localNote['created_at'] as int,
-              skipSync: true,
-              uuid: supabaseUuid);
-        }
+        await _supabase.from('notes').upsert(dataToUpsert, onConflict: 'created_at').select('id, created_at');
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadNotes exception (upsert with UUIDs)',
+        );
       }
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: '_batchUploadNotes exception',
-      );
+    }
+
+    // Insert notes without UUIDs (let Supabase generate the UUID via DEFAULT)
+    if (notesWithoutUuids.isNotEmpty) {
+      try {
+        final dataToInsert = notesWithoutUuids
+            .map((note) => {
+                  'user_id': _currentUserId,
+                  'book': note['book'],
+                  'chapter': note['chapter'],
+                  'verse': note['verse'],
+                  'note_text': note['note_text'],
+                  'created_at': note['created_at'],
+                  'updated_at': note['updated_at'],
+                  // DO NOT include 'id' field - let Supabase DEFAULT generate it
+                })
+            .toList();
+
+        final response = await _supabase.from('notes').insert(dataToInsert).select('id, created_at');
+
+        // Update local notes with UUIDs from Supabase
+        for (final uploadedRecord in response) {
+          final supabaseUuid = uploadedRecord['id'] as String?;
+          final createdAt = uploadedRecord['created_at'] as int;
+
+          // Find the corresponding local note
+          final localNote = notesWithoutUuids.firstWhere((n) => n['created_at'] == createdAt, orElse: () => <String, dynamic>{});
+
+          if (localNote.isNotEmpty && supabaseUuid != null) {
+            // Update the local note with the UUID from Supabase
+            await NotesDatabase.addOrUpdateNote(
+                book: localNote['book'] as String,
+                chapter: localNote['chapter'] as int,
+                verse: localNote['verse'] as int,
+                noteText: localNote['note_text'] as String,
+                createdAt: localNote['created_at'] as int,
+                skipSync: true,
+                uuid: supabaseUuid);
+          }
+        }
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadNotes exception (insert new notes)',
+        );
+      }
     }
   }
 
@@ -2764,63 +2824,92 @@ class SupabaseSyncService {
 
     if (validSearchHistoryItems.isEmpty) return;
 
-    // Prepare data for batch insert
-    final dataToInsert = validSearchHistoryItems
-        .map((searchHistoryItem) => {
-              'user_id': _currentUserId,
-              'query': searchHistoryItem['query'] ?? '',
-              'useRegex': searchHistoryItem['useRegex'] is bool ? searchHistoryItem['useRegex'] : false,
-              'useNearby': searchHistoryItem['useNearby'] is bool ? searchHistoryItem['useNearby'] : false,
-              'useWholeWord': searchHistoryItem['useWholeWord'] is bool ? searchHistoryItem['useWholeWord'] : false,
-              'useRedLetter': searchHistoryItem['useRedLetter'] is bool ? searchHistoryItem['useRedLetter'] : false,
-              'caseSensitive': searchHistoryItem['caseSensitive'] is bool ? searchHistoryItem['caseSensitive'] : false,
-              'bookFilterType': searchHistoryItem['bookFilterType'] ?? '',
-              'customBookFilter': searchHistoryItem['customBookFilter'] ?? '',
-              'timestamp': searchHistoryItem['timestamp'],
-              // Include UUID if it exists to preserve the same record ID across syncs
-              if (searchHistoryItem['uuid'] != null && searchHistoryItem['uuid'].isNotEmpty)
-                'id': searchHistoryItem['uuid'],
-            })
-        .toList();
-    try {
-      final response =
-          await _supabase.from('search_history').upsert(dataToInsert, onConflict: 'timestamp').select('id, timestamp');
+    // Separate search history items into two groups:
+    // 1. Items WITH UUIDs (already synced to Supabase before) - can be upserted
+    // 2. Items WITHOUT UUIDs (new, created locally while offline) - must be inserted to get UUID from Supabase
+    final itemsWithUuids = validSearchHistoryItems.where((s) => s['uuid'] != null && (s['uuid'] as String).isNotEmpty).toList();
+    final itemsWithoutUuids = validSearchHistoryItems.where((s) => s['uuid'] == null || (s['uuid'] as String).isEmpty).toList();
 
-      // Update local search history items with UUIDs from Supabase for records that didn't have them
-      for (final uploadedRecord in response) {
-        final supabaseUuid = uploadedRecord['id'] as String?;
-        final timestamp = uploadedRecord['timestamp'] as int;
+    // Upload search history items with UUIDs using upsert (updates existing or inserts if new)
+    if (itemsWithUuids.isNotEmpty) {
+      try {
+        final dataToUpsert = itemsWithUuids
+            .map((searchHistoryItem) => {
+                  'id': searchHistoryItem['uuid'],
+                  'user_id': _currentUserId,
+                  'query': searchHistoryItem['query'] ?? '',
+                  'useRegex': searchHistoryItem['useRegex'] is bool ? searchHistoryItem['useRegex'] : false,
+                  'useNearby': searchHistoryItem['useNearby'] is bool ? searchHistoryItem['useNearby'] : false,
+                  'useWholeWord': searchHistoryItem['useWholeWord'] is bool ? searchHistoryItem['useWholeWord'] : false,
+                  'useRedLetter': searchHistoryItem['useRedLetter'] is bool ? searchHistoryItem['useRedLetter'] : false,
+                  'caseSensitive': searchHistoryItem['caseSensitive'] is bool ? searchHistoryItem['caseSensitive'] : false,
+                  'bookFilterType': searchHistoryItem['bookFilterType'] ?? '',
+                  'customBookFilter': searchHistoryItem['customBookFilter'] ?? '',
+                  'timestamp': searchHistoryItem['timestamp'],
+                })
+            .toList();
 
-        // Find the corresponding local search history item
-        final localSearchHistoryItem =
-            validSearchHistoryItems.firstWhere((s) => s['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
-
-        if (localSearchHistoryItem.isNotEmpty &&
-            supabaseUuid != null &&
-            (localSearchHistoryItem['uuid'] == null || localSearchHistoryItem['uuid'].isEmpty)) {
-          // Update the local search history item with the UUID from Supabase
-          await SearchDatabase.addSearchHistory(
-              localSearchHistoryItem['query'] as String,
-              localSearchHistoryItem['useRegex'] as bool,
-              localSearchHistoryItem['useNearby'] as bool,
-              localSearchHistoryItem['useWholeWord'] as bool,
-              localSearchHistoryItem['useRedLetter'] as bool,
-              localSearchHistoryItem['caseSensitive'] as bool,
-              localSearchHistoryItem['bookFilterType'] as String,
-              localSearchHistoryItem['customBookFilter'] as String,
-              localSearchHistoryItem['timestamp'] as int,
-              skipSync: true, // skipSync to avoid recursion
-              uuid: supabaseUuid);
-        }
+        await _supabase.from('search_history').upsert(dataToUpsert, onConflict: 'timestamp').select('id, timestamp');
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadSearchHistory exception (upsert with UUIDs)',
+        );
       }
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: '_batchUploadSearchHistory exception',
-      );
+    }
 
-      // Re-throw the original error to trigger retry mechanism
-      rethrow;
+    // Insert search history items without UUIDs (let Supabase generate the UUID via DEFAULT)
+    if (itemsWithoutUuids.isNotEmpty) {
+      try {
+        final dataToInsert = itemsWithoutUuids
+            .map((searchHistoryItem) => {
+                  'user_id': _currentUserId,
+                  'query': searchHistoryItem['query'] ?? '',
+                  'useRegex': searchHistoryItem['useRegex'] is bool ? searchHistoryItem['useRegex'] : false,
+                  'useNearby': searchHistoryItem['useNearby'] is bool ? searchHistoryItem['useNearby'] : false,
+                  'useWholeWord': searchHistoryItem['useWholeWord'] is bool ? searchHistoryItem['useWholeWord'] : false,
+                  'useRedLetter': searchHistoryItem['useRedLetter'] is bool ? searchHistoryItem['useRedLetter'] : false,
+                  'caseSensitive': searchHistoryItem['caseSensitive'] is bool ? searchHistoryItem['caseSensitive'] : false,
+                  'bookFilterType': searchHistoryItem['bookFilterType'] ?? '',
+                  'customBookFilter': searchHistoryItem['customBookFilter'] ?? '',
+                  'timestamp': searchHistoryItem['timestamp'],
+                  // DO NOT include 'id' field - let Supabase DEFAULT generate it
+                })
+            .toList();
+
+        final response = await _supabase.from('search_history').insert(dataToInsert).select('id, timestamp');
+
+        // Update local search history items with UUIDs from Supabase
+        for (final uploadedRecord in response) {
+          final supabaseUuid = uploadedRecord['id'] as String?;
+          final timestamp = uploadedRecord['timestamp'] as int;
+
+          // Find the corresponding local search history item
+          final localSearchHistoryItem =
+              itemsWithoutUuids.firstWhere((s) => s['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
+
+          if (localSearchHistoryItem.isNotEmpty && supabaseUuid != null) {
+            // Update the local search history item with the UUID from Supabase
+            await SearchDatabase.addSearchHistory(
+                localSearchHistoryItem['query'] as String,
+                localSearchHistoryItem['useRegex'] as bool,
+                localSearchHistoryItem['useNearby'] as bool,
+                localSearchHistoryItem['useWholeWord'] as bool,
+                localSearchHistoryItem['useRedLetter'] as bool,
+                localSearchHistoryItem['caseSensitive'] as bool,
+                localSearchHistoryItem['bookFilterType'] as String,
+                localSearchHistoryItem['customBookFilter'] as String,
+                localSearchHistoryItem['timestamp'] as int,
+                skipSync: true, // skipSync to avoid recursion
+                uuid: supabaseUuid);
+          }
+        }
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadSearchHistory exception (insert new items)',
+        );
+      }
     }
   }
 
@@ -2990,50 +3079,77 @@ class SupabaseSyncService {
 
     if (validHistoryItems.isEmpty) return;
 
-    // Prepare data for batch insert
-    final dataToInsert = validHistoryItems
-        .map((historyItem) => {
-              'user_id': _currentUserId,
-              'book': historyItem['book'],
-              'chapter': historyItem['chapter'],
-              'verse': historyItem['verse'],
-              'timestamp': historyItem['timestamp'],
-              // Include UUID if it exists to preserve the same record ID across syncs
-              if (historyItem['uuid'] != null && historyItem['uuid'].isNotEmpty) 'id': historyItem['uuid'],
-            })
-        .toList();
+    // Separate history items into two groups:
+    // 1. Items WITH UUIDs (already synced to Supabase before) - can be upserted
+    // 2. Items WITHOUT UUIDs (new, created locally while offline) - must be inserted to get UUID from Supabase
+    final itemsWithUuids = validHistoryItems.where((h) => h['uuid'] != null && (h['uuid'] as String).isNotEmpty).toList();
+    final itemsWithoutUuids = validHistoryItems.where((h) => h['uuid'] == null || (h['uuid'] as String).isEmpty).toList();
 
-    try {
-      final response =
-          await _supabase.from('history').upsert(dataToInsert, onConflict: 'timestamp').select('id, timestamp');
+    // Upload history items with UUIDs using upsert (updates existing or inserts if new)
+    if (itemsWithUuids.isNotEmpty) {
+      try {
+        final dataToUpsert = itemsWithUuids
+            .map((historyItem) => {
+                  'id': historyItem['uuid'],
+                  'user_id': _currentUserId,
+                  'book': historyItem['book'],
+                  'chapter': historyItem['chapter'],
+                  'verse': historyItem['verse'],
+                  'timestamp': historyItem['timestamp'],
+                })
+            .toList();
 
-      // Update local history items with UUIDs from Supabase for records that didn't have them
-      for (final uploadedRecord in response) {
-        final supabaseUuid = uploadedRecord['id'] as String?;
-        final timestamp = uploadedRecord['timestamp'] as int;
-
-        // Find the corresponding local history item
-        final localHistoryItem =
-            validHistoryItems.firstWhere((h) => h['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
-
-        if (localHistoryItem.isNotEmpty &&
-            supabaseUuid != null &&
-            (localHistoryItem['uuid'] == null || localHistoryItem['uuid'].isEmpty)) {
-          // Update the local history item with the UUID from Supabase
-          await HistoryDatabase.addHistory(
-              localHistoryItem['book'] as String,
-              localHistoryItem['chapter'] as int,
-              localHistoryItem['verse'] as int?,
-              localHistoryItem['timestamp'] as int,
-              true, // skipSync to avoid recursion
-              uuid: supabaseUuid);
-        }
+        await _supabase.from('history').upsert(dataToUpsert, onConflict: 'timestamp').select('id, timestamp');
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadHistory exception (upsert with UUIDs)',
+        );
       }
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: '_batchUploadHistory exception',
-      );
+    }
+
+    // Insert history items without UUIDs (let Supabase generate the UUID via DEFAULT)
+    if (itemsWithoutUuids.isNotEmpty) {
+      try {
+        final dataToInsert = itemsWithoutUuids
+            .map((historyItem) => {
+                  'user_id': _currentUserId,
+                  'book': historyItem['book'],
+                  'chapter': historyItem['chapter'],
+                  'verse': historyItem['verse'],
+                  'timestamp': historyItem['timestamp'],
+                  // DO NOT include 'id' field - let Supabase DEFAULT generate it
+                })
+            .toList();
+
+        final response = await _supabase.from('history').insert(dataToInsert).select('id, timestamp');
+
+        // Update local history items with UUIDs from Supabase
+        for (final uploadedRecord in response) {
+          final supabaseUuid = uploadedRecord['id'] as String?;
+          final timestamp = uploadedRecord['timestamp'] as int;
+
+          // Find the corresponding local history item
+          final localHistoryItem =
+              itemsWithoutUuids.firstWhere((h) => h['timestamp'] == timestamp, orElse: () => <String, dynamic>{});
+
+          if (localHistoryItem.isNotEmpty && supabaseUuid != null) {
+            // Update the local history item with the UUID from Supabase
+            await HistoryDatabase.addHistory(
+                localHistoryItem['book'] as String,
+                localHistoryItem['chapter'] as int,
+                localHistoryItem['verse'] as int?,
+                localHistoryItem['timestamp'] as int,
+                true, // skipSync to avoid recursion
+                uuid: supabaseUuid);
+          }
+        }
+      } catch (e) {
+        ErrorHandler.logError(
+          e,
+          customMessage: '_batchUploadHistory exception (insert new items)',
+        );
+      }
     }
   }
 
