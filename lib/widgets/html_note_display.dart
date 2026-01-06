@@ -9,7 +9,7 @@ import '../utils/note_storage_format.dart'; // import for note format handling
 import '../utils/verse_reference_linker.dart'; // import for link creation
 import '../main.dart'; // For global notifiers
 import '../utils/font_size_adjustments.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:flutter_html_audio/flutter_html_audio.dart';
@@ -59,7 +59,7 @@ class HtmlNoteDisplay extends StatelessWidget {
         cleanedHtml = cleanedHtml.replaceAll('<p><br/></p>', '<br/><br/>');
 
         // Enable to see the html used for display
-        //if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
+        if (kDebugMode) debugPrint('HtmlNoteDisplay cleanedHTML: $cleanedHtml');
 
         return Html(
           extensions: const [
@@ -208,9 +208,18 @@ class HtmlNoteDisplay extends StatelessWidget {
           operations.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
 
       //debugPrint('operationsMap: $operationsMap');
+      // Clean raw HTML blocks inside insert ops to remove newlines/whitespace
+      // between tags so the converter doesn't turn them into <br/>s.
+      final cleanedOperationsMap = operationsMap.map((op) {
+        final insert = op['insert'];
+        if (insert is String && insert.contains('<')) {
+          return {...op, 'insert': _collapseHtmlWhitespace(insert)};
+        }
+        return op;
+      }).toList();
 
       final converter = QuillDeltaToHtmlConverter(
-          operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
+          cleanedOperationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
 
       final html = converter.convert();
       return html;
@@ -231,11 +240,32 @@ class HtmlNoteDisplay extends StatelessWidget {
           .map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes})
           .toList();
 
-      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
+      final cleanedOperationsMap = operationsMap.map((op) {
+        final insert = op['insert'];
+        if (insert is String && insert.contains('<')) {
+          return {...op, 'insert': _collapseHtmlWhitespace(insert)};
+        }
+        return op;
+      }).toList();
+
+      final converter = QuillDeltaToHtmlConverter(cleanedOperationsMap, ConverterOptions());
 
       final html = converter.convert();
       return html;
     }
+  }
+
+  // Collapse insignificant whitespace/newlines between HTML tags but leave
+  // text content intact. This targets sequences like ">\n    <" and turns
+  // them into "><" so the converter won't produce <br/> inside markup.
+  String _collapseHtmlWhitespace(String input) {
+    if (!input.contains('<')) return input;
+    var s = input.replaceAll('\r', '');
+    // Collapse whitespace between tags: >   <  => ><
+    s = s.replaceAll(RegExp(r'>\s+<'), '><');
+    // Trim leading/trailing whitespace (including newlines)
+    s = s.trim();
+    return s;
   }
 
   // Add highlighting to HTML content by wrapping search matches with styled spans
