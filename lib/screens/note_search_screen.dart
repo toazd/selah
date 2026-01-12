@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:flutter_quill/flutter_quill.dart' show Document;
-import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import '../database/notes_database.dart';
 import '../database/bible_database.dart';
 import '../main.dart';
@@ -18,11 +17,10 @@ import 'package:flutter/services.dart'; // <-- added to request on-screen keyboa
 import '../utils/preferences_constants.dart'; // For uiFontSize and uiFontFamily
 import '../../utils/snackbar_notification.dart';
 import '../widgets/responsive_text.dart';
-import '../widgets/html_note_display.dart';
+import '../widgets/quill_note_display.dart';
 import 'dart:async';
 import '../utils/font_size_adjustments.dart';
 import '../utils/note_storage_format.dart';
-import '../utils/verse_reference_linker.dart';
 import '../utils/bible_utils.dart';
 import '../screens/note_screen.dart';
 import '../utils/error_handler.dart';
@@ -49,7 +47,8 @@ class NoteSearchScreen extends StatefulWidget {
   State<NoteSearchScreen> createState() => _NoteSearchScreenState();
 }
 
-class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepAliveClientMixin {
+class _NoteSearchScreenState extends State<NoteSearchScreen>
+    with AutomaticKeepAliveClientMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
   final ScrollController _resultsScrollController = ScrollController();
@@ -70,8 +69,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   String _bookFilterType = 'All Books'; // Current selected filter type
   String _customBookFilter = ''; // Custom range specification
   List<String> _allowedBooks = []; // Parsed allowed books (short names)
-  Map<String, Set<int>> _allowedChapters = {}; // Parsed allowed chapters per book
-  late TextEditingController _customRangeController; // Controller for custom range input
+  Map<String, Set<int>> _allowedChapters =
+      {}; // Parsed allowed chapters per book
+  late TextEditingController
+      _customRangeController; // Controller for custom range input
   String? _customRangeError; // Error message for invalid custom range
 
   // Search results
@@ -105,61 +106,22 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         pattern.contains('\\p{S}') ||
         pattern.contains('\\p{Z}') ||
         pattern.contains('\\p{M}');
-    return RegExp(pattern, caseSensitive: caseSensitive, unicode: hasUnicodePatterns);
+    return RegExp(pattern,
+        caseSensitive: caseSensitive, unicode: hasUnicodePatterns);
   }
 
-  // Strip HTML tags from text to search only visible content
-  String _stripHtmlTags(String htmlText) {
-    return htmlText.replaceAll(RegExp(r'<[^>]*>'), '');
-  }
-
-  // Convert Delta to HTML and then get searchable text (HTML tags removed)
+  // Convert Delta to plain text for searching
   String _convertDeltaToSearchableText(String deltaJson) {
     // Check if the note is already in Delta format
     if (NoteStorageFormat.isDeltaFormat(deltaJson)) {
-      // Convert Delta to HTML
       final delta = Delta.fromJson(jsonDecode(deltaJson));
-
-      // Add verse reference links (though we don't need them for search)
-      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(Document.fromDelta(delta));
-
-      // Convert operations to the expected format
-      final operations = deltaWithLinks.toDelta().toList();
-
-      // Remove trailing newline that's added for editor compatibility but not needed for display
-      if (operations.isNotEmpty && operations.last.data == '\n' && operations.last.attributes == null) {
-        operations.removeLast();
-      }
-
-      final operationsMap =
-          operations.map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes}).toList();
-
-      final converter = QuillDeltaToHtmlConverter(
-          operationsMap, ConverterOptions(converterOptions: OpConverterOptions(encodeHtml: false)));
-
-      final html = converter.convert();
-      return _stripHtmlTags(html).replaceAll('¶ ', '');
+      final document = Document.fromDelta(delta);
+      // Get plain text directly from the document
+      final plainText = document.getPlainText(0, document.length);
+      return plainText.replaceAll('¶ ', '');
     } else {
-      // Convert plain text to Delta first, then to HTML (backwards compatibility)
-      final operations = [
-        {'insert': deltaJson},
-      ];
-      final delta = Delta.fromJson(operations);
-
-      // Add verse reference links (though we don't need them for search)
-      final deltaWithLinks = VerseReferenceLinker.addVerseReferenceLinks(Document.fromDelta(delta));
-
-      // Convert operations to the expected format
-      final operationsList = deltaWithLinks.toDelta().toList();
-
-      final operationsMap = operationsList
-          .map((op) => {'insert': op.data, if (op.attributes != null) 'attributes': op.attributes})
-          .toList();
-
-      final converter = QuillDeltaToHtmlConverter(operationsMap, ConverterOptions());
-
-      final html = converter.convert();
-      return _stripHtmlTags(html).replaceAll('¶ ', '');
+      // Plain text - return directly (backwards compatibility)
+      return deltaJson.replaceAll('¶ ', '');
     }
   }
 
@@ -181,11 +143,13 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         })
         .where((note) {
           // Apply book filtering
-          return BookFilter.verseMatchesFilter(note, _allowedBooks, _allowedChapters);
+          return BookFilter.verseMatchesFilter(
+              note, _allowedBooks, _allowedChapters);
         })
         .map((note) => {
               ...note,
-              'bookLongName': BookNameConverter.shortNameToLongName(note['book'] as String),
+              'bookLongName':
+                  BookNameConverter.shortNameToLongName(note['book'] as String),
             })
         .toList();
 
@@ -311,7 +275,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
 
   // --- END: Ensure results are in DB/Biblical order ---
 
-  Map<String, dynamic> _buildSearchPattern(bool useRegex, String input, bool useWholeWord) {
+  Map<String, dynamic> _buildSearchPattern(
+      bool useRegex, String input, bool useWholeWord) {
     if (useRegex) {
       RegExp searchRegex = _createRegExp(input, _caseSensitive);
 
@@ -319,9 +284,16 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
     } else {
       // parse phrases and words
       RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-      final phrases = phraseRegExp.allMatches(input).map((m) => m.group(1)!).where((p) => p.isNotEmpty).toList();
+      final phrases = phraseRegExp
+          .allMatches(input)
+          .map((m) => m.group(1)!)
+          .where((p) => p.isNotEmpty)
+          .toList();
       String queryWithoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-      final originalWords = queryWithoutPhrases.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      final originalWords = queryWithoutPhrases
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty)
+          .toList();
       final allTerms = [...phrases, ...originalWords];
       if (allTerms.isEmpty) {
         return {'regex': _createRegExp('.*', _caseSensitive)};
@@ -418,7 +390,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         // Use predefined category
         _allowedBooks = BookFilter.predefinedCategories[_bookFilterType] ?? [];
         _allowedChapters = {};
-        _customRangeError = null; // Clear error when switching away from Custom Range
+        _customRangeError =
+            null; // Clear error when switching away from Custom Range
       }
     });
   }
@@ -437,9 +410,12 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
       }
 
       // Load last search options
-      final lastSearchUseRegex = prefs.getBool('lastNoteSearchUseRegex') ?? false;
-      final lastSearchUseWholeWord = prefs.getBool('lastNoteSearchUseWholeWord') ?? false;
-      final lastSearchCaseSensitive = prefs.getBool('lastNoteSearchCaseSensitive') ?? false;
+      final lastSearchUseRegex =
+          prefs.getBool('lastNoteSearchUseRegex') ?? false;
+      final lastSearchUseWholeWord =
+          prefs.getBool('lastNoteSearchUseWholeWord') ?? false;
+      final lastSearchCaseSensitive =
+          prefs.getBool('lastNoteSearchCaseSensitive') ?? false;
 
       setState(() {
         _useRegex = lastSearchUseRegex;
@@ -449,7 +425,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         _isSearching = true;
       });
 
-      final patternData = _buildSearchPattern(_useRegex, lastSearch, _useWholeWord);
+      final patternData =
+          _buildSearchPattern(_useRegex, lastSearch, _useWholeWord);
       _currentRegex = patternData['regex'] as RegExp;
 
       // Perform the search
@@ -489,7 +466,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
 
   Future<void> _saveScrollOffset() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('noteSearchScrollOffset', _resultsScrollController.offset);
+    await prefs.setDouble(
+        'noteSearchScrollOffset', _resultsScrollController.offset);
   }
 
   // Reset results scroll position and stored offset to top for new searches.
@@ -533,7 +511,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
     await _resetResultsScrollToTop();
 
     try {
-      final patternData = _buildSearchPattern(_useRegex, searchText, _useWholeWord);
+      final patternData =
+          _buildSearchPattern(_useRegex, searchText, _useWholeWord);
       _currentRegex = patternData['regex'] as RegExp;
 
       // Perform the search
@@ -568,7 +547,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         // After a delay of 1s, check if any input was recieved in the last 1s, if not
         // then force the focus away to prevent the windows OSK bug
         Future.delayed(const Duration(milliseconds: 1000), () {
-          if (!_isSearching && DateTime.now().difference(_lastInputTime).inMilliseconds >= 1000) {
+          if (!_isSearching &&
+              DateTime.now().difference(_lastInputTime).inMilliseconds >=
+                  1000) {
             if (_searchResults.isNotEmpty) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted && _searchButtonFocusNode.canRequestFocus) {
@@ -589,7 +570,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   }
 
   // Show action menu for search results (simplified for notes)
-  void _showNoteSearchResultActionMenu(BuildContext context, Map<String, dynamic> result) async {
+  void _showNoteSearchResultActionMenu(
+      BuildContext context, Map<String, dynamic> result) async {
     final book = result['book'] as String;
     final chapter = result['chapter'] as int;
     final verse = result['verse'] as int;
@@ -695,7 +677,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
 
     // Add verse to history with short book name (database format)
     try {
-      HistoryDatabase.addHistory(book, chapter, verse, DateTime.now().millisecondsSinceEpoch, false);
+      HistoryDatabase.addHistory(
+          book, chapter, verse, DateTime.now().millisecondsSinceEpoch, false);
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -712,16 +695,22 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
   }
 
   // Open NoteScreen for editing notes in search screen context
-  Future<void> _openNoteFromSearch(String book, int chapter, int verse, String? existingNote) async {
+  Future<void> _openNoteFromSearch(
+      String book, int chapter, int verse, String? existingNote) async {
     await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (_) => NoteScreen(
-                book: book, chapter: chapter, verse: verse, existingNote: existingNote))); // Use provided existing note
+                book: book,
+                chapter: chapter,
+                verse: verse,
+                existingNote: existingNote))); // Use provided existing note
   }
 
   String _formatNumber(int? number) {
-    return number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+($|\D))'), (match) => '${match.group(1)},');
+    return number.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+($|\D))'),
+        (match) => '${match.group(1)},');
   }
 
   // Update totals
@@ -735,7 +724,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
     super.build(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final barColor = _adjustBarColor(
-        Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value);
+        Theme.of(context).brightness == Brightness.dark
+            ? darkBackgroundColor.value
+            : lightBackgroundColor.value);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
@@ -751,8 +742,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                 child: ResponsiveText(
                 text:
                     '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'note' : 'notes'}',
-                style:
-                    TextStyle(fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                style: TextStyle(
+                    fontSize: uiFontSize + 2,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context)),
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
@@ -779,8 +772,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
         ],
       ),
       endDrawer: Drawer(
-        backgroundColor:
-            Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? darkBackgroundColor.value
+            : lightBackgroundColor.value,
         child: SingleChildScrollView(
             child: Column(
           children: [
@@ -788,7 +782,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               scrolledUnderElevation: 0,
               iconTheme: IconThemeData(
                 size: 32,
-                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
               toolbarHeight: 60,
               backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -798,8 +793,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
             const SizedBox(height: 16),
             SwitchListTile(
               title: Text('Regex',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {
@@ -817,8 +814,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
             ),
             SwitchListTile(
               title: Text('Whole word',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               value: _useWholeWord,
               onChanged: (val) async {
                 setState(() {
@@ -834,8 +833,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
             ),
             SwitchListTile(
               title: Text('Case-sensitive',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               value: _caseSensitive,
               onChanged: (val) async {
                 setState(() {
@@ -852,7 +853,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
             Divider(),
             const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Text(
                 'Book Filter',
                 style: TextStyle(
@@ -875,7 +877,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       child: Text(
                         category,
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context)),
                       ),
                     );
                   }),
@@ -884,7 +888,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                     child: Text(
                       'Custom Range',
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
                     ),
                   ),
                 ],
@@ -910,29 +916,36 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
               Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
                     child: TextField(
                       autofocus: true,
                       maxLength: 100,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       controller: _customRangeController,
                       decoration: InputDecoration(
-                        counter: SizedBox.shrink(), // Hide the counter eg. 0/100
+                        counter:
+                            SizedBox.shrink(), // Hide the counter eg. 0/100
                         hintText: '',
-                        hintStyle: TextStyle(fontSize: uiFontSize - 4, fontFamily: uiFontFamily),
+                        hintStyle: TextStyle(
+                            fontSize: uiFontSize - 4, fontFamily: uiFontFamily),
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         suffixIcon: IconButton(
                           icon: Icon(
                             Icons.clear,
-                            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                            color: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
                             semanticLabel: 'Clear Custom Range',
                           ),
                           onPressed: () async {
                             setState(() {
                               _customRangeController.clear();
                               _customBookFilter = ''; // Reset underlying state
-                              _customRangeError = null; // Clear any lingering error
+                              _customRangeError =
+                                  null; // Clear any lingering error
                             });
                             await _saveSearchOptions();
                           },
@@ -947,7 +960,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                         ),
                       ),
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
                       onChanged: (value) {
                         _customBookFilter = value;
                         _updateBookFilter();
@@ -973,47 +988,65 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                           style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
+                              color: getAdaptiveTextColor(context,
+                                  usePrimaryColor: true))),
                     ),
                   ),
                   if (_bookFilterType == 'Custom Range') ...[
                     const SizedBox(height: 16),
                     ListTile(
-                        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-                      Text('Custom range help:',
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                      const SizedBox(height: 16),
-                      Text('• Both short and long book names are supported.',
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                      const SizedBox(height: 8),
-                      Text(
-                          '• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                      const SizedBox(height: 8),
-                      Text('• Multiple ranges must be separated by a comma (,)',
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                      const SizedBox(height: 8),
-                      Text('• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
-                          style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
-                    ]))
+                        subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                          Text('Custom range help:',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                          const SizedBox(height: 16),
+                          Text(
+                              '• Both short and long book names are supported.',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                          const SizedBox(height: 8),
+                          Text(
+                              '• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                          const SizedBox(height: 8),
+                          Text(
+                              '• Multiple ranges must be separated by a comma (,)',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                          const SizedBox(height: 8),
+                          Text(
+                              '• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context))),
+                        ]))
                   ],
                 ],
               ),
           ],
         )),
       ),
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark ? darkBackgroundColor.value : lightBackgroundColor.value,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? darkBackgroundColor.value
+          : lightBackgroundColor.value,
       body: SafeArea(
         child: Container(
             color: barColor,
             child: Padding(
-              padding: const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
+              padding:
+                  const EdgeInsets.only(left: 16, top: 0, right: 16, bottom: 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -1025,7 +1058,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(),
                       hintText: 'Search your notes',
-                      hintStyle: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
+                      hintStyle: TextStyle(
+                          fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
@@ -1048,7 +1082,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       suffixIcon: IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                          color: isDark
+                              ? darkPrimaryColor.value
+                              : lightPrimaryColor.value,
                           semanticLabel: 'Clear Search Query',
                         ),
                         onPressed: () => _controller.clear(),
@@ -1060,7 +1096,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       if (_onSearchDebounce?.isActive ?? false) {
                         _onSearchDebounce?.cancel();
                       }
-                      _onSearchDebounce = Timer(Duration(milliseconds: 500), () {
+                      _onSearchDebounce =
+                          Timer(Duration(milliseconds: 500), () {
                         if (_controller.text.isNotEmpty &&
                             _controller.text.length > 1 &&
                             (_controller.text.split('"').length - 1) % 2 == 0) {
@@ -1069,72 +1106,80 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                       });
                     },
                     onSubmitted: (_) => _onSearch(),
-                    style: TextStyle(fontSize: uiFontSize + 4, fontFamily: fontFamilyNotifier.value),
+                    style: TextStyle(
+                        fontSize: uiFontSize + 4,
+                        fontFamily: fontFamilyNotifier.value),
                   ),
                   const SizedBox(height: 16),
-                  Wrap(alignment: WrapAlignment.end, runAlignment: WrapAlignment.end, children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (_isResetting) return;
-                        setState(() => _isResetting = true);
+                  Wrap(
+                      alignment: WrapAlignment.end,
+                      runAlignment: WrapAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_isResetting) return;
+                            setState(() => _isResetting = true);
 
-                        setState(() {
-                          _controller.clear();
-                          _useRegex = false;
-                          _useWholeWord = false;
-                          _caseSensitive = false;
-                          // Reset book filter
-                          _bookFilterType = 'All Books';
-                          _customBookFilter = '';
-                          _customRangeController.text = '';
-                          _searchResults = [];
-                          _totalMatches = null;
-                          _totalVerses = null;
-                        });
-                        _clearHighlightCache();
-                        await _saveSearchOptions();
+                            setState(() {
+                              _controller.clear();
+                              _useRegex = false;
+                              _useWholeWord = false;
+                              _caseSensitive = false;
+                              // Reset book filter
+                              _bookFilterType = 'All Books';
+                              _customBookFilter = '';
+                              _customRangeController.text = '';
+                              _searchResults = [];
+                              _totalMatches = null;
+                              _totalVerses = null;
+                            });
+                            _clearHighlightCache();
+                            await _saveSearchOptions();
 
-                        // Clear saved search preferences so they don't restore on screen return
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.remove('lastNoteSearchTerm');
-                        await prefs.remove('lastNoteSearchUseRegex');
-                        await prefs.remove('lastNoteSearchUseWholeWord');
-                        await prefs.remove('lastNoteSearchCaseSensitive');
-                        await prefs.remove(_bookFilterTypeKey);
-                        await prefs.remove(_bookFilterCustomKey);
-                        await prefs.setDouble('noteSearchScrollOffset', 0.0);
+                            // Clear saved search preferences so they don't restore on screen return
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('lastNoteSearchTerm');
+                            await prefs.remove('lastNoteSearchUseRegex');
+                            await prefs.remove('lastNoteSearchUseWholeWord');
+                            await prefs.remove('lastNoteSearchCaseSensitive');
+                            await prefs.remove(_bookFilterTypeKey);
+                            await prefs.remove(_bookFilterCustomKey);
+                            await prefs.setDouble(
+                                'noteSearchScrollOffset', 0.0);
 
-                        if (context.mounted) {
-                          showStyledSnackBar(context, 'Search Reset');
-                        }
+                            if (context.mounted) {
+                              showStyledSnackBar(context, 'Search Reset');
+                            }
 
-                        Future.delayed(const Duration(seconds: 3), () {
-                          if (mounted) {
-                            setState(() => _isResetting = false);
-                          }
-                        });
-                      },
-                      child: Text('Reset',
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      focusNode: _searchButtonFocusNode,
-                      onPressed: () => _onSearch(),
-                      child: Text('Search',
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context, usePrimaryColor: true))),
-                    ),
-                  ]),
+                            Future.delayed(const Duration(seconds: 3), () {
+                              if (mounted) {
+                                setState(() => _isResetting = false);
+                              }
+                            });
+                          },
+                          child: Text('Reset',
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context,
+                                      usePrimaryColor: true))),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          focusNode: _searchButtonFocusNode,
+                          onPressed: () => _onSearch(),
+                          child: Text('Search',
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context,
+                                      usePrimaryColor: true))),
+                        ),
+                      ]),
                   const SizedBox(height: 8),
                   Expanded(
                     child: _controller.text.trim().isEmpty
@@ -1159,147 +1204,259 @@ class _NoteSearchScreenState extends State<NoteSearchScreen> with AutomaticKeepA
                                         style: TextStyle(
                                             fontSize: uiFontSize + 8,
                                             fontFamily: uiFontFamily,
-                                            color: getAdaptiveTextColor(context))),
+                                            color:
+                                                getAdaptiveTextColor(context))),
                                   ],
                                 ),
                               )
-                            : (_searchResults.isEmpty && (_controller.text.split('"').length - 1) % 2 == 0)
+                            : (_searchResults.isEmpty &&
+                                    (_controller.text.split('"').length - 1) %
+                                            2 ==
+                                        0)
                                 ? Center(
-                                    child: Text('No matches found in your notes 🧐',
+                                    child: Text(
+                                        'No matches found in your notes 🧐',
                                         style: TextStyle(
                                             fontSize: uiFontSize + 8,
                                             fontFamily: uiFontFamily,
-                                            color: getAdaptiveTextColor(context))))
+                                            color:
+                                                getAdaptiveTextColor(context))))
                                 : ValueListenableBuilder<double>(
                                     valueListenable: fontSizeNotifier,
                                     builder: (context, fontSize, child) {
                                       return RawScrollbar(
                                           thumbColor: isDark
-                                              ? darkPrimaryColor.value.withValues(alpha: 0.3)
-                                              : lightPrimaryColor.value.withValues(alpha: 0.5),
+                                              ? darkPrimaryColor.value
+                                                  .withValues(alpha: 0.3)
+                                              : lightPrimaryColor.value
+                                                  .withValues(alpha: 0.5),
                                           thumbVisibility: false,
                                           trackVisibility: false,
                                           thickness: 16.0,
                                           controller: _resultsScrollController,
                                           radius: Radius.circular(8.0),
                                           child: ScrollConfiguration(
-                                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                              behavior: ScrollConfiguration.of(
+                                                      context)
+                                                  .copyWith(scrollbars: false),
                                               child: ListView.builder(
-                                                padding: EdgeInsets.only(bottom: 100.0),
-                                                controller: _resultsScrollController,
-                                                itemCount: _searchResults.length,
+                                                padding: EdgeInsets.only(
+                                                    bottom: 100.0),
+                                                controller:
+                                                    _resultsScrollController,
+                                                itemCount:
+                                                    _searchResults.length,
                                                 itemBuilder: (context, index) {
-                                                  final result = _searchResults[index];
+                                                  final result =
+                                                      _searchResults[index];
                                                   // final baseStyle = TextStyle(
                                                   //   fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize),
                                                   //   color: Theme.of(context).brightness == Brightness.dark ? darkTextColor.value : lightTextColor.value,
                                                   // );
 
                                                   return GestureDetector(
-                                                    onTap: () => _showNoteSearchResultActionMenu(context, result),
+                                                    onTap: () =>
+                                                        _showNoteSearchResultActionMenu(
+                                                            context, result),
                                                     child: Container(
                                                       color: barColor,
                                                       width: double.infinity,
                                                       padding: EdgeInsets.only(
-                                                          left: 0.0, top: 0.0, bottom: 0.0, right: 18.0),
+                                                          left: 0.0,
+                                                          top: 0.0,
+                                                          bottom: 0.0,
+                                                          right: 18.0),
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Column(
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
                                                             children: [
                                                               Text(
                                                                 '${result['bookLongName'] as String} ${result['chapter']}:${result['verse']}',
-                                                                style: TextStyle(
+                                                                style:
+                                                                    TextStyle(
                                                                   fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                                      fontFamilyNotifier.value, fontSize),
-                                                                  fontWeight: FontWeight.bold,
-                                                                  color: Theme.of(context).brightness == Brightness.dark
-                                                                      ? darkPrimaryColor.value
-                                                                      : lightPrimaryColor.value,
+                                                                      fontFamilyNotifier
+                                                                          .value,
+                                                                      fontSize),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Theme.of(context)
+                                                                              .brightness ==
+                                                                          Brightness
+                                                                              .dark
+                                                                      ? darkPrimaryColor
+                                                                          .value
+                                                                      : lightPrimaryColor
+                                                                          .value,
                                                                 ),
                                                               ),
-                                                              const SizedBox(height: 4),
+                                                              const SizedBox(
+                                                                  height: 4),
                                                               // Display the verse text with bible screen styling
-                                                              FutureBuilder<List<Map<String, dynamic>>>(
+                                                              FutureBuilder<
+                                                                  List<
+                                                                      Map<String,
+                                                                          dynamic>>>(
                                                                 future: BibleDatabase.getVerses(
-                                                                    result['book'] as String, result['chapter'] as int),
-                                                                builder: (context, snapshot) {
-                                                                  if (snapshot.connectionState ==
-                                                                      ConnectionState.waiting) {
-                                                                    return SizedBox.shrink();
+                                                                    result['book']
+                                                                        as String,
+                                                                    result['chapter']
+                                                                        as int),
+                                                                builder: (context,
+                                                                    snapshot) {
+                                                                  if (snapshot
+                                                                          .connectionState ==
+                                                                      ConnectionState
+                                                                          .waiting) {
+                                                                    return SizedBox
+                                                                        .shrink();
                                                                   }
-                                                                  if (snapshot.hasError || !snapshot.hasData) {
-                                                                    return SizedBox.shrink();
+                                                                  if (snapshot
+                                                                          .hasError ||
+                                                                      !snapshot
+                                                                          .hasData) {
+                                                                    return SizedBox
+                                                                        .shrink();
                                                                   }
 
-                                                                  final verses = snapshot.data!;
-                                                                  final verseData = verses.firstWhere(
-                                                                    (v) => v['verse'] == result['verse'],
-                                                                    orElse: () =>
-                                                                        <String, dynamic>{} as Map<String, Object>,
+                                                                  final verses =
+                                                                      snapshot
+                                                                          .data!;
+                                                                  final verseData =
+                                                                      verses
+                                                                          .firstWhere(
+                                                                    (v) =>
+                                                                        v['verse'] ==
+                                                                        result[
+                                                                            'verse'],
+                                                                    orElse: () => <String,
+                                                                            dynamic>{}
+                                                                        as Map<
+                                                                            String,
+                                                                            Object>,
                                                                   );
 
-                                                                  if (verseData.isEmpty) {
-                                                                    return SizedBox.shrink();
+                                                                  if (verseData
+                                                                      .isEmpty) {
+                                                                    return SizedBox
+                                                                        .shrink();
                                                                   }
 
                                                                   // Use the same verse display widget as bible screen
                                                                   return buildVerseDisplayWidget(
-                                                                    context: context,
-                                                                    verseNumber: result['verse'] as int,
-                                                                    rawVerseText: verseData['text'] as String,
-                                                                    baseTextStyle: TextStyle(
+                                                                    context:
+                                                                        context,
+                                                                    verseNumber:
+                                                                        result['verse']
+                                                                            as int,
+                                                                    rawVerseText:
+                                                                        verseData['text']
+                                                                            as String,
+                                                                    baseTextStyle:
+                                                                        TextStyle(
                                                                       fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                                          fontFamilyNotifier.value, fontSize),
-                                                                      fontFamily: fontFamilyNotifier.value,
+                                                                          fontFamilyNotifier
+                                                                              .value,
+                                                                          fontSize),
+                                                                      fontFamily:
+                                                                          fontFamilyNotifier
+                                                                              .value,
                                                                       color: Theme.of(context).brightness ==
-                                                                              Brightness.dark
-                                                                          ? darkTextColor.value
-                                                                          : lightTextColor.value,
+                                                                              Brightness
+                                                                                  .dark
+                                                                          ? darkTextColor
+                                                                              .value
+                                                                          : lightTextColor
+                                                                              .value,
                                                                     ),
-                                                                    backgroundColor: barColor,
+                                                                    backgroundColor:
+                                                                        barColor,
                                                                     noteForVerse: {},
                                                                     highlightsForVerse: [],
-                                                                    showNotesInline: false,
-                                                                    fontFamily: fontFamilyNotifier.value,
-                                                                    lightModeTextColor: lightTextColor.value,
-                                                                    darkModeTextColor: darkTextColor.value,
-                                                                    onVerseTap: null,
-                                                                    onVerseLongPress: null,
-                                                                    onLinkTap: null,
-                                                                    verseKey: null,
-                                                                    onNoteIconTap: null,
-                                                                    displayVerseNumber: false,
+                                                                    showNotesInline:
+                                                                        false,
+                                                                    fontFamily:
+                                                                        fontFamilyNotifier
+                                                                            .value,
+                                                                    lightModeTextColor:
+                                                                        lightTextColor
+                                                                            .value,
+                                                                    darkModeTextColor:
+                                                                        darkTextColor
+                                                                            .value,
+                                                                    onVerseTap:
+                                                                        null,
+                                                                    onVerseLongPress:
+                                                                        null,
+                                                                    onLinkTap:
+                                                                        null,
+                                                                    verseKey:
+                                                                        null,
+                                                                    onNoteIconTap:
+                                                                        null,
+                                                                    displayVerseNumber:
+                                                                        false,
                                                                   );
                                                                 },
                                                               ),
-                                                              const SizedBox(height: 8),
-                                                              // Use HtmlNoteDisplay to properly render the note with highlighting
-                                                              HtmlNoteDisplay(
-                                                                noteText: result['note_text'] as String,
-                                                                highlightRegex: _currentRegex,
-                                                                onLinkTap: (url, element) => handleVerseLink(
+                                                              const SizedBox(
+                                                                  height: 8),
+                                                              // Use QuillNoteDisplay to properly render the note
+                                                              QuillNoteDisplay(
+                                                                noteText: result[
+                                                                        'note_text']
+                                                                    as String,
+                                                                highlightRegex:
+                                                                    _currentRegex,
+                                                                onLinkTap: (url,
+                                                                        element) =>
+                                                                    handleVerseLink(
                                                                   context,
                                                                   url,
                                                                   element,
-                                                                  navigateToVerse: _gotoVerse,
+                                                                  navigateToVerse:
+                                                                      _gotoVerse,
                                                                   onVerseLinkRecursion:
                                                                       null, // Infinite recursion enabled by default in handleVerseLink
                                                                   onNoteIconTap:
                                                                       _openNoteFromSearch, // so notes work in nested dialogs
-                                                                  onNoteEditTap: _openNoteFromSearch,
+                                                                  onNoteEditTap:
+                                                                      _openNoteFromSearch,
                                                                 ),
                                                               ),
                                                             ],
                                                           ),
-                                                          if (index < _searchResults.length - 1)
+                                                          if (index <
+                                                              _searchResults
+                                                                      .length -
+                                                                  1)
                                                             Divider(
                                                               thickness: 1,
                                                               height: 16,
-                                                              indent: MediaQuery.of(context).size.width * 0.01,
-                                                              endIndent: MediaQuery.of(context).size.width * 0.01,
-                                                              color: const Color.fromARGB(47, 158, 158, 158),
+                                                              indent: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.01,
+                                                              endIndent:
+                                                                  MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.01,
+                                                              color: const Color
+                                                                  .fromARGB(
+                                                                  47,
+                                                                  158,
+                                                                  158,
+                                                                  158),
                                                             ),
                                                         ],
                                                       ),

@@ -4,7 +4,7 @@ import '../utils/verse_text_parser.dart';
 import '../utils/highlight_text_color_adjustments.dart';
 import '../main.dart'; // For global notifiers and colors
 import '../utils/preferences_constants.dart';
-import '../widgets/html_note_display.dart';
+import '../widgets/quill_note_display.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 
@@ -49,12 +49,16 @@ Widget buildVerseDisplayWidget({
     rightSpans.add(WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
-        padding: const EdgeInsets.only(right: 8.0), // add a little space between the icon and the text
+        padding: const EdgeInsets.only(
+            right: 8.0), // add a little space between the icon and the text
         child: GestureDetector(
-          onTap: onNoteIconTap != null ? () => onNoteIconTap(verseNumber, noteForVerse['note_text']) : null,
+          onTap: onNoteIconTap != null
+              ? () => onNoteIconTap(verseNumber, noteForVerse['note_text'])
+              : null,
           child: Icon(
             Icons.text_snippet_outlined,
-            size: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
+            size: FontSizeAdjustments.getAdjustedSize(
+                fontFamilyNotifier.value, fontSizeNotifier.value),
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             semanticLabel: 'Verse note',
           ),
@@ -79,7 +83,8 @@ Widget buildVerseDisplayWidget({
   // Each verse is a GestureDetector with Row to enable tap and long press
   return GestureDetector(
     onTap: onVerseTap != null ? () => onVerseTap(verseNumber) : null,
-    onLongPress: onVerseLongPress != null ? () => onVerseLongPress(verseNumber) : null,
+    onLongPress:
+        onVerseLongPress != null ? () => onVerseLongPress(verseNumber) : null,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,7 +102,10 @@ Widget buildVerseDisplayWidget({
                       '$verseNumber',
                       style: baseTextStyle.copyWith(
                         fontSize: baseTextStyle.fontSize! - 2,
-                        color: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(alpha: 0.8),
+                        color: (isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value)
+                            .withValues(alpha: 0.8),
                         fontWeight: FontWeight.normal,
                       ),
                       //textHeightBehavior: const TextHeightBehavior(
@@ -112,7 +120,10 @@ Widget buildVerseDisplayWidget({
                     '$verseNumber',
                     style: baseTextStyle.copyWith(
                       fontSize: baseTextStyle.fontSize! - 2,
-                      color: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(alpha: 0.8),
+                      color: (isDark
+                              ? darkPrimaryColor.value
+                              : lightPrimaryColor.value)
+                          .withValues(alpha: 0.8),
                       fontWeight: FontWeight.normal,
                     ),
                     //textHeightBehavior: const TextHeightBehavior(
@@ -165,11 +176,13 @@ List<InlineSpan> applyHighlightsToText(
 ) {
   // If no highlights, just parse the text normally
   if (highlights.isEmpty) {
-    return VerseTextParser.parseVerseText(cleanVerseText, baseStyle).children ?? [];
+    return VerseTextParser.parseVerseText(cleanVerseText, baseStyle).children ??
+        [];
   }
 
   // Parse the clean verse text to get the original spans (including <r> tags)
-  final parsedVerseText = VerseTextParser.parseVerseText(cleanVerseText, baseStyle);
+  final parsedVerseText =
+      VerseTextParser.parseVerseText(cleanVerseText, baseStyle);
   final originalSpans = parsedVerseText.children ?? [];
 
   // Convert highlight positions from raw text to clean text positions
@@ -192,7 +205,8 @@ List<InlineSpan> applyHighlightsToText(
   }
 
   // Sort highlights by start position
-  adjustedHighlights.sort((a, b) => (a['start'] as int).compareTo(b['start'] as int));
+  adjustedHighlights
+      .sort((a, b) => (a['start'] as int).compareTo(b['start'] as int));
 
   final spans = <InlineSpan>[];
   int currentPosition = 0;
@@ -204,19 +218,23 @@ List<InlineSpan> applyHighlightsToText(
 
     // Add unhighlighted spans before this highlight
     if (start > currentPosition) {
-      final beforeSpans = extractSpansForRange(originalSpans, currentPosition, start, baseStyle);
+      final beforeSpans = extractSpansForRange(
+          originalSpans, currentPosition, start, baseStyle);
       spans.addAll(beforeSpans);
     }
 
     // Calculate the effective highlight background
-    final effectiveHighlightBackground = color.withValues(alpha: defaultHighlightAlpha);
+    final effectiveHighlightBackground =
+        color.withValues(alpha: defaultHighlightAlpha);
 
     // Add highlighted spans
-    final highlightSpans = extractSpansForRange(originalSpans, start, end, baseStyle);
+    final highlightSpans =
+        extractSpansForRange(originalSpans, start, end, baseStyle);
     for (final span in highlightSpans) {
       if (span is TextSpan) {
         // Get the original text color from the span or base style
-        final originalTextColor = span.style?.color ?? baseStyle.color ?? Colors.black;
+        final originalTextColor =
+            span.style?.color ?? baseStyle.color ?? Colors.black;
 
         // Check if we need to adjust the text color for contrast using the passed parameters
         final adjustedTextColor = adjustTextColorForHighlight(
@@ -247,7 +265,8 @@ List<InlineSpan> applyHighlightsToText(
 
   // Add remaining unhighlighted spans
   if (currentPosition < cleanVerseText.length) {
-    final remainingSpans = extractSpansForRange(originalSpans, currentPosition, cleanVerseText.length, baseStyle);
+    final remainingSpans = extractSpansForRange(
+        originalSpans, currentPosition, cleanVerseText.length, baseStyle);
     spans.addAll(remainingSpans);
   }
 
@@ -255,7 +274,8 @@ List<InlineSpan> applyHighlightsToText(
 }
 
 /// Helper method to extract spans for a specific character range from parsed text
-List<InlineSpan> extractSpansForRange(List<InlineSpan> originalSpans, int start, int end, TextStyle baseStyle) {
+List<InlineSpan> extractSpansForRange(
+    List<InlineSpan> originalSpans, int start, int end, TextStyle baseStyle) {
   final extractedSpans = <InlineSpan>[];
   int currentPosition = 0;
 
@@ -285,11 +305,13 @@ List<InlineSpan> extractSpansForRange(List<InlineSpan> originalSpans, int start,
 
       if (overlapStart < overlapEnd) {
         // Extract the overlapping portion of this span
-        final extractedText = spanText.substring(overlapStart - spanStart, overlapEnd - spanStart);
+        final extractedText = spanText.substring(
+            overlapStart - spanStart, overlapEnd - spanStart);
 
         // If extracted text contains <r> tags, re-parse it to handle them correctly
         if (extractedText.contains('<r>') || extractedText.contains('</r>')) {
-          final reParsed = VerseTextParser.parseVerseText(extractedText, baseStyle);
+          final reParsed =
+              VerseTextParser.parseVerseText(extractedText, baseStyle);
           if (reParsed.children != null) {
             extractedSpans.addAll(reParsed.children!);
           }
@@ -420,7 +442,8 @@ int convertRawPositionToClean(String rawText, int rawPosition) {
 
 /// Calculate dynamic width for verse number column based on verses in a list
 /// This ensures the verse number column is sized appropriately for the maximum verse number
-double calculateVerseNumberWidth(List<Map<String, dynamic>> verses, TextStyle numStyle) {
+double calculateVerseNumberWidth(
+    List<Map<String, dynamic>> verses, TextStyle numStyle) {
   int maxVerseNumber = 0;
   for (final verse in verses) {
     final verseNum = toInt(verse['verse'], orElse: 0);
@@ -431,7 +454,8 @@ double calculateVerseNumberWidth(List<Map<String, dynamic>> verses, TextStyle nu
 
   // Create a string with enough characters for the max verse number
   final maxDigits = maxVerseNumber.toString().length;
-  final sampleText = '9' * maxDigits; // e.g., "99" for 2-digit, "999" for 3-digit
+  final sampleText =
+      '9' * maxDigits; // e.g., "99" for 2-digit, "999" for 3-digit
 
   final textPainter = TextPainter(
     text: TextSpan(text: sampleText, style: numStyle),
@@ -472,14 +496,16 @@ List<Widget> buildVerseListWidget({
 
   // Different styles whether it is the verse number or the text itself
   final numStyle = TextStyle(
-    fontSize: FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+    fontSize:
+        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
     fontFamily: fontFamily,
     color: verseNumberColor,
     fontWeight: FontWeight.normal,
     height: lineHeight,
   );
   final textStyle = TextStyle(
-    fontSize: FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+    fontSize:
+        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
     fontFamily: fontFamily,
     color: textColor,
     height: lineHeight,
@@ -506,7 +532,8 @@ List<Widget> buildVerseListWidget({
       widgets.add(const SizedBox(height: 16));
     }
 
-    final customBgColor = highlightedVerses.contains(vn) ? highlightedVerseBackgroundColor : null;
+    final customBgColor =
+        highlightedVerses.contains(vn) ? highlightedVerseBackgroundColor : null;
 
     // Use the shared verse display widget
     final verseWidget = buildVerseDisplayWidget(
@@ -546,15 +573,15 @@ List<Widget> buildVerseListWidget({
       if (noteText.isNotEmpty) {
         widgets.add(
           Container(
-            margin: EdgeInsets.only(left: 80.0, right: 16.0, top: 8.0, bottom: 8.0),
-            padding: EdgeInsets.all(0.0),
-            child: GestureDetector(
-              onTap: onNoteEditTap != null ? () => onNoteEditTap(vn, noteText) : null,
-              behavior: HitTestBehavior.translucent,
-              child: HtmlNoteDisplay(
-                noteText: noteText,
-                onLinkTap: onLinkTap,
-              ),
+            margin: EdgeInsets.all(0.0),
+            padding: EdgeInsets.only(
+                left: 55.0, right: 16.0, top: 16.0, bottom: 16.0),
+            child: QuillNoteDisplay(
+              noteText: noteText,
+              onLinkTap: onLinkTap,
+              onTap: onNoteEditTap != null
+                  ? () => onNoteEditTap(vn, noteText)
+                  : null,
             ),
           ),
         );

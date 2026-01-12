@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import '../database/notes_database.dart';
 import '../main.dart';
 import '../utils/book_name_converter.dart';
@@ -109,158 +110,136 @@ class _NoteScreenState extends State<NoteScreen> {
     return _originalContentHash != currentContent.hashCode.toString();
   }
 
-  Widget _buildToolbar(Color iconColor) {
-    return Wrap(
-      spacing: 0.0,
-      runSpacing: 0.0,
-      children: [
-        QuillToolbarHistoryButton(
-          controller: _quillController,
-          isUndo: true,
-          options: QuillToolbarHistoryButtonOptions(
-            tooltip: 'Undo',
+  Widget _buildToolbar() {
+    return QuillSimpleToolbar(
+      controller: _quillController,
+      config: QuillSimpleToolbarConfig(
+        showFontFamily: false,
+        showFontSize: false,
+        showLineHeightButton: false,
+        showDirection: true,
+        multiRowsDisplay: true,
+        showClipboardCut: false,
+        showClipboardCopy: false,
+        showClipboardPaste: false,
+        showSearchButton: false,
+        // Note: Table support is not exposed in flutter_quill_extensions toolbarButtons()
+        // We include image/video buttons via embedButtons
+        embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+        buttonOptions: QuillSimpleToolbarButtonOptions(
+          base: QuillToolbarBaseButtonOptions(
             iconSize: 18,
             afterButtonPressed: () {
               _focusNode.requestFocus();
             },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
           ),
         ),
-        QuillToolbarHistoryButton(
-          controller: _quillController,
-          isUndo: false,
-          options: QuillToolbarHistoryButtonOptions(
-            tooltip: 'Redo',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        const SizedBox(width: 4),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.bold,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Bold',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.italic,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Italic',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.underline,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Underline',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        const SizedBox(width: 4),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.subscript,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Subscript',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.superscript,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Superscript',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
+      ),
+    );
+  }
 
-        const SizedBox(width: 4),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.ol,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Numbered List',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
+  /// Builds consistent editor styles that match the display styles in QuillNoteDisplay
+  DefaultStyles _buildEditorStyles(bool isDark, Color textColor) {
+    final noteFontFamily = noteFontFamilyNotifier.value;
+    final noteFontSize = uiFontSize + 4;
+    final verseRefColor =
+        isDark ? darkVerseReferenceColor.value : lightVerseReferenceColor.value;
+
+    return DefaultStyles(
+      paragraph: DefaultTextBlockStyle(
+        TextStyle(
+          fontSize: FontSizeAdjustments.getAdjustedSize(
+            noteFontFamily,
+            noteFontSize,
+          ),
+          fontFamily: noteFontFamily,
+          color: textColor,
+          height: defaultLineHeight,
+        ),
+        const HorizontalSpacing(15, 15),
+        const VerticalSpacing(0, 0),
+        const VerticalSpacing(0, 0),
+        null,
+      ),
+      link: TextStyle(
+        color: verseRefColor,
+        decoration: TextDecoration.underline,
+        fontSize: FontSizeAdjustments.getAdjustedSize(
+          noteFontFamily,
+          noteFontSize,
+        ),
+        fontFamily: noteFontFamily,
+      ),
+      lists: DefaultListBlockStyle(
+        TextStyle(
+          fontSize: FontSizeAdjustments.getAdjustedSize(
+            noteFontFamily,
+            noteFontSize,
+          ),
+          fontFamily: noteFontFamily,
+          color: textColor,
+          height: defaultLineHeight,
+        ),
+        const HorizontalSpacing(15, 15),
+        const VerticalSpacing(0, 0),
+        const VerticalSpacing(0, 0),
+        null,
+        null,
+      ),
+      code: DefaultTextBlockStyle(
+        TextStyle(
+          fontSize: FontSizeAdjustments.getAdjustedSize(
+            'Roboto Mono',
+            noteFontSize,
+          ),
+          fontFamily: 'Roboto Mono',
+          color: isDark
+              ? Colors.blue.shade200
+              : Colors.blue.shade900.withValues(alpha: 0.9),
+        ),
+        const HorizontalSpacing(15, 15),
+        const VerticalSpacing(4, 4),
+        const VerticalSpacing(0, 0),
+        BoxDecoration(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      quote: DefaultTextBlockStyle(
+        TextStyle(
+          fontSize: FontSizeAdjustments.getAdjustedSize(
+            noteFontFamily,
+            noteFontSize,
+          ),
+          fontFamily: noteFontFamily,
+          color: textColor.withValues(alpha: 0.6),
+        ),
+        const HorizontalSpacing(15, 15),
+        const VerticalSpacing(4, 4),
+        const VerticalSpacing(6, 2),
+        BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              width: 4,
+              color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+            ),
           ),
         ),
-        QuillToolbarToggleStyleButton(
-          attribute: Attribute.ul,
-          controller: _quillController,
-          options: QuillToolbarToggleStyleButtonOptions(
-            tooltip: 'Bullet List',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
+      ),
+      inlineCode: InlineCodeStyle(
+        backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+        radius: const Radius.circular(3),
+        style: TextStyle(
+          fontSize: FontSizeAdjustments.getAdjustedSize(
+            'Roboto Mono',
+            noteFontSize,
           ),
+          fontFamily: 'Roboto Mono',
+          color: isDark
+              ? Colors.blue.shade200
+              : Colors.blue.shade900.withValues(alpha: 0.8),
         ),
-        const SizedBox(width: 4),
-        QuillToolbarClearFormatButton(
-          controller: _quillController,
-          options: QuillToolbarClearFormatButtonOptions(
-            tooltip: 'Clear Format',
-            iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
-            iconTheme: QuillIconTheme(
-                iconButtonUnselectedData: IconButtonData(color: iconColor),
-                iconButtonSelectedData: IconButtonData(color: iconColor)),
-          ),
-        ),
-        // Indenting doesn't display correctly with the html widget
-        // so don't use it
-      ],
+      ),
     );
   }
 
@@ -282,8 +261,6 @@ class _NoteScreenState extends State<NoteScreen> {
               builder: (context, textColor, ___) {
                 final bool isMobile =
                     !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-                final Color topColor =
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
                 return Shortcuts(
                     shortcuts: <LogicalKeySet, Intent>{
                       LogicalKeySet(LogicalKeyboardKey.control,
@@ -357,24 +334,25 @@ class _NoteScreenState extends State<NoteScreen> {
                                                   scrollController:
                                                       _scrollController,
                                                   config: QuillEditorConfig(
-                                                      customStyles:
-                                                          DefaultStyles(
-                                                              paragraph: DefaultTextBlockStyle(
-                                                                  TextStyle(fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value), fontFamily: fontFamilyNotifier.value, color: isDark ? darkTextColor.value : lightTextColor.value),
-                                                                  const HorizontalSpacing(15, 15),
-                                                                  const VerticalSpacing(0, 0),
-                                                                  const VerticalSpacing(0, 0),
-                                                                  null)),
-                                                      customLinkPrefixes: const [
-                                                        'verse://',
-                                                        'verse:'
-                                                      ]),
+                                                    embedBuilders: kIsWeb
+                                                        ? FlutterQuillEmbeds
+                                                            .editorWebBuilders()
+                                                        : FlutterQuillEmbeds
+                                                            .editorBuilders(),
+                                                    customStyles:
+                                                        _buildEditorStyles(
+                                                            isDark, textColor),
+                                                    customLinkPrefixes: const [
+                                                      'verse://',
+                                                      'verse:'
+                                                    ],
+                                                  ),
                                                 )),
                                                 const SizedBox(height: 8),
-                                                _buildToolbar(topColor)
+                                                _buildToolbar()
                                               ]
                                             : [
-                                                _buildToolbar(topColor),
+                                                _buildToolbar(),
                                                 const SizedBox(height: 8),
                                                 Expanded(
                                                   child: QuillEditor(
@@ -384,24 +362,22 @@ class _NoteScreenState extends State<NoteScreen> {
                                                     scrollController:
                                                         _scrollController,
                                                     config: QuillEditorConfig(
-                                                      customStyles: DefaultStyles(
-                                                          paragraph: DefaultTextBlockStyle(
-                                                              TextStyle(
-                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
-                                                                  // Don't pass a list here because then it won't use the first one
-                                                                  fontFamily: fontFamilyNotifier.value,
-                                                                  color: isDark ? darkTextColor.value : lightTextColor.value),
-                                                              const HorizontalSpacing(15, 15),
-                                                              const VerticalSpacing(0, 0),
-                                                              const VerticalSpacing(0, 0),
-                                                              null)),
+                                                      embedBuilders: kIsWeb
+                                                          ? FlutterQuillEmbeds
+                                                              .editorWebBuilders()
+                                                          : FlutterQuillEmbeds
+                                                              .editorBuilders(),
+                                                      customStyles:
+                                                          _buildEditorStyles(
+                                                              isDark,
+                                                              textColor),
                                                       customLinkPrefixes: const [
                                                         'verse://',
                                                         'verse:'
                                                       ],
                                                     ),
                                                   ),
-                                                )
+                                                ),
                                               ]))
                               ]),
                             ),

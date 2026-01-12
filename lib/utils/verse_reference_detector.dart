@@ -81,7 +81,8 @@ class VerseReferenceDetector {
     'psa': 'Psa', 'psalms': 'Psa', 'psalm': 'Psa', 'Psa': 'Psa',
     'pro': 'Pro', 'proverbs': 'Pro',
     'ecc': 'Ecc', 'ecclesiastes': 'Ecc',
-    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son', 'canticles': 'Son', 'cant': 'Son',  'Sos': 'Son', 'sos': 'Son',
+    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son',
+    'canticles': 'Son', 'cant': 'Son', 'Sos': 'Son', 'sos': 'Son',
     'isa': 'Isa', 'isaiah': 'Isa',
     'jer': 'Jer', 'jeremiah': 'Jer',
     'lam': 'Lam', 'lamentations': 'Lam',
@@ -113,17 +114,24 @@ class VerseReferenceDetector {
     'col': 'Col', 'colossians': 'Col',
     '1th': '1Th', '1 thessalonians': '1Th', '1thess': '1Th', '1 thess': '1Th',
     '2th': '2Th', '2 thessalonians': '2Th', '2thess': '2Th', '2 thess': '2Th',
-    '1ti': '1Ti', '1 timothy': '1Ti', '1timothy': '1Ti', '1tim': '1Ti', '1 tim': '1Ti',
-    '2ti': '2Ti', '2 timothy': '2Ti', '2timothy': '2Ti', '2tim': '2Ti', '2 tim': '2Ti',
+    '1ti': '1Ti', '1 timothy': '1Ti', '1timothy': '1Ti', '1tim': '1Ti',
+    '1 tim': '1Ti',
+    '2ti': '2Ti', '2 timothy': '2Ti', '2timothy': '2Ti', '2tim': '2Ti',
+    '2 tim': '2Ti',
     'tit': 'Tit', 'titus': 'Tit',
     'phm': 'Phm', 'philemon': 'Phm', 'Phil': 'Phm',
     'heb': 'Heb', 'hebrews': 'Heb',
     'jam': 'Jam', 'james': 'Jam',
-    '1pe': '1Pe', '1 peter': '1Pe', '1peter': '1Pe', '1pet': '1Pe', '1 pet': '1Pe',
-    '2pe': '2Pe', '2 peter': '2Pe', '2peter': '2Pe', '2pet': '2Pe', '2 pet': '2Pe',
-    '1jo': '1Jo', '1 john': '1Jo', '1john': '1Jo', '1joh': '1Jo', '1 joh': '1Jo',
-    '2jo': '2Jo', '2 john': '2Jo', '2john': '2Jo', '2joh': '2Jo', '2 joh': '2Jo',
-    '3jo': '3Jo', '3 john': '3Jo', '3john': '3Jo', '3joh': '3Jo', '3 joh': '3Jo',
+    '1pe': '1Pe', '1 peter': '1Pe', '1peter': '1Pe', '1pet': '1Pe',
+    '1 pet': '1Pe',
+    '2pe': '2Pe', '2 peter': '2Pe', '2peter': '2Pe', '2pet': '2Pe',
+    '2 pet': '2Pe',
+    '1jo': '1Jo', '1 john': '1Jo', '1john': '1Jo', '1joh': '1Jo',
+    '1 joh': '1Jo',
+    '2jo': '2Jo', '2 john': '2Jo', '2john': '2Jo', '2joh': '2Jo',
+    '2 joh': '2Jo',
+    '3jo': '3Jo', '3 john': '3Jo', '3john': '3Jo', '3joh': '3Jo',
+    '3 joh': '3Jo',
     'jud': 'Jud', 'jude': 'Jud',
     'rev': 'Rev', 'revelation': 'Rev',
   };
@@ -165,7 +173,8 @@ class VerseReferenceDetector {
 
   static List<VerseReference> detectReferences(String text) {
     final allReferences = <VerseReference>[];
-    final usedPositions = <int>{}; // Track positions that are already part of a reference
+    final usedPositions =
+        <int>{}; // Track positions that are already part of a reference
 
     // Helper function to check if a position range conflicts with existing references
     bool hasConflict(int start, int end) {
@@ -185,14 +194,16 @@ class VerseReferenceDetector {
     }
 
     // Helper function to create reference from match
-    VerseReference? createReferenceFromMatch(Match match, int offset, String patternType) {
+    VerseReference? createReferenceFromMatch(
+        Match match, int offset, String patternType) {
       final fullMatch = match.group(0)!;
       final bookPart = match.group(1)?.trim() ?? '';
       final chapterStr = match.group(2);
       final versesStr = match.group(3)!;
 
       // For dash ranges, we need groups 3 and 4 (start verse and end verse separately)
-      final dashEndVerseStr = patternType.contains('dash_range') ? match.group(4) : null;
+      final dashEndVerseStr =
+          patternType.contains('dash_range') ? match.group(4) : null;
 
       if (chapterStr == null) {
         return null;
@@ -251,7 +262,8 @@ class VerseReferenceDetector {
       } else if (patternType.contains('range')) {
         // Simple dash range - use separate regex groups for start/end verses
         final start = int.tryParse(versesStr);
-        final end = dashEndVerseStr != null ? int.tryParse(dashEndVerseStr) : null;
+        final end =
+            dashEndVerseStr != null ? int.tryParse(dashEndVerseStr) : null;
         if (start != null && end != null && start <= end) {
           for (int v = start; v <= end; v++) {
             allVerseNumbers.add(v);
@@ -298,8 +310,11 @@ class VerseReferenceDetector {
           originalText: fullMatch,
           startIndex: startIndex,
         );
-      } else if (versesStr.contains('-') && !versesStr.contains(',')) {
-        // Simple dash range
+      } else if (patternType.contains('dash_range') ||
+          (versesStr.contains('-') && !versesStr.contains(','))) {
+        // Simple dash range - check pattern type OR versesStr contains dash
+        // Note: For dash_range pattern, versesStr is just the start verse (no dash),
+        // so we must also check the pattern type
         reference = VerseReference(
           book: normalizedBook,
           chapter: chapter,
@@ -336,7 +351,8 @@ class VerseReferenceDetector {
       final substring = text.substring(i);
       final match = _spacedMixedRangePattern.matchAsPrefix(substring);
       if (match != null) {
-        final reference = createReferenceFromMatch(match, i, 'spaced_mixed_range');
+        final reference =
+            createReferenceFromMatch(match, i, 'spaced_mixed_range');
         if (reference != null) {
           allReferences.add(reference);
         }
@@ -348,7 +364,8 @@ class VerseReferenceDetector {
       final substring = text.substring(i);
       final match = _spacedCommaRangePattern.matchAsPrefix(substring);
       if (match != null) {
-        final reference = createReferenceFromMatch(match, i, 'spaced_comma_range');
+        final reference =
+            createReferenceFromMatch(match, i, 'spaced_comma_range');
         if (reference != null) {
           allReferences.add(reference);
         }
@@ -370,7 +387,8 @@ class VerseReferenceDetector {
     // 4. LONG COMMA RANGES (handle mixed spacing - find longest comma sequences)
     final commaCandidates = <Map<String, dynamic>>[];
     // Added negative lookaheads to prevent matching across chapter boundaries
-    final allCommasPattern = RegExp(r'\b([1-3]?\s?[a-zA-Z]+)\s+(\d+):(\d+(?:,\s*\d+(?!:\d+))+)(?!,\s*\d+:)\b');
+    final allCommasPattern = RegExp(
+        r'\b([1-3]?\s?[a-zA-Z]+)\s+(\d+):(\d+(?:,\s*\d+(?!:\d+))+)(?!,\s*\d+:)\b');
     for (int i = 0; i < text.length; i++) {
       final substring = text.substring(i);
       final match = allCommasPattern.matchAsPrefix(substring);
@@ -397,7 +415,8 @@ class VerseReferenceDetector {
 
     // Process sorted candidates with conflict checking during processing
     for (final candidate in commaCandidates) {
-      final reference = createReferenceFromMatch(candidate['match'], candidate['offset'], 'comma_range');
+      final reference = createReferenceFromMatch(
+          candidate['match'], candidate['offset'], 'comma_range');
       if (reference != null) {
         allReferences.add(reference);
       }
@@ -436,7 +455,9 @@ class VerseReferenceDetector {
     if (trimmedText.isEmpty) return null;
 
     // Pattern for book chapter with optional verse: "Book Chapter" or "Book Chapter:Verse"
-    final RegExp quickJumpPattern = RegExp(r'^([1-3]?\s?[a-zA-Z]+)\s+(\d+)(?::(\d+))?$', caseSensitive: false);
+    final RegExp quickJumpPattern = RegExp(
+        r'^([1-3]?\s?[a-zA-Z]+)\s+(\d+)(?::(\d+))?$',
+        caseSensitive: false);
 
     final match = quickJumpPattern.firstMatch(trimmedText);
     if (match == null) return null;

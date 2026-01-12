@@ -29,13 +29,18 @@ class ChapterDialog extends StatefulWidget {
   final int chapter;
   final int? verse; // Verse to scroll to (optional)
   final int? endVerse; // End verse for ranges (optional)
-  final List<int>? targetVerses; // List of individual verses to highlight (optional)
+  final List<int>?
+      targetVerses; // List of individual verses to highlight (optional)
   //final int? screenIdentifier; // Screen that opened this dialog for navigation targeting
-  final Function(String, String?)? onVerseLink; // Callback for handling verse reference links
-  final Function(int)? onNavigateToVerse; // Callback for "goto verse X" navigation
+  final Function(String, String?)?
+      onVerseLink; // Callback for handling verse reference links
+  final Function(int)?
+      onNavigateToVerse; // Callback for "goto verse X" navigation
   final String? referenceText;
-  final Function(int, String?)? onNoteIconTap; // Callback for when note icon is tapped
-  final Function(int, String?)? onNoteEditTap; // Callback for when inline note is tapped for editing
+  final Function(int, String?)?
+      onNoteIconTap; // Callback for when note icon is tapped
+  final Function(int, String?)?
+      onNoteEditTap; // Callback for when inline note is tapped for editing
 
   const ChapterDialog({
     super.key,
@@ -72,14 +77,34 @@ class _ChapterDialogState extends State<ChapterDialog> {
   late StreamSubscription _notesSubscription;
 
   // Local fallback for notes inline mode
-  late final ValueNotifier<bool> _localShowNotesInlineFallback = ValueNotifier<bool>(false);
+  late final ValueNotifier<bool> _localShowNotesInlineFallback =
+      ValueNotifier<bool>(false);
 
   // Cached long name for the book
   late final String bookLongName;
 
   List<int> get _highlightedVerses {
-    if (widget.referenceText == null) return [];
-    return _parseReferenceText(widget.referenceText!);
+    // First, check if targetVerses was explicitly provided
+    if (widget.targetVerses != null && widget.targetVerses!.isNotEmpty) {
+      return widget.targetVerses!;
+    }
+
+    // Second, try parsing from referenceText (may contain ranges like "1-5" or lists like "1,3,5")
+    if (widget.referenceText != null) {
+      final parsed = _parseReferenceText(widget.referenceText!);
+      if (parsed.isNotEmpty) {
+        return parsed;
+      }
+    }
+
+    // Finally, check for verse/endVerse range (used for scrolling, may only have single verse)
+    if (widget.verse != null) {
+      final start = widget.verse!;
+      final end = widget.endVerse ?? start;
+      return List.generate(end - start + 1, (i) => start + i);
+    }
+
+    return [];
   }
 
   @override
@@ -133,24 +158,29 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   Color _getHighlightedVerseBackgroundColor() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
 
     final hsl = HSLColor.fromColor(bgColor);
-    final adjustedLightness = hsl.lightness > 0.5 ? (hsl.lightness - 0.03).clamp(0.0, 1.0) : (hsl.lightness + 0.03).clamp(0.0, 1.0);
+    final adjustedLightness = hsl.lightness > 0.5
+        ? (hsl.lightness - 0.03).clamp(0.0, 1.0)
+        : (hsl.lightness + 0.03).clamp(0.0, 1.0);
 
     return hsl.withLightness(adjustedLightness).toColor();
   }
 
   void _setupDataListeners() {
     // Listen to sync service streams for real-time updates
-    _highlightsSubscription = SupabaseSyncService.highlightsChangedStream.listen((_) async {
+    _highlightsSubscription =
+        SupabaseSyncService.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
       if (mounted) {
         setState(() {});
       }
     });
 
-    _notesSubscription = SupabaseSyncService.notesChangedStream.listen((_) async {
+    _notesSubscription =
+        SupabaseSyncService.notesChangedStream.listen((_) async {
       await _loadNotes();
       if (mounted) setState(() {});
     });
@@ -179,7 +209,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
   Future<void> _loadChapter() async {
     try {
       // Load verses for the chapter
-      _verses = await BibleDatabase.getVerses(BookNameConverter.normalizeShortName(widget.book), widget.chapter);
+      _verses = await BibleDatabase.getVerses(
+          BookNameConverter.normalizeShortName(widget.book), widget.chapter);
 
       if (_verses.isEmpty) {
         return;
@@ -209,7 +240,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToVerse(widget.verse!);
         });
-      } else if (widget.targetVerses != null && widget.targetVerses!.isNotEmpty) {
+      } else if (widget.targetVerses != null &&
+          widget.targetVerses!.isNotEmpty) {
         // Scroll to the first target verse
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollToVerse(widget.targetVerses!.first);
@@ -279,9 +311,11 @@ class _ChapterDialogState extends State<ChapterDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
     final textColor = isDark ? darkTextColor.value : lightTextColor.value;
-    final primaryColor = isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
+    final primaryColor =
+        isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
 
     return Dialog(
       child: SizedBox(
@@ -293,7 +327,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
             Container(
               decoration: BoxDecoration(
                 color: _adjustBarColor(bgColor),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Stack(
@@ -334,7 +370,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
               child: Container(
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)),
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(16.0),
+                      bottomRight: Radius.circular(16.0)),
                 ),
                 child: _loading
                     ? Center(child: CircularProgressIndicator())
@@ -355,14 +393,18 @@ class _ChapterDialogState extends State<ChapterDialog> {
   }
 
   void _showChapterVerseMenu(BuildContext context, int verseNumber) {
-    final verseData = _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
+    final verseData = _verses.firstWhere(
+        (v) => toInt(v['verse'], orElse: -1) == verseNumber,
+        orElse: () => <String, Object>{});
     final verseText = verseData['text'] as String? ?? '';
 
     // Filter out red letter tags <r> and </r>, and pilcrow symbols
     final redLetterRegex = RegExp(r'</?r>');
-    final cleanVerseText = verseText.replaceAll(redLetterRegex, '').replaceAll('¶ ', '');
+    final cleanVerseText =
+        verseText.replaceAll(redLetterRegex, '').replaceAll('¶ ', '');
     final bookName = bookLongName;
-    final copyText = '$bookName ${widget.chapter}:$verseNumber\n$cleanVerseText';
+    final copyText =
+        '$bookName ${widget.chapter}:$verseNumber\n$cleanVerseText';
 
     showModalBottomSheet(
         context: context,
@@ -373,13 +415,17 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     _notes.containsKey(verseNumber) ? 'Edit Note' : 'Add Note',
-                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(
+                        fontFamily: uiFontFamily,
+                        fontSize: uiFontSize + 10,
+                        color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
                     Navigator.of(context).pop();
                     // Use note callback if provided, otherwise navigate to verse
                     if (widget.onNoteIconTap != null) {
-                      widget.onNoteIconTap!(verseNumber, _notes[verseNumber]?['note_text']);
+                      widget.onNoteIconTap!(
+                          verseNumber, _notes[verseNumber]?['note_text']);
                     } else {
                       _gotoVerse(verseNumber);
                     }
@@ -389,7 +435,10 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     'Copy Verse $verseNumber',
-                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(
+                        fontFamily: uiFontFamily,
+                        fontSize: uiFontSize + 10,
+                        color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () async {
                     Navigator.of(context).pop();
@@ -400,7 +449,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        showStyledSnackBar(context, 'Copy failed', isError: true);
+                        showStyledSnackBar(context, 'Copy failed',
+                            isError: true);
                       }
                     }
                   },
@@ -409,7 +459,10 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   title: Center(
                       child: Text(
                     'Copy Multiple Verses',
-                    style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize + 10, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(
+                        fontFamily: uiFontFamily,
+                        fontSize: uiFontSize + 10,
+                        color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -467,7 +520,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
   }
 
   void _enterHighlightMode(BuildContext context, int verseNumber) async {
-    final verseData = _verses.firstWhere((v) => toInt(v['verse'], orElse: -1) == verseNumber, orElse: () => <String, Object>{});
+    final verseData = _verses.firstWhere(
+        (v) => toInt(v['verse'], orElse: -1) == verseNumber,
+        orElse: () => <String, Object>{});
     final rawVerseText = verseData['text'] as String? ?? '';
 
     await showHighlightDialog(
@@ -500,7 +555,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   List<Widget> _buildVerseWidgets(Color textColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
 
     return buildVerseListWidget(
       context: context,
@@ -509,7 +565,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
       notes: _notes,
       highlights: _highlights,
       textColor: textColor,
-      verseNumberColor: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(alpha: 0.5),
+      verseNumberColor:
+          (isDark ? darkPrimaryColor.value : lightPrimaryColor.value)
+              .withValues(alpha: 0.5),
       backgroundColor: bgColor,
       lineHeight: lineHeightNotifier.value,
       showNotesInline: showNotesInlineNotifier.value,
@@ -521,8 +579,12 @@ class _ChapterDialogState extends State<ChapterDialog> {
       onLinkTap: _handleVerseLink,
       lightVerseReferenceColor: lightVerseReferenceColor,
       darkVerseReferenceColor: darkVerseReferenceColor,
-      onNoteIconTap: widget.onNoteIconTap != null ? (vn, noteText) => widget.onNoteIconTap!(vn, noteText) : null,
-      onNoteEditTap: widget.onNoteEditTap != null ? (vn, noteText) => widget.onNoteEditTap!(vn, noteText) : null,
+      onNoteIconTap: widget.onNoteIconTap != null
+          ? (vn, noteText) => widget.onNoteIconTap!(vn, noteText)
+          : null,
+      onNoteEditTap: widget.onNoteEditTap != null
+          ? (vn, noteText) => widget.onNoteEditTap!(vn, noteText)
+          : null,
       highlightedVerses: _highlightedVerses,
       highlightedVerseBackgroundColor: _getHighlightedVerseBackgroundColor(),
     );

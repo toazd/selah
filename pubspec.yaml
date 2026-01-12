@@ -17,29 +17,13 @@ dependencies:
   path_provider: ^2.0.0
   file_picker: ^10.3.3
   archive: ^4.0.7
-  #firebase_core: ^4.2.0
-  #firebase_auth: ^6.1.1
-  #cloud_firestore: ^6.0.3
   supabase_flutter: ^2.12.0
   connectivity_plus: ^7.0.0
   uuid: ^4.4.0
   permission_handler: ^12.0.0
   intl: ^0.20.2
   flutter_quill: ^11.5.0
-  #flutter_quill_extensions: ^11.0.0
-  #flutter_quill_to_pdf: ^2.3.9
-  vsc_quill_delta_to_html: ^1.0.5
-  flutter_html: ^3.0.0
-  flutter_html_table: ^3.0.0
-  flutter_html_audio: ^3.0.0
-  flutter_html_svg: ^3.0.0
-  flutter_html_math: ^3.0.0
-  #flutter_html_iframe: ^3.0.0 # removed because of webview issues on desktop
-  flutter_html_video: ^3.0.0
-  #webview_flutter: ^4.13.0
-  #webview_all: ^0.5.2
-  #pdf: ^3.11.3
-  #web: ^1.1.1
+  flutter_quill_extensions: ^11.0.0
   sqflite_common_ffi_web : ^1.1.0
   url_launcher: ^6.3.2
 
