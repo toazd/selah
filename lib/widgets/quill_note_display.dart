@@ -16,6 +16,7 @@ class QuillNoteDisplay extends StatefulWidget {
   final String noteText;
   final Function(String, String?)? onLinkTap;
   final RegExp? highlightRegex;
+  final Color? highlightColor;
   final VoidCallback? onTap;
 
   const QuillNoteDisplay({
@@ -23,6 +24,7 @@ class QuillNoteDisplay extends StatefulWidget {
     required this.noteText,
     this.onLinkTap,
     this.highlightRegex,
+    this.highlightColor,
     this.onTap,
   });
 
@@ -104,6 +106,52 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
     }
   }
 
+  /// Converts note text to plain text for searching/highlighting
+  String _getPlainTextFromNote(String noteText) {
+    if (noteText.trim().isEmpty) {
+      return '';
+    }
+
+    if (NoteStorageFormat.isDeltaFormat(noteText)) {
+      final delta = Delta.fromJson(jsonDecode(noteText));
+      final document = Document.fromDelta(delta);
+      return document.getPlainText(0, document.length).replaceAll('¶ ', '');
+    } else {
+      return noteText.replaceAll('¶ ', '');
+    }
+  }
+
+  /// Builds highlighted text spans from plain text
+  TextSpan _buildHighlightedTextSpan(
+      String text, TextStyle baseStyle, RegExp regex, Color highlightColor) {
+    final spans = <InlineSpan>[];
+    int start = 0;
+
+    // Early exit if no matches
+    if (!regex.hasMatch(text)) {
+      return TextSpan(text: text, style: baseStyle);
+    }
+
+    for (final match in regex.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(TextSpan(
+            text: text.substring(start, match.start), style: baseStyle));
+      }
+      spans.add(
+        TextSpan(
+          text: text.substring(match.start, match.end),
+          style: baseStyle.copyWith(
+              backgroundColor: highlightColor, fontWeight: FontWeight.bold),
+        ),
+      );
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start), style: baseStyle));
+    }
+    return TextSpan(children: spans);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
@@ -119,6 +167,34 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
           return Text(
             'Error loading note (empty note detected)',
             style: TextStyle(color: Colors.red),
+          );
+        }
+
+        // When highlighting is requested, show plain text with highlights
+        // This is used in search results to show matching text
+        if (widget.highlightRegex != null && widget.highlightColor != null) {
+          final plainText = _getPlainTextFromNote(widget.noteText);
+          final baseStyle = TextStyle(
+            fontSize: FontSizeAdjustments.getAdjustedSize(
+              currentNoteFontFamily,
+              fontSizeNotifier.value - 4,
+            ),
+            fontFamily: currentNoteFontFamily,
+            color: textColor,
+            height: defaultLineHeight,
+          );
+
+          final highlightedSpan = _buildHighlightedTextSpan(
+            plainText,
+            baseStyle,
+            widget.highlightRegex!,
+            widget.highlightColor!,
+          );
+
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: widget.onTap,
+            child: Text.rich(highlightedSpan),
           );
         }
 

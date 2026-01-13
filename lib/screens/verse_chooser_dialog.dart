@@ -358,21 +358,20 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       final showQuickJump = prefs.getBool(_prefsKeyShowQuickJump);
       if (mounted) {
         setState(() {
-          _tapMode = tapModeIdx != null
-              ? TapMode.values[tapModeIdx]
-              : TapMode.threeTap;
+          _tapMode =
+              tapModeIdx != null ? TapMode.values[tapModeIdx] : TapMode.twoTap;
           _navigationMode = navigationModeIdx != null
               ? NavigationMode.values[navigationModeIdx]
               : NavigationMode.grid;
-          _showQuickJump = showQuickJump ?? false;
+          _showQuickJump = showQuickJump ?? true;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _tapMode = TapMode.threeTap;
+          _tapMode = TapMode.twoTap;
           _navigationMode = NavigationMode.grid;
-          _showQuickJump = false;
+          _showQuickJump = true;
         });
       }
     }

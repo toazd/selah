@@ -18,7 +18,8 @@ import '../utils/snackbar_notification.dart';
 import '../utils/error_handler.dart';
 
 /// Get adaptive text color based on background color and theme
-Color getAdaptiveTextColor(BuildContext context, {Color? backgroundColor, bool usePrimaryColor = false}) {
+Color getAdaptiveTextColor(BuildContext context,
+    {Color? backgroundColor, bool usePrimaryColor = false}) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   Color bgColor;
@@ -27,10 +28,14 @@ Color getAdaptiveTextColor(BuildContext context, {Color? backgroundColor, bool u
     bgColor = backgroundColor;
   } else if (usePrimaryColor) {
     // Use primary color (for buttons)
-    bgColor = isDark ? const Color(0xFF64B5F6) : const Color(0xFF1976D2); // Default blue colors
+    bgColor = isDark
+        ? const Color(0xFF64B5F6)
+        : const Color(0xFF1976D2); // Default blue colors
   } else {
     // Use background color (default behavior)
-    bgColor = isDark ? const Color(0xFF000010) : const Color.fromARGB(255, 255, 247, 203);
+    bgColor = isDark
+        ? const Color(0xFF000010)
+        : const Color.fromARGB(255, 255, 247, 203);
   }
 
   return bgColor.computeLuminance() > 0.5 ? Colors.black : Colors.white;
@@ -45,7 +50,9 @@ class SelahImportService {
       bool hasPermission = await _requestStoragePermission();
       if (!hasPermission) {
         if (context.mounted) {
-          showStyledSnackBar(context, 'Storage permission is required for import.', isError: true);
+          showStyledSnackBar(
+              context, 'Storage permission is required for import.',
+              isError: true);
         }
         return;
       }
@@ -68,7 +75,10 @@ class SelahImportService {
           barrierDismissible: false,
           builder: (context) => AlertDialog(
             title: Text('Reading Backup File',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -76,7 +86,9 @@ class SelahImportService {
                 const SizedBox(height: 16),
                 Text('Validating backup file...',
                     style: TextStyle(
-                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))),
               ],
             ),
           ),
@@ -91,7 +103,8 @@ class SelahImportService {
 
       // Show selection dialog
       if (context.mounted) {
-        final selectionResult = await _showImportSelectionDialog(context, importData);
+        final selectionResult =
+            await _showImportSelectionDialog(context, importData);
 
         if ((selectionResult['selectedTypes'] as Set<String>).isEmpty) return;
 
@@ -107,7 +120,9 @@ class SelahImportService {
               title: Center(
                   child: Text('Importing Data',
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)))),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)))),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -125,7 +140,8 @@ class SelahImportService {
         Map<String, bool> results;
 
         // Import selected data types
-        results = await _importSelectedData(importData, selectedTypes, isMergeMode, syncService);
+        results = await _importSelectedData(
+            importData, selectedTypes, isMergeMode, syncService);
 
         // Close progress dialog
         if (context.mounted) Navigator.pop(context);
@@ -148,15 +164,23 @@ class SelahImportService {
           builder: (context) => AlertDialog(
             constraints: const BoxConstraints(maxWidth: 400),
             title: const Text('Import Failed',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             content: Text('Failed to import data: $e',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text('Ok',
                     style: TextStyle(
-                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))),
               ),
             ],
           ),
@@ -166,7 +190,8 @@ class SelahImportService {
   }
 
   /// Extract and validate JSON from zip file
-  static Future<Map<String, dynamic>> _extractAndValidateImportData(String zipFilePath) async {
+  static Future<Map<String, dynamic>> _extractAndValidateImportData(
+      String zipFilePath) async {
     // Extract zip file to temporary directory
     final tempDir = await Directory.systemTemp.createTemp('selah_import_');
     final encoder = ZipDecoder();
@@ -243,7 +268,9 @@ class SelahImportService {
                       const SizedBox(height: 16),
                       Text('Import Mode:',
                           style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
                       RadioGroup<bool>(
                         groupValue: isMergeMode,
                         onChanged: (bool? value) {
@@ -261,7 +288,8 @@ class SelahImportService {
                                       fontSize: uiFontSize,
                                       fontFamily: uiFontFamily,
                                       color: getAdaptiveTextColor(context))),
-                              value: false, // REQUIRED: The value this tile represents
+                              value:
+                                  false, // REQUIRED: The value this tile represents
                               controlAffinity: ListTileControlAffinity.leading,
                               // groupValue and onChanged are handled by the parent RadioGroup.
                             ),
@@ -271,7 +299,8 @@ class SelahImportService {
                                       fontSize: uiFontSize,
                                       fontFamily: uiFontFamily,
                                       color: getAdaptiveTextColor(context))),
-                              value: true, // REQUIRED: The value this tile represents
+                              value:
+                                  true, // REQUIRED: The value this tile represents
                               controlAffinity: ListTileControlAffinity.leading,
                               // groupValue and onChanged are handled by the parent RadioGroup.
                             ),
@@ -281,7 +310,9 @@ class SelahImportService {
                       const SizedBox(height: 16),
                       Text('Available data in backup:',
                           style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
                       const SizedBox(height: 8),
                       ...availableTypes.map((type) {
                         final count = _getDataTypeCount(importData, type);
@@ -315,7 +346,9 @@ class SelahImportService {
                       onPressed: () => Navigator.pop(context, null),
                       child: Text('Cancel',
                           style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, {
@@ -324,7 +357,9 @@ class SelahImportService {
                       }),
                       child: Text('Import Selected',
                           style: TextStyle(
-                              fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
                     ),
                   ],
                 );
@@ -337,13 +372,23 @@ class SelahImportService {
 
   /// Import selected data types
   static Future<Map<String, bool>> _importSelectedData(
-      Map<String, dynamic> data, Set<String> selectedTypes, bool isMergeMode, SupabaseSyncService syncService) async {
+      Map<String, dynamic> data,
+      Set<String> selectedTypes,
+      bool isMergeMode,
+      SupabaseSyncService syncService) async {
     final results = <String, bool>{};
+
+    // Reset sync timestamps for imported data types BEFORE syncing.
+    // Imported records have their original updated_at timestamps which may be
+    // older than the last sync time, causing them to be filtered out during sync.
+    // Resetting the sync timestamps ensures a full sync will pick up all records.
+    await syncService.resetSyncTimestampsForImport(selectedTypes);
 
     // Import highlights if selected
     if (selectedTypes.contains('highlights')) {
       try {
-        await _importHighlights(data['highlights'] as List<dynamic>, isMergeMode);
+        await _importHighlights(
+            data['highlights'] as List<dynamic>, isMergeMode);
         LocalDataChangeNotifier.notifyHighlightsChanged();
 
         // Trigger sync after results merged and UI updated
@@ -406,11 +451,13 @@ class SelahImportService {
     // Import search history if selected
     if (selectedTypes.contains('searchHistory')) {
       try {
-        await _importSearchHistory(data['searchHistory'] as List<dynamic>, isMergeMode);
+        await _importSearchHistory(
+            data['searchHistory'] as List<dynamic>, isMergeMode);
         LocalDataChangeNotifier.notifySearchHistoryChanged();
 
         // Trigger sync after search history is imported to maintain continuity
-        final searchHistoryCount = (data['searchHistory'] as List<dynamic>).length;
+        final searchHistoryCount =
+            (data['searchHistory'] as List<dynamic>).length;
         if (searchHistoryCount > 0) {
           try {
             await syncService.syncSearchHistory();
@@ -418,7 +465,10 @@ class SelahImportService {
             ErrorHandler.logError(
               e,
               customMessage: '_ImportSelectedData syncSearchHistory exception',
-              context: {'class': 'SelahImportService', 'method': '_importSelectedData'},
+              context: {
+                'class': 'SelahImportService',
+                'method': '_importSelectedData'
+              },
             );
           }
         }
@@ -433,7 +483,8 @@ class SelahImportService {
   }
 
   /// Import highlights from Selah backup
-  static Future<void> _importHighlights(List<dynamic> highlights, bool isMergeMode) async {
+  static Future<void> _importHighlights(
+      List<dynamic> highlights, bool isMergeMode) async {
     if (!isMergeMode) {
       // Clear existing highlights in replace mode
       final dbHighlights = await HighlightsDatabase.getDatabase();
@@ -441,6 +492,10 @@ class SelahImportService {
     }
 
     // Import highlights
+    // Note: We intentionally don't preserve UUIDs from the backup file.
+    // UUIDs are specific to each user's Supabase account. If we preserved them,
+    // the sync would see UUIDs that don't exist in the current user's remote data
+    // and incorrectly delete the imported records as "remotely deleted".
     for (final highlight in highlights) {
       await HighlightsDatabase.addHighlight(
         book: highlight['book'] as String,
@@ -452,13 +507,14 @@ class SelahImportService {
         createdAt: highlight['created_at'] as int,
         updatedAt: highlight['updated_at'] as int,
         skipSync: true,
-        uuid: highlight['uuid'] as String?, // Preserve UUID for sync continuity
+        uuid: null, // Don't preserve UUID - let sync assign new ones
       );
     }
   }
 
   /// Import notes from Selah backup
-  static Future<void> _importNotes(List<dynamic> notes, bool isMergeMode) async {
+  static Future<void> _importNotes(
+      List<dynamic> notes, bool isMergeMode) async {
     if (!isMergeMode) {
       // Clear existing notes in replace mode
       final db = await NotesDatabase.getDatabase();
@@ -466,9 +522,14 @@ class SelahImportService {
     }
 
     // Import notes
+    // Note: We intentionally don't preserve UUIDs from the backup file.
+    // UUIDs are specific to each user's Supabase account. If we preserved them,
+    // the sync would see UUIDs that don't exist in the current user's remote data
+    // and incorrectly delete the imported records as "remotely deleted".
     for (final note in notes) {
       // Convert to Delta format before storing
-      final deltaNoteText = NoteStorageFormat.ensureDeltaFormat(note['note_text'] as String);
+      final deltaNoteText =
+          NoteStorageFormat.ensureDeltaFormat(note['note_text'] as String);
 
       await NotesDatabase.addOrUpdateNote(
         book: note['book'] as String,
@@ -476,13 +537,14 @@ class SelahImportService {
         verse: note['verse'] as int,
         noteText: deltaNoteText,
         skipSync: true,
-        uuid: note['uuid'] as String?, // Preserve UUID for sync continuity
+        uuid: null, // Don't preserve UUID - let sync assign new ones
       );
     }
   }
 
   /// Import history from Selah backup
-  static Future<void> _importHistory(List<dynamic> history, bool isMergeMode) async {
+  static Future<void> _importHistory(
+      List<dynamic> history, bool isMergeMode) async {
     if (!isMergeMode) {
       // Clear existing history in replace mode
       final db = await HistoryDatabase.getDatabase();
@@ -490,6 +552,10 @@ class SelahImportService {
     }
 
     // Import history
+    // Note: We intentionally don't preserve UUIDs from the backup file.
+    // UUIDs are specific to each user's Supabase account. If we preserved them,
+    // the sync would see UUIDs that don't exist in the current user's remote data
+    // and incorrectly delete the imported records as "remotely deleted".
     for (final entry in history) {
       await HistoryDatabase.addHistory(
         entry['book'] as String,
@@ -497,13 +563,14 @@ class SelahImportService {
         entry['verse'] as int?,
         entry['timestamp'] as int,
         false,
-        uuid: entry['uuid'] as String?, // Preserve UUID for sync continuity
+        uuid: null, // Don't preserve UUID - let sync assign new ones
       );
     }
   }
 
   /// Import search history from Selah backup
-  static Future<void> _importSearchHistory(List<dynamic> searchHistory, bool isMergeMode) async {
+  static Future<void> _importSearchHistory(
+      List<dynamic> searchHistory, bool isMergeMode) async {
     if (!isMergeMode) {
       // Clear existing search history in replace mode
       await SearchDatabase.clearSearchHistory();
@@ -518,6 +585,10 @@ class SelahImportService {
         return false; // Default to false for any other type
       }
 
+      // Note: We intentionally don't preserve UUIDs from the backup file.
+      // UUIDs are specific to each user's Supabase account. If we preserved them,
+      // the sync would see UUIDs that don't exist in the current user's remote data
+      // and incorrectly delete the imported records as "remotely deleted".
       await SearchDatabase.addSearchHistory(
         entry['query'] as String,
         parseBool(entry['useRegex']),
@@ -528,7 +599,7 @@ class SelahImportService {
         entry['bookFilterType'] as String,
         entry['customBookFilter'] as String,
         entry['timestamp'] as int,
-        uuid: entry['uuid'] as String?, // Preserve UUID for sync continuity
+        uuid: null, // Don't preserve UUID - let sync assign new ones
       );
     }
   }
@@ -568,9 +639,12 @@ class SelahImportService {
   }
 
   /// Show import results dialog
-  static void _showImportResults(BuildContext context, Map<String, bool> results) {
-    final successful = results.entries.where((e) => e.value).map((e) => e.key).toList();
-    final failed = results.entries.where((e) => !e.value).map((e) => e.key).toList();
+  static void _showImportResults(
+      BuildContext context, Map<String, bool> results) {
+    final successful =
+        results.entries.where((e) => e.value).map((e) => e.key).toList();
+    final failed =
+        results.entries.where((e) => !e.value).map((e) => e.key).toList();
 
     //Show success snackbars for each successful import
     //for (final type in successful) {
@@ -584,28 +658,38 @@ class SelahImportService {
         builder: (context) => AlertDialog(
           constraints: const BoxConstraints(maxWidth: 400),
           title: const Text('Import Completed with Errors',
-              style: TextStyle(color: Colors.red, fontSize: uiFontSize, fontFamily: uiFontFamily)),
+              style: TextStyle(
+                  color: Colors.red,
+                  fontSize: uiFontSize,
+                  fontFamily: uiFontFamily)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('The following items failed to import:',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
-              ...failed.map((type) => Text('❌ ${_getDataTypeDisplayName(type)}')),
+              ...failed
+                  .map((type) => Text('❌ ${_getDataTypeDisplayName(type)}')),
               const SizedBox(height: 16),
               Text('Your existing data for failed items has been preserved.',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Ok',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
             ),
           ],
         ),
@@ -616,14 +700,20 @@ class SelahImportService {
         context: context,
         builder: (context) => AlertDialog(
           constraints: const BoxConstraints(maxWidth: 300),
-          content: Text('✅ All of the selected data types have been imported successfully.',
-              style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+          content: Text(
+              '✅ All of the selected data types have been imported successfully.',
+              style: TextStyle(
+                  fontSize: uiFontSize,
+                  fontFamily: uiFontFamily,
+                  color: getAdaptiveTextColor(context))),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Ok',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
             ),
           ],
         ),

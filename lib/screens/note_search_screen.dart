@@ -9,7 +9,6 @@ import 'package:flutter_quill/flutter_quill.dart' show Document;
 import '../database/notes_database.dart';
 import '../database/bible_database.dart';
 import '../main.dart';
-import '../utils/verse_display_utils.dart';
 import '../utils/book_name_converter.dart'; // Import for book name conversion
 import '../utils/book_filter.dart'; // Import for book filtering
 import '../database/history_database.dart'; // Import for history tracking
@@ -24,6 +23,7 @@ import '../utils/note_storage_format.dart';
 import '../utils/bible_utils.dart';
 import '../screens/note_screen.dart';
 import '../utils/error_handler.dart';
+import '../utils/verse_text_parser.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -95,6 +95,85 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   // Clear cache when search options change
   void _clearHighlightCache() {
     _highlightedSpansCache.clear();
+  }
+
+  // Get highlight color based on theme (same as search_screen.dart)
+  Color _getHighlightColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark
+        ? darkHighlightColor.value
+        : lightHighlightColor.value;
+  }
+
+  // Highlight matches in a parsed TextSpan (same logic as search_screen.dart)
+  TextSpan _highlightParsedSpan(
+      TextSpan span, RegExp regex, BuildContext context) {
+    final color = _getHighlightColor(context);
+
+    // Performance optimization: if no children and no text, return as-is
+    if (span.children == null && (span.text == null || span.text!.isEmpty)) {
+      return span;
+    }
+
+    // Handle spans with children (from VerseTextParser)
+    if (span.children != null && span.children!.isNotEmpty) {
+      return TextSpan(
+        style: span.style,
+        children: span.children!.map((child) {
+          if (child is TextSpan) {
+            return _highlightParsedSpan(child, regex, context);
+          }
+          return child;
+        }).toList(),
+      );
+    }
+
+    // Handle simple text spans (most common case after optimization)
+    if (span.text != null && span.text!.isNotEmpty) {
+      final text = span.text!;
+      final spans = <InlineSpan>[];
+      int start = 0;
+
+      // Performance optimization: early exit if no matches
+      if (!regex.hasMatch(text)) {
+        return span;
+      }
+
+      for (final match in regex.allMatches(text)) {
+        if (match.start > start) {
+          spans.add(TextSpan(
+              text: text.substring(start, match.start), style: span.style));
+        }
+        spans.add(
+          TextSpan(
+            text: text.substring(match.start, match.end),
+            style: (span.style ?? TextStyle())
+                .copyWith(backgroundColor: color, fontWeight: FontWeight.bold),
+          ),
+        );
+        start = match.end;
+      }
+      if (start < text.length) {
+        spans.add(TextSpan(text: text.substring(start), style: span.style));
+      }
+      return TextSpan(style: span.style, children: spans);
+    }
+
+    return span;
+  }
+
+  // Get highlighted span for verse text in search results
+  TextSpan _getHighlightedVerseSpan(
+      String verseText, TextStyle baseStyle, BuildContext context) {
+    if (_currentRegex == null) {
+      return VerseTextParser.parseVerseText(verseText, baseStyle);
+    }
+
+    // Parse the verse text first (handles red letters, etc.)
+    final parsedSpan = VerseTextParser.parseVerseText(verseText, baseStyle);
+
+    // Then apply highlighting
+    return _highlightParsedSpan(parsedSpan, _currentRegex!, context);
   }
 
   // Create RegExp with conditional unicode flag based on pattern content
@@ -1349,61 +1428,37 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                         .shrink();
                                                                   }
 
-                                                                  // Use the same verse display widget as bible screen
-                                                                  return buildVerseDisplayWidget(
-                                                                    context:
-                                                                        context,
-                                                                    verseNumber:
-                                                                        result['verse']
-                                                                            as int,
-                                                                    rawVerseText:
-                                                                        verseData['text']
-                                                                            as String,
-                                                                    baseTextStyle:
-                                                                        TextStyle(
-                                                                      fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                                          fontFamilyNotifier
-                                                                              .value,
-                                                                          fontSize),
-                                                                      fontFamily:
-                                                                          fontFamilyNotifier
-                                                                              .value,
-                                                                      color: Theme.of(context).brightness ==
-                                                                              Brightness
-                                                                                  .dark
-                                                                          ? darkTextColor
-                                                                              .value
-                                                                          : lightTextColor
-                                                                              .value,
-                                                                    ),
-                                                                    backgroundColor:
-                                                                        barColor,
-                                                                    noteForVerse: {},
-                                                                    highlightsForVerse: [],
-                                                                    showNotesInline:
-                                                                        false,
+                                                                  // Display verse text with search highlighting
+                                                                  final verseTextStyle =
+                                                                      TextStyle(
+                                                                    fontSize: FontSizeAdjustments.getAdjustedSize(
+                                                                        fontFamilyNotifier
+                                                                            .value,
+                                                                        fontSize),
                                                                     fontFamily:
                                                                         fontFamilyNotifier
                                                                             .value,
-                                                                    lightModeTextColor:
-                                                                        lightTextColor
+                                                                    color: Theme.of(context).brightness ==
+                                                                            Brightness
+                                                                                .dark
+                                                                        ? darkTextColor
+                                                                            .value
+                                                                        : lightTextColor
                                                                             .value,
-                                                                    darkModeTextColor:
-                                                                        darkTextColor
-                                                                            .value,
-                                                                    onVerseTap:
-                                                                        null,
-                                                                    onVerseLongPress:
-                                                                        null,
-                                                                    onLinkTap:
-                                                                        null,
-                                                                    verseKey:
-                                                                        null,
-                                                                    onNoteIconTap:
-                                                                        null,
-                                                                    displayVerseNumber:
-                                                                        false,
                                                                   );
+
+                                                                  // Get verse text and apply highlighting
+                                                                  final rawVerseText =
+                                                                      verseData[
+                                                                              'text']
+                                                                          as String;
+                                                                  final highlightedVerseSpan = _getHighlightedVerseSpan(
+                                                                      rawVerseText,
+                                                                      verseTextStyle,
+                                                                      context);
+
+                                                                  return Text.rich(
+                                                                      highlightedVerseSpan);
                                                                 },
                                                               ),
                                                               const SizedBox(
@@ -1415,6 +1470,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                     as String,
                                                                 highlightRegex:
                                                                     _currentRegex,
+                                                                highlightColor:
+                                                                    _getHighlightColor(
+                                                                        context),
                                                                 onLinkTap: (url,
                                                                         element) =>
                                                                     handleVerseLink(

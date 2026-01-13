@@ -28,8 +28,8 @@ dependencies:
   url_launcher: ^6.3.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  #flutter_test:
+  #  sdk: flutter
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
   flutter_prunekit: ^2.4.0
