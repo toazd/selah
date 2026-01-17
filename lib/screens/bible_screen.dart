@@ -8,18 +8,17 @@ import '../utils/preferences_constants.dart';
 import '../database/history_database.dart';
 import '../main.dart'; // For color notifiers
 import '../services/supabase_sync_service.dart';
-import 'verse_chooser_dialog.dart'; // <-- new import
-import 'note_screen.dart'; // <-- new import
-import 'note_search_screen.dart'; // <-- new import
+import 'verse_chooser_dialog.dart';
+import 'note_screen.dart';
+import 'note_search_screen.dart';
 import 'dart:async'; // For StreamSubscription
 import '../services/local_data_change_notifier.dart';
-import '../utils/verse_display_utils.dart'; // <-- new import for shared verse display utilities
 import '../utils/book_name_converter.dart';
-import '../utils/bible_utils.dart'; // <-- shared utility functions
-import '../utils/data_loaders.dart'; // <-- shared data loading functions
-import '../utils/dialog_utils.dart'; // <-- shared dialog functions
-import '../utils/font_size_adjustments.dart';
+import '../utils/bible_utils.dart'; // shared utility functions
+import '../utils/data_loaders.dart'; // shared data loading functions
+import '../utils/dialog_utils.dart'; // shared dialog functions
 import 'bible_screen_header.dart'; // Import custom header
+import '../widgets/chapter_content_widget.dart'; // For PageView chapter display
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor, BuildContext context) {
@@ -41,6 +40,46 @@ Color _adjustBarColor(Color backgroundColor, BuildContext context) {
   }
 }
 
+/// Data class to hold preloaded chapter information for PageView caching
+class _ChapterData {
+  final String book;
+  final int chapter;
+  final List<Map<String, dynamic>> verses;
+  final Map<int, Map<String, dynamic>> notes;
+  final Map<int, List<Map<String, dynamic>>> highlights;
+  final String? bookTitle;
+  final String? bookColophon;
+  final bool isLastChapter;
+
+  const _ChapterData({
+    required this.book,
+    required this.chapter,
+    required this.verses,
+    required this.notes,
+    required this.highlights,
+    this.bookTitle,
+    this.bookColophon,
+    this.isLastChapter = false,
+  });
+
+  /// Creates a copy with updated fields
+  _ChapterData copyWith({
+    Map<int, Map<String, dynamic>>? notes,
+    Map<int, List<Map<String, dynamic>>>? highlights,
+  }) {
+    return _ChapterData(
+      book: book,
+      chapter: chapter,
+      verses: verses,
+      notes: notes ?? this.notes,
+      highlights: highlights ?? this.highlights,
+      bookTitle: bookTitle,
+      bookColophon: bookColophon,
+      isLastChapter: isLastChapter,
+    );
+  }
+}
+
 class BibleScreen extends StatefulWidget {
   final String? initialBook;
   final int? initialChapter;
@@ -54,6 +93,7 @@ class BibleScreen extends StatefulWidget {
   final ValueListenable<bool>? showNotesInline;
   final VoidCallback? onShowNotesSearch;
   //final VoidCallback? onShowBookmarksManager;
+  final VoidCallback? onNoteScreenClosed;
 
   const BibleScreen({
     super.key,
@@ -68,6 +108,7 @@ class BibleScreen extends StatefulWidget {
     this.showNotesInline, // optional listenable for notes display mode
     this.onShowNotesSearch,
     //this.onShowBookmarksManager,
+    this.onNoteScreenClosed,
   });
   @override
   State<BibleScreen> createState() => _BibleScreenState();
@@ -81,25 +122,41 @@ class _BibleScreenState extends State<BibleScreen> {
   int? _selectedChapter;
   int? _selectedVerse;
   bool _loading = true;
-  String? _bookTitle;
-  String? _bookColophon;
-  final ScrollController _scrollController = ScrollController();
-  final Map<int, GlobalKey> _verseKeys = {}; // key per verse
   // Local fallback for notes inline mode
   late final ValueNotifier<bool> _localShowNotesInlineFallback =
       ValueNotifier<bool>(true);
   Map<int, Map<String, dynamic>> _notes = {};
   Map<int, List<Map<String, dynamic>>> _highlights = {};
 
-  // Scroll management to prevent overshooting
-  bool _isScrolling = false;
-  DateTime? _lastScrollTime;
   // Navigation management to prevent rapid successive navigation
   bool _isNavigating = false;
 
   // Stream subscriptions for real-time updates
   late StreamSubscription _highlightsSubscription;
   late StreamSubscription _notesSubscription;
+
+  // ===== PageView Navigation System =====
+  // Virtual index system for seamless chapter navigation across all books
+  // Total chapters in KJV Bible: 1189 (Genesis 1 = index 0, Revelation 22 = index 1188)
+  static const int _totalChapters = 1189;
+
+  // PageController for chapter navigation with swipe animations
+  late PageController _pageController;
+
+  // Lookup tables for book/chapter ↔ virtual index mapping
+  // Built once on initialization for O(1) lookups
+  List<(String book, int chapter)>? _indexToLocation; // index → (book, chapter)
+  Map<String, Map<int, int>>? _locationToIndex; // book → chapter → index
+
+  // Cache for preloaded chapter data (verses, notes, highlights, metadata)
+  // Key: real chapter index (0-1188), Value: chapter data
+  final Map<int, _ChapterData> _chapterCache = {};
+
+  // Track current page to detect direction changes (real index 0-1188)
+  int _currentPageIndex = 0;
+
+  // Keys to access ChapterContentWidget state for verse scrolling
+  final Map<int, GlobalKey<ChapterContentWidgetState>> _chapterWidgetKeys = {};
 
   @override
   void initState() {
@@ -112,8 +169,7 @@ class _BibleScreenState extends State<BibleScreen> {
 
     // Listen to local data change notifier streams for immediate updates during local operations
     LocalDataChangeNotifier.highlightsChangedStream.listen((_) async {
-      await _loadHighlights();
-
+      await _reloadCurrentChapterData();
       if (mounted) {
         setState(() {});
       }
@@ -122,30 +178,83 @@ class _BibleScreenState extends State<BibleScreen> {
     // Listen to sync service streams for real-time updates
     _highlightsSubscription =
         SupabaseSyncService.highlightsChangedStream.listen((_) async {
-      await _loadHighlights();
-
+      await _reloadCurrentChapterData();
       if (mounted) {
         setState(() {});
-      } else {}
+      }
     });
 
     // local
     LocalDataChangeNotifier.notesChangedStream.listen((_) async {
-      await _loadNotes();
+      await _reloadCurrentChapterData();
       if (mounted) setState(() {});
     });
 
     // remote
     _notesSubscription =
         SupabaseSyncService.notesChangedStream.listen((_) async {
-      await _loadNotes();
+      await _reloadCurrentChapterData();
       if (mounted) setState(() {});
-      // Add this debug print
     });
   }
 
-  Future<void> _loadInitialLocation() async {
+  /// Reloads notes and highlights for the current chapter and updates cache
+  Future<void> _reloadCurrentChapterData() async {
+    if (_selectedBook == null || _selectedChapter == null) return;
+
+    // Reload notes and highlights
+    await _loadNotes();
+    await _loadHighlights();
+
+    // Update cache for current page
+    if (_chapterCache.containsKey(_currentPageIndex)) {
+      _chapterCache[_currentPageIndex] =
+          _chapterCache[_currentPageIndex]!.copyWith(
+        notes: Map.from(_notes),
+        highlights: Map.from(_highlights),
+      );
+    }
+  }
+
+  /// Builds the virtual index lookup tables for O(1) book/chapter ↔ index conversion
+  Future<void> _buildIndexLookupTables() async {
+    if (_indexToLocation != null) return; // Already built
+
     _books = await BibleDatabase.getBooks();
+    _indexToLocation = [];
+    _locationToIndex = {};
+
+    for (final book in _books) {
+      final chapters = await BibleDatabase.getChapters(book);
+      _locationToIndex![book] = {};
+      for (final chapter in chapters) {
+        final index = _indexToLocation!.length;
+        _indexToLocation!.add((book, chapter));
+        _locationToIndex![book]![chapter] = index;
+      }
+    }
+  }
+
+  /// Converts a chapter index (0-1188) to (book, chapter) tuple
+  (String book, int chapter) _indexToBookChapter(int index) {
+    if (_indexToLocation == null || _indexToLocation!.isEmpty) {
+      return ('Gen', 1); // Fallback
+    }
+    // Clamp index to valid range
+    final clampedIndex = index.clamp(0, _totalChapters - 1);
+    return _indexToLocation![clampedIndex];
+  }
+
+  /// Converts (book, chapter) to index
+  int _bookChapterToIndex(String book, int chapter) {
+    if (_locationToIndex == null) return 0;
+    return _locationToIndex![book]?[chapter] ?? 0;
+  }
+
+  Future<void> _loadInitialLocation() async {
+    // Build lookup tables first
+    await _buildIndexLookupTables();
+
     _selectedBook =
         (widget.initialBook != null && _books.contains(widget.initialBook))
             ? widget.initialBook
@@ -157,19 +266,113 @@ class _BibleScreenState extends State<BibleScreen> {
             _chapters.contains(widget.initialChapter))
         ? widget.initialChapter
         : (_chapters.isNotEmpty ? _chapters.first : null);
+
+    // Calculate initial page index (0-1188)
+    _currentPageIndex = _selectedBook != null && _selectedChapter != null
+        ? _bookChapterToIndex(_selectedBook!, _selectedChapter!)
+        : 0;
+
+    // Initialize PageController at real index
+    _pageController = PageController(initialPage: _currentPageIndex);
+
     await _loadVerses();
-    // Load book metadata after setting the initial book
-    await _loadBookMetadata();
     _selectedVerse = (widget.initialVerse != null &&
             _verses.any((v) => v['verse'] == widget.initialVerse))
         ? widget.initialVerse
         : null;
 
+    // Preload current chapter data into cache
+    await _preloadChapterData(_currentPageIndex);
+
     setState(() {
       _loading = false;
     });
-    // Scroll after first build
-    _scrollToSelected();
+
+    // Scroll to initial verse after first build if specified
+    if (_selectedVerse != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToVerseOnCurrentPage(_selectedVerse!);
+      });
+    }
+  }
+
+  /// Preloads chapter data for a given virtual index into the cache
+  Future<_ChapterData> _preloadChapterData(int index) async {
+    // Return cached data if available
+    if (_chapterCache.containsKey(index)) {
+      return _chapterCache[index]!;
+    }
+
+    final (book, chapter) = _indexToBookChapter(index);
+
+    // Load verses
+    final verses = await BibleDatabase.getVerses(book, chapter);
+    // Sort verses
+    if (verses.isNotEmpty) {
+      final hasId = verses.first.containsKey('id');
+      verses.sort((a, b) {
+        final left = hasId ? toInt(a['id']) : toInt(a['verse']);
+        final right = hasId ? toInt(b['id']) : toInt(b['verse']);
+        return left.compareTo(right);
+      });
+    }
+
+    // Load notes and highlights
+    final notes = await loadNotesForChapter(book, chapter);
+    final highlights = await loadHighlightsForChapter(book, chapter);
+
+    // Load metadata
+    String? title;
+    String? colophon;
+    if (book == 'Psa') {
+      final metadata =
+          await BibleDatabase.getBookMetadata(book, chapter: chapter);
+      title = metadata?['title'] as String?;
+      colophon = metadata?['colophon'] as String?;
+    } else {
+      final metadata = await BibleDatabase.getBookMetadata(book);
+      title = metadata?['title'] as String?;
+      colophon = metadata?['colophon'] as String?;
+    }
+
+    // Determine if this is the last chapter of the book
+    final bookChapters = await BibleDatabase.getChapters(book);
+    final isLastChapter =
+        bookChapters.isNotEmpty && chapter == bookChapters.last;
+
+    final chapterData = _ChapterData(
+      book: book,
+      chapter: chapter,
+      verses: verses,
+      notes: notes,
+      highlights: highlights,
+      bookTitle: title,
+      bookColophon: colophon,
+      isLastChapter: isLastChapter,
+    );
+
+    _chapterCache[index] = chapterData;
+
+    // Limit cache size to prevent memory issues (keep ~5 chapters)
+    if (_chapterCache.length > 5) {
+      // Remove entries furthest from current page
+      final keysToRemove = _chapterCache.keys
+          .where((k) => (k - _currentPageIndex).abs() > 2)
+          .toList();
+      for (final key in keysToRemove) {
+        _chapterCache.remove(key);
+      }
+    }
+
+    return chapterData;
+  }
+
+  /// Scrolls to a specific verse on the currently visible page
+  void _scrollToVerseOnCurrentPage(int verseNumber) {
+    final key = _chapterWidgetKeys[_currentPageIndex];
+    if (key?.currentState != null) {
+      key!.currentState!.scrollToVerse(verseNumber);
+    }
   }
 
   Future<void> _loadVerses() async {
@@ -185,17 +388,10 @@ class _BibleScreenState extends State<BibleScreen> {
           return left.compareTo(right);
         });
       }
-      // Rebuild verse keys
-      _verseKeys.clear();
-      for (final v in _verses) {
-        final n = toInt(v['verse'], orElse: 0);
-        if (n > 0) _verseKeys[n] = GlobalKey();
-      }
       await _loadNotes();
       await _loadHighlights();
     } else {
       _verses = [];
-      _verseKeys.clear();
       _notes.clear();
       _highlights.clear();
     }
@@ -218,36 +414,6 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  Future<void> _loadBookMetadata() async {
-    if (_selectedBook != null) {
-      Map<String, dynamic>? metadata;
-
-      //debugPrint('_selectedBook: $_selectedBook');
-
-      // Only pass chapter parameter for Psalms
-      if (_selectedBook == 'Psa') {
-        metadata = await BibleDatabase.getBookMetadata(
-          _selectedBook as String,
-          chapter: _selectedChapter,
-        );
-      } else {
-        metadata = await BibleDatabase.getBookMetadata(_selectedBook as String);
-      }
-
-      _bookTitle = metadata?['title'] as String?;
-      _bookColophon = metadata?['colophon'] as String?;
-
-      if (mounted) {
-        setState(() {});
-      }
-    } else {
-      setState(() {
-        _bookTitle = null;
-        _bookColophon = null;
-      });
-    }
-  }
-
   Future<void> _recordHistory() async {
     if (_selectedBook != null && _selectedChapter != null) {
       HistoryDatabase.addHistory(_selectedBook!, _selectedChapter!,
@@ -256,307 +422,80 @@ class _BibleScreenState extends State<BibleScreen> {
     }
   }
 
-  Future<void> _onChapterChanged(int? chapter,
-      {bool recordHistory = true}) async {
-    // Enhanced protection against rapid successive navigation
-    if (_isNavigating || chapter == null || !mounted) {
-      return;
-    }
+  /// Called when PageView page changes (via swipe or programmatic navigation)
+  void _onPageChanged(int newPageIndex) {
+    if (_isNavigating) return;
 
-    _isNavigating = true;
-    try {
-      setState(() {
-        _loading = true;
-      });
-      _selectedChapter = chapter;
+    // Update current page index (already in valid range 0-1188)
+    _currentPageIndex = newPageIndex;
 
-      // Reload metadata for Psalm superscriptions (titles)
-      if (_selectedBook == 'Psa') {
-        await _loadBookMetadata();
-      }
+    // Get new location from real index
+    final (book, chapter) = _indexToBookChapter(_currentPageIndex);
 
-      await _loadVerses();
+    // Update state
+    _selectedBook = book;
+    _selectedChapter = chapter;
+    _selectedVerse = null; // Reset verse selection on page change
 
-      setState(() {
-        // Set to null for chapter 1 OR for Psalms with titles (scroll to top), verse 1 otherwise
-        final shouldScrollToTop =
-            chapter == 1 || (_selectedBook == 'Psa' && _bookTitle != null);
-        _selectedVerse = shouldScrollToTop ? null : 1;
-        _loading = false;
-      });
-      if (widget.onLocationChanged != null) {
-        widget.onLocationChanged!(
-            _selectedBook, _selectedChapter, _selectedVerse);
-      }
-      if (recordHistory) {
-        _recordHistory();
-      }
-      // Scroll to selected verse (or top for chapter 1) after chapter navigation
-      // Add a small delay to ensure the scroll view is ready
-      await Future.delayed(Duration(milliseconds: 50));
-      if (mounted) {
-        _scrollToSelected();
-      }
-    } finally {
-      _isNavigating = false;
-    }
-  }
-
-  // Handle next chapter navigation (used by swipe gestures and buttons)
-  Future<void> _handleNextChapter() async {
-    if (_isNavigating) {
-      return;
-    }
-    if (_selectedChapter != null &&
-        _chapters.isNotEmpty &&
-        _selectedChapter! < _chapters.last) {
-      // Next chapter in same book
-      await _onChapterChanged(_selectedChapter! + 1, recordHistory: false);
-    } else if (_selectedChapter == _chapters.last &&
-        _books.indexOf(_selectedBook!) < _books.length - 1 &&
-        _selectedBook != _books.last) {
-      // Next book, first chapter - use atomic navigation to prevent race conditions
-      final nextBookIndex = _books.indexOf(_selectedBook!) + 1;
-      final nextBook = _books[nextBookIndex];
-      await _navigateToNextBook(nextBook, recordHistory: false);
-    }
-  }
-
-  // Atomic navigation to next book to prevent race conditions
-  Future<void> _navigateToNextBook(String nextBook,
-      {bool recordHistory = true}) async {
-    // Enhanced protection against rapid successive navigation
-    if (_isNavigating || !mounted) return;
-
-    _isNavigating = true;
-
-    // Perform all operations atomically in a single setState block
-    setState(() {
-      _loading = true;
+    // Update chapters list for the new book (used by some UI elements)
+    BibleDatabase.getChapters(book).then((chapters) {
+      _chapters = chapters;
     });
 
-    try {
-      // Update book and load metadata
-      _selectedBook = nextBook;
-      await _loadBookMetadata();
+    // Notify parent of location change
+    widget.onLocationChanged
+        ?.call(_selectedBook, _selectedChapter, _selectedVerse);
 
-      // Load chapters for the new book
-      _chapters = await BibleDatabase.getChapters(nextBook);
+    // Record history (swipe navigation doesn't record by default, but we do for consistency)
+    // Note: We don't record history on every swipe to avoid cluttering history
 
-      if (_chapters.isNotEmpty) {
-        // Set to first chapter of new book
-        _selectedChapter = _chapters.first;
-        await _loadVerses();
+    // Preload adjacent pages
+    _preloadAdjacentPages();
 
-        // Set verse to null for chapter 1 (scroll to top), verse 1 otherwise
-        _selectedVerse = _chapters.first == 1 ? null : 1;
-
-        if (widget.onLocationChanged != null) {
-          widget.onLocationChanged!(
-              _selectedBook, _selectedChapter, _selectedVerse);
-        }
-
-        if (recordHistory) {
-          await _recordHistory();
-        }
-
-        // Scroll to selected verse after state is updated
-        // Add a small delay to ensure the scroll view is ready
-        await Future.delayed(Duration(milliseconds: 50));
-        if (mounted) {
-          _scrollToSelected();
-        }
-      } else {
-        // Handle case where book has no chapters (shouldn't happen but being defensive)
-        _selectedChapter = null;
-        _selectedVerse = null;
-        _verses = [];
-        _verseKeys.clear();
-      }
-    } catch (e) {
-      // Handle any errors during navigation
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-      _isNavigating = false;
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  // Atomic navigation to previous book to prevent race conditions
-  Future<void> _navigateToPreviousBook(String prevBook,
-      {bool recordHistory = true}) async {
-    // Enhanced protection against rapid successive navigation
-    if (_isNavigating || !mounted) return;
+  /// Preloads chapter data for pages adjacent to the current page
+  Future<void> _preloadAdjacentPages() async {
+    // Preload previous page if not at start
+    if (_currentPageIndex > 0) {
+      _preloadChapterData(_currentPageIndex - 1);
+    }
 
-    _isNavigating = true;
-
-    // Perform all operations atomically in a single setState block
-    setState(() {
-      _loading = true;
-    });
-
-    try {
-      // Update book and load metadata
-      _selectedBook = prevBook;
-      await _loadBookMetadata();
-
-      // Load chapters for the new book
-      _chapters = await BibleDatabase.getChapters(prevBook);
-
-      if (_chapters.isNotEmpty) {
-        // Set to last chapter of previous book
-        _selectedChapter = _chapters.last;
-        await _loadVerses();
-
-        // Set verse to null for chapter 1 (scroll to top), verse 1 otherwise
-        _selectedVerse = _chapters.last == 1 ? null : 1;
-
-        if (widget.onLocationChanged != null) {
-          widget.onLocationChanged!(
-              _selectedBook, _selectedChapter, _selectedVerse);
-        }
-
-        if (recordHistory) {
-          _recordHistory();
-        }
-
-        // Scroll to selected verse (or top for chapter 1) after state is updated
-        // Add a small delay to ensure the scroll view is ready
-        await Future.delayed(Duration(milliseconds: 50));
-        if (mounted) {
-          _scrollToSelected();
-        }
-      } else {
-        // Handle case where book has no chapters (shouldn't happen but being defensive)
-        _selectedChapter = null;
-        _selectedVerse = null;
-        _verses = [];
-        _verseKeys.clear();
-      }
-    } catch (e) {
-      // Handle any errors during navigation
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-      _isNavigating = false;
+    // Preload next page if not at end
+    if (_currentPageIndex < _totalChapters - 1) {
+      _preloadChapterData(_currentPageIndex + 1);
     }
   }
 
-  // Handle previous chapter navigation (used by swipe gestures and buttons)
-  Future<void> _handlePreviousChapter() async {
-    if (_isNavigating) {
-      return;
-    }
-    if (_selectedChapter != null &&
-        _chapters.isNotEmpty &&
-        _selectedChapter! > _chapters.first) {
-      // Previous chapter in same book
-      await _onChapterChanged(_selectedChapter! - 1, recordHistory: false);
-    } else if (_selectedChapter == _chapters.first &&
-        _books.indexOf(_selectedBook!) > 0 &&
-        _selectedBook != _books.first) {
-      // Previous book, last chapter - use atomic navigation to prevent race conditions
-      final prevBookIndex = _books.indexOf(_selectedBook!) - 1;
-      final prevBook = _books[prevBookIndex];
-      await _navigateToPreviousBook(prevBook, recordHistory: false);
-    }
+  /// Navigate to previous chapter/page with animation
+  void _navigateToPreviousPage() {
+    if (!_pageController.hasClients) return;
+    if (_currentPageIndex <= 0) return; // Already at first chapter
+
+    _pageController.animateToPage(
+      _currentPageIndex - 1,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.fastEaseInToSlowEaseOut,
+    );
   }
 
-  void _scrollToSelected({bool animate = true}) {
-    // Prevent rapid successive scroll calls that cause overshooting
-    final now = DateTime.now();
-    if (_isScrolling && _lastScrollTime != null) {
-      final timeSinceLastScroll = now.difference(_lastScrollTime!);
-      if (timeSinceLastScroll.inMilliseconds < 500) {
-        return;
-      }
+  /// Navigate to next chapter/page with animation
+  void _navigateToNextPage() {
+    if (!_pageController.hasClients) return;
+    if (_currentPageIndex >= _totalChapters - 1) {
+      return; // Already at last chapter
     }
 
-    _isScrolling = true;
-    _lastScrollTime = now;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Check if scroll controller is attached to any scroll views before using it
-      if (!_scrollController.hasClients ||
-          _scrollController.positions.isEmpty) {
-        // Scroll controller not ready, retry after a short delay
-        _isScrolling = false;
-        if (mounted) {
-          Future.delayed(Duration(milliseconds: 100), () {
-            if (mounted && !_isNavigating) {
-              _scrollToSelected(animate: animate);
-            }
-          });
-        }
-        return;
-      }
-
-      // If no verse is selected (null), scroll to the top of the scroll view
-      if (_selectedVerse == null) {
-        if (animate) {
-          _scrollController
-              .animateTo(
-            0.0,
-            duration: Duration(milliseconds: 500),
-            curve: Curves.easeOut,
-          )
-              .then((_) {
-            _isScrolling = false;
-          }).catchError((error) {
-            // Handle scroll errors gracefully
-            _isScrolling = false;
-          });
-        } else {
-          _scrollController.jumpTo(0.0);
-          _isScrolling = false;
-        }
-
-        return;
-      }
-
-      // Otherwise, scroll to the selected verse
-      final key = _verseKeys[_selectedVerse!];
-
-      final ctx = key?.currentContext;
-      if (ctx != null) {
-        try {
-          // Use different alignment values based on layout mode
-          // In horizontal layout (stacked vertically), use smaller alignment to prevent overshooting
-          // In vertical layout (side by side), keep the original alignment
-          final alignment = isVerticalTile.value
-              ? 0.005
-              : 0.025; // 0.025 for vertical, 0.015 for horizontal
-
-          Scrollable.ensureVisible(
-            ctx,
-            alignment: alignment,
-            duration: Duration(
-                milliseconds: animate ? 250 : 0), // Slightly faster animation
-            curve: Curves.easeOut, // Use easeOut for more natural feel
-          ).then((_) {
-            // Reset scrolling flag after animation completes
-            Future.delayed(Duration(milliseconds: animate ? 250 : 0), () {
-              _isScrolling = false;
-            });
-          }).catchError((error) {
-            // Reset flag on error too
-            _isScrolling = false;
-          });
-        } catch (e) {
-          // Reset flag if ensureVisible fails
-          _isScrolling = false;
-        }
-      } else {
-        // Reset flag if context is not available
-        _isScrolling = false;
-      }
-    });
+    _pageController.animateToPage(
+      _currentPageIndex + 1,
+      duration: Duration(milliseconds: 300),
+      //curve: Curves.easeOut,
+      // curve: Curves.fastOutSlowIn,
+      curve: Curves.fastEaseInToSlowEaseOut,
+    );
   }
 
   @override
@@ -578,14 +517,13 @@ class _BibleScreenState extends State<BibleScreen> {
     _isNavigating = true;
 
     try {
-      _books = await BibleDatabase.getBooks();
+      // Ensure lookup tables are built
+      await _buildIndexLookupTables();
+
       _selectedBook = widget.initialBook;
       _chapters = await BibleDatabase.getChapters(_selectedBook!);
       _selectedChapter = widget.initialChapter ??
           (_chapters.isNotEmpty ? _chapters.first : null);
-
-      // Load metadata after setting chapter (especially important for Psalms)
-      await _loadBookMetadata();
 
       await _loadVerses();
 
@@ -593,12 +531,27 @@ class _BibleScreenState extends State<BibleScreen> {
       _selectedVerse = (widget.initialChapter == 1 && widget.initialVerse == 1)
           ? null
           : widget.initialVerse;
+
+      // Calculate target page index and jump to it
+      final targetIndex =
+          _bookChapterToIndex(_selectedBook!, _selectedChapter!);
+      _currentPageIndex = targetIndex;
+
+      // Preload chapter data
+      await _preloadChapterData(targetIndex);
+
+      // Jump to page (no animation for external navigation)
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(targetIndex);
+      }
+
       setState(() {});
 
-      // Add a small delay to ensure the scroll view is ready
-      await Future.delayed(Duration(milliseconds: 50));
-      if (mounted) {
-        _scrollToSelected();
+      // Scroll to verse if specified
+      if (_selectedVerse != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToVerseOnCurrentPage(_selectedVerse!);
+        });
       }
     } finally {
       _isNavigating = false;
@@ -618,10 +571,8 @@ class _BibleScreenState extends State<BibleScreen> {
     });
 
     try {
-      // Ensure books are loaded
-      if (_books.isEmpty) {
-        _books = await BibleDatabase.getBooks();
-      }
+      // Ensure lookup tables are built
+      await _buildIndexLookupTables();
 
       // Update book
       _selectedBook = book;
@@ -631,15 +582,11 @@ class _BibleScreenState extends State<BibleScreen> {
       if (_chapters.isEmpty) {
         _selectedChapter = null;
         _verses = [];
-        _verseKeys.clear();
       } else {
         if (!_chapters.contains(chapter)) {
           chapter = _chapters.first;
         }
         _selectedChapter = chapter;
-
-        // Load metadata after setting chapter (especially important for Psalms)
-        await _loadBookMetadata();
 
         await _loadVerses();
       }
@@ -652,6 +599,18 @@ class _BibleScreenState extends State<BibleScreen> {
         _selectedVerse = null;
       }
 
+      // Calculate target page index and navigate
+      final targetIndex = _bookChapterToIndex(book, chapter);
+      _currentPageIndex = targetIndex;
+
+      // Preload chapter data
+      await _preloadChapterData(targetIndex);
+
+      // Jump to the page (no animation for dialog/external navigation)
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(targetIndex);
+      }
+
       setState(() {
         _loading = false;
       });
@@ -662,10 +621,11 @@ class _BibleScreenState extends State<BibleScreen> {
         await _recordHistory();
       }
 
-      // Add a small delay to ensure the scroll view is ready
-      await Future.delayed(Duration(milliseconds: 50));
-      if (mounted) {
-        _scrollToSelected();
+      // Scroll to verse if specified
+      if (_selectedVerse != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToVerseOnCurrentPage(_selectedVerse!);
+        });
       }
     } finally {
       _isNavigating = false;
@@ -793,6 +753,11 @@ class _BibleScreenState extends State<BibleScreen> {
                 chapter: noteChapter,
                 verse: vn,
                 existingNote: existingNote)));
+    // Force focus to invisible button to prevent Windows OSK bug
+    // if (kDebugMode) {
+    //   debugPrint('>>> NoteScreen closed, calling onNoteScreenClosed callback');
+    // }
+    widget.onNoteScreenClosed?.call();
     await _loadNotes();
     // Note: sync operations are handled by database update methods, no need for additional marking
     if (mounted) setState(() {});
@@ -906,54 +871,6 @@ class _BibleScreenState extends State<BibleScreen> {
   //   }
   // }
 
-  // Build Widget for verse mode
-  Widget _buildVerseModeWidget({
-    required BuildContext context,
-    required double lineHeight,
-    required Color verseNumberColor,
-    required Color verseTextColor,
-    required bool showNotesInline,
-    required Color backgroundColor,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      //mainAxisSize: MainAxisSize.min,
-      children: buildVerseListWidget(
-        context: context,
-        verses: _verses,
-        verseKeys: _verseKeys,
-        notes: _notes,
-        highlights: _highlights,
-        textColor: verseTextColor,
-        verseNumberColor: verseNumberColor,
-        backgroundColor: backgroundColor,
-        lineHeight: lineHeightNotifier.value,
-        showNotesInline: showNotesInline,
-        fontFamily: fontFamilyNotifier.value,
-        lightHighlightTextColor: lightTextColor.value,
-        darkHighlightTextColor: darkTextColor.value,
-        onVerseTap: (verseNum) => _showAddNoteMenu(context, verseNum),
-        onVerseLongPress: (verseNum) => _enterHighlightMode(context, verseNum),
-        onLinkTap: (link, referenceText) => handleVerseLink(
-          context,
-          link,
-          referenceText,
-          navigateToVerse: _applyLocation,
-          onVerseLinkRecursion:
-              null, // Infinite recursion enabled by default in handleVerseLink
-          onNoteIconTap: (book, chapter, verse, noteText) =>
-              _openNote(verse, noteText, book, chapter),
-          onNoteEditTap: (book, chapter, verse, noteText) =>
-              _openNote(verse, noteText, book, chapter),
-        ),
-        lightVerseReferenceColor: lightVerseReferenceColor,
-        darkVerseReferenceColor: darkVerseReferenceColor,
-        onNoteIconTap: (vn, noteText) => _openNote(vn, noteText),
-        onNoteEditTap: (vn, noteText) => _openNote(vn, noteText),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1004,201 +921,114 @@ class _BibleScreenState extends State<BibleScreen> {
                             //mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onHorizontalDragEnd:
-                                      (DragEndDetails details) {
-                                    // Enhanced protection against rapid successive navigation
-                                    if (_isNavigating || !mounted) return;
+                                // PageView for smooth chapter navigation with swipe gestures
+                                // Using finite itemCount for simple wrap-around
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  onPageChanged: _onPageChanged,
+                                  itemCount: _totalChapters,
+                                  itemBuilder: (context, index) {
+                                    // index is already in valid range (0-1188)
+                                    final realIndex = index;
 
-                                    // Swipe navigation minimum velocity for changing chapters
-                                    const minVelocity = 300.0;
+                                    // Get or create a GlobalKey for this page's ChapterContentWidget
+                                    // Use realIndex for the key to reuse widgets for same chapter
+                                    _chapterWidgetKeys[realIndex] ??=
+                                        GlobalKey<ChapterContentWidgetState>();
 
-                                    // Ensure the swipe is primarily horizontal
-                                    final horizontalVelocity = details
-                                        .velocity.pixelsPerSecond.dx
-                                        .abs();
-                                    final verticalVelocity = details
-                                        .velocity.pixelsPerSecond.dy
-                                        .abs();
+                                    // Build the chapter content widget
+                                    return FutureBuilder<_ChapterData>(
+                                      future: _preloadChapterData(realIndex),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                                ConnectionState.waiting &&
+                                            !_chapterCache
+                                                .containsKey(realIndex)) {
+                                          return Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
 
-                                    if (horizontalVelocity > minVelocity &&
-                                        horizontalVelocity >
-                                            verticalVelocity * 2) {
-                                      if (details.velocity.pixelsPerSecond.dx >
-                                          0) {
-                                        // Right swipe - go to previous chapter
-                                        _handlePreviousChapter();
-                                      } else {
-                                        // Left swipe - go to next chapter
-                                        _handleNextChapter();
-                                      }
-                                    }
+                                        final chapterData = snapshot.data ??
+                                            _chapterCache[realIndex];
+                                        if (chapterData == null) {
+                                          return Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
+
+                                        return ChapterContentWidget(
+                                          key: _chapterWidgetKeys[realIndex],
+                                          book: chapterData.book,
+                                          chapter: chapterData.chapter,
+                                          verses: chapterData.verses,
+                                          notes: chapterData.notes,
+                                          highlights: chapterData.highlights,
+                                          bookTitle: chapterData.bookTitle,
+                                          bookColophon:
+                                              chapterData.bookColophon,
+                                          isLastChapter:
+                                              chapterData.isLastChapter,
+                                          showNotesInline: showNotesInline,
+                                          backgroundColor: bibleBgColor,
+                                          textColor: verseTextColor,
+                                          verseNumberColor: verseNumberColor,
+                                          onVerseTap: (verseNum) {
+                                            // Update current state for menu operations
+                                            _verses = chapterData.verses;
+                                            _notes = chapterData.notes;
+                                            _showAddNoteMenu(context, verseNum);
+                                          },
+                                          onVerseLongPress: (verseNum) {
+                                            _verses = chapterData.verses;
+                                            _enterHighlightMode(
+                                                context, verseNum);
+                                          },
+                                          onLinkTap: (link, referenceText) =>
+                                              handleVerseLink(
+                                            context,
+                                            link,
+                                            referenceText,
+                                            navigateToVerse: _applyLocation,
+                                            onVerseLinkRecursion: null,
+                                            onNoteIconTap: (book, chapter,
+                                                    verse, noteText) =>
+                                                _openNote(verse, noteText, book,
+                                                    chapter),
+                                            onNoteEditTap: (book, chapter,
+                                                    verse, noteText) =>
+                                                _openNote(verse, noteText, book,
+                                                    chapter),
+                                          ),
+                                          onNoteIconTap: (vn, noteText) =>
+                                              _openNote(vn, noteText),
+                                          onNoteEditTap: (vn, noteText) =>
+                                              _openNote(vn, noteText),
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: Builder(
-                                    builder: (context) {
-                                      //final lineHeight = lineHeightNotifier.value;
-
-                                      return RawScrollbar(
-                                          thumbColor: isDark
-                                              ? darkPrimaryColor.value
-                                                  .withValues(alpha: 0.3)
-                                              : lightPrimaryColor.value
-                                                  .withValues(alpha: 0.5),
-                                          thumbVisibility: false,
-                                          trackVisibility: false,
-                                          thickness: 16.0,
-                                          radius: Radius.circular(8.0),
-                                          controller: _scrollController,
-                                          child: ScrollConfiguration(
-                                              behavior: ScrollConfiguration.of(
-                                                      context)
-                                                  .copyWith(scrollbars: false),
-                                              child: SingleChildScrollView(
-                                                  controller: _scrollController,
-                                                  child: Padding(
-                                                    // Leave a large blank gap at the bottom for when reading while laying down
-                                                    padding: EdgeInsets.only(
-                                                        left: 0.0,
-                                                        top: 8.0,
-                                                        bottom: 300.0,
-                                                        right: 16.0),
-                                                    child: Column(
-                                                      //mainAxisSize: MainAxisSize.min,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .stretch,
-                                                      // Add book title and colophon
-                                                      children: [
-                                                        // Show book title only on Chapter 1, or for Psalms (superscriptions)
-                                                        if (_bookTitle !=
-                                                                null &&
-                                                            (_selectedChapter ==
-                                                                    1 ||
-                                                                _selectedBook ==
-                                                                    'Psa'))
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    bottom:
-                                                                        16.0),
-                                                            child: Center(
-                                                              child: Text(
-                                                                _bookTitle!,
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                                      fontFamilyNotifier
-                                                                          .value,
-                                                                      fontSizeNotifier
-                                                                              .value +
-                                                                          1),
-                                                                  color: isDark
-                                                                      ? darkTextColor
-                                                                          .value
-                                                                      : lightTextColor
-                                                                          .value,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        // Always use verse mode
-                                                        _buildVerseModeWidget(
-                                                          context: context,
-                                                          lineHeight:
-                                                              lineHeightNotifier
-                                                                  .value,
-                                                          verseNumberColor:
-                                                              verseNumberColor,
-                                                          verseTextColor:
-                                                              verseTextColor,
-                                                          showNotesInline:
-                                                              showNotesInline,
-                                                          backgroundColor:
-                                                              bibleBgColor,
-                                                        ),
-                                                        // Show colophon only on the last chapter
-                                                        if (_bookColophon !=
-                                                                null &&
-                                                            _bookColophon!
-                                                                .isNotEmpty &&
-                                                            _chapters
-                                                                .isNotEmpty &&
-                                                            _selectedChapter ==
-                                                                _chapters.last)
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    top: 16.0),
-                                                            child: Text(
-                                                              _bookColophon!,
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .left,
-                                                              style: TextStyle(
-                                                                fontStyle:
-                                                                    FontStyle
-                                                                        .italic,
-                                                                fontSize: FontSizeAdjustments.getAdjustedSize(
-                                                                    fontFamilyNotifier
-                                                                        .value,
-                                                                    fontSizeNotifier
-                                                                            .value -
-                                                                        1),
-                                                                color: isDark
-                                                                    ? darkTextColor
-                                                                        .value
-                                                                    : lightTextColor
-                                                                        .value,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ))));
-                                    },
-                                  ),
                                 ),
                               ),
                               if (showNavBar)
                                 Container(
                                   margin: EdgeInsetsGeometry.all(0),
                                   padding: EdgeInsetsGeometry.all(0),
-                                  // decoration: BoxDecoration(
-                                  //   border: Border.all(
-                                  //     color: Colors.red, // The color of the border
-                                  //     width: 2.0, // The thickness of the border (optional)
-                                  //   ),
-                                  // ),
                                   width: double.infinity,
                                   height: 40,
                                   color: barColor,
                                   child: Row(
-                                    //mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Expanded(
-                                        // child: Container(
-                                        //   decoration: BoxDecoration(
-                                        //     border: Border.all(
-                                        //       color: Colors.red, // The color of the border
-                                        //       width: 2.0, // The thickness of the border (optional)
-                                        //     ),
-                                        //   ),
                                         child: Center(
                                           child: IconButton(
                                             icon: Icon(
                                               Icons.arrow_back_ios_new,
-                                              color: isDark
-                                                  ? darkPrimaryColor.value
-                                                  : lightPrimaryColor.value,
+                                              color: _currentPageIndex > 0
+                                                  ? (isDark
+                                                      ? darkPrimaryColor.value
+                                                      : lightPrimaryColor.value)
+                                                  : Colors.grey,
                                               semanticLabel:
                                                   'Navigate to the Previous Chapter',
                                               size: 24.0,
@@ -1207,36 +1037,24 @@ class _BibleScreenState extends State<BibleScreen> {
                                             color: isDark
                                                 ? darkPrimaryColor.value
                                                 : lightPrimaryColor.value,
-                                            onPressed: _selectedChapter !=
-                                                        null &&
-                                                    _chapters.isNotEmpty &&
-                                                    _selectedChapter! >
-                                                        _chapters.first
-                                                ? () => _onChapterChanged(
-                                                    _selectedChapter! - 1,
-                                                    recordHistory: false)
-                                                : (_selectedChapter ==
-                                                            _chapters.first &&
-                                                        _books.indexOf(
-                                                                _selectedBook!) >
-                                                            0 &&
-                                                        _selectedBook !=
-                                                            _books.first)
-                                                    ? () =>
-                                                        _handlePreviousChapter()
-                                                    : null,
+                                            // Disabled at Genesis 1
+                                            onPressed: _currentPageIndex > 0
+                                                ? _navigateToPreviousPage
+                                                : null,
                                           ),
                                         ),
-                                        //),
                                       ),
                                       Expanded(
                                         child: Center(
                                           child: IconButton(
                                             icon: Icon(
                                               Icons.arrow_forward_ios,
-                                              color: isDark
-                                                  ? darkPrimaryColor.value
-                                                  : lightPrimaryColor.value,
+                                              color: _currentPageIndex <
+                                                      _totalChapters - 1
+                                                  ? (isDark
+                                                      ? darkPrimaryColor.value
+                                                      : lightPrimaryColor.value)
+                                                  : Colors.grey,
                                               semanticLabel:
                                                   'Navigate to the next chapter',
                                               size: 24.0,
@@ -1245,23 +1063,11 @@ class _BibleScreenState extends State<BibleScreen> {
                                             color: isDark
                                                 ? darkPrimaryColor.value
                                                 : lightPrimaryColor.value,
-                                            onPressed: _selectedChapter !=
-                                                        null &&
-                                                    _chapters.isNotEmpty &&
-                                                    _selectedChapter! <
-                                                        _chapters.last
-                                                ? () => _onChapterChanged(
-                                                    _selectedChapter! + 1,
-                                                    recordHistory: false)
-                                                : (_selectedChapter ==
-                                                            _chapters.last &&
-                                                        _books.indexOf(
-                                                                _selectedBook!) <
-                                                            _books.length - 1 &&
-                                                        _selectedBook !=
-                                                            _books.last)
-                                                    ? () => _handleNextChapter()
-                                                    : null,
+                                            // Disabled at Revelation 22
+                                            onPressed: _currentPageIndex <
+                                                    _totalChapters - 1
+                                                ? _navigateToNextPage
+                                                : null,
                                           ),
                                         ),
                                       ),
@@ -1277,22 +1083,17 @@ class _BibleScreenState extends State<BibleScreen> {
           ),
         ),
       ],
-      //),
     );
   }
 
   @override
   void dispose() {
-    // Reset scroll state to prevent issues if widget is rebuilt
-    _isScrolling = false;
-    _lastScrollTime = null;
-
     // Cancel stream subscriptions
     _highlightsSubscription.cancel();
     _notesSubscription.cancel();
 
     // Dispose controllers to prevent memory leaks
-    _scrollController.dispose();
+    _pageController.dispose();
     _localShowNotesInlineFallback.dispose();
 
     super.dispose();

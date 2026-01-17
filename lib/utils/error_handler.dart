@@ -57,7 +57,8 @@ class ErrorHandler {
   }
 
   // Main error handling method
-  static Future<void> handleError(AppError error, {BuildContext? context}) async {
+  static Future<void> handleError(AppError error,
+      {BuildContext? context}) async {
     // Always log the error
     _logError(error);
 
@@ -200,7 +201,8 @@ class ErrorHandler {
   }
 
   // Build detailed sync error message with context
-  static Map<String, dynamic> _buildSyncErrorDetails(dynamic error, Map<String, dynamic>? context) {
+  static Map<String, dynamic> _buildSyncErrorDetails(
+      dynamic error, Map<String, dynamic>? context) {
     String message = 'Sync operation failed';
     ErrorSeverity severity = ErrorSeverity.medium;
 
@@ -208,7 +210,8 @@ class ErrorHandler {
       // Check if this is a realtime subscription error (less critical)
       if (context != null && context.containsKey('table')) {
         final tableName = context['table'];
-        message = 'Realtime sync for $tableName encountered an issue (sync will continue)';
+        message =
+            'Realtime sync for $tableName encountered an issue (sync will continue)';
         severity = ErrorSeverity.low; // Realtime errors are less critical
 
         // Add specific error details if available
@@ -216,7 +219,8 @@ class ErrorHandler {
           message =
               'Realtime sync for $tableName failed: ${error.status} - ${error.details ?? 'no details'} (sync will continue)';
         } else if (error != null) {
-          message = 'Realtime sync for $tableName failed: ${error.toString()} (sync will continue)';
+          message =
+              'Realtime sync for $tableName failed: ${error.toString()} (sync will continue)';
         }
       }
       // Check if this is a specific error type that we can identify
@@ -239,20 +243,25 @@ class ErrorHandler {
           }
         }
 
-        if (errorString.contains('timeout') || errorString.contains('Timeout')) {
+        if (errorString.contains('timeout') ||
+            errorString.contains('Timeout')) {
           message = 'Sync timeout occurred$operationContext (sync will retry)';
           severity = ErrorSeverity.low;
-        } else if (errorString.contains('connection') || errorString.contains('Connection')) {
+        } else if (errorString.contains('connection') ||
+            errorString.contains('Connection')) {
           message = 'Sync connection issue$operationContext (sync will retry)';
           severity = ErrorSeverity.low;
-        } else if (errorString.contains('network') || errorString.contains('Network')) {
-          message = 'Sync network error$operationContext: ${error.toString()} (sync will retry)';
+        } else if (errorString.contains('network') ||
+            errorString.contains('Network')) {
+          message =
+              'Sync network error$operationContext: ${error.toString()} (sync will retry)';
           severity = ErrorSeverity.medium;
         } else if (errorString.contains('permission') ||
             errorString.contains('Permission') ||
             errorString.contains('authentication') ||
             errorString.contains('Authentication')) {
-          message = 'Sync authentication error$operationContext: ${error.toString()}';
+          message =
+              'Sync authentication error$operationContext: ${error.toString()}';
           severity = ErrorSeverity.high;
         } else if (errorString.contains('database') ||
             errorString.contains('Database') ||
@@ -309,26 +318,29 @@ class ErrorHandler {
 
     // Windows-only temporary debug log: write to user's Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
     // remove for production builds
-    // if (Platform.isWindows) {
-    //   try {
-    //     final userProfile = Platform.environment['USERPROFILE'] ?? '.';
-    //     final logsDir = Directory('$userProfile${Platform.pathSeparator}Documents${Platform.pathSeparator}SelahLogs');
-    //     if (!logsDir.existsSync()) {
-    //       logsDir.createSync(recursive: true);
-    //     }
+    if (Platform.isWindows) {
+      try {
+        final userProfile = Platform.environment['USERPROFILE'] ?? '.';
+        final logsDir = Directory(
+            '$userProfile${Platform.pathSeparator}Documents${Platform.pathSeparator}SelahLogs');
+        if (!logsDir.existsSync()) {
+          logsDir.createSync(recursive: true);
+        }
 
-    //     final now = DateTime.now();
-    //     final datePart = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    //     final file = File('${logsDir.path}${Platform.pathSeparator}selah_debug_$datePart.log');
-    //     final timestamp = now.toIso8601String();
-    //     final entry = '[$timestamp] ${buffer.toString()}\n';
+        final now = DateTime.now();
+        final datePart =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final file = File(
+            '${logsDir.path}${Platform.pathSeparator}selah_debug_$datePart.log');
+        final timestamp = now.toIso8601String();
+        final entry = '[$timestamp] ${buffer.toString()}\n';
 
-    //     file.writeAsStringSync(entry, mode: FileMode.append, flush: true);
-    //   } catch (e) {
-    //     // If file logging fails, fall back to console (do not throw)
-    //     if (kDebugMode) debugPrint('Error writing Windows debug log: $e');
-    //   }
-    // }
+        file.writeAsStringSync(entry, mode: FileMode.append, flush: true);
+      } catch (e) {
+        // If file logging fails, fall back to console (do not throw)
+        if (kDebugMode) debugPrint('Error writing Windows debug log: $e');
+      }
+    }
   }
 
   // Format error message for user display
@@ -348,7 +360,9 @@ class ErrorHandler {
   // Format dynamic error objects to strings
   static String _formatErrorMessage(dynamic error) {
     if (error is String) return error;
-    if (error is Exception) return error.toString().replaceFirst('Exception: ', '');
+    if (error is Exception) {
+      return error.toString().replaceFirst('Exception: ', '');
+    }
     if (error is Error) return error.toString();
     return error?.toString() ?? 'Unknown error';
   }

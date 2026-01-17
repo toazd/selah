@@ -72,6 +72,13 @@ class _NoteScreenState extends State<NoteScreen> {
     // Auto-focus the editor after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
+
+      // if (kDebugMode) {
+      //   // Debug: print semantics info
+      //   Future.delayed(Duration(milliseconds: 500), () {
+      //     debugDumpSemanticsTree();
+      //   });
+      // }
     });
 
     // Set created_at for sync operations and store original content hash
@@ -328,26 +335,29 @@ class _NoteScreenState extends State<NoteScreen> {
                                         children: isMobile
                                             ? [
                                                 Expanded(
-                                                    child: QuillEditor(
-                                                  controller: _quillController,
-                                                  focusNode: _focusNode,
-                                                  scrollController:
-                                                      _scrollController,
-                                                  config: QuillEditorConfig(
-                                                    embedBuilders: kIsWeb
-                                                        ? FlutterQuillEmbeds
-                                                            .editorWebBuilders()
-                                                        : FlutterQuillEmbeds
-                                                            .editorBuilders(),
-                                                    customStyles:
-                                                        _buildEditorStyles(
-                                                            isDark, textColor),
-                                                    customLinkPrefixes: const [
-                                                      'verse://',
-                                                      'verse:'
-                                                    ],
+                                                  child: QuillEditor(
+                                                    controller:
+                                                        _quillController,
+                                                    focusNode: _focusNode,
+                                                    scrollController:
+                                                        _scrollController,
+                                                    config: QuillEditorConfig(
+                                                      embedBuilders: kIsWeb
+                                                          ? FlutterQuillEmbeds
+                                                              .editorWebBuilders()
+                                                          : FlutterQuillEmbeds
+                                                              .editorBuilders(),
+                                                      customStyles:
+                                                          _buildEditorStyles(
+                                                              isDark,
+                                                              textColor),
+                                                      customLinkPrefixes: const [
+                                                        'verse://',
+                                                        'verse:'
+                                                      ],
+                                                    ),
                                                   ),
-                                                )),
+                                                ),
                                                 const SizedBox(height: 8),
                                                 _buildToolbar()
                                               ]
@@ -362,6 +372,8 @@ class _NoteScreenState extends State<NoteScreen> {
                                                     scrollController:
                                                         _scrollController,
                                                     config: QuillEditorConfig(
+                                                      onTapOutsideEnabled:
+                                                          false,
                                                       embedBuilders: kIsWeb
                                                           ? FlutterQuillEmbeds
                                                               .editorWebBuilders()
@@ -392,6 +404,19 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _saveAndExit() async {
+    // Explicitly hide keyboard BEFORE popping to prevent Windows OSK from staying open
+    _focusNode.unfocus();
+
+    // Clear any primary focus in the app
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Close the text input connection
+    await SystemChannels.textInput.invokeMethod('TextInput.hide');
+    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+
+    // Small delay to ensure Windows processes the keyboard hide
+    await Future.delayed(const Duration(milliseconds: 50));
+
     // Always close UI for both save and back buttons
     if (mounted) {
       Navigator.of(context).pop();
@@ -464,6 +489,13 @@ class _NoteScreenState extends State<NoteScreen> {
         // deleteNote() now handles queuing sync operations, no need for additional marking
         await NotesDatabase.deleteNote(existing['id']);
       }
+
+      // Explicitly hide keyboard BEFORE popping to prevent Windows OSK from staying open
+      _focusNode.unfocus();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await SystemChannels.textInput.invokeMethod('TextInput.hide');
+      await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+      await Future.delayed(const Duration(milliseconds: 50));
       if (mounted) {
         Navigator.of(context).pop();
       }
