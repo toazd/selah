@@ -115,9 +115,12 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
     if (NoteStorageFormat.isDeltaFormat(noteText)) {
       final delta = Delta.fromJson(jsonDecode(noteText));
       final document = Document.fromDelta(delta);
-      return document.getPlainText(0, document.length).replaceAll('¶ ', '');
+      return document
+          .getPlainText(0, document.length)
+          .replaceAll('¶ ', '')
+          .replaceAll('\uFFFC', '');
     } else {
-      return noteText.replaceAll('¶ ', '');
+      return noteText.replaceAll('¶ ', '').replaceAll('\uFFFC', '');
     }
   }
 

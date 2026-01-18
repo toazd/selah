@@ -197,10 +197,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
       final document = Document.fromDelta(delta);
       // Get plain text directly from the document
       final plainText = document.getPlainText(0, document.length);
-      return plainText.replaceAll('¶ ', '');
+      return plainText.replaceAll('¶ ', '').replaceAll('\uFFFC', '');
     } else {
       // Plain text - return directly (backwards compatibility)
-      return deltaJson.replaceAll('¶ ', '');
+      return deltaJson.replaceAll('¶ ', '').replaceAll('\uFFFC', '');
     }
   }
 
