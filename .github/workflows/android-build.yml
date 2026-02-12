@@ -83,7 +83,7 @@ jobs:
       with:
         name: Selah-Android-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/artifacts/Selah-${{ env.APP_VERSION }}.apk
-        retention-days: 90
+        retention-days: 1
 
     - name: Build Summary
       run: |

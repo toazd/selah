@@ -206,7 +206,7 @@ jobs:
       with:
         name: Selah-Linux-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/packages/
-        retention-days: 90
+        retention-days: 1
 
     - name: Build Summary
       run: |

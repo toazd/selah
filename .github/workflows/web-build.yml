@@ -71,7 +71,7 @@ jobs:
       with:
         name: Selah-Web-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/web/
-        retention-days: 90
+        retention-days: 1
 
     - name: Build Summary
       run: |

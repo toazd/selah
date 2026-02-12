@@ -146,7 +146,7 @@ jobs:
       with:
         name: Selah-iOS-${{ env.APP_VERSION }}-${{ github.run_number }}
         path: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
-        retention-days: 90
+        retention-days: 1
         
     - name: Build Summary
       run: |
