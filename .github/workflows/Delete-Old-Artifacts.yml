@@ -1,6 +1,7 @@
 name: Delete old artifacts
 # Run action manually
 on: [workflow_dispatch]
+permissions: write-all
 
 jobs:
   delete:
