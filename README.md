@@ -41,7 +41,7 @@ Selah is currently in open beta and your thoughts/contributions/bug reports woul
 |----------|--------|-------|
 | Android  | ✅ Stable | Minimum API 22 (Android 5.1 untested; 8.1.1 tested) |
 | iOS      | ✅ Stable | iOS 11+ (iOS 18 tested) |
-| Web      | ✅ Stable | Modern browsers (Chrome & Firefox) |
+| Web      | ✅ Stable | Modern browsers (Apache - Chrome & Firefox tested; electron-forge (Windows) tested) |
 | Windows  | ✅ Stable | Windows 10+ (Windows 10 untested; Windows 11 tested)) |
 | macOS    | ✅ Stable | macOS 10.14+ (untested) |
 | Linux    | ✅ Stable | All distributions (Arch, Debian 12+, Ubuntu 22.04+ all tested) |
