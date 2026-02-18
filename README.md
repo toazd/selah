@@ -1,8 +1,10 @@
 # Selah - Cross-Platform Bible Study App
 
-A cross-platform Bible study application built with Flutter.
+A cross-platform Bible study application built with Flutter with no strings attached (no ads and no analytics).
 
-Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app. Use the "Issues" tab to report anything you think might be useful.
+- Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app.
+- It currently does not have self-installing or self-updating features
+- Use the "Issues" tab to report issues or anything you think might be useful.
 
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
@@ -39,12 +41,12 @@ Selah is currently in open beta and your thoughts/contributions/bug reports woul
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| Android  | ✅ Stable | Minimum API 22 |
-| iOS      | ✅ Stable | iOS 11+ |
-| Web      | ✅ Stable | Modern browsers |
-| Windows  | ✅ Stable | Windows 10+ |
-| macOS    | ✅ Stable | macOS 10.14+ |
-| Linux    | ✅ Stable | All distributions |
+| Android  | ✅ Stable | Minimum API 22 (5.1 untested; 8.1.1 tested) |
+| iOS      | ✅ Stable | iOS 11+ (18 tested) |
+| Web      | ✅ Stable | Modern browsers (Chrome & Firefox on Apache tested; electron-forge (Windows) tested) |
+| Windows  | ✅ Stable | Windows 10+ (10 untested; 11 tested) |
+| macOS    | ✅ Stable | macOS 10.14+ (untested) |
+| Linux    | ✅ Stable | All distributions (Arch/Manjaro/CachyOS, Debian 12+, Ubuntu 22.04+ tested) |
 
 
 ## 🚀 Getting Started
