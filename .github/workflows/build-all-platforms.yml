@@ -192,6 +192,9 @@ jobs:
           
           ## 📦 Installation files by Platform
           
+          ### 🪟 Windows
+          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release)
+
           ### 🐧 Linux
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu
@@ -209,7 +212,7 @@ jobs:
           
           ### 🌐 Web
           - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
-
+          
   build-web:
     name: Build Web App
     needs: extract-version
