@@ -13,6 +13,8 @@ jobs:
   build-linux:
     name: Build Linux App
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
@@ -204,13 +206,12 @@ jobs:
     - name: Create Release and Upload Packages
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: linux-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
         name: Linux Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
         draft: false
         prerelease: false
         files: build/packages/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Summary
       run: |

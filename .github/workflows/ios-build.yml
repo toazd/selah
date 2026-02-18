@@ -13,6 +13,8 @@ jobs:
   build-ios:
     name: Build iOS App
     runs-on: macos-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Checkout code
@@ -144,6 +146,7 @@ jobs:
     - name: Create Release and Upload IPA
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ios-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
         name: iOS Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
         draft: false
