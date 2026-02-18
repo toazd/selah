@@ -2,7 +2,9 @@
 
 A cross-platform Bible study application built with Flutter.
 
-Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app. Use the "Issues" tab to report anything you think might be useful.
+- Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app.
+- It currently does not have self-installing or self-updating features
+- Use the "Issues" tab to report issues or anything you think might be useful.
 
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
