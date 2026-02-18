@@ -1,6 +1,19 @@
 # Selah - Cross-Platform Bible Study App
 
-A comprehensive cross-platform Bible study application built with Flutter, featuring the 1769 King James Version of the Bible with rich study tools and offline capabilities.
+A cross-platform Bible study application built with Flutter.
+
+## 📱 Supported Platforms
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Android  | ✅ Stable | Minimum API 22 |
+| iOS      | ✅ Stable | iOS 11+ |
+| Web      | ✅ Stable | Modern browsers |
+| Windows  | ✅ Stable | Windows 10+ |
+| macOS    | ✅ Stable | macOS 10.14+ |
+| Linux    | ✅ Stable | All distributions |
+
+Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app. Use the "Issues" tab to report anything you think might be useful.
 
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
@@ -9,120 +22,33 @@ A comprehensive cross-platform Bible study application built with Flutter, featu
 ## 📖 Features
 
 ### Core Bible Study Tools
-- **Complete 1769 King James Version** - Full Bible text with accurate verse references
-- **Offline Reading** - Downloaded content available without internet connection
-- **Cross-Platform** - Works on Android, iOS, Web, Windows, macOS, and Linux
+- **AV1769 King James Version** - With the words of our Lord coloured in red.
+- **Offline Reading** - The App contains everything you need, no internet connection required (except to use the online features like account-based sync).
+- **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
 ### Study Features
 - **Rich Text Notes** - Create and edit detailed study notes with formatting
-- **Highlight System** - Mark and categorize important verses with colors
+- **Highlight System** - Mark and categorize important verses with colours
 - **Verse History** - Track and revisit previously viewed verses
-- **Advanced Search** - Find verses by keywords, phrases, or references
+- **Advanced Search** - Find verses by keywords or phrases with or without using the advanced modes (Regex, Nearby)
 - **Book Navigation** - Easy browsing through all 66 books of the Bible
+- **Full Touch-screen support** - Built from the ground up to be both touch-screen and non-touch-screen friendly
+- **Seemless, transparent, account based online sync features** - Sign in to the same account on multiple devices and they will all automatically sync with eachother
 
 ### Data Management
-- **Local SQLite Database** - Fast, offline access to all Bible content
-- **Cloud Sync** - Optional Firebase synchronization across devices
-- **Data Import** - Import from Olive Tree Bible format
-- **Export Capabilities** - Export notes and highlights
+- **Local SQLite Database** - All user data is stored localling in sqlite databases
+- **Cloud Sync** - Optional Supabase synchronization across devices
+- **Data Export/Import** - Export some or all of your data to a backup file and easily import it anywhere else. Import from Olive Tree Bible format is also supported (you will need to obtain the backup file from the Olive Tree Bible web site)
 
 ### Technical Features
 - **Responsive Design** - Optimized for phones, tablets, and desktop
-- **Firebase Authentication** - Secure user accounts and data sync
+- **Supabase Authentication** - Secure user accounts and data sync
 - **Material Design** - Clean, intuitive user interface
 - **Performance Optimized** - Fast loading and smooth navigation
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- **Flutter SDK** (3.0 or higher)
-- **Dart SDK** (3.0 or higher)
-- **Git** for version control
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/selah.git
-   cd selah
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Configure Firebase (Optional):**
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Download `google-services.json` for Android
-   - Download `GoogleService-Info.plist` for iOS/macOS
-   - Enable Authentication and Firestore in your Firebase project
-
-4. **Generate app icons (if needed):**
-   ```bash
-   flutter pub run flutter_launcher_icons:main
-   ```
-
-### Running the App
-
-#### Development Mode
-```bash
-# Run on all platforms
-flutter run -d chrome    # Web
-flutter run -d windows   # Windows
-flutter run -d macos     # macOS
-flutter run -d linux     # Linux
-
-# For mobile (requires connected device or emulator)
-flutter run -d android   # Android
-flutter run -d ios       # iOS (requires Xcode)
-```
-
-#### Production Builds
-
-**Android:**
-```bash
-# APK for sideloading
-flutter build apk --release
-
-# App Bundle for Play Store
-flutter build appbundle --release
-```
-
-**iOS (for sideloading):**
-```bash
-# Build for iOS
-flutter build ios --release
-
-# Create IPA (requires Xcode)
-cd build/ios/iphoneos
-xcodebuild -exportArchive -archivePath YourApp.xcarchive -exportPath ./export -exportOptionsPlist ExportOptions.plist
-```
-
-**macOS:**
-```bash
-flutter build macos --release
-```
-
-**Windows:**
-```bash
-flutter build windows --release
-```
-
-**Linux:**
-```bash
-flutter build linux --release
-```
-
-**Web:**
-```bash
-# Standard web build
-flutter build web --release
-
-# With specific renderer (recommended for better performance)
-flutter build web --web-renderer canvaskit --release
-```
+- Visit the "Releases" section, download the file appropriate for your target platform, and manually install and run the application. While in Beta, the app does not come with any self-installing capabilities. RPM based Linux distributions will require additional steps (to bypass the fact that the RPM files are not signed).
 
 ## 📁 Project Structure
 
@@ -146,39 +72,6 @@ selah/
 └── linux/                     # Linux-specific files
 ```
 
-## 🔧 Configuration
-
-### Firebase Setup (Optional)
-1. Create a Firebase project
-2. Enable Authentication (Email/Password)
-3. Enable Firestore Database
-4. Download configuration files
-5. Place them in the appropriate platform folders
-
-### Platform-Specific Setup
-
-**iOS/macOS:**
-- Requires Xcode 12+ for development
-- Enable "Automatically manage signing" in Xcode
-
-**Android:**
-- Minimum SDK: API 22 (Android 5.1)
-- Target SDK: Latest stable version
-
-**Web:**
-- Requires modern browser support
-- Optimized for Chrome, Firefox, Safari, Edge
-
-## 📱 Supported Platforms
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Android  | ✅ Stable | Minimum API 22 |
-| iOS      | ✅ Stable | iOS 11+ |
-| Web      | ✅ Stable | Modern browsers |
-| Windows  | ✅ Stable | Windows 10+ |
-| macOS    | ✅ Stable | macOS 10.14+ |
-| Linux    | ✅ Stable | Most modern distributions |
 
 ## 🤝 Contributing
 
@@ -195,13 +88,6 @@ Contributions are welcome! Please feel free to submit pull requests with improve
 
 This project is released into the public domain under the [Unlicense](LICENSE). You are free to use, modify, and distribute this software for any purpose without restriction.
 
-## 🙏 Acknowledgments
-
-- **1769 King James Version** - Public domain Bible text
-- **Flutter Team** - For the excellent cross-platform framework
-- **Firebase** - For cloud services and authentication
-- **Open Source Community** - For the many libraries that make this possible
-
 ## 🐛 Issues & Support
 
 If you encounter any problems or have suggestions:
@@ -213,8 +99,6 @@ If you encounter any problems or have suggestions:
 
 ## 📊 Build Status
 
-This project uses GitHub Actions for continuous integration and multi-platform builds.
+This project uses GitHub Actions for continuous integration and multi-platform builds. Check the Releases section for the latest release or clone the repository to build it yourself.
 
 ---
-
-**Made with ❤️ for Bible study and reflection**
