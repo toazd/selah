@@ -1,0 +1,581 @@
+name: Build All Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  extract-version:
+    name: Extract App Version
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.extract.outputs.app_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract app version
+        id: extract
+        run: |
+          APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "📋 App version: $APP_VERSION"
+
+  build-linux:
+    name: Build Linux App
+    needs: extract-version
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.41.1'
+        channel: 'stable'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Install Linux build dependencies & packaging tools
+      run: |
+        sudo snap remove --purge firefox
+        sudo apt-get purge -y firefox
+        sudo rm -rf ~/snap/firefox
+        sudo apt-get update
+        sudo apt-get full-upgrade -y
+        sudo apt-get install -y \
+          clang \
+          cmake \
+          ninja-build \
+          pkg-config \
+          libgtk-3-dev \
+          libblkid-dev \
+          liblzma-dev \
+          ruby \
+          ruby-dev \
+          build-essential \
+          rpm
+        sudo snap refresh
+        sudo gem install fpm
+
+    - name: Build Linux release
+      run: |
+        flutter build linux \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create packages
+      run: |
+        APP_NAME="selah"
+        VERSION="${{ needs.extract-version.outputs.app_version }}"
+        BUILD_DIR="build/linux/x64/release/bundle"
+        OUTPUT_DIR="build/packages"
+
+        mkdir -p "$OUTPUT_DIR"
+
+        echo "📦 Creating .tar.gz package..."
+        tar -czf "$OUTPUT_DIR/Selah-${VERSION}.tar.gz" -C "$BUILD_DIR" .
+
+        echo "📦 Creating .deb package..."
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/opt/selah"
+        
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
+        fi
+        
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        
+        fpm -s dir -t deb \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
+          --deb-priority optional \
+          --category utils \
+          --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
+          --url "https://github.com/toazd/selah" \
+          --maintainer "Selah Team" \
+          --license "Unlicense" \
+          -p "$OUTPUT_DIR" \
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/selah.desktop \
+          usr/share/icons/ \
+          opt/selah/
+        rm -rf "$TEMP_DIR"
+
+        echo "📦 Creating .rpm package..."
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/opt/selah"
+        
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
+        fi
+        
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        
+        fpm -s dir -t rpm \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
+          --rpm-os linux \
+          --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
+          --url "https://github.com/toazd/selah" \
+          --maintainer "Selah Team" \
+          --license "Unlicense" \
+          -p "$OUTPUT_DIR" \
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/selah.desktop \
+          usr/share/icons/ \
+          opt/selah/
+        rm -rf "$TEMP_DIR"
+
+        ls -lah "$OUTPUT_DIR"
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-build
+        path: build/packages/*
+        retention-days: 1
+
+  build-web:
+    name: Build Web App
+    needs: extract-version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.9'
+        channel: 'stable'
+
+    - name: Setup Node.js for web build
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build Web release
+      run: |
+        flutter build web \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create web build archive
+      run: |
+        mkdir -p build/artifacts
+        cd build/web
+        zip -r "../../build/artifacts/Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip" .
+        cd ../..
+        ls -lah build/artifacts/
+
+    - name: Upload Web artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-build
+        path: build/artifacts/*
+        retention-days: 1
+
+  build-android:
+    name: Build Android App
+    needs: extract-version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.9'
+        channel: 'stable'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Accept Android licenses
+      run: yes | flutter doctor --android-licenses
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build Android APK
+      run: |
+        flutter build apk \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Rename APK artifact
+      run: |
+        mkdir -p build/artifacts
+        cp build/app/outputs/flutter-apk/app-release.apk "build/artifacts/Selah-${{ needs.extract-version.outputs.app_version }}.apk"
+        ls -lah build/artifacts/
+
+    - name: Upload Android artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-build
+        path: build/artifacts/*
+        retention-days: 1
+
+  build-ios:
+    name: Build iOS App
+    needs: extract-version
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+          
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.9'
+        channel: 'stable'
+
+    - name: Setup iOS platform
+      run: |
+        if [ ! -f "ios/Podfile" ]; then
+          echo "⚠️ Podfile not found. Regenerating iOS platform files..."
+          flutter precache --ios
+          flutter create --platforms ios .
+        else
+          echo "✅ Podfile found"
+        fi
+        
+    - name: Set iOS platform version
+      run: |
+        if grep -q "platform :ios" ios/Podfile; then
+          CURRENT_VERSION=$(grep "platform :ios" ios/Podfile | sed -n "s/.*'\([0-9.]*\)'.*/\1/p")
+          if [[ "$(printf '%s\n' "13.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "13.0" ]]; then
+            echo "platform :ios, '13.0'" > ios/Podfile.tmp
+            grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
+            mv ios/Podfile.tmp ios/Podfile
+          fi
+        else
+          sed -i '' '1i platform :ios, '\''13.0'\''' ios/Podfile
+        fi
+        
+    - name: Get iOS dependencies
+      run: |
+        cd ios
+        pod repo update
+        pod install
+        cd ..
+
+    - name: Clean build
+      run: flutter clean
+      
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build iOS release
+      run: |
+        flutter build ios \
+          --release \
+          --no-codesign \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+          
+    - name: Create IPA file
+      run: |
+        mkdir -p build/ios-ipa
+        BUILD_DIR=$(find build/ -name "Runner.app" -type d | head -1)
+        
+        if [ -z "$BUILD_DIR" ]; then
+          echo "❌ Could not find Runner.app"
+          exit 1
+        fi
+
+        cp -R "$BUILD_DIR" build/ios-ipa/
+        mkdir -p build/ios-ipa/Payload
+        mv build/ios-ipa/Runner.app build/ios-ipa/Payload/Selah.app
+        
+        cd build/ios-ipa
+        zip -r "../../build/Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa" Payload
+        cd ../..
+
+    - name: Upload iOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-build
+        path: build/Selah-*.ipa
+        retention-days: 1
+
+  build-macos:
+    name: Build macOS Desktop App
+    needs: extract-version
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.9'
+        channel: 'stable'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build macOS release
+      run: |
+        flutter build macos \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create DMG package
+      run: |
+        VERSION="${{ needs.extract-version.outputs.app_version }}"
+        BUILD_DIR="build/macos/Build/Products/Release/Selah.app"
+        OUTPUT_DIR="build/packages"
+        DMG_NAME="Selah-${VERSION}.dmg"
+
+        mkdir -p $OUTPUT_DIR
+
+        if [ ! -d "$BUILD_DIR" ]; then
+          echo "❌ Selah.app not found"
+          exit 1
+        fi
+
+        DMG_DIR="$OUTPUT_DIR/dmg"
+        mkdir -p "$DMG_DIR"
+        cp -R "$BUILD_DIR" "$DMG_DIR/"
+
+        echo "📦 Creating DMG..."
+        hdiutil create -volname "Selah $VERSION" \
+          -srcfolder "$DMG_DIR" \
+          -ov \
+          -format UDZO \
+          "$OUTPUT_DIR/$DMG_NAME"
+
+        cp -R "$BUILD_DIR" "$OUTPUT_DIR/"
+        ls -lah "$OUTPUT_DIR"
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-build
+        path: build/packages/*
+        retention-days: 1
+
+  create-release:
+    name: Create Unified Release
+    needs: [extract-version, build-linux, build-web, build-android, build-ios, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: Prepare artifacts for release
+        run: |
+          mkdir -p release-files
+          cp all-artifacts/*/* release-files/ 2>/dev/null || true
+          ls -lah release-files/
+
+      - name: Create unified release
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+          name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: release-files/*
+          body: |
+            # Selah Release v${{ needs.extract-version.outputs.app_version }}
+            ## Build #${{ github.run_number }}
+            
+            This unified release contains builds for all supported platforms.
+
+            NOTE:   The sync service currently uses the free tier of Supabase.
+                    When and if the free tier capacity is exceeded online sync may fail to work properly.
+                    You won't lose any local data and if the tier is ever upgraded sync services will resume seemlessly.
+            
+            ## 📦 Installation files by Platform
+            
+            ### 🐧 Linux
+            NOTE: RPM files are not signed. You may need to install using --nogpgcheck, --allow-unsigned-rpm, --nodigest, and/or --nofiledigest.
+            - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions)
+            - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu
+            - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora
+            
+            **Installation:**
+            - `.deb`: `sudo dpkg -i selah-*.deb`
+            - `.rpm`: `sudo rpm -i selah-*.rpm`
+            - `.tar.gz`: Extract and run the executable
+            
+            ### 🤖 Android
+            - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app
+            
+            **Installation:**
+            1. Transfer to your Android device
+            2. Enable "Install from Unknown Sources" in settings
+            3. Open the APK file and install
+
+            Or use ADB: `adb install Selah-${{ needs.extract-version.outputs.app_version }}.apk` (if a dialog pops up click "more" and "install anyway")
+            
+            ### 🍎 iOS
+            - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa` - iOS app (unsigned for sideloading)
+            
+            **Installation:**
+            1. Download the IPA file
+            2. Open Sideloadly on your computer
+            3. Connect your iPhone
+            4. Drag and drop the IPA into Sideloadly
+            5. Follow the installation prompts
+            6. Trust the developer profile (Settings > General > VPN & Device Management)
+            
+            *Note: App may need reinstallation every 7 days*
+            This is a limitation that Apple imposes and there is no way around it (that I know of) without paying for a developer license and getting the app added to the app store.
+            
+            ### 🍎 macOS
+            NOTE: These builds are not tested so reporting any problems you have with installing/running the app would be helpful.
+            - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer
+            - `Selah.app` - Standalone app bundle
+            
+            **Installation:**
+            - **DMG:** Double-click to mount, drag Selah.app to Applications folder
+            - **Direct:** Move Selah.app to Applications, right-click > Open (first time)
+            
+            ### 🌐 Web
+            NOTE: Requires a real web server to run unless you manually build with electron-forge
+            - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
+            
+            **Deployment:**
+            1. Download and extract the ZIP archive
+            2. Serve with any static web server:
+               - Python: `python -m http.server 8000`
+               - Node: `npx serve .`
+               - PHP: `php -S localhost:8000`
+            
+            ---
+            
+            ## ℹ️ Build Information
+            - **Version:** v${{ needs.extract-version.outputs.app_version }}
+            - **Build Number:** ${{ github.run_number }}
+            - **Backend:** Supabase

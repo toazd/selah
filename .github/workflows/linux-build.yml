@@ -33,7 +33,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: '3.41.1'
         channel: 'stable'
 
     - name: Extract app version
@@ -208,10 +208,27 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: linux-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
-        name: Linux Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        name: Linux Release - ${{ env.APP_VERSION }}-${{ github.run_number }}
         draft: false
         prerelease: false
         files: build/packages/*
+        body: |
+          ## Linux Build ${{ github.run_number }}
+          
+          ### 📦 Packages Included
+          - **Selah-${{ env.APP_VERSION }}.tar.gz** - Generic Linux (all distributions)
+          - **selah-${{ env.APP_VERSION }}-*.deb** - Debian/Ubuntu
+          - **selah-${{ env.APP_VERSION }}-*.rpm** - Red Hat/Fedora
+          
+          ### 📥 Installation
+          See the [Linux Build](https://github.com/toazd/selah/actions/workflows/linux-build.yml) workflow for detailed installation instructions.
+          
+          ### ℹ️ Build Info
+          - **Platform**: Linux (x64)
+          - **Build**: ${{ github.run_number }}
+          - **Timestamp**: ${{ github.event.head_commit.timestamp }}
+          
+          Add any custom notes or updates here!
 
     - name: Build Summary
       run: |

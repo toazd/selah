@@ -33,7 +33,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: '3.41.1'
         channel: 'stable'
 
     - name: Extract app version
@@ -101,15 +101,39 @@ jobs:
     - name: Create Release and Upload macOS Packages
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: macos-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
-        name: macOS Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        name: macOS Release - ${{ env.APP_VERSION }}-${{ github.run_number }}
         draft: false
         prerelease: false
         files: |
           build/packages/Selah.app
           build/packages/Selah-${{ env.APP_VERSION }}.dmg
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          ## macOS Build ${{ github.run_number }}
+          
+          ### 📦 Packages
+          - **Selah-${{ env.APP_VERSION }}.dmg** - Disk image installer
+          - **Selah.app** - Standalone app bundle
+          
+          ### 📝 Installation
+          **Option 1 - DMG Installer:**
+          1. Download the .dmg file
+          2. Double-click to mount
+          3. Drag Selah.app to Applications folder
+          4. Eject the DMG
+          
+          **Option 2 - Direct App Bundle:**
+          1. Download Selah.app
+          2. Move to Applications folder
+          3. Right-click > Open (first time, to bypass Gatekeeper)
+          
+          ### ℹ️ Build Info
+          - **Platform**: macOS (Intel/Apple Silicon)
+          - **Build**: ${{ github.run_number }}
+          - **Timestamp**: ${{ github.event.head_commit.timestamp }}
+          
+          Add any custom notes or updates here!
 
     - name: Build Summary
       run: |

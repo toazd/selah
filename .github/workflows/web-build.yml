@@ -33,7 +33,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: '3.41.1'
         channel: 'stable'
 
     - name: Extract app version
@@ -80,13 +80,31 @@ jobs:
     - name: Create Release and Upload Web Build
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: web-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
-        name: Web Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        name: Web Release - ${{ env.APP_VERSION }}-${{ github.run_number }}
         draft: false
         prerelease: false
         files: build/artifacts/Selah-Web-${{ env.APP_VERSION }}.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          ## Web Build ${{ github.run_number }}
+          
+          ### 📦 Package
+          - **Selah-Web-${{ env.APP_VERSION }}.zip** - Complete web build archive
+          
+          ### 📝 Deployment
+          1. Download and extract the ZIP archive
+          2. Serve with any static web server:
+             - Python: `python -m http.server 8000`
+             - Node: `npx serve .`
+             - PHP: `php -S localhost:8000`
+          
+          ### ℹ️ Build Info
+          - **Platform**: Web (HTML/CSS/JS)
+          - **Build**: ${{ github.run_number }}
+          - **Timestamp**: ${{ github.event.head_commit.timestamp }}
+          
+          Add any custom notes or updates here!
 
     - name: Build Summary
       run: |

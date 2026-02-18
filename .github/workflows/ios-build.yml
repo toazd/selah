@@ -33,7 +33,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: '3.41.1'
         channel: 'stable'
 
     - name: Extract app version
@@ -148,12 +148,32 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ios-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
-        name: iOS Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        name: iOS Release - ${{ env.APP_VERSION }}-${{ github.run_number }}
         draft: false
         prerelease: false
         files: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          ## iOS Build ${{ github.run_number }}
+          
+          ### 📦 Package
+          - **Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa** - iOS app (unsigned for sideloading)
+          
+          ### 📥 Installation
+          1. Download the IPA file
+          2. Open Sideloadly on your computer
+          3. Connect your iPhone
+          4. Drag and drop the IPA into Sideloadly
+          5. Follow the installation prompts
+          6. Trust the developer profile on your iPhone (Settings > General > VPN & Device Management)
+          
+          ### ℹ️ Build Info
+          - **Platform**: iOS
+          - **Minimum iOS**: 13.0
+          - **Build**: ${{ github.run_number }}
+          - **Timestamp**: ${{ github.event.head_commit.timestamp }}
+          - **Note**: App will need reinstallation every 7 days
+          
+          Add any custom notes or updates here!
         
     - name: Build Summary
       run: |
