@@ -209,8 +209,6 @@ jobs:
           
           ### 🌐 Web
           - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
-          
-          **Add any custom release notes here!**
 
   build-web:
     name: Build Web App
@@ -537,3 +535,66 @@ jobs:
         draft: false
         prerelease: false
         files: build/packages/*
+
+  build-windows:
+    name: Build Windows App
+    needs: extract-version
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.9'
+        channel: 'stable'
+
+    - name: Verify Windows toolchain
+      run: flutter doctor -v
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build Windows release
+      run: |
+        flutter build windows \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Package Windows build
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path build\artifacts | Out-Null
+        $out = "build\artifacts\Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip"
+        $p1 = 'build\windows\runner\Release'
+        $p2 = 'build\windows\x64\runner\Release'
+        if (Test-Path $p2) {
+          Write-Host "Using $p2"
+          Compress-Archive -Path "$p2\*" -DestinationPath $out -Force
+        } elseif (Test-Path $p1) {
+          Write-Host "Using $p1"
+          Compress-Archive -Path "$p1\*" -DestinationPath $out -Force
+        } else {
+          Write-Error "Windows build output not found. Checked: $p1 and $p2"
+          Get-ChildItem build -Recurse | Select-Object -First 50 | Format-Table
+          exit 1
+        }
+        Get-ChildItem build\artifacts | Format-Table
+
+    - name: Upload Windows to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/artifacts/*

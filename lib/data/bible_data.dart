@@ -17231,82 +17231,139 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       98: 'Thou through thy commandments hast made me wiser than mine enemies: for they are ever with me.',
       99: 'I have more understanding than all my teachers: for thy testimonies are my meditation.',
       100: 'I understand more than the ancients, because I keep thy precepts.',
-      101: 'I have refrained my feet from every evil way, that I might keep thy word.',
+      101:
+          'I have refrained my feet from every evil way, that I might keep thy word.',
       102: 'I have not departed from thy judgments: for thou hast taught me.',
-      103: 'How sweet are thy words unto my taste! yea, sweeter than honey to my mouth!',
-      104: 'Through thy precepts I get understanding: therefore I hate every false way.',
+      103:
+          'How sweet are thy words unto my taste! yea, sweeter than honey to my mouth!',
+      104:
+          'Through thy precepts I get understanding: therefore I hate every false way.',
       105: '¶ NUN. Thy word is a lamp unto my feet, and a light unto my path.',
-      106: 'I have sworn, and I will perform it, that I will keep thy righteous judgments.',
-      107: 'I am afflicted very much: quicken me, O LORD, according unto thy word.',
-      108: 'Accept, I beseech thee, the freewill offerings of my mouth, O LORD, and teach me thy judgments.',
+      106:
+          'I have sworn, and I will perform it, that I will keep thy righteous judgments.',
+      107:
+          'I am afflicted very much: quicken me, O LORD, according unto thy word.',
+      108:
+          'Accept, I beseech thee, the freewill offerings of my mouth, O LORD, and teach me thy judgments.',
       109: 'My soul is continually in my hand: yet do I not forget thy law.',
-      110: 'The wicked have laid a snare for me: yet I erred not from thy precepts.',
-      111: 'Thy testimonies have I taken as an heritage for ever: for they are the rejoicing of my heart.',
-      112: 'I have inclined mine heart to perform thy statutes alway, even unto the end.',
+      110:
+          'The wicked have laid a snare for me: yet I erred not from thy precepts.',
+      111:
+          'Thy testimonies have I taken as an heritage for ever: for they are the rejoicing of my heart.',
+      112:
+          'I have inclined mine heart to perform thy statutes alway, even unto the end.',
       113: '¶ SAMECH. I hate vain thoughts: but thy law do I love.',
       114: 'Thou art my hiding place and my shield: I hope in thy word.',
-      115: 'Depart from me, ye evildoers: for I will keep the commandments of my God.',
-      116: 'Uphold me according unto thy word, that I may live: and let me not be ashamed of my hope.',
-      117: 'Hold thou me up, and I shall be safe: and I will have respect unto thy statutes continually.',
-      118: 'Thou hast trodden down all them that err from thy statutes: for their deceit is falsehood.',
-      119: 'Thou puttest away all the wicked of the earth like dross: therefore I love thy testimonies.',
-      120: 'My flesh trembleth for fear of thee; and I am afraid of thy judgments.',
-      121: '¶ AIN. I have done judgment and justice: leave me not to mine oppressors.',
+      115:
+          'Depart from me, ye evildoers: for I will keep the commandments of my God.',
+      116:
+          'Uphold me according unto thy word, that I may live: and let me not be ashamed of my hope.',
+      117:
+          'Hold thou me up, and I shall be safe: and I will have respect unto thy statutes continually.',
+      118:
+          'Thou hast trodden down all them that err from thy statutes: for their deceit is falsehood.',
+      119:
+          'Thou puttest away all the wicked of the earth like dross: therefore I love thy testimonies.',
+      120:
+          'My flesh trembleth for fear of thee; and I am afraid of thy judgments.',
+      121:
+          '¶ AIN. I have done judgment and justice: leave me not to mine oppressors.',
       122: 'Be surety for thy servant for good: let not the proud oppress me.',
-      123: 'Mine eyes fail for thy salvation, and for the word of thy righteousness.',
-      124: 'Deal with thy servant according unto thy mercy, and teach me thy statutes.',
-      125: 'I am thy servant; give me understanding, that I may know thy testimonies.',
-      126: 'It is time for thee, LORD, to work: for they have made void thy law.',
-      127: 'Therefore I love thy commandments above gold; yea, above fine gold.',
-      128: 'Therefore I esteem all thy precepts concerning all things to be right; and I hate every false way.',
-      129: '¶ PE. Thy testimonies are wonderful: therefore doth my soul keep them.',
-      130: 'The entrance of thy words giveth light; it giveth understanding unto the simple.',
+      123:
+          'Mine eyes fail for thy salvation, and for the word of thy righteousness.',
+      124:
+          'Deal with thy servant according unto thy mercy, and teach me thy statutes.',
+      125:
+          'I am thy servant; give me understanding, that I may know thy testimonies.',
+      126:
+          'It is time for thee, LORD, to work: for they have made void thy law.',
+      127:
+          'Therefore I love thy commandments above gold; yea, above fine gold.',
+      128:
+          'Therefore I esteem all thy precepts concerning all things to be right; and I hate every false way.',
+      129:
+          '¶ PE. Thy testimonies are wonderful: therefore doth my soul keep them.',
+      130:
+          'The entrance of thy words giveth light; it giveth understanding unto the simple.',
       131: 'I opened my mouth, and panted: for I longed for thy commandments.',
-      132: 'Look thou upon me, and be merciful unto me, as thou usest to do unto those that love thy name.',
-      133: 'Order my steps in thy word: and let not any iniquity have dominion over me.',
-      134: 'Deliver me from the oppression of man: so will I keep thy precepts.',
-      135: 'Make thy face to shine upon thy servant; and teach me thy statutes.',
-      136: 'Rivers of waters run down mine eyes, because they keep not thy law.',
-      137: '¶ TZADDI. Righteous art thou, O LORD, and upright are thy judgments.',
-      138: 'Thy testimonies that thou hast commanded are righteous and very faithful.',
-      139: 'My zeal hath consumed me, because mine enemies have forgotten thy words.',
+      132:
+          'Look thou upon me, and be merciful unto me, as thou usest to do unto those that love thy name.',
+      133:
+          'Order my steps in thy word: and let not any iniquity have dominion over me.',
+      134:
+          'Deliver me from the oppression of man: so will I keep thy precepts.',
+      135:
+          'Make thy face to shine upon thy servant; and teach me thy statutes.',
+      136:
+          'Rivers of waters run down mine eyes, because they keep not thy law.',
+      137:
+          '¶ TZADDI. Righteous art thou, O LORD, and upright are thy judgments.',
+      138:
+          'Thy testimonies that thou hast commanded are righteous and very faithful.',
+      139:
+          'My zeal hath consumed me, because mine enemies have forgotten thy words.',
       140: 'Thy word is very pure: therefore thy servant loveth it.',
       141: 'I am small and despised: yet do not I forget thy precepts.',
-      142: 'Thy righteousness is an everlasting righteousness, and thy law is the truth.',
-      143: 'Trouble and anguish have taken hold on me: yet thy commandments are my delights.',
-      144: 'The righteousness of thy testimonies is everlasting: give me understanding, and I shall live.',
-      145: '¶ KOPH. I cried with my whole heart; hear me, O LORD: I will keep thy statutes.',
+      142:
+          'Thy righteousness is an everlasting righteousness, and thy law is the truth.',
+      143:
+          'Trouble and anguish have taken hold on me: yet thy commandments are my delights.',
+      144:
+          'The righteousness of thy testimonies is everlasting: give me understanding, and I shall live.',
+      145:
+          '¶ KOPH. I cried with my whole heart; hear me, O LORD: I will keep thy statutes.',
       146: 'I cried unto thee; save me, and I shall keep thy testimonies.',
-      147: 'I prevented the dawning of the morning, and cried: I hoped in thy word.',
-      148: 'Mine eyes prevent the night watches, that I might meditate in thy word.',
-      149: 'Hear my voice according unto thy lovingkindness: O LORD, quicken me according to thy judgment.',
-      150: 'They draw nigh that follow after mischief: they are far from thy law.',
+      147:
+          'I prevented the dawning of the morning, and cried: I hoped in thy word.',
+      148:
+          'Mine eyes prevent the night watches, that I might meditate in thy word.',
+      149:
+          'Hear my voice according unto thy lovingkindness: O LORD, quicken me according to thy judgment.',
+      150:
+          'They draw nigh that follow after mischief: they are far from thy law.',
       151: 'Thou art near, O LORD; and all thy commandments are truth.',
-      152: 'Concerning thy testimonies, I have known of old that thou hast founded them for ever.',
-      153: '¶ RESH. Consider mine affliction, and deliver me: for I do not forget thy law.',
+      152:
+          'Concerning thy testimonies, I have known of old that thou hast founded them for ever.',
+      153:
+          '¶ RESH. Consider mine affliction, and deliver me: for I do not forget thy law.',
       154: 'Plead my cause, and deliver me: quicken me according to thy word.',
       155: 'Salvation is far from the wicked: for they seek not thy statutes.',
-      156: 'Great are thy tender mercies, O LORD: quicken me according to thy judgments.',
-      157: 'Many are my persecutors and mine enemies; yet do I not decline from thy testimonies.',
-      158: 'I beheld the transgressors, and was grieved; because they kept not thy word.',
-      159: 'Consider how I love thy precepts: quicken me, O LORD, according to thy lovingkindness.',
-      160: 'Thy word is true from the beginning: and every one of thy righteous judgments endureth for ever.',
-      161: '¶ SCHIN. Princes have persecuted me without a cause: but my heart standeth in awe of thy word.',
+      156:
+          'Great are thy tender mercies, O LORD: quicken me according to thy judgments.',
+      157:
+          'Many are my persecutors and mine enemies; yet do I not decline from thy testimonies.',
+      158:
+          'I beheld the transgressors, and was grieved; because they kept not thy word.',
+      159:
+          'Consider how I love thy precepts: quicken me, O LORD, according to thy lovingkindness.',
+      160:
+          'Thy word is true from the beginning: and every one of thy righteous judgments endureth for ever.',
+      161:
+          '¶ SCHIN. Princes have persecuted me without a cause: but my heart standeth in awe of thy word.',
       162: 'I rejoice at thy word, as one that findeth great spoil.',
       163: 'I hate and abhor lying: but thy law do I love.',
-      164: 'Seven times a day do I praise thee because of thy righteous judgments.',
-      165: 'Great peace have they which love thy law: and nothing shall offend them.',
+      164:
+          'Seven times a day do I praise thee because of thy righteous judgments.',
+      165:
+          'Great peace have they which love thy law: and nothing shall offend them.',
       166: 'LORD, I have hoped for thy salvation, and done thy commandments.',
       167: 'My soul hath kept thy testimonies; and I love them exceedingly.',
-      168: 'I have kept thy precepts and thy testimonies: for all my ways are before thee.',
-      169: '¶ TAU. Let my cry come near before thee, O LORD: give me understanding according to thy word.',
-      170: 'Let my supplication come before thee: deliver me according to thy word.',
+      168:
+          'I have kept thy precepts and thy testimonies: for all my ways are before thee.',
+      169:
+          '¶ TAU. Let my cry come near before thee, O LORD: give me understanding according to thy word.',
+      170:
+          'Let my supplication come before thee: deliver me according to thy word.',
       171: 'My lips shall utter praise, when thou hast taught me thy statutes.',
-      172: 'My tongue shall speak of thy word: for all thy commandments are righteousness.',
+      172:
+          'My tongue shall speak of thy word: for all thy commandments are righteousness.',
       173: 'Let thine hand help me; for I have chosen thy precepts.',
-      174: 'I have longed for thy salvation, O LORD; and thy law is my delight.',
-      175: 'Let my soul live, and it shall praise thee; and let thy judgments help me.',
-      176: 'I have gone astray like a lost sheep; seek thy servant; for I do not forget thy commandments.',
+      174:
+          'I have longed for thy salvation, O LORD; and thy law is my delight.',
+      175:
+          'Let my soul live, and it shall praise thee; and let thy judgments help me.',
+      176:
+          'I have gone astray like a lost sheep; seek thy servant; for I do not forget thy commandments.',
     },
     120: {
       1: 'In my distress I cried unto the LORD, and he heard me.',
@@ -25919,16 +25976,16 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       14: '<r>Woe unto you, scribes and Pharisees, hypocrites! for ye devour widows\' houses, and for a pretence make long prayer: therefore ye shall receive the greater damnation.</r>',
       15: '<r>Woe unto you, scribes and Pharisees, hypocrites! for ye compass sea and land to make one proselyte, and when he is made, ye make him twofold more the child of hell than yourselves.</r>',
       16: '<r>Woe unto you, ye blind guides, which say, Whosoever shall swear by the temple, it is nothing; but whosoever shall swear by the gold of the temple, he is a debtor!</r>',
-      17: 'Ye <r>fools and blind: for whether is greater, the gold, or the temple that sanctifieth the gold?</r>',
+      17: '<r>Ye fools and blind: for whether is greater, the gold, or the temple that sanctifieth the gold?</r>',
       18: '<r>And, Whosoever shall swear by the altar, it is nothing; but whosoever sweareth by the gift that is upon it, he is guilty.</r>',
-      19: 'Ye <r>fools and blind: for whether is greater, the gift, or the altar that sanctifieth the gift?</r>',
+      19: '<r>Ye fools and blind: for whether is greater, the gift, or the altar that sanctifieth the gift?</r>',
       20: '<r>Whoso therefore shall swear by the altar, sweareth by it, and by all things thereon.</r>',
       21: '<r>And whoso shall swear by the temple, sweareth by it, and by him that dwelleth therein.</r>',
       22: '<r>And he that shall swear by heaven, sweareth by the throne of God, and by him that sitteth thereon.</r>',
       23: '<r>Woe unto you, scribes and Pharisees, hypocrites! for ye pay tithe of mint and anise and cummin, and have omitted the weightier matters of the law, judgment, mercy, and faith: these ought ye to have done, and not to leave the other undone.</r>',
-      24: 'Ye <r>blind guides, which strain at a gnat, and swallow a camel.</r>',
+      24: '<r>Ye blind guides, which strain at a gnat, and swallow a camel.</r>',
       25: '<r>Woe unto you, scribes and Pharisees, hypocrites! for ye make clean the outside of the cup and of the platter, but within they are full of extortion and excess.</r>',
-      26: 'Thou <r>blind Pharisee, cleanse first that which is within the cup and platter, that the outside of them may be clean also.</r>',
+      26: '<r>Thou blind Pharisee, cleanse first that which is within the cup and platter, that the outside of them may be clean also.</r>',
       27: '<r>Woe unto you, scribes and Pharisees, hypocrites! for ye are like unto whited sepulchres, which indeed appear beautiful outward, but are within full of dead men\'s bones, and of all uncleanness.</r>',
       28: '<r>Even so ye also outwardly appear righteous unto men, but within ye are full of hypocrisy and iniquity.</r>',
       29: '<r>Woe unto you, scribes and Pharisees, hypocrites! because ye build the tombs of the prophets, and garnish the sepulchres of the righteous,</r>',
