@@ -1,6 +1,6 @@
 # Selah - Cross-Platform Bible Study App
 
-A cross-platform Bible study application built with Flutter.
+A cross-platform Bible study application built with Flutter with no strings attached (no ads and no analytics).
 
 - Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app.
 - It currently does not have self-installing or self-updating features
