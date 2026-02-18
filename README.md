@@ -2,17 +2,6 @@
 
 A cross-platform Bible study application built with Flutter.
 
-## 📱 Supported Platforms
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Android  | ✅ Stable | Minimum API 22 |
-| iOS      | ✅ Stable | iOS 11+ |
-| Web      | ✅ Stable | Modern browsers |
-| Windows  | ✅ Stable | Windows 10+ |
-| macOS    | ✅ Stable | macOS 10.14+ |
-| Linux    | ✅ Stable | All distributions |
-
 Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app. Use the "Issues" tab to report anything you think might be useful.
 
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
@@ -30,7 +19,7 @@ Selah is currently in open beta and your thoughts/contributions/bug reports woul
 - **Rich Text Notes** - Create and edit detailed study notes with formatting
 - **Highlight System** - Mark and categorize important verses with colours
 - **Verse History** - Track and revisit previously viewed verses
-- **Advanced Search** - Find verses by keywords or phrases with or without using the advanced modes (Regex, Nearby)
+- **Simple/Advanced Search** - Find verses by keywords or phrases with or without using the advanced modes (Regex, Nearby)
 - **Book Navigation** - Easy browsing through all 66 books of the Bible
 - **Full Touch-screen support** - Built from the ground up to be both touch-screen and non-touch-screen friendly
 - **Seemless, transparent, account based online sync features** - Sign in to the same account on multiple devices and they will all automatically sync with eachother
@@ -45,6 +34,18 @@ Selah is currently in open beta and your thoughts/contributions/bug reports woul
 - **Supabase Authentication** - Secure user accounts and data sync
 - **Material Design** - Clean, intuitive user interface
 - **Performance Optimized** - Fast loading and smooth navigation
+
+## 📱 Supported Platforms
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Android  | ✅ Stable | Minimum API 22 |
+| iOS      | ✅ Stable | iOS 11+ |
+| Web      | ✅ Stable | Modern browsers |
+| Windows  | ✅ Stable | Windows 10+ |
+| macOS    | ✅ Stable | macOS 10.14+ |
+| Linux    | ✅ Stable | All distributions |
+
 
 ## 🚀 Getting Started
 
