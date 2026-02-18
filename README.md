@@ -49,7 +49,7 @@ Selah is currently in open beta and your thoughts/contributions/bug reports woul
 
 ## 🚀 Getting Started
 
-- Visit the "Releases" section, download the file appropriate for your target platform, and manually install and run the application. While in Beta, the app does not come with any self-installing capabilities. RPM based Linux distributions will require additional steps (to bypass the fact that the RPM files are not signed).
+- Visit the "Releases" section, download the file appropriate for your target platform, and manually install and run the application. While in Beta, the app does not come with any self-installing or self-updating capabilities. RPM based Linux distributions will require additional steps (to bypass the fact that the RPM files are not signed).
 
 ## 📁 Project Structure
 
