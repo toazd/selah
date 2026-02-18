@@ -66,32 +66,48 @@ jobs:
         echo "Build size:"
         du -sh build/web/
 
-    - name: Upload Web build artifact
-      uses: actions/upload-artifact@v4
+    - name: Create web build archive
+      run: |
+        mkdir -p build/artifacts
+        cd build/web
+        zip -r "../../build/artifacts/Selah-Web-${{ env.APP_VERSION }}.zip" .
+        cd ../..
+        echo "✅ Web archive created: build/artifacts/Selah-Web-${{ env.APP_VERSION }}.zip"
+        ls -lah build/artifacts/
+
+    - name: Create Release and Upload Web Build
+      uses: softprops/action-gh-release@v1
       with:
-        name: Selah-Web-${{ env.APP_VERSION }}-${{ github.run_number }}
-        path: build/web/
-        retention-days: 1
+        tag_name: web-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
+        name: Web Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: build/artifacts/Selah-Web-${{ env.APP_VERSION }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Summary
       run: |
         echo "## ✅ Web Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build (${{ env.APP_VERSION }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Web (HTML/CSS/JS)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📥 Download from GitHub Release:**" >> $GITHUB_STEP_SUMMARY
+        echo "The web build archive has been uploaded to the [GitHub Release](https://github.com/toazd/selah/releases/tag/web-v${{ env.APP_VERSION }}-build.${{ github.run_number }})." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Build Output:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Directory:** build/web/ (ready for deployment)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Archive:** Selah-Web-${{ env.APP_VERSION }}.zip (ready for deployment)" >> $GITHUB_STEP_SUMMARY
         echo "- **Main File:** index.html" >> $GITHUB_STEP_SUMMARY
         echo "- **Includes:** All assets, fonts, and compiled JavaScript" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**🚀 Deployment Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "**For Local Testing:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download the web build artifact" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the web build archive from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. Extract the contents" >> $GITHUB_STEP_SUMMARY
         echo "3. Serve with any static web server:" >> $GITHUB_STEP_SUMMARY
         echo "   - Python: \`python -m http.server 8000\`" >> $GITHUB_STEP_SUMMARY
@@ -99,7 +115,7 @@ jobs:
         echo "   - PHP: \`php -S localhost:8000\`" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**For Electron Packaging:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Copy build/web/ contents to your electron app folder" >> $GITHUB_STEP_SUMMARY
+        echo "1. Extract the archive contents to your electron app folder" >> $GITHUB_STEP_SUMMARY
         echo "2. Run \`npm run make\` as usual" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**⚠️ Important Notes:**" >> $GITHUB_STEP_SUMMARY

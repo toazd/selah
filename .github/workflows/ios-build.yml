@@ -141,30 +141,37 @@ jobs:
         zip -r "../../build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa" Payload
         cd ../..
 
-    - name: Upload IPA artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release and Upload IPA
+      uses: softprops/action-gh-release@v1
       with:
-        name: Selah-iOS-${{ env.APP_VERSION }}-${{ github.run_number }}
-        path: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
-        retention-days: 1
+        tag_name: ios-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
+        name: iOS Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: build/Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Build Summary
       run: |
         echo "## ✅ iOS Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build (${{ env.APP_VERSION }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** iOS (iPhone/iPad)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "- **iOS Target:** 13.0 (modern app compatibility)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📥 Download from GitHub Release:**" >> $GITHUB_STEP_SUMMARY
+        echo "The IPA has been uploaded to the [GitHub Release](https://github.com/toazd/selah/releases/tag/ios-v${{ env.APP_VERSION }}-build.${{ github.run_number }})." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
         echo "- **IPA:** Selah-${{ env.APP_VERSION }}-${{ github.run_number }}.ipa (iOS App Package, unsigned for sideloading)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download the IPA file from the artifacts below" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the IPA file from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. Open Sideloadly on your computer" >> $GITHUB_STEP_SUMMARY
         echo "3. Connect your iPhone XR" >> $GITHUB_STEP_SUMMARY
         echo "4. Drag and drop the downloaded IPA file into Sideloadly" >> $GITHUB_STEP_SUMMARY

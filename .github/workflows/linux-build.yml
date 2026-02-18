@@ -201,19 +201,23 @@ jobs:
     - name: List created packages
       run: ls -lah build/packages/
 
-    - name: Upload Linux packages artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release and Upload Packages
+      uses: softprops/action-gh-release@v1
       with:
-        name: Selah-Linux-${{ env.APP_VERSION }}-${{ github.run_number }}
-        path: build/packages/
-        retention-days: 1
+        tag_name: linux-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
+        name: Linux Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: build/packages/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Summary
       run: |
         echo "## ✅ Linux Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build (${{ env.APP_VERSION }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Linux (x64)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
@@ -224,8 +228,11 @@ jobs:
         echo "- **.deb:** Debian/Ubuntu compatible" >> $GITHUB_STEP_SUMMARY
         echo "- **.rpm:** Red Hat/Fedora compatible" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📥 Download from GitHub Release:**" >> $GITHUB_STEP_SUMMARY
+        echo "All packages have been uploaded to the [GitHub Release](https://github.com/toazd/selah/releases/tag/linux-v${{ env.APP_VERSION }}-build.${{ github.run_number }}) for this build." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download the appropriate package from the artifacts below" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the appropriate package from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. For .deb: \`sudo dpkg -i selah-${{ env.APP_VERSION }}.deb\`" >> $GITHUB_STEP_SUMMARY
         echo "3. For .rpm: \`sudo rpm -i selah-${{ env.APP_VERSION }}.rpm\`" >> $GITHUB_STEP_SUMMARY
         echo "4. For .tar.gz: Extract and run the executable" >> $GITHUB_STEP_SUMMARY

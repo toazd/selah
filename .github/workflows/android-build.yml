@@ -78,31 +78,38 @@ jobs:
         echo "📦 Final artifact:"
         ls -la build/artifacts/
 
-    - name: Upload Android APK artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release and Upload APK
+      uses: softprops/action-gh-release@v1
       with:
-        name: Selah-Android-${{ env.APP_VERSION }}-${{ github.run_number }}
-        path: build/artifacts/Selah-${{ env.APP_VERSION }}.apk
-        retention-days: 1
+        tag_name: android-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
+        name: Android Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: build/artifacts/Selah-${{ env.APP_VERSION }}.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Summary
       run: |
         echo "## ✅ Android Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build (${{ env.APP_VERSION }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** Android" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
         echo "- **Min SDK:** 22 (Android 5.1+)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📥 Download from GitHub Release:**" >> $GITHUB_STEP_SUMMARY
+        echo "The APK has been uploaded to the [GitHub Release](https://github.com/toazd/selah/releases/tag/android-v${{ env.APP_VERSION }}-build.${{ github.run_number }})." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Package:**" >> $GITHUB_STEP_SUMMARY
         echo "- **APK:** Selah-${{ env.APP_VERSION }}.apk (Universal Android package)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "**Option 1 - Direct APK Install:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download the APK file from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the APK file from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. Transfer to your Android device" >> $GITHUB_STEP_SUMMARY
         echo "3. Enable 'Install from Unknown Sources' in settings" >> $GITHUB_STEP_SUMMARY
         echo "4. Open the APK file and install" >> $GITHUB_STEP_SUMMARY

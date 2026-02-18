@@ -96,25 +96,32 @@ jobs:
         echo "📦 macOS packages created:"
         ls -la build/packages/
 
-    - name: Upload macOS desktop artifacts
-      uses: actions/upload-artifact@v4
+    - name: Create Release and Upload macOS Packages
+      uses: softprops/action-gh-release@v1
       with:
-        name: Selah-MacOS-${{ env.APP_VERSION }}-${{ github.run_number }}
-        path: |
+        tag_name: macos-v${{ env.APP_VERSION }}-build.${{ github.run_number }}
+        name: macOS Release - ${{ env.APP_VERSION }} (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: |
           build/packages/Selah.app
           build/packages/Selah-${{ env.APP_VERSION }}.dmg
-        retention-days: 1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Summary
       run: |
         echo "## ✅ macOS Desktop Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-        echo "- **Version:** Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** Release Build (${{ env.APP_VERSION }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Build Number:** ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Platform:** macOS (Intel/Apple Silicon)" >> $GITHUB_STEP_SUMMARY
         echo "- **Configuration:** Release" >> $GITHUB_STEP_SUMMARY
         echo "- **Backend:** Supabase" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📥 Download from GitHub Release:**" >> $GITHUB_STEP_SUMMARY
+        echo "All packages have been uploaded to the [GitHub Release](https://github.com/toazd/selah/releases/tag/macos-v${{ env.APP_VERSION }}-build.${{ github.run_number }})." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📦 Available Packages:**" >> $GITHUB_STEP_SUMMARY
         echo "- **Selah.app:** Application bundle (drag to Applications folder)" >> $GITHUB_STEP_SUMMARY
@@ -122,13 +129,13 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**📱 Installation Instructions:**" >> $GITHUB_STEP_SUMMARY
         echo "**Option 1 - DMG Installer:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download the .dmg file from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the .dmg file from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. Double-click the .dmg to mount it" >> $GITHUB_STEP_SUMMARY
         echo "3. Drag Selah.app to your Applications folder" >> $GITHUB_STEP_SUMMARY
         echo "4. Eject the DMG" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Option 2 - Direct App Bundle:**" >> $GITHUB_STEP_SUMMARY
-        echo "1. Download Selah.app from artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download Selah.app from the GitHub Release" >> $GITHUB_STEP_SUMMARY
         echo "2. Move to Applications folder" >> $GITHUB_STEP_SUMMARY
         echo "3. Right-click > Open (first time only, to bypass Gatekeeper)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
