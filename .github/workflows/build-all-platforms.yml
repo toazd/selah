@@ -175,12 +175,42 @@ jobs:
 
         ls -lah "$OUTPUT_DIR"
 
-    - name: Upload Linux artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload Linux to Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: linux-build
-        path: build/packages/*
-        retention-days: 1
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/packages/*
+        body: |
+          # Selah Release v${{ needs.extract-version.outputs.app_version }}
+          ## Build #${{ github.run_number }}
+          
+          This unified release contains builds for all supported platforms.
+          
+          ## 📦 Installation files by Platform
+          
+          ### 🐧 Linux
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora
+          
+          ### 🤖 Android
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app
+          
+          ### 🍎 iOS
+          - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa` - iOS app (unsigned for sideloading)
+          
+          ### 🍎 macOS
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer
+          - `Selah.app` - Standalone app bundle
+          
+          ### 🌐 Web
+          - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
+          
+          **Add any custom release notes here!**
 
   build-web:
     name: Build Web App
@@ -235,12 +265,15 @@ jobs:
         cd ../..
         ls -lah build/artifacts/
 
-    - name: Upload Web artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload Web to Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: web-build
-        path: build/artifacts/*
-        retention-days: 1
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/artifacts/*
 
   build-android:
     name: Build Android App
@@ -300,12 +333,15 @@ jobs:
         cp build/app/outputs/flutter-apk/app-release.apk "build/artifacts/Selah-${{ needs.extract-version.outputs.app_version }}.apk"
         ls -lah build/artifacts/
 
-    - name: Upload Android artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload Android to Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: android-build
-        path: build/artifacts/*
-        retention-days: 1
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/artifacts/*
 
   build-ios:
     name: Build iOS App
@@ -396,12 +432,15 @@ jobs:
         zip -r "../../build/Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa" Payload
         cd ../..
 
-    - name: Upload iOS artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload iOS to Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: ios-build
-        path: build/Selah-*.ipa
-        retention-days: 1
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/Selah-*.ipa
 
   build-macos:
     name: Build macOS Desktop App
@@ -471,111 +510,12 @@ jobs:
         cp -R "$BUILD_DIR" "$OUTPUT_DIR/"
         ls -lah "$OUTPUT_DIR"
 
-    - name: Upload macOS artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload macOS to Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: macos-build
-        path: build/packages/*
-        retention-days: 1
-
-  create-release:
-    name: Create Unified Release
-    needs: [extract-version, build-linux, build-web, build-android, build-ios, build-macos]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: all-artifacts
-
-      - name: Prepare artifacts for release
-        run: |
-          mkdir -p release-files
-          cp all-artifacts/*/* release-files/ 2>/dev/null || true
-          ls -lah release-files/
-
-      - name: Create unified release
-        uses: softprops/action-gh-release@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
-          name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
-          draft: false
-          prerelease: false
-          files: release-files/*
-          body: |
-            # Selah Release v${{ needs.extract-version.outputs.app_version }}
-            ## Build #${{ github.run_number }}
-            
-            This unified release contains builds for all supported platforms.
-
-            NOTE:   The sync service currently uses the free tier of Supabase.
-                    When and if the free tier capacity is exceeded online sync may fail to work properly.
-                    You won't lose any local data and if the tier is ever upgraded sync services will resume seemlessly.
-            
-            ## 📦 Installation files by Platform
-            
-            ### 🐧 Linux
-            NOTE: RPM files are not signed. You may need to install using --nogpgcheck, --allow-unsigned-rpm, --nodigest, and/or --nofiledigest.
-            - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions)
-            - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu
-            - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora
-            
-            **Installation:**
-            - `.deb`: `sudo dpkg -i selah-*.deb`
-            - `.rpm`: `sudo rpm -i selah-*.rpm`
-            - `.tar.gz`: Extract and run the executable
-            
-            ### 🤖 Android
-            - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app
-            
-            **Installation:**
-            1. Transfer to your Android device
-            2. Enable "Install from Unknown Sources" in settings
-            3. Open the APK file and install
-
-            Or use ADB: `adb install Selah-${{ needs.extract-version.outputs.app_version }}.apk` (if a dialog pops up click "more" and "install anyway")
-            
-            ### 🍎 iOS
-            - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa` - iOS app (unsigned for sideloading)
-            
-            **Installation:**
-            1. Download the IPA file
-            2. Open Sideloadly on your computer
-            3. Connect your iPhone
-            4. Drag and drop the IPA into Sideloadly
-            5. Follow the installation prompts
-            6. Trust the developer profile (Settings > General > VPN & Device Management)
-            
-            *Note: App may need reinstallation every 7 days*
-            This is a limitation that Apple imposes and there is no way around it (that I know of) without paying for a developer license and getting the app added to the app store.
-            
-            ### 🍎 macOS
-            NOTE: These builds are not tested so reporting any problems you have with installing/running the app would be helpful.
-            - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer
-            - `Selah.app` - Standalone app bundle
-            
-            **Installation:**
-            - **DMG:** Double-click to mount, drag Selah.app to Applications folder
-            - **Direct:** Move Selah.app to Applications, right-click > Open (first time)
-            
-            ### 🌐 Web
-            NOTE: Requires a real web server to run unless you manually build with electron-forge
-            - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
-            
-            **Deployment:**
-            1. Download and extract the ZIP archive
-            2. Serve with any static web server:
-               - Python: `python -m http.server 8000`
-               - Node: `npx serve .`
-               - PHP: `php -S localhost:8000`
-            
-            ---
-            
-            ## ℹ️ Build Information
-            - **Version:** v${{ needs.extract-version.outputs.app_version }}
-            - **Build Number:** ${{ github.run_number }}
-            - **Backend:** Supabase
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/packages/*
