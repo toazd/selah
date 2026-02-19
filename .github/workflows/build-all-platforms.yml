@@ -249,7 +249,7 @@ jobs:
         JSON
 
         cd "$TEMP_DIR3"
-        flatpak-builder --force-clean --repo=repo build-dir "$MANIFEST"
+        flatpak-builder --force-clean --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
         cd -
         rm -rf "$TEMP_DIR3"
