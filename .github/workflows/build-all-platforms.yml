@@ -1,5 +1,6 @@
 name: Build All Platforms
-
+env:
+  FLUTTER_VERSION='3.41.1'
 on:
   workflow_dispatch:
     inputs:
@@ -50,7 +51,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.41.1'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Clean build
@@ -325,7 +326,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Setup Node.js for web build
@@ -388,7 +389,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Setup Java JDK
@@ -474,7 +475,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Setup iOS platform
@@ -573,7 +574,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Clean build
@@ -641,7 +642,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.38.9'
+        flutter-version: "$FLUTTER_VERSION"
         channel: 'stable'
 
     - name: Verify Windows toolchain
