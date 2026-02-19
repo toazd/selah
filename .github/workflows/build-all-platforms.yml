@@ -312,7 +312,6 @@ jobs:
           
           ### 🍎 macOS
           - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer (untested builds; need feedback!)
-          - `Selah.app` - Standalone app bundle
           
           ### 🌐 Web
           - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive (requires a real web server; may or may not require manual tweaking)
