@@ -94,7 +94,7 @@ jobs:
         APP_NAME="selah"
         VERSION="${{ needs.extract-version.outputs.app_version }}"
         BUILD_DIR="build/linux/x64/release/bundle"
-        OUTPUT_DIR="build/packages"
+        OUTPUT_DIR="$(pwd)/build/packages"
 
         mkdir -p "$OUTPUT_DIR"
 
@@ -255,7 +255,7 @@ jobs:
         flatpak-builder --user --force-clean --arch=x86_64 --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
         sync
-        cd || true
+        cd - || true
         rm -rf "$TEMP_DIR3" || true
 
         ls -lah "$OUTPUT_DIR"
