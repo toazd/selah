@@ -280,17 +280,10 @@ jobs:
         
         # Clone debtap
         git clone https://github.com/helixarch/debtap.git /tmp/debtap
-        cd /tmp/debtap
-        
-        # Install debtap
-        sudo cp debtap /usr/bin/
-        sudo chmod +x /usr/bin/debtap
-        sudo mkdir -p /usr/share/debtap
-        sudo cp -r pkg/ /usr/share/debtap/
-        
-        cd "$GITHUB_WORKSPACE"
-        
+        chmod +x /tmp/debtap/debtap
+
         # Find the .deb file using glob pattern with proper error handling
+        cd "$GITHUB_WORKSPACE"
         shopt -s nullglob
         deb_files=(build/packages/selah*.deb)
         if [ ${#deb_files[@]} -eq 0 ]; then
@@ -304,7 +297,7 @@ jobs:
         echo "Converting $DEB_FILE to Arch package..."
         
         # Run debtap in quiet mode (-Q)
-        debtap -Q "$DEB_FILE"
+        exec /tmp/debtap/debtap -Q "$DEB_FILE"
 
         # Move to packages directory
         mv *.pkg.tar.zst build/packages/ 
