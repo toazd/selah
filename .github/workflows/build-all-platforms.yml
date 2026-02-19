@@ -240,6 +240,8 @@ jobs:
               "name": "selah-bundle",
               "buildsystem": "simple",
               "build-commands": [
+                "install -d /app/lib",
+                "cp -r opt/selah/lib/* /app/lib/",
                 "install -D -m755 opt/selah/selah /app/bin/selah",
                 "install -D -m644 usr/share/applications/selah.desktop /app/share/applications/com.selah.Selah.desktop",
                 "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
