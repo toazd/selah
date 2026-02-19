@@ -250,7 +250,7 @@ jobs:
 
         cd "$TEMP_DIR3"
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        flatpak-builder --force-clean --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
+        flatpak-builder --user --force-clean --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
         cd -
         rm -rf "$TEMP_DIR3"
