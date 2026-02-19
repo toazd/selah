@@ -179,32 +179,18 @@ jobs:
 
         echo "📦 Creating AppImage package..."
         TEMP_DIR2=$(mktemp -d)
-        cp -r "$BUILD_DIR"/* "$TEMP_DIR2/"
-        mkdir -p "$TEMP_DIR2/usr/share/icons/hicolor/256x256/apps"
-        mkdir -p "$TEMP_DIR2/opt/selah"
-
-        cp "$TEMP_DIR2/data/flutter_assets/assets/icon.png" "$TEMP_DIR2/usr/share/icons/hicolor/256x256/apps/selah.png"
-        mv "$TEMP_DIR2/selah" "$TEMP_DIR2/opt/selah/"
-        if [ -d "$TEMP_DIR2/data" ]; then
-          mv "$TEMP_DIR2/data" "$TEMP_DIR2/opt/selah/"
-        fi
-        if [ -d "$TEMP_DIR2/lib" ]; then
-          mv "$TEMP_DIR2/lib" "$TEMP_DIR2/opt/selah/"
-        fi
-
         APPDIR=$(mktemp -d)/Selah.AppDir
-        mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/icons/hicolor/256x256/apps"
-        # copy files into AppDir
-        cp -r "$TEMP_DIR2/opt/selah/"* "$APPDIR/usr/bin/"
-        if [ -f "$TEMP_DIR2/usr/share/applications/selah.desktop" ]; then
-          cp "$TEMP_DIR2/usr/share/applications/selah.desktop" "$APPDIR/usr/share/applications/"
-        else
-          printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nStartupNotify=true\n' > "$APPDIR/usr/share/applications/selah.desktop"
-        fi
-        cp "$TEMP_DIR2/usr/share/icons/hicolor/256x256/apps/selah.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        cp -r "$BUILD_DIR"/* "$APPDIR/"
 
-        printf '#!/bin/sh\nexec /opt/selah/selah "$@"\n' > "$APPDIR/AppRun"
+        # Copy icon to root
+        cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/selah.png"
+        
+        # Create AppRun
+        printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
         chmod +x "$APPDIR/AppRun"
+
+        # Create .desktop
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=selah\nType=Application\nCategories=Education\nStartupNotify=true\n' > "$APPDIR/selah.desktop"
 
         # download appimagetool
         wget -q -O appimagetool.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
