@@ -235,6 +235,15 @@ jobs:
           "sdk": "org.freedesktop.Sdk",
           "command": "selah",
           "branch": "$VERSION",
+          "finish-args": [
+              "--socket=wayland",
+              "--socket=fallback-x11",
+              "--device=dri",
+              "--share=ipc",
+              "--share=network",
+              "--talk-name=org.freedesktop.secrets",
+              "--filesystem=xdg-config/selah:create"
+            ],
           "modules": [
             {
               "name": "selah-bundle",
