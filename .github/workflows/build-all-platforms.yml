@@ -297,8 +297,8 @@ jobs:
         echo "Converting $DEB_FILE to Arch package..."
         
         # Run debtap in quiet mode (-Q)
-        sudo exec /tmp/debtab/debtap -u
-        exec /tmp/debtap/debtap -Q "$DEB_FILE"
+        sudo /tmp/debtab/debtap -u
+        /tmp/debtap/debtap -Q "$DEB_FILE"
 
         # Move to packages directory
         mv *.pkg.tar.zst build/packages/ 
