@@ -181,7 +181,7 @@ jobs:
         TEMP_DIR2=$(mktemp -d)
         APPDIR=$(mktemp -d)/Selah.AppDir
         mkdir -p "$APPDIR"
-        
+
         cp -r "$BUILD_DIR"/* "$APPDIR/"
 
         # Copy icon to root
@@ -248,8 +248,6 @@ jobs:
         }
         JSON
 
-        # copy build tree next to manifest so flatpak-builder can find it
-        cp -r "$FLATPAK_BUILD" "$TEMP_DIR3/flatpak-build"
         cd "$TEMP_DIR3"
         flatpak-builder --force-clean --repo=repo build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
