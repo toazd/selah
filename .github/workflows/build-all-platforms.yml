@@ -251,6 +251,7 @@ jobs:
               "build-commands": [
                 "install -d /app/lib",
                 "cp -r opt/selah/lib/* /app/lib/",
+                "cp -r opt/selah/data/flutter_assets/ /app/bin/data/",
                 "install -D -m755 opt/selah/selah /app/bin/selah",
                 "install -D -m644 usr/share/applications/selah.desktop /app/share/applications/com.selah.Selah.desktop",
                 "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
