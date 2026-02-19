@@ -161,6 +161,7 @@ jobs:
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
           -v "$VERSION" \
+          --iteration "${{ github.run_number }}" \
           --rpm-os linux \
           --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
           --url "https://github.com/toazd/selah" \
