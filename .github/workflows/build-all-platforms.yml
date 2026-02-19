@@ -225,13 +225,14 @@ jobs:
         cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/selah.png"
 
         MANIFEST="$TEMP_DIR3/manifest.json"
-        cat > "$MANIFEST" <<'JSON'
+        cat > "$MANIFEST" <<JSON
         {
           "app-id": "com.selah.Selah",
           "runtime": "org.freedesktop.Platform",
           "runtime-version": "25.08",
           "sdk": "org.freedesktop.Sdk",
           "command": "selah",
+          "branch": "$VERSION",
           "modules": [
             {
               "name": "selah-bundle",
