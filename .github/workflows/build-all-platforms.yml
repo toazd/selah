@@ -273,6 +273,43 @@ jobs:
         cd - || true
         rm -rf "$TEMP_DIR3" || true
 
+    - name: Create Arch Linux package with debtap
+      run: |
+        # Install debtap dependencies
+        sudo apt-get install -y binutils pkg-config fakeroot
+        
+        # Clone debtap
+        git clone https://github.com/helixelix/debtap.git /tmp/debtap
+        cd /tmp/debtap
+        
+        # Install debtap
+        sudo cp debtap /usr/bin/
+        sudo chmod +x /usr/bin/debtap
+        sudo mkdir -p /usr/share/debtap
+        sudo cp -r pkg/ /usr/share/debtap/
+        
+        cd "$GITHUB_WORKSPACE"
+        
+        # Find the .deb file using glob pattern with proper error handling
+        shopt -s nullglob
+        deb_files=(build/packages/selah*.deb)
+        if [ ${#deb_files[@]} -eq 0 ]; then
+          echo "ERROR: No .deb file found in build/packages!"
+          ls -lah .
+          ls -lah build
+          ls -lah build/packages
+          exit 1
+        fi
+        DEB_FILE="${deb_files[0]}"
+        echo "Converting $DEB_FILE to Arch package..."
+        
+        # Run debtap in quiet mode (-Q)
+        debtap -Q "$DEB_FILE"
+
+        # Move to packages directory
+        mv *.pkg.tar.zst build/packages/ 
+        
+        ls -lah build/packages/
         ls -lah "$OUTPUT_DIR"
 
     - name: Upload Linux to Release
@@ -288,32 +325,33 @@ jobs:
           # Selah Release v${{ needs.extract-version.outputs.app_version }}
           ## Build #${{ github.run_number }}
           
-          This unified release contains builds for all supported platforms.
+          This unified release contains builds for all supported platforms. Selah is currently in open beta and (generally) does not have self-installing or self-updating features. The Arch and Debian builds are the exception to this.
           
           ## 📦 Installation files by Platform
           
           ### 🪟 Windows
-          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release)
+          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions)
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage
-          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation; ln -s /path/to/extracted/selah /usr/bin/selah)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm)
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
+          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (NOTE: NOT WORKING YET!)
           
           ### 🤖 Android
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
           
           ### 🍎 iOS
-          - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa` - iOS app (unsigned for sideloading)
+          - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa` - iOS app (unsigned for sideloading; Sideloadly works well for testing)
           
           ### 🍎 macOS
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer (untested builds; need feedback!)
           - `Selah.app` - Standalone app bundle
           
           ### 🌐 Web
-          - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive
+          - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive (requires a real web server; may or may not require manual tweaking)
           
   build-web:
     name: Build Web App
