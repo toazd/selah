@@ -229,7 +229,7 @@ jobs:
         {
           "app-id": "com.selah.Selah",
           "runtime": "org.freedesktop.Platform",
-          "runtime-version": "25.08.7",
+          "runtime-version": "25.08",
           "sdk": "org.freedesktop.Sdk",
           "command": "selah",
           "modules": [
@@ -251,7 +251,7 @@ jobs:
 
         cd "$TEMP_DIR3"
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        flatpak-builder --user --force-clean --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
+        flatpak-builder --user --force-clean --arch=x86_64 --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
         cd -
         rm -rf "$TEMP_DIR3"
