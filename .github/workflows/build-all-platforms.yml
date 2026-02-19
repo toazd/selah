@@ -254,8 +254,9 @@ jobs:
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         flatpak-builder --user --force-clean --arch=x86_64 --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
         flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
-        cd -
-        rm -rf "$TEMP_DIR3"
+        sync
+        cd .. || true
+        rm -rf "$TEMP_DIR3" || true
 
         ls -lah "$OUTPUT_DIR"
 
