@@ -273,41 +273,6 @@ jobs:
         cd - || true
         rm -rf "$TEMP_DIR3" || true
 
-    - name: Create Arch Linux package with debtap
-      run: |
-        # Install debtap dependencies
-        sudo apt-get install -y binutils pkg-config fakeroot zstd pkgfile curl
-        export TERM=xterm
-
-        # Clone debtap
-        git clone https://github.com/helixarch/debtap.git /tmp/debtap
-        chmod +x /tmp/debtap/debtap
-        sudo cp /tmp/debtap/debtap /usr/bin/debtap
-        sudo mkdir -p /usr/share/debtap
-        sudo touch /usr/share/debtap/debtap-packages
-        sudo pkgfile --update
-        sudo debtap -u
-
-        # Find the .deb file using glob pattern with proper error handling
-        cd "$GITHUB_WORKSPACE"
-        shopt -s nullglob
-        deb_files=(build/packages/selah*.deb)
-        if [ ${#deb_files[@]} -eq 0 ]; then
-          echo "ERROR: No .deb file found in build/packages!"
-          ls -lah .
-          ls -lah build
-          ls -lah build/packages
-          exit 1
-        fi
-        DEB_FILE="${deb_files[0]}"
-        echo "Converting $DEB_FILE to Arch package..."
-        
-        # Run debtap in quiet mode (-Q)
-        debtap -Q "$DEB_FILE"
-
-        # Move to packages directory
-        mv *.pkg.tar.zst build/packages/ 
-        
         ls -lah build/packages/
         ls -lah "$OUTPUT_DIR"
 
