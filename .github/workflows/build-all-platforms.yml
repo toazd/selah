@@ -61,9 +61,6 @@ jobs:
 
     - name: Install Linux build dependencies & packaging tools
       run: |
-        sudo snap remove --purge firefox
-        sudo apt-get purge -y firefox
-        sudo rm -rf ~/snap/firefox
         sudo apt-get update
         sudo apt-get full-upgrade -y
         sudo apt-get install -y \
@@ -232,7 +229,6 @@ jobs:
         {
           "app-id": "com.selah.Selah",
           "runtime": "org.freedesktop.Platform",
-          "sdk": "org.freedesktop.Sdk",
           "command": "selah",
           "modules": [
             {
