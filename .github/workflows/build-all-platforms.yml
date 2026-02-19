@@ -122,7 +122,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
         
         fpm -s dir -t deb \
           -n "$APP_NAME" \
@@ -159,7 +159,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Office;Education;\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.holybible\n' > "$TEMP_DIR/usr/share/applications/selah.desktop"
         
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
@@ -214,6 +214,10 @@ jobs:
           mv "$TEMP_DIR3/lib" "$TEMP_DIR3/opt/selah/"
         fi
 
+        # Create desktop file for Flatpak
+        mkdir -p "$TEMP_DIR3/usr/share/applications"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR3/usr/share/applications/selah.desktop"
+
         # Prepare minimal flatpak manifest and build tree
         FLATPAK_BUILD="$TEMP_DIR3/flatpak-build"
         mkdir -p "$FLATPAK_BUILD/opt/selah" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps" "$FLATPAK_BUILD/usr/share/applications"
@@ -228,7 +232,6 @@ jobs:
         {
           "app-id": "com.selah.Selah",
           "runtime": "org.freedesktop.Platform",
-          "runtime-version": "23.08",
           "sdk": "org.freedesktop.Sdk",
           "command": "selah",
           "modules": [
