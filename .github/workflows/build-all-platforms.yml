@@ -229,6 +229,8 @@ jobs:
         {
           "app-id": "com.selah.Selah",
           "runtime": "org.freedesktop.Platform",
+          "runtime-version": "25.08.7",
+          "sdk": "org.freedesktop.Sdk",
           "command": "selah",
           "modules": [
             {
