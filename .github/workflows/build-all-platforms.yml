@@ -297,6 +297,7 @@ jobs:
         echo "Converting $DEB_FILE to Arch package..."
         
         # Run debtap in quiet mode (-Q)
+        sudo debtap -u
         exec /tmp/debtap/debtap -Q "$DEB_FILE"
 
         # Move to packages directory
