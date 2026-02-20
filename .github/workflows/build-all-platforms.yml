@@ -249,25 +249,23 @@ jobs:
               "name": "selah-bundle",
               "buildsystem": "simple",
               "build-commands": [
-              "install -d /app/bin",
-              "install -d /app/lib",
-              
-              /* 1. Copy the main executable */
-              "install -D -m755 opt/selah/selah /app/bin/selah",
-              
-              /* 2. Copy the ENTIRE data directory (Crucial for AOT and ICU) */
-              "cp -r opt/selah/data /app/bin/",
-              
-              /* 3. Copy system libs if they exist (Flutter engine libs) */
-              "cp -r opt/selah/lib/* /app/lib/",
-              
-              /* 4. Desktop and Icons */
-              "install -D -m644 usr/share/applications/selah.desktop /app/share/applications/com.selah.Selah.desktop",
-              "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
-            ],
-            "sources": [
-              { "type": "dir", "path": "flatpak-build" }
-            ]
+                /* 1. Ensure the target directory exists */
+                "install -d /app/bin",
+
+                /* 2. Copy the binary directly into bin */
+                "install -D -m755 opt/selah/selah /app/bin/selah",
+
+                /* 3. Copy the lib and data folders into bin as siblings to the binary */
+                "cp -r opt/selah/lib /app/bin/",
+                "cp -r opt/selah/data /app/bin/",
+
+                /* 4. Standard metadata (desktop file/icons) */
+                "install -D -m644 usr/share/applications/selah.desktop /app/share/applications/com.selah.Selah.desktop",
+                "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+              ],
+              "sources": [
+                { "type": "dir", "path": "flatpak-build" }
+              ]
             }
           ]
         }
