@@ -290,7 +290,7 @@ jobs:
           # Selah Release v${{ needs.extract-version.outputs.app_version }}
           ## Build #${{ github.run_number }}
           
-          This unified release contains builds for all supported platforms. Selah is currently in open beta and requires manually installation on platforms other than Arch/Debian based Linux distros.
+          This unified release contains builds for all supported platforms. Selah is currently in open beta and currently requires manual installation and updating.
           
           ## 📦 Installation files by Platform
           
@@ -315,7 +315,7 @@ jobs:
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm)
           - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
-          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (NOTE: NOT WORKING YET!)
+          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
           
           ### 🤖 Android
           - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
