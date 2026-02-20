@@ -264,10 +264,10 @@ jobs:
               /* 4. Desktop and Icons */
               "install -D -m644 usr/share/applications/selah.desktop /app/share/applications/com.selah.Selah.desktop",
               "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
-          ],
-              "sources": [
-                { "type": "dir", "path": "flatpak-build" }
-              ]
+            ],
+            "sources": [
+              { "type": "dir", "path": "flatpak-build" }
+            ]
             }
           ]
         }
