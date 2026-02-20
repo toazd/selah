@@ -243,6 +243,8 @@ jobs:
               "--share=network",
               "--talk-name=org.freedesktop.secrets",
               "--filesystem=xdg-config/selah:create"
+              "--socket=system-bus",
+              "--talk-name=org.freedesktop.NetworkManager"
             ],
           "modules": [
             {
