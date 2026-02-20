@@ -290,7 +290,7 @@ jobs:
           # Selah Release v${{ needs.extract-version.outputs.app_version }}
           ## Build #${{ github.run_number }}
           
-          This unified release contains builds for all supported platforms. Selah is currently in open beta and currently requires manual installation and updating.
+          This unified release contains builds for all supported platforms. Selah is currently in open beta and requires manual installation and updating.
           
           ## 📦 Installation files by Platform
           
