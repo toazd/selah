@@ -297,15 +297,17 @@ jobs:
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
+
           NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme
           it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE).
+
           adw-gtk3 works well for me (https://github.com/lassekongo83/adw-gtk3).
           
           GNOME
-          After installing adw-gtk3 open gnome-tweaks, 
+          After installing adw-gtk3 open gnome-tweaks, goto Appearance, for Legacy Applications select either adw-gtk3 (light theme)/adw-gtk3-dark (dark theme).
 
           KDE
-          Install adw-gtk3, System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose a theme and click Apply
+          Install adw-gtk3, System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose adw-gtk3/adw-gtk3-dark and click Apply.
 
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation; ln -s /path/to/extracted/selah /usr/bin/selah)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
