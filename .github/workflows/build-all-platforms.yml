@@ -289,7 +289,7 @@ jobs:
           # Selah Release v${{ needs.extract-version.outputs.app_version }}
           ## Build #${{ github.run_number }}
           
-          This unified release contains builds for all supported platforms. Selah is currently in open beta and (generally) does not have self-installing or self-updating features. The Arch and Debian builds are the exception to this.
+          This unified release contains builds for all supported platforms. Selah is currently in open beta and requires manually installation on platforms other than Arch/Debian based Linux distros.
           
           ## 📦 Installation files by Platform
           
@@ -297,6 +297,9 @@ jobs:
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
+          NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme
+          it's likely because you don't have a GTK3 theme installed. adw-gtk3 works well for me (https://github.com/lassekongo83/adw-gtk3).
+
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation; ln -s /path/to/extracted/selah /usr/bin/selah)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
