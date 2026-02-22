@@ -18,24 +18,25 @@ A cross-platform Bible study application built with Flutter with no strings atta
 - **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
 ### Study Features
-- **Rich Text Notes** - Create and edit detailed study notes with formatting
-- **Highlight System** - Mark and categorize important verses with colours
+- **Rich Text Notes** - Verse-level note support with automatic verse reference linker
+- **Highlight System** - Support for Word-level highlighting with customizeable colours
 - **Verse History** - Track and revisit previously viewed verses
-- **Simple/Advanced Search** - Find verses by keywords or phrases with or without using the advanced modes (Regex, Nearby)
-- **Book Navigation** - Easy browsing through all 66 books of the Bible
+- **Simple/Advanced Search** - Find verses by keywords or phrases with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother eg. graven carved)
+- **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid, list layout, and/or manually entering a reference
 - **Full Touch-screen support** - Built from the ground up to be both touch-screen and non-touch-screen friendly
-- **Seemless, transparent, account based online sync features** - Sign in to the same account on multiple devices and they will all automatically sync with eachother
+- **Seemless, transparent, account based online sync features** - Sign in to the same account on multiple devices and they will all automatically sync with eachother. Accounts and sync are both secure and free (provided by Supabase free tier which does have limits).
 
 ### Data Management
-- **Local SQLite Database** - All user data is stored localling in sqlite databases
+- **Local SQLite Database** - All user data is saved in easy to read and understand sqlite databases. No encryption or obfuscation.
 - **Cloud Sync** - Optional Supabase synchronization across devices
-- **Data Export/Import** - Export some or all of your data to a backup file and easily import it anywhere else. Import from Olive Tree Bible format is also supported (you will need to obtain the backup file from the Olive Tree Bible web site)
+- **Data Export/Import** - Export some or all of your data to a backup file and easily import it anywhere else. Import from Olive Tree Bible format is also supported (you will need to obtain your backup file from the Olive Tree Bible web site)
 
 ### Technical Features
 - **Responsive Design** - Optimized for phones, tablets, and desktop
+- **Many Customizeable features** - Colors, fonts, and more.
 - **Supabase Authentication** - Secure user accounts and data sync
 - **Material Design** - Clean, intuitive user interface
-- **Performance Optimized** - Fast loading and smooth navigation
+- **Performance Optimized** - Fast loading and smooth navigation due to a simple yet robust design
 
 ## 📱 Supported Platforms
 
