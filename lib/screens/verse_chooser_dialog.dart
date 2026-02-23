@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:selah/utils/snackbar_notification.dart';
+import 'dart:math';
 import '../database/bible_database.dart';
 import '../main.dart';
 import '../utils/book_name_converter.dart';
@@ -158,6 +159,69 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
 
   // Convert a DB code to the canonical display key.
   String _toDisplayKey(String dbName) => dbName.trim();
+
+  double _measureTextWidth(
+    BuildContext context,
+    String text,
+    TextStyle style, {
+    int maxLines = 1,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: maxLines,
+      textDirection: Directionality.of(context),
+    )..layout();
+    return painter.width;
+  }
+
+  double _measureTextHeight(
+    BuildContext context,
+    String text,
+    TextStyle style, {
+    int maxLines = 1,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: maxLines,
+      textDirection: Directionality.of(context),
+    )..layout();
+    return painter.height;
+  }
+
+  Size _scaledTileSize(
+    BuildContext context, {
+    required Iterable<String> labels,
+    required TextStyle style,
+    double horizontalPadding = 14,
+    double verticalPadding = 8,
+    double minWidth = 48,
+    double minHeight = 36,
+    int maxLines = 1,
+  }) {
+    if (labels.isEmpty) {
+      return Size(minWidth, minHeight);
+    }
+
+    double maxWidth = 0;
+    double maxHeight = 0;
+    for (final label in labels) {
+      maxWidth = max(
+        maxWidth,
+        _measureTextWidth(context, label, style, maxLines: maxLines),
+      );
+      maxHeight = max(
+        maxHeight,
+        _measureTextHeight(context, label, style, maxLines: maxLines),
+      );
+    }
+
+    return Size(
+      max(minWidth, maxWidth + horizontalPadding),
+      max(minHeight, maxHeight + verticalPadding),
+    );
+  }
 
   Future<void> _loadBooks() async {
     //debugPrint('_loadBooks starting');
@@ -429,7 +493,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
         controller: _quickJumpController,
         decoration: InputDecoration(
           counterText: "",
-          contentPadding: EdgeInsetsGeometry.only(top: 18),
+          contentPadding: const EdgeInsets.only(top: 18),
           //labelText: 'Quick Jump',
           //labelStyle: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize),
           //alignLabelWithHint: true,
@@ -499,177 +563,229 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final dropdownTextStyle =
+        TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
+    final bookLabels = _books.map(BookNameConverter.shortNameToLongName);
+    final chapterLabels =
+        _chapters.isEmpty ? <String>['119'] : _chapters.map((c) => '$c');
+    final verseLabels =
+        _verses.isEmpty ? <String>['176'] : _verses.map((v) => '$v');
+
     return Padding(
-      padding: const EdgeInsets.all(
-          16.0), // Padding remains around the whole content
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment:
-              CrossAxisAlignment.center, // Makes items fill the width
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 1. Book Name Dropdown (NOW DropdownButton)
-            SizedBox(
-              width: 180,
-              child: DropdownButton<String>(
-                value: _selectedBook,
-                isExpanded: true, // Keep isExpanded for full width
-                alignment: Alignment.center,
-                underline: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                ),
-                // Remove the default underline
-                //underline: const SizedBox(),
+      padding: const EdgeInsets.all(16.0),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : MediaQuery.of(context).size.width - 64;
 
-                icon: Icon(
-                  Icons.menu_book_rounded,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                ),
+          final bookWidth = _scaledTileSize(
+            context,
+            labels: bookLabels,
+            style: dropdownTextStyle,
+            horizontalPadding: 92,
+            verticalPadding: 0,
+            minWidth: 180,
+            minHeight: 0,
+          ).width;
+          final chapterWidth = _scaledTileSize(
+            context,
+            labels: chapterLabels,
+            style: dropdownTextStyle,
+            horizontalPadding: 92,
+            verticalPadding: 0,
+            minWidth: 180,
+            minHeight: 0,
+          ).width;
+          final verseWidth = _scaledTileSize(
+            context,
+            labels: verseLabels,
+            style: dropdownTextStyle,
+            horizontalPadding: 92,
+            verticalPadding: 0,
+            minWidth: 180,
+            minHeight: 0,
+          ).width;
 
-                selectedItemBuilder: (context) {
-                  return _books.map((b) {
-                    return Center(
-                      child: Text(
-                        BookNameConverter.shortNameToLongName(b),
-                        style: TextStyle(
-                            fontFamily: uiFontFamily, fontSize: uiFontSize),
-                      ),
-                    );
-                  }).toList();
-                },
+          final dropdownWidth =
+              min(maxWidth, max(bookWidth, max(chapterWidth, verseWidth)));
 
-                items: [
-                  // DropdownMenuItem content remains centered
-                  ..._books.map((b) => DropdownMenuItem(
-                        value: b,
-                        child: Center(
-                            child: Text(
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: dropdownWidth,
+                  child: DropdownButton<String>(
+                    value: _selectedBook,
+                    isExpanded: true,
+                    alignment: Alignment.center,
+                    underline: Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    icon: Icon(
+                      Icons.menu_book_rounded,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    selectedItemBuilder: (context) {
+                      return _books.map((b) {
+                        return Center(
+                          child: Text(
+                            BookNameConverter.shortNameToLongName(b),
+                            style: dropdownTextStyle,
+                            textAlign: TextAlign.center,
+                            softWrap: true,
+                          ),
+                        );
+                      }).toList();
+                    },
+                    items: [
+                      ..._books.map((b) => DropdownMenuItem(
+                            value: b,
+                            child: Center(
+                              child: Text(
                                 BookNameConverter.shortNameToLongName(b),
-                                style: TextStyle(
-                                    fontFamily: uiFontFamily,
-                                    fontSize: uiFontSize))),
-                      )),
-                ],
-                onChanged: (book) => _onBookSelected(book!),
-              ),
-            ),
-            SizedBox(height: 16), // vertical spacing between dropdowns
-
-            // 2. Chapter Number Dropdown
-            SizedBox(
-              width: 180,
-              child: DropdownButton<int>(
-                value: _selectedChapter,
-                isExpanded: true,
-                alignment: Alignment.center,
-                underline: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                                style: dropdownTextStyle,
+                                textAlign: TextAlign.center,
+                                softWrap: true,
+                              ),
+                            ),
+                          )),
+                    ],
+                    onChanged: (book) => _onBookSelected(book!),
+                  ),
                 ),
-                icon: Icon(
-                  Icons.library_books_rounded,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: dropdownWidth,
+                  child: DropdownButton<int>(
+                    value: _selectedChapter,
+                    isExpanded: true,
+                    alignment: Alignment.center,
+                    underline: Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    icon: Icon(
+                      Icons.library_books_rounded,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    selectedItemBuilder: (context) {
+                      return _chapters.map((c) {
+                        return Center(
+                          child: Text(
+                            '$c',
+                            style: dropdownTextStyle,
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }).toList();
+                    },
+                    items: _chapters.isEmpty
+                        ? []
+                        : _chapters
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Center(
+                                    child: Text(
+                                      '$c',
+                                      style: dropdownTextStyle,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                    onChanged: (chapter) => _onChapterSelected(chapter!),
+                  ),
                 ),
-                selectedItemBuilder: (context) {
-                  return _chapters.map((c) {
-                    return Center(
-                      child: Text('$c',
-                          style: TextStyle(
-                              fontFamily: uiFontFamily, fontSize: uiFontSize)),
-                    );
-                  }).toList();
-                },
-                items: _chapters.isEmpty
-                    ? []
-                    : _chapters
-                        .map((c) => DropdownMenuItem(
-                              value: c,
-                              child: Center(
-                                  child: Text('$c',
-                                      style: TextStyle(
-                                          fontFamily: uiFontFamily,
-                                          fontSize: uiFontSize))),
-                            ))
-                        .toList(),
-                onChanged: (chapter) => _onChapterSelected(chapter!),
-              ),
-            ),
-            SizedBox(height: 16), // vertical spacing between dropdowns
-
-            // 3. Verse Number Dropdown
-            SizedBox(
-              width: 180,
-              child: DropdownButton<int>(
-                value: _selectedVerse,
-                isExpanded: true,
-                alignment: Alignment.center,
-                underline: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: dropdownWidth,
+                  child: DropdownButton<int>(
+                    value: _selectedVerse,
+                    isExpanded: true,
+                    alignment: Alignment.center,
+                    underline: Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    icon: Icon(
+                      Icons.pageview_rounded,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                    ),
+                    selectedItemBuilder: (context) {
+                      return _verses.map((v) {
+                        return Center(
+                          child: Text(
+                            '$v',
+                            style: dropdownTextStyle,
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }).toList();
+                    },
+                    items: _verses.isEmpty
+                        ? []
+                        : _verses
+                            .map((v) => DropdownMenuItem(
+                                  value: v,
+                                  child: Center(
+                                    child: Text(
+                                      '$v',
+                                      style: dropdownTextStyle,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                    onChanged: (verse) => _onVerseSelected(verse!),
+                  ),
                 ),
-                icon: Icon(
-                  Icons.pageview_rounded,
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                ),
-                selectedItemBuilder: (context) {
-                  return _verses.map((v) {
-                    return Center(
-                      child: Text('$v',
-                          style: TextStyle(
-                              fontFamily: uiFontFamily, fontSize: uiFontSize)),
-                    );
-                  }).toList();
-                },
-                items: _verses.isEmpty
-                    ? []
-                    : _verses
-                        .map((v) => DropdownMenuItem(
-                              value: v,
-                              child: Center(
-                                  child: Text('$v',
-                                      style: TextStyle(
-                                          fontFamily: uiFontFamily,
-                                          fontSize: uiFontSize))),
-                            ))
-                        .toList(),
-                onChanged: (verse) => _onVerseSelected(verse!),
-              ),
-            ),
-
-            SizedBox(height: 32), // Spacing before the button
-
-            ElevatedButton(
-              onPressed: _selectedBook != null &&
-                      _selectedChapter != null &&
-                      _selectedVerse != null
-                  ? () {
-                      Navigator.pop(context, {
-                        'book': _selectedBook,
-                        'chapter': _selectedChapter,
-                        'verse': _selectedVerse,
-                      });
-                    }
-                  : null,
-              child: Text('Go',
-                  style: TextStyle(
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: _selectedBook != null &&
+                          _selectedChapter != null &&
+                          _selectedVerse != null
+                      ? () {
+                          Navigator.pop(context, {
+                            'book': _selectedBook,
+                            'chapter': _selectedChapter,
+                            'verse': _selectedVerse,
+                          });
+                        }
+                      : null,
+                  child: Text(
+                    'Go',
+                    style: TextStyle(
                       fontFamily: uiFontFamily,
                       fontSize: uiFontSize,
-                      color: getAdaptiveTextColor(context,
-                          usePrimaryColor: true))),
+                      color:
+                          getAdaptiveTextColor(context, usePrimaryColor: true),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -870,6 +986,72 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final txtColor = isDark ? darkTextColor.value : lightTextColor.value;
     final bookColors = isDark ? _bookColorsDark : _bookColorsLight;
+    final bookTileStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: uiFontSize + 6,
+      fontFamily: fontFamilyNotifier.value,
+    );
+    final numberTileStyle = TextStyle(
+      fontWeight: FontWeight.normal,
+      fontSize: uiFontSize + 7,
+      fontFamily: fontFamilyNotifier.value,
+    );
+    final dropdownStyle = TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
+
+    final bookChipSize = _scaledTileSize(
+      context,
+      labels: _books.map(_toDisplayKey),
+      style: bookTileStyle,
+      horizontalPadding: 20,
+      verticalPadding: 10,
+      minWidth: 67,
+      minHeight: 36,
+    );
+    final chapterChipSize = _scaledTileSize(
+      context,
+      labels: _chapters.isEmpty ? ['119'] : _chapters.map((c) => '$c'),
+      style: numberTileStyle,
+      horizontalPadding: 18,
+      verticalPadding: 10,
+      minWidth: 48,
+      minHeight: 36,
+    );
+    final verseChipSize = _scaledTileSize(
+      context,
+      labels: _verses.isEmpty ? ['176'] : _verses.map((v) => '$v'),
+      style: numberTileStyle,
+      horizontalPadding: 18,
+      verticalPadding: 10,
+      minWidth: 48,
+      minHeight: 36,
+    );
+
+    const gridSpacing = 8.0;
+    const gridColumns = 6;
+    final gridContentWidth =
+        (bookChipSize.width * gridColumns) + (gridSpacing * (gridColumns - 1)) + 24;
+    final listBookWidth = _measureTextWidth(
+          context,
+          _books
+              .map(BookNameConverter.shortNameToLongName)
+              .fold('', (a, b) => b.length > a.length ? b : a),
+          dropdownStyle,
+        ) +
+        120;
+    final longestChapterLabel =
+        _chapters.isEmpty ? '119' : _chapters.fold<int>(0, max).toString();
+    final longestVerseLabel =
+        _verses.isEmpty ? '176' : _verses.fold<int>(0, max).toString();
+    final listNumberWidth = max(
+          _measureTextWidth(context, longestChapterLabel, dropdownStyle),
+          _measureTextWidth(context, longestVerseLabel, dropdownStyle),
+        ) +
+        120;
+    final listContentWidth = max(285.0, max(listBookWidth, listNumberWidth));
+    final maxDialogWidth = max(280.0, MediaQuery.of(context).size.width - 32);
+    final targetDialogWidth =
+        _navigationMode == NavigationMode.grid ? max(480.0, gridContentWidth) : listContentWidth;
+    final dialogWidth = targetDialogWidth.clamp(280.0, maxDialogWidth).toDouble();
 
     // Use display key for color of the selected book title
     Color? selectedBookColor;
@@ -879,15 +1061,15 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     }
 
     return Dialog(
-      insetPadding: EdgeInsets.only(top: 32.0),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: Container(
-        width: _navigationMode == NavigationMode.grid ? 480 : 285,
-        padding: EdgeInsets.all(8),
+        width: dialogWidth,
+        padding: const EdgeInsets.all(8),
         child: _loading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height,
+                  maxHeight: MediaQuery.of(context).size.height - 64,
                 ),
                 child: Stack(
                   children: [
@@ -922,8 +1104,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                         return GestureDetector(
                                           onTap: () => _onBookSelected(b),
                                           child: Container(
-                                            width: 67,
-                                            height: 36,
+                                            width: bookChipSize.width,
+                                            height: bookChipSize.height,
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
                                               color: Colors.transparent,
@@ -938,7 +1120,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                               disp,
                                               textAlign: TextAlign.center,
                                               style: textStyle,
-                                              overflow: TextOverflow.fade,
+                                              overflow: TextOverflow.clip,
+                                              softWrap: false,
                                             ),
                                           ),
                                         );
@@ -999,6 +1182,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             child: Text(
                                               title,
                                               textAlign: TextAlign.center,
+                                              softWrap: true,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: uiFontSize + 7,
@@ -1015,10 +1199,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           spacing: 8,
                                           runSpacing: 8,
                                           children: _chapters
-                                              .map((c) => GestureDetector(
+                                                  .map((c) => GestureDetector(
                                                     child: Container(
-                                                      width: 48,
-                                                      height: 36,
+                                                      width: chapterChipSize.width,
+                                                      height: chapterChipSize.height,
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(
@@ -1037,6 +1221,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                         '$c',
                                                         textAlign:
                                                             TextAlign.center,
+                                                        softWrap: false,
                                                         style: TextStyle(
                                                           color: txtColor,
                                                           fontWeight:
@@ -1091,6 +1276,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             child: Text(
                                               '$bookLabel ${_selectedChapter!}',
                                               textAlign: TextAlign.center,
+                                              softWrap: true,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: uiFontSize + 7,
@@ -1109,10 +1295,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           spacing: 8,
                                           runSpacing: 8,
                                           children: _verses
-                                              .map((v) => GestureDetector(
+                                                  .map((v) => GestureDetector(
                                                     child: Container(
-                                                      width: 48,
-                                                      height: 36,
+                                                      width: verseChipSize.width,
+                                                      height: verseChipSize.height,
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(
@@ -1129,6 +1315,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                       ),
                                                       child: Text(
                                                         '$v',
+                                                        softWrap: false,
                                                         style: TextStyle(
                                                           color: txtColor,
                                                           fontSize:

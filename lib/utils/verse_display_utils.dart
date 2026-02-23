@@ -38,8 +38,22 @@ Widget buildVerseDisplayWidget({
 
   //String cleanVerseText = rawVerseText.replaceAll('¶ ', '');
 
+  final verseNumberStyle = baseTextStyle.copyWith(
+    fontSize: baseTextStyle.fontSize! - 2,
+    color:
+        (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(
+      alpha: 0.8,
+    ),
+    fontWeight: FontWeight.normal,
+  );
+
   // Use provided verse number width or default
-  final effectiveVerseNumberWidth = verseNumberWidth ?? 40.0;
+  final effectiveVerseNumberWidth = verseNumberWidth ??
+      _calculateSingleVerseNumberWidth(
+        context,
+        verseNumber.toString(),
+        verseNumberStyle,
+      );
 
   // Build the right column spans (verse text with highlights)
   final rightSpans = <InlineSpan>[];
@@ -98,16 +112,9 @@ Widget buildVerseDisplayWidget({
                     key: verseKey,
                     child: Text(
                       softWrap: false,
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.clip,
                       '$verseNumber',
-                      style: baseTextStyle.copyWith(
-                        fontSize: baseTextStyle.fontSize! - 2,
-                        color: (isDark
-                                ? darkPrimaryColor.value
-                                : lightPrimaryColor.value)
-                            .withValues(alpha: 0.8),
-                        fontWeight: FontWeight.normal,
-                      ),
+                      style: verseNumberStyle,
                       //textHeightBehavior: const TextHeightBehavior(
                       //  applyHeightToFirstAscent: false,
                       //  applyHeightToLastDescent: false,
@@ -116,16 +123,9 @@ Widget buildVerseDisplayWidget({
                     ))
                 : Text(
                     softWrap: false,
-                    overflow: TextOverflow.fade,
+                    overflow: TextOverflow.clip,
                     '$verseNumber',
-                    style: baseTextStyle.copyWith(
-                      fontSize: baseTextStyle.fontSize! - 2,
-                      color: (isDark
-                              ? darkPrimaryColor.value
-                              : lightPrimaryColor.value)
-                          .withValues(alpha: 0.8),
-                      fontWeight: FontWeight.normal,
-                    ),
+                    style: verseNumberStyle,
                     //textHeightBehavior: const TextHeightBehavior(
                     //  applyHeightToFirstAscent: false,
                     //  applyHeightToLastDescent: false,
@@ -443,7 +443,7 @@ int convertRawPositionToClean(String rawText, int rawPosition) {
 /// Calculate dynamic width for verse number column based on verses in a list
 /// This ensures the verse number column is sized appropriately for the maximum verse number
 double calculateVerseNumberWidth(
-    List<Map<String, dynamic>> verses, TextStyle numStyle) {
+    BuildContext context, List<Map<String, dynamic>> verses, TextStyle numStyle) {
   int maxVerseNumber = 0;
   for (final verse in verses) {
     final verseNum = toInt(verse['verse'], orElse: 0);
@@ -459,10 +459,22 @@ double calculateVerseNumberWidth(
 
   final textPainter = TextPainter(
     text: TextSpan(text: sampleText, style: numStyle),
+    textScaler: MediaQuery.textScalerOf(context),
     maxLines: 1,
     textDirection: TextDirection.ltr,
   )..layout();
-  return textPainter.size.width + 5.0;
+  return textPainter.size.width + 10.0;
+}
+
+double _calculateSingleVerseNumberWidth(
+    BuildContext context, String verseLabel, TextStyle style) {
+  final textPainter = TextPainter(
+    text: TextSpan(text: verseLabel, style: style),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+    textDirection: TextDirection.ltr,
+  )..layout();
+  return textPainter.size.width + 10.0;
 }
 
 /// Builds a list of verse widgets with common display logic
@@ -512,7 +524,7 @@ List<Widget> buildVerseListWidget({
   );
 
   // Calculate dynamic width for verse number column based on current chapter's verses
-  final verseNumberWidth = calculateVerseNumberWidth(verses, numStyle);
+  final verseNumberWidth = calculateVerseNumberWidth(context, verses, numStyle);
 
   for (final verse in verses) {
     final vn = toInt(verse['verse'], orElse: 0);
