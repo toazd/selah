@@ -414,6 +414,20 @@ class _ChapterDialogState extends State<ChapterDialog> {
                 ListTile(
                   title: Center(
                       child: Text(
+                    'Goto Verse $verseNumber',
+                    style: TextStyle(
+                        fontFamily: uiFontFamily,
+                        fontSize: uiFontSize + 10,
+                        color: getAdaptiveTextColor(context)),
+                  )),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _gotoVerseAndCloseAllChapterDialogs(verseNumber);
+                  },
+                ),
+                ListTile(
+                  title: Center(
+                      child: Text(
                     _notes.containsKey(verseNumber) ? 'Edit Note' : 'Add Note',
                     style: TextStyle(
                         fontFamily: uiFontFamily,
@@ -480,6 +494,20 @@ class _ChapterDialogState extends State<ChapterDialog> {
     // Use callback to navigate the initiating screen to the selected verse
     if (widget.onNavigateToVerse != null) {
       widget.onNavigateToVerse!(verseNumber);
+    }
+  }
+
+  void _gotoVerseAndCloseAllChapterDialogs(int verseNumber) {
+    // Capture callback before popping routes, as this dialog state may be disposed.
+    final navigateToVerse = widget.onNavigateToVerse;
+
+    // Close all currently open popup routes (bottom sheets + nested chapter dialogs).
+    Navigator.of(context, rootNavigator: true)
+        .popUntil((route) => route is! PopupRoute);
+
+    // Navigate the originating Bible screen using the standard callback.
+    if (navigateToVerse != null) {
+      navigateToVerse(verseNumber);
     }
   }
 
