@@ -8,8 +8,8 @@ Note also that Selah has built-in data export and import functionality so you do
 
 - Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app.
   - We are especially in need of users to test the app on MacOS desktop and iOS mobile platforms!
-- It currently does not have self-installing or self-updating features.
-  -  Fixes and features are being added regularily.
+- Selah currently does not have self-installing or self-updating features.
+  -  Fixes and features are being added regularily so check for new releases periodically.
 - Use the "Issues" tab to report any problem you may have with the app or even if you need assitance installing, running, or using the app.
 
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
