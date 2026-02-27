@@ -1,6 +1,3 @@
-// AUTO-GENERATED FILE - DO NOT EDIT
-// Generated from bible_export.txt
-
 const Map<String, Map<int, Map<int, String>>> bibleData = {
   'Gen': {
     1: {
