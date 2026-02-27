@@ -90,9 +90,9 @@ Contributions are welcome but it is highly recommended to first discuss it in th
 
 Selah is primarily developed on Arch linux and Windows 11. The development environment requirements are
 
-- Visual Studio Code (https://code.visualstudio.com/)
-- Flutter (https://docs.flutter.dev/install/manual) (can also be installed easily inside of VS code)
-- Optionally install the extensions that VS code recommends while browsing the project folder
+- Visual Studio Code (https://code.visualstudio.com/).
+- Flutter (https://docs.flutter.dev/install/manual) (can also be installed easily inside of VS code).
+- Optionally install the extensions that VS code recommends while browsing the project folder and source files.
 
 **How to contribute:**
 1. Fork the repository
