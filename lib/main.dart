@@ -164,6 +164,84 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
+bool get _isMobilePlatform => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+Future<void> _setMobileSystemFullscreen(bool enabled) async {
+  // Keep icon contrast correct against the current effective theme.
+  final systemBrightness =
+      WidgetsBinding.instance.platformDispatcher.platformBrightness;
+  final bool isDarkTheme = themeModeNotifier.value == ThemeMode.dark ||
+      (themeModeNotifier.value == ThemeMode.system &&
+          systemBrightness == Brightness.dark);
+
+  if (enabled) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        statusBarIconBrightness:
+            isDarkTheme ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness:
+            isDarkTheme ? Brightness.light : Brightness.dark,
+      ),
+    );
+  } else {
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+  }
+}
+
+Future<void> _reapplyMobileFullscreenIfEnabled() async {
+  if (_isMobilePlatform && fullscreenNotifier.value) {
+    await _setMobileSystemFullscreen(true);
+  }
+}
+
+class _FullscreenRouteObserver extends NavigatorObserver {
+  void _scheduleMobileFullscreenReapply() {
+    if (!_isMobilePlatform || !fullscreenNotifier.value) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_reapplyMobileFullscreenIfEnabled());
+      Future<void>.delayed(
+        const Duration(milliseconds: 250),
+        _reapplyMobileFullscreenIfEnabled,
+      );
+    });
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _scheduleMobileFullscreenReapply();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    _scheduleMobileFullscreenReapply();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didRemove(route, previousRoute);
+    _scheduleMobileFullscreenReapply();
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    _scheduleMobileFullscreenReapply();
+  }
+}
+
+final NavigatorObserver fullscreenRouteObserver = _FullscreenRouteObserver();
+
 // Global tablet mode detection service
 // Only used on Windows desktop to circumvent
 // a bug that can be triggered with the OSK
@@ -1213,6 +1291,9 @@ class BibleStudyApp extends StatelessWidget {
                                           },
                                           themeMode: mode,
                                           navigatorKey: navigatorKey,
+                                          navigatorObservers: [
+                                            fullscreenRouteObserver,
+                                          ],
                                           scaffoldMessengerKey:
                                               scaffoldMessengerKey,
                                           home: ValueListenableBuilder<Color>(
@@ -1416,6 +1497,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
             );
           }
         }
+        unawaited(_reapplyMobileFullscreenIfEnabled());
       }
     }
   }
@@ -1429,6 +1511,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
     _loadScreensFromPrefs();
     themeModeNotifier.addListener(_saveThemeMode);
     fullscreenNotifier.addListener(_applyFullscreen);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _applyFullscreen();
+      }
+    });
   }
 
   @override
@@ -2262,79 +2349,51 @@ class _MultiBibleViewState extends State<MultiBibleView>
   void _applyFullscreen() async {
     if (_fullscreenChanging) return; // Prevent re-entrancy
     _fullscreenChanging = true;
-    if (!kIsWeb &&
-        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      if (!_windowManagerInitialized) {
-        _initWindowManager();
-      }
-
-      // Only proceed if window manager is still valid
-      if (!_windowManagerInitialized) {
-        return;
-      }
-
+    try {
       if (!kIsWeb &&
           (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-        if (fullscreenNotifier.value) {
-          // Save maximized state before entering fullscreen
-          _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
-
-          bool isMaximized = _wasMaximizedBeforeFullscreen;
-          if (isMaximized) {
-            await windowManager.setFullScreen(false);
-            await windowManager.unmaximize();
-          }
-        } else {
-          // Exiting fullscreen: restore maximized state if needed
-          await windowManager.setFullScreen(false);
-
-          if (_wasMaximizedBeforeFullscreen) {
-            //await Future.delayed(Duration(milliseconds: 150));
-            await windowManager.show();
-            // TODO: this needs testing on linux and mac desktop
-            await windowManager.maximize();
-            _wasMaximizedBeforeFullscreen = false;
-          }
+        if (!_windowManagerInitialized) {
+          _initWindowManager();
         }
 
-        await windowManager.setFullScreen(fullscreenNotifier.value);
-      }
-    } else {
-      // Determine brightness for icon colors when toggling on mobile
-      // TODO: test on android/ios, no idea why this is here or if it's needed
-      final systemBrightness =
-          WidgetsBinding.instance.platformDispatcher.platformBrightness;
-      final bool isDarkTheme = themeModeNotifier.value == ThemeMode.dark ||
-          (themeModeNotifier.value == ThemeMode.system &&
-              systemBrightness == Brightness.dark);
+        // Only proceed if window manager is still valid
+        if (!_windowManagerInitialized) {
+          return;
+        }
 
-      if (fullscreenNotifier.value) {
-        // Use immersiveSticky mode for more persistent fullscreen that resists keyboard appearance
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.immersiveSticky,
-        );
-        // changed: setSystemUIOverlayStyle returns void; do not await
-        SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Colors.transparent,
-            statusBarIconBrightness:
-                isDarkTheme ? Brightness.light : Brightness.dark,
-            systemNavigationBarIconBrightness:
-                isDarkTheme ? Brightness.light : Brightness.dark,
-          ),
-        );
+        if (!kIsWeb &&
+            (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+          if (fullscreenNotifier.value) {
+            // Save maximized state before entering fullscreen
+            _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
+
+            bool isMaximized = _wasMaximizedBeforeFullscreen;
+            if (isMaximized) {
+              await windowManager.setFullScreen(false);
+              await windowManager.unmaximize();
+            }
+          } else {
+            // Exiting fullscreen: restore maximized state if needed
+            await windowManager.setFullScreen(false);
+
+            if (_wasMaximizedBeforeFullscreen) {
+              //await Future.delayed(Duration(milliseconds: 150));
+              await windowManager.show();
+              // TODO: this needs testing on linux and mac desktop
+              await windowManager.maximize();
+              _wasMaximizedBeforeFullscreen = false;
+            }
+          }
+
+          await windowManager.setFullScreen(fullscreenNotifier.value);
+        }
       } else {
-        // Restore system UI overlays when exiting fullscreen
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
+        await _setMobileSystemFullscreen(fullscreenNotifier.value);
       }
+      _saveFullscreenPrefs();
+    } finally {
+      _fullscreenChanging = false;
     }
-    _saveFullscreenPrefs();
-
-    _fullscreenChanging = false;
   }
 
   // Main options drawer
