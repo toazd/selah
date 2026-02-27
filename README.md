@@ -63,11 +63,11 @@ A cross-platform Bible study application built with Flutter with no strings atta
 selah/
 ├── lib/
 │   ├── main.dart              # App entry point
-│   ├── data/                  # Data models and bible content
+│   ├── data/                  # Bible data and metadata, TSK data
 │   ├── database/              # SQLite database classes
-│   ├── models/                # Data models
+│   ├── models/                # Data models for 3rd party import
 │   ├── screens/               # UI screens
-│   ├── services/              # Business logic services
+│   ├── services/              # Logic services
 │   ├── utils/                 # Utility functions
 │   └── widgets/               # Reusable UI components
 ├── assets/                    # App assets (fonts, icons)
@@ -82,13 +82,19 @@ selah/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests with improvements, bug fixes, or new features.
+Contributions are welcome but it is highly recommended to first discuss it in the issues section before putting in the work for a PR.
+
+Selah is primarily developed on Arch linux and Windows 11. The development environment requirements are
+
+- Visual Studio Code (https://code.visualstudio.com/)
+- Flutter (https://docs.flutter.dev/install/manual) (can also be installed easily inside of VS code)
+- Optionally install the extensions that VS code recommends while browsing the project folder
 
 **How to contribute:**
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Test your changes
 5. Submit a pull request
 
 ## 📄 License
