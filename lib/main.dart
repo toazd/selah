@@ -663,7 +663,7 @@ Future<void> _loadAllPrefs() async {
 
     // Font
     double fontSize = prefs.getDouble('fontSize') ?? defaultFontSize;
-    if (fontSize < 12.0 || fontSize > 36.0) fontSize = defaultFontSize;
+    if (fontSize < 12.0 || fontSize > 30.0) fontSize = defaultFontSize;
     String fontFamily = prefs.getString('fontFamily') ?? defaultFontFamily;
     String noteFontFamily =
         prefs.getString('noteFontFamily') ?? defaultNoteFontFamily;

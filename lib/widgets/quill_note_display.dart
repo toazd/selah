@@ -180,7 +180,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
           final baseStyle = TextStyle(
             fontSize: FontSizeAdjustments.getAdjustedSize(
               currentNoteFontFamily,
-              fontSizeNotifier.value - 4,
+              fontSizeNotifier.value - 8,
             ),
             fontFamily: currentNoteFontFamily,
             color: textColor,
@@ -233,7 +233,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 4,
+                      fontSizeNotifier.value - 8,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -249,7 +249,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   decoration: TextDecoration.none,
                   fontSize: FontSizeAdjustments.getAdjustedSize(
                     currentNoteFontFamily,
-                    fontSizeNotifier.value - 4,
+                    fontSizeNotifier.value - 8,
                   ),
                   fontFamily: currentNoteFontFamily,
                 ),
@@ -257,7 +257,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 4,
+                      fontSizeNotifier.value - 8,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -273,7 +273,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       'Roboto Mono',
-                      fontSizeNotifier.value - 4,
+                      fontSizeNotifier.value - 8,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
@@ -292,7 +292,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 4,
+                      fontSizeNotifier.value - 8,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor.withValues(alpha: 0.6),
@@ -318,7 +318,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   style: TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       'Roboto Mono',
-                      fontSizeNotifier.value - 4,
+                      fontSizeNotifier.value - 8,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
