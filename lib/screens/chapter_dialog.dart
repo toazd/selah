@@ -13,6 +13,7 @@ import '../utils/snackbar_notification.dart';
 import '../utils/bible_utils.dart';
 import '../utils/data_loaders.dart';
 import '../utils/dialog_utils.dart';
+import '../data/tsk_data.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -376,13 +377,23 @@ class _ChapterDialogState extends State<ChapterDialog> {
                 ),
                 child: _loading
                     ? Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _buildVerseWidgets(textColor),
-                        ),
+                    : ValueListenableBuilder<bool>(
+                        valueListenable: showNotesInlineNotifier,
+                        builder: (context, _, __) {
+                          return ValueListenableBuilder<bool>(
+                            valueListenable: showTskReferencesNotifier,
+                            builder: (context, _, __) {
+                              return SingleChildScrollView(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: _buildVerseWidgets(textColor),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
               ),
             ),
@@ -585,6 +596,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final normalizedBook = BookNameConverter.normalizeShortName(widget.book);
+    final tskReferences =
+        tskData[normalizedBook]?[widget.chapter] ?? const <int, String>{};
 
     return buildVerseListWidget(
       context: context,
@@ -599,6 +613,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
       backgroundColor: bgColor,
       lineHeight: lineHeightNotifier.value,
       showNotesInline: showNotesInlineNotifier.value,
+      showTskReferences: showTskReferencesNotifier.value,
+      tskReferences: tskReferences,
       fontFamily: fontFamilyNotifier.value,
       lightHighlightTextColor: lightTextColor.value,
       darkHighlightTextColor: darkTextColor.value,
