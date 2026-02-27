@@ -22,6 +22,7 @@ A cross-platform Bible study application built with Flutter with no strings atta
 ### Study Features
 - **Rich Text Notes** - Verse-level note support with automatic verse reference linker
 - **Highlight System** - Support for Word-level highlighting with customizeable colours
+- **TSK Cross references** - Optionally show TSK (Treasury of Scripture Knowledge) references below each verse. Click-able links are automatically created for TSK references the same as they are for user notes.
 - **Verse History** - Track and revisit previously viewed verses
 - **Simple/Advanced Search** - Find verses by keywords or phrases with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother eg. graven carved)
 - **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid, list layout, and/or manually entering a reference
