@@ -11,6 +11,7 @@ import '../utils/verse_reference_linker.dart';
 import '../main.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
+import 'dart:io';
 
 class QuillNoteDisplay extends StatefulWidget {
   final String noteText;
@@ -180,7 +181,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
           final baseStyle = TextStyle(
             fontSize: FontSizeAdjustments.getAdjustedSize(
               currentNoteFontFamily,
-              fontSizeNotifier.value - 8,
+              // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+              (!kIsWeb &&
+                      (Platform.isLinux ||
+                          Platform.isWindows ||
+                          Platform.isMacOS))
+                  ? fontSizeNotifier.value - 8
+                  : fontSizeNotifier.value - 4,
             ),
             fontFamily: currentNoteFontFamily,
             color: textColor,
@@ -233,7 +240,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 8,
+                      // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                      (!kIsWeb &&
+                              (Platform.isLinux ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS))
+                          ? fontSizeNotifier.value - 8
+                          : fontSizeNotifier.value - 4,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -249,7 +262,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   decoration: TextDecoration.none,
                   fontSize: FontSizeAdjustments.getAdjustedSize(
                     currentNoteFontFamily,
-                    fontSizeNotifier.value - 8,
+                    // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                    (!kIsWeb &&
+                            (Platform.isLinux ||
+                                Platform.isWindows ||
+                                Platform.isMacOS))
+                        ? fontSizeNotifier.value - 8
+                        : fontSizeNotifier.value - 4,
                   ),
                   fontFamily: currentNoteFontFamily,
                 ),
@@ -257,7 +276,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 8,
+                      // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                      (!kIsWeb &&
+                              (Platform.isLinux ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS))
+                          ? fontSizeNotifier.value - 8
+                          : fontSizeNotifier.value - 4,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -273,7 +298,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       'Roboto Mono',
-                      fontSizeNotifier.value - 8,
+                      // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                      (!kIsWeb &&
+                              (Platform.isLinux ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS))
+                          ? fontSizeNotifier.value - 8
+                          : fontSizeNotifier.value - 4,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
@@ -292,7 +323,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       currentNoteFontFamily,
-                      fontSizeNotifier.value - 8,
+                      // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                      (!kIsWeb &&
+                              (Platform.isLinux ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS))
+                          ? fontSizeNotifier.value - 8
+                          : fontSizeNotifier.value - 4,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor.withValues(alpha: 0.6),
@@ -318,7 +355,13 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   style: TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                       'Roboto Mono',
-                      fontSizeNotifier.value - 8,
+                      // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
+                      (!kIsWeb &&
+                              (Platform.isLinux ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS))
+                          ? fontSizeNotifier.value - 8
+                          : fontSizeNotifier.value - 4,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
