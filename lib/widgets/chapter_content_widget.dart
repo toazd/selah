@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart'; // For global notifiers and colors
+import '../data/tsk_data.dart';
 import '../utils/verse_display_utils.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
@@ -16,6 +17,7 @@ class ChapterContentWidget extends StatefulWidget {
   final String? bookColophon;
   final bool isLastChapter;
   final bool showNotesInline;
+  final bool showTskReferences;
   final Color backgroundColor;
   final Color textColor;
   final Color verseNumberColor;
@@ -37,6 +39,7 @@ class ChapterContentWidget extends StatefulWidget {
     this.bookColophon,
     this.isLastChapter = false,
     required this.showNotesInline,
+    required this.showTskReferences,
     required this.backgroundColor,
     required this.textColor,
     required this.verseNumberColor,
@@ -127,6 +130,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tskReferencesForChapter = tskData[widget.book]?[widget.chapter];
 
     return RawScrollbar(
       thumbColor: isDark
@@ -186,6 +190,8 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                   backgroundColor: widget.backgroundColor,
                   lineHeight: lineHeightNotifier.value,
                   showNotesInline: widget.showNotesInline,
+                  showTskReferences: widget.showTskReferences,
+                  tskReferences: tskReferencesForChapter ?? const {},
                   fontFamily: fontFamilyNotifier.value,
                   lightHighlightTextColor: lightTextColor.value,
                   darkHighlightTextColor: darkTextColor.value,

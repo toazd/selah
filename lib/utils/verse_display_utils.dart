@@ -39,7 +39,8 @@ Widget buildVerseDisplayWidget({
   //String cleanVerseText = rawVerseText.replaceAll('¶ ', '');
 
   final verseNumberStyle = baseTextStyle.copyWith(
-    fontSize: baseTextStyle.fontSize! - 2,
+    // Verse number font size
+    fontSize: baseTextStyle.fontSize! - 6,
     color:
         (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(
       alpha: 0.8,
@@ -442,8 +443,8 @@ int convertRawPositionToClean(String rawText, int rawPosition) {
 
 /// Calculate dynamic width for verse number column based on verses in a list
 /// This ensures the verse number column is sized appropriately for the maximum verse number
-double calculateVerseNumberWidth(
-    BuildContext context, List<Map<String, dynamic>> verses, TextStyle numStyle) {
+double calculateVerseNumberWidth(BuildContext context,
+    List<Map<String, dynamic>> verses, TextStyle numStyle) {
   int maxVerseNumber = 0;
   for (final verse in verses) {
     final verseNum = toInt(verse['verse'], orElse: 0);
@@ -463,7 +464,7 @@ double calculateVerseNumberWidth(
     maxLines: 1,
     textDirection: TextDirection.ltr,
   )..layout();
-  return textPainter.size.width + 10.0;
+  return textPainter.size.width; // + 10.0;
 }
 
 double _calculateSingleVerseNumberWidth(
@@ -474,7 +475,7 @@ double _calculateSingleVerseNumberWidth(
     maxLines: 1,
     textDirection: TextDirection.ltr,
   )..layout();
-  return textPainter.size.width + 10.0;
+  return textPainter.size.width; // + 10.0;
 }
 
 /// Builds a list of verse widgets with common display logic
@@ -490,6 +491,8 @@ List<Widget> buildVerseListWidget({
   required Color backgroundColor,
   required double lineHeight,
   required bool showNotesInline,
+  bool showTskReferences = false,
+  Map<int, String> tskReferences = const {},
   required String fontFamily,
   required Color lightHighlightTextColor,
   required Color darkHighlightTextColor,
@@ -579,6 +582,25 @@ List<Widget> buildVerseListWidget({
       ),
     );
 
+    // If enabled, display TSK references below the verse and above notes.
+    if (showTskReferences) {
+      // Quill notes must end with a '\n' or an exception will be thrown
+      final tskText = '${(tskReferences[vn] ?? '').trim()}\n';
+      if (tskText.isNotEmpty) {
+        widgets.add(
+          Container(
+            margin: EdgeInsets.all(0.0),
+            padding:
+                EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
+            child: QuillNoteDisplay(
+              noteText: tskText,
+              onLinkTap: onLinkTap,
+            ),
+          ),
+        );
+      }
+    }
+
     // If showNotesInline, display note content below the verse
     if (showNotesInline && notes.containsKey(vn)) {
       final noteText = notes[vn]!['note_text'] as String? ?? '';
@@ -586,8 +608,8 @@ List<Widget> buildVerseListWidget({
         widgets.add(
           Container(
             margin: EdgeInsets.all(0.0),
-            padding: EdgeInsets.only(
-                left: 55.0, right: 16.0, top: 16.0, bottom: 16.0),
+            padding:
+                EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
             child: QuillNoteDisplay(
               noteText: noteText,
               onLinkTap: onLinkTap,

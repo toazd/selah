@@ -91,6 +91,8 @@ class BibleScreen extends StatefulWidget {
   final Future<void> Function()? onShowSearch;
   // Add: external notes inline mode toggle (default: false => "Icon mode")
   final ValueListenable<bool>? showNotesInline;
+  // Add: external TSK references mode toggle (default: false => hidden)
+  final ValueListenable<bool>? showTskReferences;
   final VoidCallback? onShowNotesSearch;
   //final VoidCallback? onShowBookmarksManager;
   final VoidCallback? onNoteScreenClosed;
@@ -106,6 +108,7 @@ class BibleScreen extends StatefulWidget {
     this.onShowHistory,
     this.onShowSearch,
     this.showNotesInline, // optional listenable for notes display mode
+    this.showTskReferences, // optional listenable for TSK display mode
     this.onShowNotesSearch,
     //this.onShowBookmarksManager,
     this.onNoteScreenClosed,
@@ -125,6 +128,9 @@ class _BibleScreenState extends State<BibleScreen> {
   // Local fallback for notes inline mode
   late final ValueNotifier<bool> _localShowNotesInlineFallback =
       ValueNotifier<bool>(true);
+  // Local fallback for TSK references mode
+  late final ValueNotifier<bool> _localShowTskReferencesFallback =
+      ValueNotifier<bool>(false);
   Map<int, Map<String, dynamic>> _notes = {};
   Map<int, List<Map<String, dynamic>>> _highlights = {};
 
@@ -915,166 +921,185 @@ class _BibleScreenState extends State<BibleScreen> {
                         widget.showNotesInline ?? _localShowNotesInlineFallback,
                     builder: (context, showNotesInline, _) {
                       return ValueListenableBuilder<bool>(
-                        valueListenable: showNavigationBarNotifier,
-                        builder: (context, showNavBar, _) {
-                          return Column(
-                            //mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Expanded(
-                                // PageView for smooth chapter navigation with swipe gestures
-                                // Using finite itemCount for simple wrap-around
-                                child: PageView.builder(
-                                  controller: _pageController,
-                                  onPageChanged: _onPageChanged,
-                                  itemCount: _totalChapters,
-                                  itemBuilder: (context, index) {
-                                    // index is already in valid range (0-1188)
-                                    final realIndex = index;
+                        valueListenable: widget.showTskReferences ??
+                            _localShowTskReferencesFallback,
+                        builder: (context, showTskReferences, _) {
+                          return ValueListenableBuilder<bool>(
+                            valueListenable: showNavigationBarNotifier,
+                            builder: (context, showNavBar, _) {
+                              return Column(
+                                //mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Expanded(
+                                    // PageView for smooth chapter navigation with swipe gestures
+                                    // Using finite itemCount for simple wrap-around
+                                    child: PageView.builder(
+                                      controller: _pageController,
+                                      onPageChanged: _onPageChanged,
+                                      itemCount: _totalChapters,
+                                      itemBuilder: (context, index) {
+                                        // index is already in valid range (0-1188)
+                                        final realIndex = index;
 
-                                    // Get or create a GlobalKey for this page's ChapterContentWidget
-                                    // Use realIndex for the key to reuse widgets for same chapter
-                                    _chapterWidgetKeys[realIndex] ??=
-                                        GlobalKey<ChapterContentWidgetState>();
+                                        // Get or create a GlobalKey for this page's ChapterContentWidget
+                                        // Use realIndex for the key to reuse widgets for same chapter
+                                        _chapterWidgetKeys[realIndex] ??=
+                                            GlobalKey<
+                                                ChapterContentWidgetState>();
 
-                                    // Build the chapter content widget
-                                    return FutureBuilder<_ChapterData>(
-                                      future: _preloadChapterData(realIndex),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                                ConnectionState.waiting &&
-                                            !_chapterCache
-                                                .containsKey(realIndex)) {
-                                          return Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        }
+                                        // Build the chapter content widget
+                                        return FutureBuilder<_ChapterData>(
+                                          future:
+                                              _preloadChapterData(realIndex),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                    ConnectionState.waiting &&
+                                                !_chapterCache
+                                                    .containsKey(realIndex)) {
+                                              return Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            }
 
-                                        final chapterData = snapshot.data ??
-                                            _chapterCache[realIndex];
-                                        if (chapterData == null) {
-                                          return Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        }
+                                            final chapterData = snapshot.data ??
+                                                _chapterCache[realIndex];
+                                            if (chapterData == null) {
+                                              return Center(
+                                                  child:
+                                                      CircularProgressIndicator());
+                                            }
 
-                                        return ChapterContentWidget(
-                                          key: _chapterWidgetKeys[realIndex],
-                                          book: chapterData.book,
-                                          chapter: chapterData.chapter,
-                                          verses: chapterData.verses,
-                                          notes: chapterData.notes,
-                                          highlights: chapterData.highlights,
-                                          bookTitle: chapterData.bookTitle,
-                                          bookColophon:
-                                              chapterData.bookColophon,
-                                          isLastChapter:
-                                              chapterData.isLastChapter,
-                                          showNotesInline: showNotesInline,
-                                          backgroundColor: bibleBgColor,
-                                          textColor: verseTextColor,
-                                          verseNumberColor: verseNumberColor,
-                                          onVerseTap: (verseNum) {
-                                            // Update current state for menu operations
-                                            _verses = chapterData.verses;
-                                            _notes = chapterData.notes;
-                                            _showAddNoteMenu(context, verseNum);
+                                            return ChapterContentWidget(
+                                              key:
+                                                  _chapterWidgetKeys[realIndex],
+                                              book: chapterData.book,
+                                              chapter: chapterData.chapter,
+                                              verses: chapterData.verses,
+                                              notes: chapterData.notes,
+                                              highlights:
+                                                  chapterData.highlights,
+                                              bookTitle: chapterData.bookTitle,
+                                              bookColophon:
+                                                  chapterData.bookColophon,
+                                              isLastChapter:
+                                                  chapterData.isLastChapter,
+                                              showNotesInline: showNotesInline,
+                                              showTskReferences:
+                                                  showTskReferences,
+                                              backgroundColor: bibleBgColor,
+                                              textColor: verseTextColor,
+                                              verseNumberColor:
+                                                  verseNumberColor,
+                                              onVerseTap: (verseNum) {
+                                                // Update current state for menu operations
+                                                _verses = chapterData.verses;
+                                                _notes = chapterData.notes;
+                                                _showAddNoteMenu(
+                                                    context, verseNum);
+                                              },
+                                              onVerseLongPress: (verseNum) {
+                                                _verses = chapterData.verses;
+                                                _enterHighlightMode(
+                                                    context, verseNum);
+                                              },
+                                              onLinkTap:
+                                                  (link, referenceText) =>
+                                                      handleVerseLink(
+                                                context,
+                                                link,
+                                                referenceText,
+                                                navigateToVerse: _applyLocation,
+                                                onVerseLinkRecursion: null,
+                                                onNoteIconTap: (book, chapter,
+                                                        verse, noteText) =>
+                                                    _openNote(verse, noteText,
+                                                        book, chapter),
+                                                onNoteEditTap: (book, chapter,
+                                                        verse, noteText) =>
+                                                    _openNote(verse, noteText,
+                                                        book, chapter),
+                                              ),
+                                              onNoteIconTap: (vn, noteText) =>
+                                                  _openNote(vn, noteText),
+                                              onNoteEditTap: (vn, noteText) =>
+                                                  _openNote(vn, noteText),
+                                            );
                                           },
-                                          onVerseLongPress: (verseNum) {
-                                            _verses = chapterData.verses;
-                                            _enterHighlightMode(
-                                                context, verseNum);
-                                          },
-                                          onLinkTap: (link, referenceText) =>
-                                              handleVerseLink(
-                                            context,
-                                            link,
-                                            referenceText,
-                                            navigateToVerse: _applyLocation,
-                                            onVerseLinkRecursion: null,
-                                            onNoteIconTap: (book, chapter,
-                                                    verse, noteText) =>
-                                                _openNote(verse, noteText, book,
-                                                    chapter),
-                                            onNoteEditTap: (book, chapter,
-                                                    verse, noteText) =>
-                                                _openNote(verse, noteText, book,
-                                                    chapter),
-                                          ),
-                                          onNoteIconTap: (vn, noteText) =>
-                                              _openNote(vn, noteText),
-                                          onNoteEditTap: (vn, noteText) =>
-                                              _openNote(vn, noteText),
                                         );
                                       },
-                                    );
-                                  },
-                                ),
-                              ),
-                              if (showNavBar)
-                                Container(
-                                  margin: EdgeInsetsGeometry.all(0),
-                                  padding: EdgeInsetsGeometry.all(0),
-                                  width: double.infinity,
-                                  height: 40,
-                                  color: barColor,
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Center(
-                                          child: IconButton(
-                                            icon: Icon(
-                                              Icons.arrow_back_ios_new,
-                                              color: _currentPageIndex > 0
-                                                  ? (isDark
-                                                      ? darkPrimaryColor.value
-                                                      : lightPrimaryColor.value)
-                                                  : Colors.grey,
-                                              semanticLabel:
-                                                  'Navigate to the Previous Chapter',
-                                              size: 24.0,
-                                            ),
-                                            tooltip: 'Previous Chapter',
-                                            color: isDark
-                                                ? darkPrimaryColor.value
-                                                : lightPrimaryColor.value,
-                                            // Disabled at Genesis 1
-                                            onPressed: _currentPageIndex > 0
-                                                ? _navigateToPreviousPage
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Center(
-                                          child: IconButton(
-                                            icon: Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: _currentPageIndex <
-                                                      _totalChapters - 1
-                                                  ? (isDark
-                                                      ? darkPrimaryColor.value
-                                                      : lightPrimaryColor.value)
-                                                  : Colors.grey,
-                                              semanticLabel:
-                                                  'Navigate to the next chapter',
-                                              size: 24.0,
-                                            ),
-                                            tooltip: 'Next Chapter',
-                                            color: isDark
-                                                ? darkPrimaryColor.value
-                                                : lightPrimaryColor.value,
-                                            // Disabled at Revelation 22
-                                            onPressed: _currentPageIndex <
-                                                    _totalChapters - 1
-                                                ? _navigateToNextPage
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                            ],
+                                  if (showNavBar)
+                                    Container(
+                                      margin: EdgeInsetsGeometry.all(0),
+                                      padding: EdgeInsetsGeometry.all(0),
+                                      width: double.infinity,
+                                      height: 40,
+                                      color: barColor,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Center(
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  Icons.arrow_back_ios_new,
+                                                  color: _currentPageIndex > 0
+                                                      ? (isDark
+                                                          ? darkPrimaryColor
+                                                              .value
+                                                          : lightPrimaryColor
+                                                              .value)
+                                                      : Colors.grey,
+                                                  semanticLabel:
+                                                      'Navigate to the Previous Chapter',
+                                                  size: 24.0,
+                                                ),
+                                                tooltip: 'Previous Chapter',
+                                                color: isDark
+                                                    ? darkPrimaryColor.value
+                                                    : lightPrimaryColor.value,
+                                                // Disabled at Genesis 1
+                                                onPressed: _currentPageIndex > 0
+                                                    ? _navigateToPreviousPage
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Center(
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  Icons.arrow_forward_ios,
+                                                  color: _currentPageIndex <
+                                                          _totalChapters - 1
+                                                      ? (isDark
+                                                          ? darkPrimaryColor
+                                                              .value
+                                                          : lightPrimaryColor
+                                                              .value)
+                                                      : Colors.grey,
+                                                  semanticLabel:
+                                                      'Navigate to the next chapter',
+                                                  size: 24.0,
+                                                ),
+                                                tooltip: 'Next Chapter',
+                                                color: isDark
+                                                    ? darkPrimaryColor.value
+                                                    : lightPrimaryColor.value,
+                                                // Disabled at Revelation 22
+                                                onPressed: _currentPageIndex <
+                                                        _totalChapters - 1
+                                                    ? _navigateToNextPage
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
                           );
                         },
                       );
@@ -1095,6 +1120,7 @@ class _BibleScreenState extends State<BibleScreen> {
     // Dispose controllers to prevent memory leaks
     _pageController.dispose();
     _localShowNotesInlineFallback.dispose();
+    _localShowTskReferencesFallback.dispose();
 
     super.dispose();
   }

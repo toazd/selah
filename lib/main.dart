@@ -130,6 +130,10 @@ final ValueNotifier<Color> darkVerseReferenceColor =
 final ValueNotifier<bool> showNotesInlineNotifier =
     ValueNotifier(defaultShowNotesInline);
 
+// Add: TSK references display mode (false = hidden [default], true = visible inline)
+final ValueNotifier<bool> showTskReferencesNotifier =
+    ValueNotifier(defaultShowTskReferences);
+
 // Add: navigation bar display mode (false = hidden, true = visible [default])
 final ValueNotifier<bool> showNavigationBarNotifier =
     ValueNotifier(defaultShowNavigationBar);
@@ -693,6 +697,10 @@ Future<void> _loadAllPrefs() async {
     showNotesInlineNotifier.value =
         prefs.getBool('showNotesInline') ?? defaultShowNotesInline;
 
+    // TSK references display mode
+    showTskReferencesNotifier.value =
+        prefs.getBool('showTskReferences') ?? defaultShowTskReferences;
+
     // Navigation bar display mode
     showNavigationBarNotifier.value =
         prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
@@ -810,6 +818,7 @@ Future<void> _saveAllCurrentPrefs() async {
       ),
       prefs.setBool('fullscreen', fullscreenNotifier.value),
       prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
+      prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
       prefs.setInt('maxVerticalScreens', maxVerticalScreens.value),
       prefs.setInt('maxHorizontalScreens', maxHorizontalScreens.value),
@@ -1548,6 +1557,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _saveInlineNotesPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('showNotesInline', showNotesInlineNotifier.value);
+  }
+
+  Future<void> _saveTskReferencesPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('showTskReferences', showTskReferencesNotifier.value);
   }
 
   void _addView() {
@@ -2431,6 +2445,29 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           onChanged: (val) async {
                             showNotesInlineNotifier.value = val;
                             _saveInlineNotesPrefs();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50,
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: showTskReferencesNotifier,
+                      builder: (context, showTskReferences, _) {
+                        return SwitchListTile(
+                          title: Text(
+                            'TSK References',
+                            style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context),
+                            ),
+                          ),
+                          value: showTskReferences,
+                          onChanged: (val) async {
+                            showTskReferencesNotifier.value = val;
+                            _saveTskReferencesPrefs();
                           },
                         );
                       },
@@ -4217,6 +4254,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           //showViewMenu: i == 0,
                           // Add: pass notes inline mode
                           showNotesInline: showNotesInlineNotifier,
+                          showTskReferences: showTskReferencesNotifier,
                           // Force focus to invisible button when the note screen closes
                           // to prevent the Windows OSK bug
                           onNoteScreenClosed: () {
@@ -4306,6 +4344,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           //showViewMenu: i == 0,
                           // Add: pass notes inline mode
                           showNotesInline: showNotesInlineNotifier,
+                          showTskReferences: showTskReferencesNotifier,
                           // Force focus to invisible button when the note screen closes
                           // to prevent the Windows OSK bug
                           onNoteScreenClosed: () {
