@@ -298,7 +298,6 @@ jobs:
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
-
           NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme
           it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE).
 
@@ -318,6 +317,7 @@ jobs:
           - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
           
           ### 🤖 Android
+          NOTE: If you get the "Unsafe App Blocked" dialog simply tap "more details" and then "Install anyway"
           - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
           
           ### 🍎 iOS

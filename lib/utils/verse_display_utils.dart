@@ -584,9 +584,10 @@ List<Widget> buildVerseListWidget({
 
     // If enabled, display TSK references below the verse and above notes.
     if (showTskReferences) {
-      // Quill notes must end with a '\n' or an exception will be thrown
-      final tskText = '${(tskReferences[vn] ?? '').trim()}\n';
-      if (tskText.isNotEmpty) {
+      final rawTskText = (tskReferences[vn] ?? '').trim();
+      if (rawTskText.isNotEmpty) {
+        // Quill notes must end with a '\n' or an exception will be thrown.
+        final tskText = '$rawTskText\n';
         widgets.add(
           Container(
             margin: EdgeInsets.all(0.0),
