@@ -19,24 +19,25 @@ Note also that Selah has built-in data export and import functionality so you do
 ## 📖 Features
 
 ### Core Bible Study Tools
-- **AV1769 King James Version** - With the words of our Lord coloured in red.
-- **Offline Reading** - The App contains everything you need, no internet connection required (except to use the online features like account-based sync).
+- **AV1769 King James Version** - With the words of our Lord colored in red.
+- **Offline Reading** - No internet connection required if you don't want to use the online account sync feature
 - **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
 ### Study Features
 - **Rich Text Notes** - Verse-level note support with automatic verse reference linker
-- **Highlight System** - Support for Word-level highlighting with customizeable colours
-- **TSK Cross references** - Optionally show TSK (Treasury of Scripture Knowledge) references below each verse. Click-able links are automatically created for TSK references the same as they are for user notes.
+- **Highlight System** - Support for word-level highlighting with customizeable colors
+- **TSK Cross references** - Optionally show TSK (Treasury of Scripture Knowledge) references below each verse
 - **Verse History** - Track and revisit previously viewed verses
 - **Simple/Advanced Search** - Find verses by keywords or phrases with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother eg. graven carved)
-- **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid, list layout, and/or manually entering a reference
+- **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid, list layout, or manually entering a reference
 - **Full Touch-screen support** - Built from the ground up to be both touch-screen and non-touch-screen friendly
-- **Seemless, transparent, account based online sync features** - Sign in to the same account on multiple devices and they will all automatically sync with eachother. Accounts and sync are both secure and free (provided by Supabase free tier which does have limits).
+- **Seemless, transparent, account based online sync features** - Sign up using a free account and use that account across multiple devices (no email required)
 
 ### Data Management
-- **Local SQLite Database** - All user data is saved in easy to read and understand sqlite databases. No encryption or obfuscation.
-- **Cloud Sync** - Optional Supabase synchronization across devices
-- **Data Export/Import** - Export some or all of your data to a backup file and easily import it anywhere else. Import from Olive Tree Bible format is also supported (you will need to obtain your backup file from the Olive Tree Bible web site)
+- **Local SQLite Database** - All user data is saved in easy to read and understand sqlite databases. No encryption or obfuscation
+- **Cloud Sync** - Optional Supabase synchronization across devices. Sign in to the same account on multiple devices and they will all seemlessly stay in sync
+- **Data Export/Import** - Export some or all of your data to a backup file (compressed JSON) and easily import it anywhere else. Import from Olive Tree Bible format is also supported but you will have to obtain your backup file from the Olive Tree Bible web site
+- **Data integrity** - Both local and synced data are checked for integrity violations and discarded if anything invalid or corrupted is detected
 
 ### Technical Features
 - **Responsive Design** - Optimized for phones, tablets, and desktop
@@ -49,7 +50,7 @@ Note also that Selah has built-in data export and import functionality so you do
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| Android  | ✅ Stable | Minimum API 22 (5.1 untested; 8.1.1 tested) |
+| Android  | ✅ Stable | Minimum API 22 (5.1 untested; 8.1.1 & 11 tested) |
 | iOS      | ✅ Stable | iOS 11+ (18 tested) |
 | Web      | ✅ Stable | Modern browsers (Chrome & Firefox on Apache tested; electron-forge (Windows) tested) |
 | Windows  | ✅ Stable | Windows 10+ (10 untested; 11 tested) |
@@ -59,7 +60,7 @@ Note also that Selah has built-in data export and import functionality so you do
 
 ## 🚀 Getting Started
 
-- Visit the "Releases" section, download the file appropriate for your target platform, and manually install and run the application. While in Beta, the app does not come with any self-installing or self-updating capabilities. RPM based Linux distributions will require additional steps (to bypass the fact that the RPM files are not signed).
+- Visit the "Releases" section, download the file appropriate for your target platform, and manually install and run the application. While in Beta, the app does not come with any self-installing or self-updating capabilities. RPM based Linux distributions will require additional steps (a command line argument; because the RPM files are not signed).
 
 ## 📁 Project Structure
 
