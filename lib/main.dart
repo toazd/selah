@@ -2379,7 +2379,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
             if (_wasMaximizedBeforeFullscreen) {
               //await Future.delayed(Duration(milliseconds: 150));
               await windowManager.show();
-              // TODO: this needs testing on linux and mac desktop
+              // TODO: this needs tested on mac desktop
               await windowManager.maximize();
               _wasMaximizedBeforeFullscreen = false;
             }

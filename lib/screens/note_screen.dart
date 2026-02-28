@@ -352,8 +352,8 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               isDark,
                                                               textColor),
                                                       customLinkPrefixes: const [
-                                                        'verse://',
-                                                        'verse:'
+                                                        'v://',
+                                                        'v:'
                                                       ],
                                                     ),
                                                   ),
@@ -384,8 +384,8 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               isDark,
                                                               textColor),
                                                       customLinkPrefixes: const [
-                                                        'verse://',
-                                                        'verse:'
+                                                        'v://',
+                                                        'v:'
                                                       ],
                                                     ),
                                                   ),

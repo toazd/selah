@@ -13,7 +13,7 @@ import '../utils/snackbar_notification.dart';
 import '../utils/bible_utils.dart';
 import '../utils/data_loaders.dart';
 import '../utils/dialog_utils.dart';
-import '../data/tsk_data.dart';
+import '../data/tsk_data_delta.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {

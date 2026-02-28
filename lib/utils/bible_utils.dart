@@ -14,7 +14,7 @@ int toInt(dynamic v, {int orElse = 1 << 30}) {
   return orElse;
 }
 
-/// Shared handler for verse:// scheme links that opens ChapterDialog with target verses
+/// Shared handler for v:// scheme links that opens ChapterDialog with target verses
 /// This eliminates code duplication between BibleScreen and SearchScreen
 Future<void> handleVerseLink(
   BuildContext context,
@@ -30,9 +30,9 @@ Future<void> handleVerseLink(
     link = link.replaceFirst('unsafe:', '');
   }
 
-  // Parse verse://book/chapter/verse or verse://book/chapter/verse/endVerse
+  // Parse v://book/chapter/verse or v://book/chapter/verse/endVerse
   final uri = Uri.parse(link);
-  if (uri.scheme == 'verse' && uri.host.isNotEmpty) {
+  if (uri.scheme == 'v' && uri.host.isNotEmpty) {
     final parts = uri.pathSegments;
     if (parts.length >= 2) {
       final book = uri.host;
@@ -40,40 +40,40 @@ Future<void> handleVerseLink(
       final verseSpec = parts[1]; // This could be "5", "5-7", or "5,6,7"
 
       if (chapter != null) {
-        // Parse verse specification: single, range, or multiple
-        List<int> targetVerses = [];
-        if (verseSpec.contains('-')) {
-          // Range: "5-7" → [5,6,7]
-          final rangeParts = verseSpec.split('-');
-          if (rangeParts.length == 2) {
-            final start = int.tryParse(rangeParts[0]);
-            final end = int.tryParse(rangeParts[1]);
-            if (start != null && end != null) {
-              for (int i = start; i <= end; i++) {
-                targetVerses.add(i);
+        // Parse verse spec in a generalized way:
+        // single ("5"), range ("5-7"), list ("5,6,7"), or mixed ("5-7,9,11-12")
+        final targetVerses = <int>[];
+        final partsSpec = verseSpec.split(',');
+        for (final partRaw in partsSpec) {
+          final part = partRaw.trim();
+          if (part.isEmpty) continue;
+
+          if (part.contains('-')) {
+            final rangeParts = part.split('-');
+            if (rangeParts.length == 2) {
+              final start = int.tryParse(rangeParts[0].trim());
+              final end = int.tryParse(rangeParts[1].trim());
+              if (start != null && end != null && end >= start) {
+                for (int i = start; i <= end; i++) {
+                  if (!targetVerses.contains(i)) {
+                    targetVerses.add(i);
+                  }
+                }
               }
             }
-          }
-        } else if (verseSpec.contains(',')) {
-          // Multiple: "5,6,7" → [5,6,7]
-          final verseNumbers = verseSpec.split(',');
-          for (final number in verseNumbers) {
-            final verse = int.tryParse(number.trim());
-            if (verse != null) {
+          } else {
+            final verse = int.tryParse(part);
+            if (verse != null && !targetVerses.contains(verse)) {
               targetVerses.add(verse);
             }
-          }
-        } else {
-          // Single: "5" → [5]
-          final verse = int.tryParse(verseSpec);
-          if (verse != null) {
-            targetVerses.add(verse);
           }
         }
 
         if (targetVerses.isNotEmpty) {
           // Convert book name to proper database format
-          final normalizedBook = book.isNotEmpty ? BookNameConverter.normalizeShortName(book) : book;
+          final normalizedBook = book.isNotEmpty
+              ? BookNameConverter.normalizeShortName(book)
+              : book;
 
           // Create recursive wrapper if needed (for infinite recursion)
           Function(String, String?)? finalOnVerseLink;
@@ -81,7 +81,8 @@ Future<void> handleVerseLink(
             finalOnVerseLink = onVerseLinkRecursion;
           } else {
             // Create infinite recursion by calling handleVerseLink again with same parameters
-            finalOnVerseLink = (recursiveLink, recursiveRefText) => handleVerseLink(
+            finalOnVerseLink = (recursiveLink, recursiveRefText) =>
+                handleVerseLink(
                   context,
                   recursiveLink,
                   recursiveRefText,
@@ -100,16 +101,24 @@ Future<void> handleVerseLink(
               targetVerses: targetVerses, // New parameter for individual verses
               referenceText: referenceText,
               onVerseLink: finalOnVerseLink, // Pass link handler for navigation
-              onNavigateToVerse: navigateToVerse != null ? (verse) => navigateToVerse(normalizedBook, chapter, verse) : null, // Navigate to verse callback
-              onNoteIconTap: onNoteIconTap != null ? (verse, noteText) => onNoteIconTap(normalizedBook, chapter, verse, noteText) : null,
-              onNoteEditTap: onNoteEditTap != null ? (verse, noteText) => onNoteEditTap(normalizedBook, chapter, verse, noteText) : null,
+              onNavigateToVerse: navigateToVerse != null
+                  ? (verse) => navigateToVerse(normalizedBook, chapter, verse)
+                  : null, // Navigate to verse callback
+              onNoteIconTap: onNoteIconTap != null
+                  ? (verse, noteText) =>
+                      onNoteIconTap(normalizedBook, chapter, verse, noteText)
+                  : null,
+              onNoteEditTap: onNoteEditTap != null
+                  ? (verse, noteText) =>
+                      onNoteEditTap(normalizedBook, chapter, verse, noteText)
+                  : null,
             ),
           );
         }
       }
     }
   } else {
-    // Handle external links (not verse://) - show confirmation dialog
+    // Handle external links (not v://) - show confirmation dialog
     final shouldOpen = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -143,7 +152,8 @@ Future<void> handleVerseLink(
                 child: Text(
                   link,
                   style: TextStyle(
-                    color: getAdaptiveTextColor(context), //isDark ? Colors.white : Colors.black,
+                    color: getAdaptiveTextColor(
+                        context), //isDark ? Colors.white : Colors.black,
                     fontFamily: 'Roboto Mono',
                     fontSize: uiFontSize,
                   ),

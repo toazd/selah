@@ -586,15 +586,14 @@ List<Widget> buildVerseListWidget({
     if (showTskReferences) {
       final rawTskText = (tskReferences[vn] ?? '').trim();
       if (rawTskText.isNotEmpty) {
-        // Quill notes must end with a '\n' or an exception will be thrown.
-        final tskText = '$rawTskText\n';
         widgets.add(
           Container(
             margin: EdgeInsets.all(0.0),
             padding:
                 EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
             child: QuillNoteDisplay(
-              noteText: tskText,
+              noteText: rawTskText,
+              autoLinkVerseReferences: false,
               onLinkTap: onLinkTap,
             ),
           ),

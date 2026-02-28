@@ -15,7 +15,7 @@ BOOKS = {
 }
 
 def convert_tsk(input_file, output_file):
-    # Dictionary to hold the nested structure: {Book: {Chapter: {Verse: "Refs"}}}
+    # Dictionary to hold the nested structure: {Book: {Chapter: {verse: "Refs"}}}
     data = {}
 
     try:
@@ -71,7 +71,7 @@ def convert_tsk(input_file, output_file):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    # Usage: python convert_tsk.py input.csv tsk_data.dart
+    # Usage: python convert_tsk.py input.csv tsk_data_delta.dart
     if len(sys.argv) > 2:
         convert_tsk(sys.argv[1], sys.argv[2])
     else:

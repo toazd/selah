@@ -19,6 +19,7 @@ class QuillNoteDisplay extends StatefulWidget {
   final RegExp? highlightRegex;
   final Color? highlightColor;
   final VoidCallback? onTap;
+  final bool autoLinkVerseReferences;
 
   const QuillNoteDisplay({
     super.key,
@@ -27,6 +28,8 @@ class QuillNoteDisplay extends StatefulWidget {
     this.highlightRegex,
     this.highlightColor,
     this.onTap,
+    // Whether or not to automatically parse and create verse reference links for this data
+    this.autoLinkVerseReferences = true,
   });
 
   @override
@@ -50,7 +53,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
   @override
   void didUpdateWidget(QuillNoteDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.noteText != widget.noteText) {
+    if (oldWidget.noteText != widget.noteText ||
+        oldWidget.autoLinkVerseReferences != widget.autoLinkVerseReferences) {
       _controller.dispose();
       _controller = _createControllerFromNote(widget.noteText);
     }
@@ -76,20 +80,28 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
 
     Document document;
     if (NoteStorageFormat.isDeltaFormat(noteText)) {
-      final delta = Delta.fromJson(jsonDecode(noteText));
+      final decoded = jsonDecode(noteText);
+      final normalizedDeltaJson = _ensureDeltaHasTrailingNewline(decoded);
+      final delta = Delta.fromJson(normalizedDeltaJson);
       document = Document.fromDelta(delta);
     } else {
       // Plain text fallback for backwards compatibility
+      // Quill note data without a newline suffix will throw
+      // an exception
+      final normalizedPlainText =
+          noteText.endsWith('\n') ? noteText : '$noteText\n';
       final operations = [
-        {'insert': noteText}
+        {'insert': normalizedPlainText}
       ];
       document = Document.fromDelta(Delta.fromJson(operations));
     }
 
-    // Add verse reference links if the plain text contains a colon (potential verse reference)
-    final plainText = document.getPlainText(0, document.length);
-    if (plainText.contains(':')) {
-      document = VerseReferenceLinker.addVerseReferenceLinks(document);
+    // Add verse reference links only when enabled (TSK can ship pre-linked static data).
+    if (widget.autoLinkVerseReferences) {
+      final plainText = document.getPlainText(0, document.length);
+      if (plainText.contains(':')) {
+        document = VerseReferenceLinker.addVerseReferenceLinks(document);
+      }
     }
 
     return QuillController(
@@ -97,6 +109,38 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
       selection: const TextSelection.collapsed(offset: 0),
       readOnly: true,
     );
+  }
+
+  List<dynamic> _ensureDeltaHasTrailingNewline(dynamic decoded) {
+    if (decoded is! List) {
+      return const [
+        {'insert': '\n'}
+      ];
+    }
+
+    if (decoded.isEmpty) {
+      return const [
+        {'insert': '\n'}
+      ];
+    }
+
+    final normalized = decoded
+        .map((op) => op is Map
+            ? Map<String, dynamic>.from(op)
+            : <String, dynamic>{'insert': op.toString()})
+        .toList();
+
+    final last = normalized.last;
+    final lastInsert = last['insert'];
+    if (lastInsert is String) {
+      if (!lastInsert.endsWith('\n')) {
+        last['insert'] = '$lastInsert\n';
+      }
+      return normalized;
+    }
+
+    normalized.add({'insert': '\n'});
+    return normalized;
   }
 
   void _handleLinkTap(String? link) {
@@ -233,7 +277,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
               embedBuilders: kIsWeb
                   ? FlutterQuillEmbeds.editorWebBuilders()
                   : FlutterQuillEmbeds.editorBuilders(),
-              customLinkPrefixes: const ['verse://', 'verse:'],
+              customLinkPrefixes: const ['v://', 'v:'],
               onLaunchUrl: _handleLinkTap,
               customStyles: DefaultStyles(
                 paragraph: DefaultTextBlockStyle(

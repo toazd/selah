@@ -32,7 +32,8 @@ class VerseReferenceLinker {
           if (overlapLength > 0) {
             // If this overlapping operation has a link attribute, count how many characters
             // of the target range are already covered by a link.
-            if (operation.attributes != null && operation.attributes!.containsKey('link')) {
+            if (operation.attributes != null &&
+                operation.attributes!.containsKey('link')) {
               coveredByLink += overlapLength;
             }
           }
@@ -69,37 +70,39 @@ class VerseReferenceLinker {
     final newDocument = Document.fromDelta(document.toDelta());
 
     // Sort references in descending order by startIndex to avoid position shifting
-    final sortedReferences = references.toList()..sort((a, b) => b.startIndex.compareTo(a.startIndex));
+    final sortedReferences = references.toList()
+      ..sort((a, b) => b.startIndex.compareTo(a.startIndex));
 
     for (final reference in sortedReferences) {
       try {
         // Check if this specific range already has link formatting
-        if (hasLinkAtRange(newDocument, reference.startIndex, reference.originalText.length)) {
+        if (hasLinkAtRange(
+            newDocument, reference.startIndex, reference.originalText.length)) {
           // Skip this reference - it's already a link
           continue;
         }
 
-        // For comma-separated verses, extract the full verse spec from originalText
-        String verseSpec;
-        if (reference.originalText.contains(',') && !reference.originalText.contains('-')) {
-          // This is a comma-separated reference like "Gen 1:4,9,11"
-          // Extract everything after the colon for comma-separated verses
-          final parts = reference.originalText.split(':');
-          if (parts.length >= 2) {
-            verseSpec = parts[1]; // Everything after the colon
-          } else {
-            // Fallback to single verse if parsing fails
-            verseSpec = reference.verse.toString();
-          }
-        } else if (reference.endVerse != null) {
+        // Preserve the exact verse spec from the matched text whenever possible.
+        // This supports single, dash ranges, comma lists, and mixed forms.
+        String verseSpec = '';
+        final colonIndex = reference.originalText.indexOf(':');
+        if (colonIndex != -1 &&
+            colonIndex + 1 < reference.originalText.length) {
+          verseSpec = reference.originalText
+              .substring(colonIndex + 1)
+              .replaceAll(RegExp(r'\s+'), '');
+        }
+
+        if (verseSpec.isEmpty && reference.endVerse != null) {
           // This is a range like "Gen 1:4-6"
           verseSpec = '${reference.verse}-${reference.endVerse}';
-        } else {
+        } else if (verseSpec.isEmpty) {
           // Single verse
           verseSpec = reference.verse.toString();
         }
 
-        final linkData = 'verse://${reference.book}/${reference.chapter}/$verseSpec';
+        final linkData =
+            'v://${reference.book}/${reference.chapter}/$verseSpec';
 
         // Format the text at the reference position as a link
         newDocument.format(
@@ -116,7 +119,7 @@ class VerseReferenceLinker {
     return newDocument;
   }
 
-  /// Removes all verse:// links from a Quill document (for editing existing notes)
+  /// Removes all v:// links from a Quill document (for editing existing notes)
   /// This prevents stale links when users edit previously saved notes
   static Document removeVerseLinksForEditing(Document document) {
     try {
@@ -125,17 +128,21 @@ class VerseReferenceLinker {
       final cleanedOperations = <dynamic>[];
 
       for (final operation in operations) {
-        if (operation.attributes != null && operation.attributes!.containsKey('link')) {
+        if (operation.attributes != null &&
+            operation.attributes!.containsKey('link')) {
           final linkValue = operation.attributes!['link'] as String?;
 
-          if (linkValue != null && (linkValue.startsWith('verse://') || linkValue.startsWith('verse:'))) {
+          if (linkValue != null &&
+              (linkValue.startsWith('v://') || linkValue.startsWith('v:'))) {
             // This IS a verse link - remove the link attribute
-            final cleanedAttributes = Map<String, dynamic>.from(operation.attributes!);
+            final cleanedAttributes =
+                Map<String, dynamic>.from(operation.attributes!);
             cleanedAttributes.remove('link');
 
             cleanedOperations.add({
               'insert': operation.data,
-              'attributes': cleanedAttributes.isNotEmpty ? cleanedAttributes : null,
+              'attributes':
+                  cleanedAttributes.isNotEmpty ? cleanedAttributes : null,
             });
           } else {
             // This has link but is NOT a verse link (keep it)
