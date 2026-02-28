@@ -245,8 +245,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                               (Platform.isLinux ||
                                   Platform.isWindows ||
                                   Platform.isMacOS))
-                          ? fontSizeNotifier.value - 8
-                          : fontSizeNotifier.value - 4,
+                          ? fontSizeNotifier.value - 6
+                          : fontSizeNotifier.value - 2,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -267,8 +267,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                             (Platform.isLinux ||
                                 Platform.isWindows ||
                                 Platform.isMacOS))
-                        ? fontSizeNotifier.value - 8
-                        : fontSizeNotifier.value - 4,
+                        ? fontSizeNotifier.value - 6
+                        : fontSizeNotifier.value - 2,
                   ),
                   fontFamily: currentNoteFontFamily,
                 ),
@@ -281,8 +281,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                               (Platform.isLinux ||
                                   Platform.isWindows ||
                                   Platform.isMacOS))
-                          ? fontSizeNotifier.value - 8
-                          : fontSizeNotifier.value - 4,
+                          ? fontSizeNotifier.value - 6
+                          : fontSizeNotifier.value - 2,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor,
@@ -303,8 +303,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                               (Platform.isLinux ||
                                   Platform.isWindows ||
                                   Platform.isMacOS))
-                          ? fontSizeNotifier.value - 8
-                          : fontSizeNotifier.value - 4,
+                          ? fontSizeNotifier.value - 6
+                          : fontSizeNotifier.value - 2,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
@@ -328,8 +328,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                               (Platform.isLinux ||
                                   Platform.isWindows ||
                                   Platform.isMacOS))
-                          ? fontSizeNotifier.value - 8
-                          : fontSizeNotifier.value - 4,
+                          ? fontSizeNotifier.value - 6
+                          : fontSizeNotifier.value - 2,
                     ),
                     fontFamily: currentNoteFontFamily,
                     color: textColor.withValues(alpha: 0.6),
@@ -360,8 +360,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                               (Platform.isLinux ||
                                   Platform.isWindows ||
                                   Platform.isMacOS))
-                          ? fontSizeNotifier.value - 8
-                          : fontSizeNotifier.value - 4,
+                          ? fontSizeNotifier.value - 6
+                          : fontSizeNotifier.value - 2,
                     ),
                     fontFamily: 'Roboto Mono',
                     color: isDark
