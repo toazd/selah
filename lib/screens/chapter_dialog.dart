@@ -522,32 +522,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
     }
   }
 
-  /*
-  void _openMultipleVersesDialog(int verseNumber) {
-    showDialog(
-      context: context,
-      builder: (context) => MultipleVersesDialog(
-          book: BookNameConverter.displayKeyForDb(widget.book),
-          chapter: widget.chapter,
-          initialVerse: verseNumber,
-          verses: _verses.map((verseMap) {
-            // 1. Safely retrieve the original text, defaulting to "" if null.
-            String parsedVerse = (verseMap['text'] as String?) ?? '';
-
-            // 2. Create the cleaned text.
-            String cleanedText = parsedVerse.replaceAll('¶ ', '');
-
-            // 3. Return a NEW Map with the original data, but with the
-            //    'text' key updated with the cleaned string.
-            return {
-              ...verseMap, // Copies all existing key/value pairs from the original map
-              'text': cleanedText, // Overwrites the 'text' key with the cleaned string
-            };
-          }).toList()),
-    );
-  }
-  */
-
   void _openMultipleVersesDialog(int verseNumber) {
     showMultipleVersesDialog(
       context: context,

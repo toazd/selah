@@ -1,5 +1,6 @@
 // Utility functions shared across Bible-related screens and components
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:selah/main.dart';
 import 'package:selah/utils/preferences_constants.dart';
@@ -25,14 +26,31 @@ Future<void> handleVerseLink(
   Function(String, int, int, String?)? onNoteIconTap,
   Function(String, int, int, String?)? onNoteEditTap,
 }) async {
-  // Remove "unsafe:" prefix if present
+  // Remove old and conflicting prefixes
   if (link.startsWith('unsafe:')) {
     link = link.replaceFirst('unsafe:', '');
+  }
+  if (link.startsWith('https://')) {
+    link = link.replaceFirst('https://', '');
+  }
+  if (link.startsWith('http://')) {
+    link = link.replaceFirst('http://', '');
+  }
+  if (link.startsWith('verse://')) {
+    link = link.replaceFirst('verse://', 'v://');
   }
 
   // Parse v://book/chapter/verse or v://book/chapter/verse/endVerse
   final uri = Uri.parse(link);
-  if (uri.scheme == 'v' && uri.host.isNotEmpty) {
+
+  // Debug mode only prints to diagnose problems with migration from
+  // the old verse: to the new v: link format
+  if (kDebugMode) {
+    debugPrint(link);
+    debugPrint("scheme: ${uri.scheme}");
+    debugPrint("host: ${uri.host}");
+  }
+  if (uri.scheme == 'v' || uri.host.isNotEmpty) {
     final parts = uri.pathSegments;
     if (parts.length >= 2) {
       final book = uri.host;

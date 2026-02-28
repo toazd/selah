@@ -132,8 +132,12 @@ class VerseReferenceLinker {
             operation.attributes!.containsKey('link')) {
           final linkValue = operation.attributes!['link'] as String?;
 
+          // Handle conversion from the old verse: to the new v:
           if (linkValue != null &&
-              (linkValue.startsWith('v://') || linkValue.startsWith('v:'))) {
+              (linkValue.startsWith('v://') ||
+                  linkValue.startsWith('v:') ||
+                  linkValue.startsWith('verse://') ||
+                  linkValue.startsWith('verse:'))) {
             // This IS a verse link - remove the link attribute
             final cleanedAttributes =
                 Map<String, dynamic>.from(operation.attributes!);
