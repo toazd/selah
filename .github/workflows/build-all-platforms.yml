@@ -311,7 +311,7 @@ jobs:
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm) NOTE: rpms are not signed
           - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
           - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
           
