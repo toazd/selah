@@ -35,32 +35,12 @@ class BibleScreenHeader extends StatelessWidget {
         context);
 
     return Container(
-      // decoration: BoxDecoration(
-      //   border: Border.all(
-      //     color: Colors.red, // The color of the border
-      //     width: 1.0, // The thickness of the border (optional)
-      //   ),
-      // ),
       height: 48, // Fixed height for consistent sizing
       color: barColor,
       child: Row(
         children: [
           // Leading area
           SizedBox(
-              //width: 48.0,
-              // child: showViewMenu
-              //     ? IconButton(
-              //         icon: Icon(
-              //           Icons.menu,
-              //           semanticLabel: 'Main Options Menu',
-              //         ),
-              //         tooltip: 'Options',
-              //         onPressed: onOpenDrawer,
-              //         iconSize: 32,
-              //         padding: EdgeInsets.all(8),
-              //         color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              //       )
-              //     : SizedBox(width: 48.0), // 32 + 8 + 8
               child: IconButton(
             icon: Icon(
               Icons.menu,
@@ -187,6 +167,7 @@ class BibleScreenHeader extends StatelessWidget {
             final tp = TextPainter(
               text: TextSpan(text: text, style: style),
               maxLines: 1,
+              textScaler: MediaQuery.textScalerOf(context),
               textDirection: TextDirection.ltr,
             )..layout(minWidth: 0, maxWidth: double.infinity);
             return tp.size.width;
