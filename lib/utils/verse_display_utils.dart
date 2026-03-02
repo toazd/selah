@@ -8,11 +8,12 @@ import '../widgets/quill_note_display.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 
-const _verseTextHeightBehavior = TextHeightBehavior(
-  applyHeightToFirstAscent: false,
-  applyHeightToLastDescent: false,
-  leadingDistribution: TextLeadingDistribution.even,
-);
+// const _verseTextHeightBehavior = TextHeightBehavior(
+//   applyHeightToFirstAscent: true, //false,
+//   applyHeightToLastDescent: true, //false,
+//   leadingDistribution:
+//       TextLeadingDistribution.proportional, //TextLeadingDistribution.even,
+// );
 
 /// Utility functions for displaying verses with notes and highlights
 /// Extracted from bible_screen.dart for reusability
@@ -132,7 +133,7 @@ Widget buildVerseDisplayWidget({
                         text: '$verseNumber',
                         style: verseNumberStyle,
                       ),
-                      textHeightBehavior: _verseTextHeightBehavior,
+                      //textHeightBehavior: _verseTextHeightBehavior,
                       strutStyle: verseStrutStyle,
                     ),
                   )
@@ -145,7 +146,7 @@ Widget buildVerseDisplayWidget({
                       text: '$verseNumber',
                       style: verseNumberStyle,
                     ),
-                    textHeightBehavior: _verseTextHeightBehavior,
+                    //textHeightBehavior: _verseTextHeightBehavior,
                     strutStyle: verseStrutStyle,
                   ),
           ),
@@ -168,7 +169,7 @@ Widget buildVerseDisplayWidget({
                 style: baseTextStyle,
                 children: rightSpans,
               ),
-              textHeightBehavior: _verseTextHeightBehavior,
+              //textHeightBehavior: _verseTextHeightBehavior,
               strutStyle: verseStrutStyle,
             ),
           ),
@@ -489,7 +490,7 @@ double _calculateSingleVerseNumberWidth(
     textScaler: MediaQuery.textScalerOf(context),
     maxLines: 1,
     textDirection: TextDirection.ltr,
-    textHeightBehavior: _verseTextHeightBehavior,
+    //textHeightBehavior: _verseTextHeightBehavior,
   )..layout();
   return textPainter.size.width; // + 10.0;
 }
