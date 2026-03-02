@@ -8,6 +8,12 @@ import '../widgets/quill_note_display.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 
+const _verseTextHeightBehavior = TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+  leadingDistribution: TextLeadingDistribution.even,
+);
+
 /// Utility functions for displaying verses with notes and highlights
 /// Extracted from bible_screen.dart for reusability
 
@@ -40,10 +46,10 @@ Widget buildVerseDisplayWidget({
 
   final verseNumberStyle = baseTextStyle.copyWith(
     // Verse number font size
-    fontSize: baseTextStyle.fontSize! - 6,
+    fontSize: baseTextStyle.fontSize! - 2,
     color:
         (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(
-      alpha: 0.8,
+      alpha: 0.9,
     ),
     fontWeight: FontWeight.normal,
   );
@@ -55,6 +61,11 @@ Widget buildVerseDisplayWidget({
         verseNumber.toString(),
         verseNumberStyle,
       );
+  final textScaler = MediaQuery.textScalerOf(context);
+  final verseStrutStyle = StrutStyle.fromTextStyle(
+    baseTextStyle,
+    forceStrutHeight: true,
+  );
 
   // Build the right column spans (verse text with highlights)
   final rightSpans = <InlineSpan>[];
@@ -62,7 +73,7 @@ Widget buildVerseDisplayWidget({
   // Only show icon inline in verse if not showNotesInline and note exists
   if (!showNotesInline && noteForVerse.isNotEmpty) {
     rightSpans.add(WidgetSpan(
-      alignment: PlaceholderAlignment.middle,
+      alignment: PlaceholderAlignment.bottom,
       child: Padding(
         padding: const EdgeInsets.only(
             right: 8.0), // add a little space between the icon and the text
@@ -71,9 +82,10 @@ Widget buildVerseDisplayWidget({
               ? () => onNoteIconTap(verseNumber, noteForVerse['note_text'])
               : null,
           child: Icon(
+            applyTextScaling: true,
             Icons.text_snippet_outlined,
             size: FontSizeAdjustments.getAdjustedSize(
-                fontFamilyNotifier.value, fontSizeNotifier.value),
+                fontFamilyNotifier.value, fontSizeNotifier.value - 2),
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             semanticLabel: 'Verse note',
           ),
@@ -107,37 +119,41 @@ Widget buildVerseDisplayWidget({
         if (displayVerseNumber)
           Container(
             width: effectiveVerseNumberWidth,
-            alignment: Alignment.centerRight,
+            alignment: Alignment.bottomRight,
             child: verseKey != null
                 ? Container(
                     key: verseKey,
-                    child: Text(
-                      softWrap: false,
+                    child: RichText(
+                      textAlign: TextAlign.right,
+                      textScaler: textScaler,
+                      maxLines: 1,
                       overflow: TextOverflow.clip,
-                      '$verseNumber',
-                      style: verseNumberStyle,
-                      //textHeightBehavior: const TextHeightBehavior(
-                      //  applyHeightToFirstAscent: false,
-                      //  applyHeightToLastDescent: false,
-                      //  leadingDistribution: TextLeadingDistribution.even,
-                      //),
-                    ))
-                : Text(
-                    softWrap: false,
+                      text: TextSpan(
+                        text: '$verseNumber',
+                        style: verseNumberStyle,
+                      ),
+                      textHeightBehavior: _verseTextHeightBehavior,
+                      strutStyle: verseStrutStyle,
+                    ),
+                  )
+                : RichText(
+                    textAlign: TextAlign.right,
+                    textScaler: textScaler,
+                    maxLines: 1,
                     overflow: TextOverflow.clip,
-                    '$verseNumber',
-                    style: verseNumberStyle,
-                    //textHeightBehavior: const TextHeightBehavior(
-                    //  applyHeightToFirstAscent: false,
-                    //  applyHeightToLastDescent: false,
-                    //  leadingDistribution: TextLeadingDistribution.even,
-                    //),
+                    text: TextSpan(
+                      text: '$verseNumber',
+                      style: verseNumberStyle,
+                    ),
+                    textHeightBehavior: _verseTextHeightBehavior,
+                    strutStyle: verseStrutStyle,
                   ),
           ),
         if (displayVerseNumber) const SizedBox(width: 8),
         // Right column: verse text with inline icon
         Expanded(
           child: Container(
+            alignment: Alignment.topLeft,
             //padding: EdgeInsets.all(4.0),
             //margin: EdgeInsets.all(0),
             decoration: BoxDecoration(
@@ -145,16 +161,15 @@ Widget buildVerseDisplayWidget({
               //borderRadius: BorderRadius.circular(8.0),
             ),
             child: RichText(
+              textAlign: TextAlign.left,
+              textScaler: textScaler,
               softWrap: true,
               text: TextSpan(
                 style: baseTextStyle,
                 children: rightSpans,
               ),
-              //textHeightBehavior: const TextHeightBehavior(
-              //  applyHeightToFirstAscent: false,
-              //  applyHeightToLastDescent: false,
-              //  leadingDistribution: TextLeadingDistribution.even,
-              //),
+              textHeightBehavior: _verseTextHeightBehavior,
+              strutStyle: verseStrutStyle,
             ),
           ),
         ),
@@ -474,6 +489,7 @@ double _calculateSingleVerseNumberWidth(
     textScaler: MediaQuery.textScalerOf(context),
     maxLines: 1,
     textDirection: TextDirection.ltr,
+    textHeightBehavior: _verseTextHeightBehavior,
   )..layout();
   return textPainter.size.width; // + 10.0;
 }
