@@ -29,6 +29,8 @@ final ValueNotifier<SyncStatus> syncStatusNotifier =
 // Prevent rapid initialize() calls
 bool _isInitialized = false;
 
+const int _remoteSyncPageSize = 500;
+
 enum SyncStatus { offline, connecting, online, syncing, error }
 
 class SyncOperation {
@@ -140,6 +142,48 @@ class SupabaseSyncService {
 
   // Get current user ID
   String? get _currentUserId => _supabase.auth.currentUser?.id;
+
+  Future<List<Map<String, dynamic>>> _fetchRemoteRows({
+    required String table,
+    String columns = '*',
+    required String orderColumn,
+    String? secondaryOrderColumn,
+    String? greaterThanColumn,
+    int? greaterThanValue,
+  }) async {
+    if (_currentUserId == null) return [];
+
+    final rows = <Map<String, dynamic>>[];
+    var from = 0;
+
+    while (true) {
+      dynamic query =
+          _supabase.from(table).select(columns).eq('user_id', _currentUserId!);
+
+      if (greaterThanColumn != null && greaterThanValue != null) {
+        query = query.gt(greaterThanColumn, greaterThanValue);
+      }
+
+      query = query.order(orderColumn, ascending: false);
+
+      if (secondaryOrderColumn != null && secondaryOrderColumn != orderColumn) {
+        query = query.order(secondaryOrderColumn, ascending: false);
+      }
+
+      query = query.range(from, from + _remoteSyncPageSize - 1);
+
+      final page = List<Map<String, dynamic>>.from(await query);
+      rows.addAll(page);
+
+      if (page.length < _remoteSyncPageSize) {
+        break;
+      }
+
+      from += _remoteSyncPageSize;
+    }
+
+    return rows;
+  }
 
   // Helper method to get sync enabled status from individual preferences
   Future<bool> _getSyncEnabled(String key) async {
@@ -1872,15 +1916,6 @@ class SupabaseSyncService {
   //       return;
   //     }
 
-  //     // DEBUG: Log realtime handler invocation with detailed information
-  //     if (kDebugMode) {
-  //       debugPrint('=== DEBUG _onNotesChanged REALTIME ===');
-  //       debugPrint('Received ${data.length} realtime note changes');
-  //       for (var note in data) {
-  //         debugPrint('Note data: ${note.toString()}');
-  //       }
-  //     }
-
   //     await _downloadNotes(data);
   //   } catch (e) {
   //     // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1903,12 +1938,6 @@ class SupabaseSyncService {
   //       return;
   //     }
 
-  //     // DEBUG: Log realtime handler invocation
-  //     if (kDebugMode) {
-  //       debugPrint('=== DEBUG _onHistoryChanged REALTIME ===');
-  //       debugPrint('Received ${data.length} realtime history changes');
-  //     }
-
   //     await _downloadHistory(data);
   //   } catch (e) {
   //     // Handle sync errors gracefully without throwing unhandled exceptions
@@ -1929,12 +1958,6 @@ class SupabaseSyncService {
 
   //     if (!searchHistoryEnabled) {
   //       return;
-  //     }
-
-  //     // DEBUG: Log realtime handler invocation
-  //     if (kDebugMode) {
-  //       debugPrint('=== DEBUG _onSearchHistoryChanged REALTIME ===');
-  //       debugPrint('Received ${data.length} realtime search history changes');
   //     }
 
   //     await _downloadSearchHistory(data);
@@ -1967,8 +1990,6 @@ class SupabaseSyncService {
     }
 
     try {
-      // DEBUG: Log sync operation start
-
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
       final baselineTime =
@@ -1987,12 +2008,10 @@ class SupabaseSyncService {
       // Upload local changes
       if (highlightsToSync.isNotEmpty) {
         // Get remote highlights for comparison
-        final remoteHighlightsResponse = await _supabase
-            .from('highlights')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteHighlights =
-            List<Map<String, dynamic>>.from(remoteHighlightsResponse);
+        final remoteHighlights = await _fetchRemoteRows(
+          table: 'highlights',
+          orderColumn: 'created_at',
+        );
 
         // Sync logic: collect highlights that need uploading
         final highlightsToUpload = <Map<String, dynamic>>[];
@@ -2046,12 +2065,13 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastHighlightsSyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('highlights')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('updated_at', lastSyncMs);
-      final snapshot = await query;
+      final snapshot = await _fetchRemoteRows(
+        table: 'highlights',
+        orderColumn: 'updated_at',
+        secondaryOrderColumn: 'created_at',
+        greaterThanColumn: 'updated_at',
+        greaterThanValue: lastSyncMs,
+      );
       if (snapshot.isNotEmpty) {
         await _downloadHighlights(snapshot);
       }
@@ -2078,8 +2098,6 @@ class SupabaseSyncService {
       bool hasChanges = false;
       int processedCount = 0;
 
-      // DEBUG: Log download operation start (only for problematic data types)
-
       // Get local highlights - match by created_at timestamp only
       final localHighlights = await HighlightsDatabase.getHighlights();
 
@@ -2091,7 +2109,10 @@ class SupabaseSyncService {
           final docId = data['created_at'] as int;
 
           await deleteRemoteHighlight(docId);
-
+          if (kDebugMode) {
+            debugPrint(
+                '_downloadHighlights: data validation failure detected: ${data.toString()}');
+          }
           continue; // Skip processing this document
         }
 
@@ -2181,7 +2202,10 @@ class SupabaseSyncService {
           final docId = data['created_at'] as int;
 
           await deleteRemoteNote(docId);
-
+          if (kDebugMode) {
+            debugPrint(
+                '_downloadNotes: data validation failure detected: ${data.toString()}');
+          }
           continue; // Skip processing this document
         }
 
@@ -2251,6 +2275,10 @@ class SupabaseSyncService {
           // Delete corrupt remote document
           final docId = data['timestamp'];
           await deleteRemoteHistoryItem(docId);
+          if (kDebugMode) {
+            debugPrint(
+                '_downloadHistory: data validation failure detected: ${data.toString()}');
+          }
           continue; // Skip processing this document
         }
 
@@ -2307,6 +2335,10 @@ class SupabaseSyncService {
           // Delete corrupt remote document
           final docId = data['timestamp'];
           await deleteRemoteSearchHistoryItem(docId);
+          if (kDebugMode) {
+            debugPrint(
+                '_downloadSearchHistory: data validation failure detected: ${data.toString()}');
+          }
           continue; // Skip processing this document
         }
 
@@ -2365,10 +2397,11 @@ class SupabaseSyncService {
 
     try {
       // Get all remote UUIDs
-      final remoteResponse = await _supabase
-          .from(_getTableName(type))
-          .select('id')
-          .eq('user_id', _currentUserId!);
+      final remoteResponse = await _fetchRemoteRows(
+        table: _getTableName(type),
+        columns: 'id',
+        orderColumn: 'id',
+      );
       final remoteUuids =
           Set<String>.from(remoteResponse.map((r) => r['id'] as String));
 
@@ -2689,12 +2722,10 @@ class SupabaseSyncService {
 
       if (notesToSync.isNotEmpty) {
         // Get remote notes for comparison
-        final remoteNotesResponse = await _supabase
-            .from('notes')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteNotes =
-            List<Map<String, dynamic>>.from(remoteNotesResponse);
+        final remoteNotes = await _fetchRemoteRows(
+          table: 'notes',
+          orderColumn: 'created_at',
+        );
 
         // Sync logic: collect notes that need uploading
         final notesToUpload = <Map<String, dynamic>>[];
@@ -2748,12 +2779,13 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('notes')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('updated_at', lastSyncMs);
-      final snapshot = await query;
+      final snapshot = await _fetchRemoteRows(
+        table: 'notes',
+        orderColumn: 'updated_at',
+        secondaryOrderColumn: 'created_at',
+        greaterThanColumn: 'updated_at',
+        greaterThanValue: lastSyncMs,
+      );
       if (snapshot.isNotEmpty) {
         await _downloadNotes(snapshot);
       }
@@ -2979,12 +3011,10 @@ class SupabaseSyncService {
       // Upload local changes
       if (searchHistoryToSync.isNotEmpty) {
         // Get remote search history
-        final remoteSearchHistoryResponse = await _supabase
-            .from('search_history')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteSearchHistory =
-            List<Map<String, dynamic>>.from(remoteSearchHistoryResponse);
+        final remoteSearchHistory = await _fetchRemoteRows(
+          table: 'search_history',
+          orderColumn: 'timestamp',
+        );
 
         // Sync logic: collect search history items that need uploading
         final searchHistoryItemsToUpload = <Map<String, dynamic>>[];
@@ -3037,12 +3067,12 @@ class SupabaseSyncService {
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs =
           _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('search_history')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('timestamp', lastSyncMs);
-      final snapshot = await query;
+      final snapshot = await _fetchRemoteRows(
+        table: 'search_history',
+        orderColumn: 'timestamp',
+        greaterThanColumn: 'timestamp',
+        greaterThanValue: lastSyncMs,
+      );
       if (snapshot.isNotEmpty) {
         await _downloadSearchHistory(snapshot);
       }
@@ -3239,12 +3269,10 @@ class SupabaseSyncService {
       // Upload local changes
       if (historyToSync.isNotEmpty) {
         // Get remote history
-        final remoteHistoryResponse = await _supabase
-            .from('history')
-            .select()
-            .eq('user_id', _currentUserId!);
-        final remoteHistory =
-            List<Map<String, dynamic>>.from(remoteHistoryResponse);
+        final remoteHistory = await _fetchRemoteRows(
+          table: 'history',
+          orderColumn: 'timestamp',
+        );
 
         // Sync logic: collect history items that need uploading
         final historyItemsToUpload = <Map<String, dynamic>>[];
@@ -3296,12 +3324,12 @@ class SupabaseSyncService {
 
       // Download remote changes newer than last sync for bidirectional sync
       final lastSyncMs = _lastHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-      final query = _supabase
-          .from('history')
-          .select()
-          .eq('user_id', _currentUserId!)
-          .gt('timestamp', lastSyncMs);
-      final snapshot = await query;
+      final snapshot = await _fetchRemoteRows(
+        table: 'history',
+        orderColumn: 'timestamp',
+        greaterThanColumn: 'timestamp',
+        greaterThanValue: lastSyncMs,
+      );
       if (snapshot.isNotEmpty) {
         await _downloadHistory(snapshot);
       }
@@ -3505,12 +3533,13 @@ class SupabaseSyncService {
       if (highlightsEnabled) {
         final baselineTime =
             _lastHighlightsSyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('highlights')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('updated_at', baselineTime);
-        final snapshot = await query;
+        final snapshot = await _fetchRemoteRows(
+          table: 'highlights',
+          orderColumn: 'updated_at',
+          secondaryOrderColumn: 'created_at',
+          greaterThanColumn: 'updated_at',
+          greaterThanValue: baselineTime,
+        );
 
         if (snapshot.isNotEmpty) {
           await _downloadHighlights(snapshot);
@@ -3524,12 +3553,13 @@ class SupabaseSyncService {
       // Query and download notes updated since last sync
       if (notesEnabled) {
         final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('notes')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('updated_at', lastSyncMs);
-        final snapshot = await query;
+        final snapshot = await _fetchRemoteRows(
+          table: 'notes',
+          orderColumn: 'updated_at',
+          secondaryOrderColumn: 'created_at',
+          greaterThanColumn: 'updated_at',
+          greaterThanValue: lastSyncMs,
+        );
 
         if (snapshot.isNotEmpty) {
           await _downloadNotes(snapshot);
@@ -3543,12 +3573,12 @@ class SupabaseSyncService {
       // Query and download history items since last sync
       if (historyEnabled) {
         final lastSyncMs = _lastHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('history')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('timestamp', lastSyncMs);
-        final snapshot = await query;
+        final snapshot = await _fetchRemoteRows(
+          table: 'history',
+          orderColumn: 'timestamp',
+          greaterThanColumn: 'timestamp',
+          greaterThanValue: lastSyncMs,
+        );
 
         if (snapshot.isNotEmpty) {
           await _downloadHistory(snapshot);
@@ -3563,12 +3593,12 @@ class SupabaseSyncService {
       if (searchHistoryEnabled) {
         final lastSyncMs =
             _lastSearchHistorySyncSaved?.millisecondsSinceEpoch ?? 0;
-        final query = _supabase
-            .from('search_history')
-            .select()
-            .eq('user_id', _currentUserId!)
-            .gt('timestamp', lastSyncMs);
-        final snapshot = await query;
+        final snapshot = await _fetchRemoteRows(
+          table: 'search_history',
+          orderColumn: 'timestamp',
+          greaterThanColumn: 'timestamp',
+          greaterThanValue: lastSyncMs,
+        );
 
         if (snapshot.isNotEmpty) {
           await _downloadSearchHistory(snapshot);

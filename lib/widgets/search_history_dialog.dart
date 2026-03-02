@@ -317,10 +317,12 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
                   if ((h['useRegex'] as bool)) enabledOptions.add('Regex');
                   if ((h['useNearby'] as bool)) enabledOptions.add('Nearby');
-                  if ((h['useWholeWord'] as bool))
+                  if ((h['useWholeWord'] as bool)) {
                     enabledOptions.add('Whole word');
-                  if ((h['useRedLetter'] as bool))
+                  }
+                  if ((h['useRedLetter'] as bool)) {
                     enabledOptions.add('Red letter');
+                  }
                   if ((h['caseSensitive'] as bool)) {
                     enabledOptions.add('Case-sensitive');
                   }
