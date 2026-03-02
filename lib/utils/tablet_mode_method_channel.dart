@@ -30,7 +30,8 @@ class MethodChannelTabletMode extends TabletModePlatform {
   @override
   Future<bool> isKeyboardAttached() async {
     try {
-      return await methodChannel.invokeMethod<bool>('isKeyboardAttached') ?? false;
+      return await methodChannel.invokeMethod<bool>('isKeyboardAttached') ??
+          false;
     } on PlatformException catch (e) {
       // if (kDebugMode) {
       //   debugPrint('Failed to check keyboard attachment: ${e.message}');
@@ -54,7 +55,8 @@ class MethodChannelTabletMode extends TabletModePlatform {
   @override
   Future<int> getMaximumTouchPoints() async {
     try {
-      return await methodChannel.invokeMethod<int>('getMaximumTouchPoints') ?? 0;
+      return await methodChannel.invokeMethod<int>('getMaximumTouchPoints') ??
+          0;
     } on PlatformException catch (e) {
       // if (kDebugMode) {
       //   debugPrint('Failed to get maximum touch points: ${e.message}');
@@ -66,7 +68,8 @@ class MethodChannelTabletMode extends TabletModePlatform {
   @override
   Future<bool> isConvertibleDevice() async {
     try {
-      return await methodChannel.invokeMethod<bool>('isConvertibleDevice') ?? false;
+      return await methodChannel.invokeMethod<bool>('isConvertibleDevice') ??
+          false;
     } on PlatformException catch (e) {
       // if (kDebugMode) {
       //   debugPrint('Failed to check convertible device: ${e.message}');
@@ -78,7 +81,8 @@ class MethodChannelTabletMode extends TabletModePlatform {
   @override
   Future<String> debugLogInputDevices() async {
     try {
-      return await methodChannel.invokeMethod<String>('debugLogInputDevices') ?? '';
+      return await methodChannel.invokeMethod<String>('debugLogInputDevices') ??
+          '';
     } on PlatformException catch (e) {
       // if (kDebugMode) {
       //   debugPrint('Failed to log input devices: ${e.message}');
@@ -90,7 +94,8 @@ class MethodChannelTabletMode extends TabletModePlatform {
   @override
   Future<String> getKeyboardDevices() async {
     try {
-      return await methodChannel.invokeMethod<String>('getKeyboardDevices') ?? '';
+      return await methodChannel.invokeMethod<String>('getKeyboardDevices') ??
+          '';
     } on PlatformException catch (e) {
       // if (kDebugMode) {
       //   debugPrint('Failed to get keyboard devices: ${e.message}');

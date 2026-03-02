@@ -3,7 +3,8 @@ import 'dart:async';
 /// Local data change notifier for immediate UI updates
 /// Independent of Firestore sync service - works even when offline or signed out
 class LocalDataChangeNotifier {
-  static final LocalDataChangeNotifier _instance = LocalDataChangeNotifier._internal();
+  static final LocalDataChangeNotifier _instance =
+      LocalDataChangeNotifier._internal();
   factory LocalDataChangeNotifier() => _instance;
   LocalDataChangeNotifier._internal();
 
@@ -15,7 +16,8 @@ class LocalDataChangeNotifier {
 
   // Public streams for UI components to subscribe to
   static Stream<void> get highlightsChangedStream {
-    if (_highlightsChangedController == null || _highlightsChangedController!.isClosed) {
+    if (_highlightsChangedController == null ||
+        _highlightsChangedController!.isClosed) {
       _highlightsChangedController = StreamController<void>.broadcast();
     }
     return _highlightsChangedController!.stream;
@@ -29,14 +31,16 @@ class LocalDataChangeNotifier {
   }
 
   static Stream<void> get historyChangedStream {
-    if (_historyChangedController == null || _historyChangedController!.isClosed) {
+    if (_historyChangedController == null ||
+        _historyChangedController!.isClosed) {
       _historyChangedController = StreamController<void>.broadcast();
     }
     return _historyChangedController!.stream;
   }
 
   static Stream<void> get searchHistoryChangedStream {
-    if (_searchHistoryChangedController == null || _searchHistoryChangedController!.isClosed) {
+    if (_searchHistoryChangedController == null ||
+        _searchHistoryChangedController!.isClosed) {
       _searchHistoryChangedController = StreamController<void>.broadcast();
     }
     return _searchHistoryChangedController!.stream;
@@ -44,7 +48,8 @@ class LocalDataChangeNotifier {
 
   // Public notification methods
   static void notifyHighlightsChanged() {
-    if (_highlightsChangedController == null || _highlightsChangedController!.isClosed) {
+    if (_highlightsChangedController == null ||
+        _highlightsChangedController!.isClosed) {
       _highlightsChangedController = StreamController<void>.broadcast();
     }
     _highlightsChangedController!.add(null);
@@ -58,14 +63,16 @@ class LocalDataChangeNotifier {
   }
 
   static void notifyHistoryChanged() {
-    if (_historyChangedController == null || _historyChangedController!.isClosed) {
+    if (_historyChangedController == null ||
+        _historyChangedController!.isClosed) {
       _historyChangedController = StreamController<void>.broadcast();
     }
     _historyChangedController!.add(null);
   }
 
   static void notifySearchHistoryChanged() {
-    if (_searchHistoryChangedController == null || _searchHistoryChangedController!.isClosed) {
+    if (_searchHistoryChangedController == null ||
+        _searchHistoryChangedController!.isClosed) {
       _searchHistoryChangedController = StreamController<void>.broadcast();
     }
     _searchHistoryChangedController!.add(null);

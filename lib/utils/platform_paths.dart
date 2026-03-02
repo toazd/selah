@@ -14,7 +14,12 @@ class PlatformPaths {
     if (Platform.isWindows) {
       // Windows: Use %APPDATA%/com.selah.holybible/selah
       final appData = Platform.environment['APPDATA'] ??
-          join(Platform.environment['USERPROFILE'] ?? Platform.environment['HOME'] ?? '', 'AppData', 'Roaming');
+          join(
+              Platform.environment['USERPROFILE'] ??
+                  Platform.environment['HOME'] ??
+                  '',
+              'AppData',
+              'Roaming');
       return join(appData, 'com.selah.holybible', 'selah');
     } else if (Platform.isLinux) {
       // Linux: Use ~/.config/selah
@@ -81,7 +86,8 @@ class PlatformPaths {
       // Desktop: Check current directory first, then assets
       final currentDir = Directory.current.path;
       final path1 = join(currentDir, 'assets', assetPath);
-      final path2 = join(currentDir, 'data', 'flutter_assets', 'assets', assetPath);
+      final path2 =
+          join(currentDir, 'data', 'flutter_assets', 'assets', assetPath);
 
       if (await File(path1).exists()) {
         return path1;

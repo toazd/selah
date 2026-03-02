@@ -77,10 +77,36 @@ class BookFilter {
       'Rev'
     ],
     'Pentateuch/Torah': ['Gen', 'Exo', 'Lev', 'Num', 'Deu'],
-    'Historical Books': ['Jos', 'Jdg', 'Rth', '1Sa', '2Sa', '1Ki', '2Ki', '1Ch', '2Ch', 'Ezr', 'Neh', 'Est'],
+    'Historical Books': [
+      'Jos',
+      'Jdg',
+      'Rth',
+      '1Sa',
+      '2Sa',
+      '1Ki',
+      '2Ki',
+      '1Ch',
+      '2Ch',
+      'Ezr',
+      'Neh',
+      'Est'
+    ],
     'Poetry': ['Job', 'Psa', 'Pro', 'Ecc', 'Son'],
     'Major Prophets': ['Isa', 'Jer', 'Lam', 'Eze', 'Dan'],
-    'Minor Prophets': ['Hos', 'Joe', 'Amo', 'Oba', 'Jon', 'Mic', 'Nah', 'Hab', 'Zep', 'Hag', 'Zec', 'Mal'],
+    'Minor Prophets': [
+      'Hos',
+      'Joe',
+      'Amo',
+      'Oba',
+      'Jon',
+      'Mic',
+      'Nah',
+      'Hab',
+      'Zep',
+      'Hag',
+      'Zec',
+      'Mal'
+    ],
     'Gospels': ['Mat', 'Mar', 'Luk', 'Joh'],
     'Acts': ['Act'],
     'Pauline Epistles': [
@@ -125,7 +151,8 @@ class BookFilter {
   };
 
   /// Get display names for dropdown options
-  static List<String> get categoryDisplayNames => predefinedCategories.keys.toList();
+  static List<String> get categoryDisplayNames =>
+      predefinedCategories.keys.toList();
 
   /// Parse a custom range specification and return list of allowed book short names
   /// Supports formats like: "Psa 119, Pro 1-20, Gen-Deu, Mat 22 - John 21"
@@ -134,9 +161,14 @@ class BookFilter {
       return BookFilterResult.error('Invalid book/range');
     }
 
-    final specifications = input.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    final specifications = input
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
     final allowedBooks = <String>{};
-    final allowedChapters = <String, Set<int>>{}; // book -> set of allowed chapters
+    final allowedChapters =
+        <String, Set<int>>{}; // book -> set of allowed chapters
 
     for (final spec in specifications) {
       final parseResult = await _parseSingleSpecification(spec);
@@ -161,7 +193,8 @@ class BookFilter {
     if (spec.contains(' ')) {
       final spaceIndex = spec.indexOf(' ');
       final afterSpace = spec.substring(spaceIndex + 1);
-      if (afterSpace.contains('-') && RegExp(r'^\d+-\d+$').hasMatch(afterSpace)) {
+      if (afterSpace.contains('-') &&
+          RegExp(r'^\d+-\d+$').hasMatch(afterSpace)) {
         return _parseBookWithChapters(spec);
       }
     }
@@ -222,7 +255,8 @@ class BookFilter {
     final startChapter = startSpecResult.startChapter;
     final endChapter = endSpecResult.endChapter;
 
-    final allBooks = predefinedCategories['Old Testament']! + predefinedCategories['New Testament']!;
+    final allBooks = predefinedCategories['Old Testament']! +
+        predefinedCategories['New Testament']!;
     final startIndex = allBooks.indexOf(startBook);
     final endIndex = allBooks.indexOf(endBook);
 
@@ -238,14 +272,16 @@ class BookFilter {
     if (startChapter != null) {
       final startBookChapters = await BibleDatabase.getChapters(startBook);
       if (!startBookChapters.contains(startChapter)) {
-        return _ParseResult.error('Invalid chapter number for $startBook: $startChapter');
+        return _ParseResult.error(
+            'Invalid chapter number for $startBook: $startChapter');
       }
     }
 
     if (endChapter != null) {
       final endBookChapters = await BibleDatabase.getChapters(endBook);
       if (!endBookChapters.contains(endChapter)) {
-        return _ParseResult.error('Invalid chapter number for $endBook: $endChapter');
+        return _ParseResult.error(
+            'Invalid chapter number for $endBook: $endChapter');
       }
     }
 
@@ -258,13 +294,16 @@ class BookFilter {
     if (startIndex == endIndex && startChapter != null && endChapter != null) {
       // Same book with chapter range: add all chapters between start and end
       final bookChapters = await BibleDatabase.getChapters(startBook);
-      chapters[startBook] = bookChapters.where((ch) => ch >= startChapter && ch <= endChapter).toSet();
+      chapters[startBook] = bookChapters
+          .where((ch) => ch >= startChapter && ch <= endChapter)
+          .toSet();
     } else {
       // Different books or partial chapter specs
       // Start book: restrict to chapters >= startChapter if specified
       if (startChapter != null) {
         final startBookChapters = await BibleDatabase.getChapters(startBook);
-        chapters[startBook] = startBookChapters.where((ch) => ch >= startChapter).toSet();
+        chapters[startBook] =
+            startBookChapters.where((ch) => ch >= startChapter).toSet();
       }
 
       // Middle books: no restrictions (include all chapters)
@@ -272,7 +311,8 @@ class BookFilter {
       // End book: restrict to chapters <= endChapter if specified
       if (endChapter != null && (startBook != endBook)) {
         final endBookChapters = await BibleDatabase.getChapters(endBook);
-        chapters[endBook] = endBookChapters.where((ch) => ch <= endChapter).toSet();
+        chapters[endBook] =
+            endBookChapters.where((ch) => ch <= endChapter).toSet();
       }
     }
 
@@ -311,7 +351,8 @@ class BookFilter {
           return _BookSpecResult.error('Invalid chapter numbers: $chapterSpec');
         }
         if (startChapter > endChapter) {
-          return _BookSpecResult.error('Start chapter must be before end chapter: $chapterSpec');
+          return _BookSpecResult.error(
+              'Start chapter must be before end chapter: $chapterSpec');
         }
         return _BookSpecResult.success(bookName, startChapter, endChapter);
       } else {
@@ -357,7 +398,8 @@ class BookFilter {
       }
 
       if (startChapter > endChapter) {
-        return _ParseResult.error('Start chapter must be before end chapter: $chapterSpec');
+        return _ParseResult.error(
+            'Start chapter must be before end chapter: $chapterSpec');
       }
 
       for (int i = startChapter; i <= endChapter; i++) {
@@ -391,7 +433,8 @@ class BookFilter {
     if (trimmed.isEmpty) return null;
 
     // First, check if input matches any canonical short name (case-insensitive)
-    final allBooks = predefinedCategories['Old Testament']! + predefinedCategories['New Testament']!;
+    final allBooks = predefinedCategories['Old Testament']! +
+        predefinedCategories['New Testament']!;
     for (final shortName in allBooks) {
       if (shortName.toLowerCase() == trimmed.toLowerCase()) {
         return shortName; // Return canonical case
@@ -624,8 +667,8 @@ class BookFilter {
   }
 
   /// Check if a verse matches the current book filter
-  static bool verseMatchesFilter(
-      Map<String, dynamic> verse, List<String> allowedBooks, Map<String, Set<int>> allowedChapters) {
+  static bool verseMatchesFilter(Map<String, dynamic> verse,
+      List<String> allowedBooks, Map<String, Set<int>> allowedChapters) {
     final bookShortName = verse['book'] as String;
 
     // If no books are allowed, allow all
@@ -657,7 +700,8 @@ class BookFilterResult {
 
   BookFilterResult._(this.books, this.chapters, this.error);
 
-  factory BookFilterResult.success(List<String> books, [Map<String, Set<int>> chapters = const {}]) {
+  factory BookFilterResult.success(List<String> books,
+      [Map<String, Set<int>> chapters = const {}]) {
     return BookFilterResult._(books, chapters, null);
   }
 
@@ -676,7 +720,8 @@ class _ParseResult {
 
   _ParseResult._(this.books, this.chapters, this.error);
 
-  factory _ParseResult.success(List<String> books, [Map<String, Set<int>> chapters = const {}]) {
+  factory _ParseResult.success(List<String> books,
+      [Map<String, Set<int>> chapters = const {}]) {
     return _ParseResult._(books, chapters, null);
   }
 
@@ -688,13 +733,15 @@ class _ParseResult {
 /// Result of parsing a single book specification (may include chapter or chapter range)
 class _BookSpecResult {
   final String? book;
-  final int? startChapter; // Start of chapter range (null if no chapters specified)
+  final int?
+      startChapter; // Start of chapter range (null if no chapters specified)
   final int? endChapter; // End of chapter range (null if no chapters specified)
   final String? error;
 
   _BookSpecResult._(this.book, this.startChapter, this.endChapter, this.error);
 
-  factory _BookSpecResult.success(String book, [int? startChapter, int? endChapter]) {
+  factory _BookSpecResult.success(String book,
+      [int? startChapter, int? endChapter]) {
     return _BookSpecResult._(book, startChapter, endChapter, null);
   }
 

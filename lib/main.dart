@@ -4443,9 +4443,38 @@ class _MultiBibleViewState extends State<MultiBibleView>
     );
   }
 
-  Future<void> _clearPreferences() async {
+  Future<void> _clearPreferences({bool preserveSyncQueues = true}) async {
     final prefs = await SharedPreferences.getInstance();
+
+    String? pendingHighlights;
+    String? pendingNotes;
+    String? pendingHistory;
+    String? pendingSearchHistory;
+
+    if (preserveSyncQueues) {
+      pendingHighlights = prefs.getString('pendingHighlightsQueue');
+      pendingNotes = prefs.getString('pendingNotesQueue');
+      pendingHistory = prefs.getString('pendingHistoryQueue');
+      pendingSearchHistory = prefs.getString('pendingSearchHistoryQueue');
+    }
+
     await prefs.clear();
+
+    if (preserveSyncQueues) {
+      if (pendingHighlights != null) {
+        await prefs.setString('pendingHighlightsQueue', pendingHighlights);
+      }
+      if (pendingNotes != null) {
+        await prefs.setString('pendingNotesQueue', pendingNotes);
+      }
+      if (pendingHistory != null) {
+        await prefs.setString('pendingHistoryQueue', pendingHistory);
+      }
+      if (pendingSearchHistory != null) {
+        await prefs.setString(
+            'pendingSearchHistoryQueue', pendingSearchHistory);
+      }
+    }
   }
 
   Future<void> _resetPreferencesAndExit() async {
@@ -4481,7 +4510,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
     }
 
     try {
-      await _clearPreferences();
+      await _clearPreferences(preserveSyncQueues: false);
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -5227,7 +5256,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
     if (confirm == null) return; // Cancelled
 
     try {
-      await AuthService().signOut();
+      await AuthService().signOut(preservePendingOperations: !confirm);
       SupabaseSyncService().dispose();
       if (confirm) {
         // Erase data

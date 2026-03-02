@@ -27,11 +27,14 @@ class VerseTextParser {
     for (final match in regExp.allMatches(cleanText)) {
       // Add text before the current match
       if (match.start > lastMatchEnd) {
-        spans.add(TextSpan(text: cleanText.substring(lastMatchEnd, match.start), style: baseStyle));
+        spans.add(TextSpan(
+            text: cleanText.substring(lastMatchEnd, match.start),
+            style: baseStyle));
       }
       // Add the red text, using group(1) to get the content inside the tags
       spans.add(TextSpan(
-        text: match.group(1) ?? '!!! VerseTextParser.parseVerseText RegExp Matching Error !!!',
+        text: match.group(1) ??
+            '!!! VerseTextParser.parseVerseText RegExp Matching Error !!!',
         style: redStyle,
       ));
       lastMatchEnd = match.end;
@@ -39,7 +42,10 @@ class VerseTextParser {
 
     // Add any remaining text after the last match
     if (lastMatchEnd < cleanText.length) {
-      spans.add(TextSpan(text: cleanText.substring(lastMatchEnd), style: baseStyle, spellOut: false));
+      spans.add(TextSpan(
+          text: cleanText.substring(lastMatchEnd),
+          style: baseStyle,
+          spellOut: false));
     }
 
     return TextSpan(children: spans);

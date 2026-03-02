@@ -13,7 +13,9 @@ import 'package:flutter/material.dart';
 /// Calculate the relative luminance of a color (WCAG formula)
 double calculateRelativeLuminance(Color color) {
   double toLinear(double channel) {
-    return channel <= 0.03928 ? channel / 12.92 : pow((channel + 0.055) / 1.055, 2.4).toDouble();
+    return channel <= 0.03928
+        ? channel / 12.92
+        : pow((channel + 0.055) / 1.055, 2.4).toDouble();
   }
 
   final r = toLinear(color.r);
@@ -35,7 +37,8 @@ double calculateContrastRatio(Color color1, Color color2) {
 }
 
 /// Gradually adjust a color towards a target to achieve minimum contrast
-Color adjustColorTowards(Color current, Color target, double minContrast, Color background) {
+Color adjustColorTowards(
+    Color current, Color target, double minContrast, Color background) {
   // If target already meets contrast, return it immediately
   if (calculateContrastRatio(target, background) >= minContrast) {
     return target;
@@ -61,7 +64,8 @@ Color adjustColorTowards(Color current, Color target, double minContrast, Color 
     final interpolatedHsl = HSLColor.fromAHSL(
       1.0,
       hslCurrent.hue + (hslTarget.hue - hslCurrent.hue) * mid,
-      hslCurrent.saturation + (hslTarget.saturation - hslCurrent.saturation) * mid,
+      hslCurrent.saturation +
+          (hslTarget.saturation - hslCurrent.saturation) * mid,
       hslCurrent.lightness + (hslTarget.lightness - hslCurrent.lightness) * mid,
     );
 
@@ -80,17 +84,20 @@ Color adjustColorTowards(Color current, Color target, double minContrast, Color 
 }
 
 /// Adjust text color for optimal contrast against a highlight background
-Color adjustTextColorForHighlight(
-    Color originalTextColor, Color highlightBackground, Color darkTextColor, Color lightTextColor) {
+Color adjustTextColorForHighlight(Color originalTextColor,
+    Color highlightBackground, Color darkTextColor, Color lightTextColor) {
   Color adjustedTextColor = originalTextColor;
-  final currentContrast = calculateContrastRatio(originalTextColor, highlightBackground);
+  final currentContrast =
+      calculateContrastRatio(originalTextColor, highlightBackground);
 
   // Only adjust if contrast is below 4.5:1 (WCAG AA normal text threshold)
   // This is more conservative and avoids changing already readable combinations
   if (currentContrast < 4.5) {
     // Try adjusting towards white first (better for dark themes), then black
-    final contrastWithDarkTextColor = calculateContrastRatio(darkTextColor, highlightBackground);
-    final contrastWithLightTextColor = calculateContrastRatio(lightTextColor, highlightBackground);
+    final contrastWithDarkTextColor =
+        calculateContrastRatio(darkTextColor, highlightBackground);
+    final contrastWithLightTextColor =
+        calculateContrastRatio(lightTextColor, highlightBackground);
 
     Color targetColor;
     if (contrastWithDarkTextColor > contrastWithLightTextColor) {
@@ -100,7 +107,8 @@ Color adjustTextColorForHighlight(
     }
 
     // Gradually adjust the current text color towards the target with more subtle steps
-    adjustedTextColor = adjustColorTowards(originalTextColor, targetColor, 4.5, highlightBackground);
+    adjustedTextColor = adjustColorTowards(
+        originalTextColor, targetColor, 4.5, highlightBackground);
   }
 
   return adjustedTextColor;

@@ -10,7 +10,8 @@
 class CsvParser {
   /// Parse CSV content into a list of maps
   /// Handles quoted fields and embedded newlines properly
-  static List<Map<String, String>> parse(String csvContent, {List<String>? headers}) {
+  static List<Map<String, String>> parse(String csvContent,
+      {List<String>? headers}) {
     // Preprocess Olive Tree's malformed CSV format
     csvContent = _preprocessOliveTreeCsv(csvContent);
 

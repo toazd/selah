@@ -58,14 +58,16 @@ class OliveTreeHighlight {
     );
   }
 
-  static VerseReference? _parseVerseReference(String content, String referenceStart, String title) {
+  static VerseReference? _parseVerseReference(
+      String content, String referenceStart, String title) {
     final cleanedContent = _cleanContent(content);
     if (cleanedContent.isEmpty) {
       return _parseVerseReferenceFromTitle(title);
     }
 
     final convertedRef = referenceStart.replaceFirst(':', ' ');
-    final parsedRef = VerseReferenceDetector.detectReferences(convertedRef).firstOrNull;
+    final parsedRef =
+        VerseReferenceDetector.detectReferences(convertedRef).firstOrNull;
     return _isVerseRange(convertedRef) ? null : parsedRef;
   }
 
@@ -160,7 +162,8 @@ class OliveTreeNote {
     );
   }
 
-  static VerseReference? _parseVerseReference(String referenceStart, String title) {
+  static VerseReference? _parseVerseReference(
+      String referenceStart, String title) {
     // Parse verse reference from reference_start using Olive Tree's colon format
     var verseRef = OliveTreeData._parseColonReference(referenceStart);
 
@@ -198,7 +201,8 @@ class OliveTreeData {
       if (type == 'Highlight') {
         try {
           final highlight = OliveTreeHighlight.fromCsvRow(row);
-          highlights.add(highlight); // Add all, validation happens in import service
+          highlights
+              .add(highlight); // Add all, validation happens in import service
         } catch (e) {
           failedRows.add(FailedRow(
             rowData: row,
@@ -283,7 +287,8 @@ class OliveTreeData {
     'psa': 'Psa', 'psalms': 'Psa', 'psalm': 'Psa',
     'pro': 'Pro', 'proverbs': 'Pro',
     'ecc': 'Ecc', 'ecclesiastes': 'Ecc',
-    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son', 'canticles': 'Son', 'cant': 'Son',
+    'son': 'Son', 'song of solomon': 'Son', 'song of songs': 'Son',
+    'canticles': 'Son', 'cant': 'Son',
     'isa': 'Isa', 'isaiah': 'Isa',
     'jer': 'Jer', 'jeremiah': 'Jer',
     'lam': 'Lam', 'lamentations': 'Lam',

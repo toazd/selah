@@ -37,13 +37,15 @@ class SearchDatabase {
   static Future<Database> _initDatabase() async {
     String dbPath;
     try {
-      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      if (!kIsWeb &&
+          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
         // FFI is already initialized in main.dart - open database in user data directory
         dbPath = await PlatformPaths.getDatabasePath('user_search');
 
         // If a bundled asset database exists, copy it to user data directory on first run
         if (!await File(dbPath).exists()) {
-          final assetPath = await PlatformPaths.getAssetPath('user_search.sqlite');
+          final assetPath =
+              await PlatformPaths.getAssetPath('user_search.sqlite');
           if (await File(assetPath).exists()) {
             await File(assetPath).copy(dbPath);
           }
@@ -144,7 +146,8 @@ class SearchDatabase {
   static Future<List<Map<String, dynamic>>> getSearchHistory() async {
     Database db = await getDatabase();
 
-    final result = await db.query(searchHistoryTable, orderBy: '$colTimestamp DESC');
+    final result =
+        await db.query(searchHistoryTable, orderBy: '$colTimestamp DESC');
 
     // Convert int boolean fields back to bool values for the rest of the app
     final results = result.map((item) {
@@ -159,7 +162,8 @@ class SearchDatabase {
         'bookFilterType': item[colBookFilterType],
         'customBookFilter': item[colCustomBookFilter],
         'timestamp': item[colTimestamp],
-        'uuid': item['uuid'], // Include UUID for proper backup/restore and sync continuity
+        'uuid': item[
+            'uuid'], // Include UUID for proper backup/restore and sync continuity
       };
     }).toList();
 
@@ -168,7 +172,9 @@ class SearchDatabase {
     final corruptIds = <int>[];
 
     for (final record in results) {
-      final isValid = await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
+      final isValid = await DataValidation.validateDatabaseRecord(
+          record, 'search_history',
+          context: 'database query');
       if (isValid) {
         validResults.add(record);
       } else {
@@ -179,20 +185,22 @@ class SearchDatabase {
     // Delete corrupt records
     if (corruptIds.isNotEmpty) {
       await db.delete(searchHistoryTable,
-          where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+          where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
+          whereArgs: corruptIds);
     }
 
     return validResults;
   }
 
   // Get search history with pagination
-  static Future<List<Map<String, dynamic>>> getSearchHistoryPaginated(int offset, int limit) async {
+  static Future<List<Map<String, dynamic>>> getSearchHistoryPaginated(
+      int offset, int limit) async {
     Database db = await getDatabase();
 
     try {
       // First verify database integrity
-      final tableExists =
-          await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$searchHistoryTable'");
+      final tableExists = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='$searchHistoryTable'");
 
       if (tableExists.isEmpty) {
         await _onCreate(db, 1);
@@ -218,7 +226,8 @@ class SearchDatabase {
           'bookFilterType': item[colBookFilterType],
           'customBookFilter': item[colCustomBookFilter],
           'timestamp': item[colTimestamp],
-          'uuid': item['uuid'], // Include UUID for proper backup/restore and sync continuity
+          'uuid': item[
+              'uuid'], // Include UUID for proper backup/restore and sync continuity
         };
       }).toList();
 
@@ -227,8 +236,9 @@ class SearchDatabase {
       final corruptIds = <int>[];
 
       for (final record in results) {
-        final isValid =
-            await DataValidation.validateDatabaseRecord(record, 'search_history', context: 'database query');
+        final isValid = await DataValidation.validateDatabaseRecord(
+            record, 'search_history',
+            context: 'database query');
         if (isValid) {
           validResults.add(record);
         } else {
@@ -239,7 +249,8 @@ class SearchDatabase {
       // Delete corrupt records
       if (corruptIds.isNotEmpty) {
         await db.delete(searchHistoryTable,
-            where: 'id IN (${corruptIds.map((_) => '?').join(',')})', whereArgs: corruptIds);
+            where: 'id IN (${corruptIds.map((_) => '?').join(',')})',
+            whereArgs: corruptIds);
       }
 
       return validResults;
@@ -276,9 +287,11 @@ class SearchDatabase {
       'uuid': uuid,
     };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(searchHistoryData, 'search_history');
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        searchHistoryData, 'search_history');
     if (!isValid) {
-      throw Exception('Invalid search history data - failed validation. Operation rejected.');
+      throw Exception(
+          'Invalid search history data - failed validation. Operation rejected.');
     }
 
     Database db = await getDatabase();
@@ -309,7 +322,8 @@ class SearchDatabase {
         'timestamp': timestamp,
         'uuid': uuid,
       };
-      SupabaseSyncService().markOperation('search_history', timestamp, 'create', syncData);
+      SupabaseSyncService()
+          .markOperation('search_history', timestamp, 'create', syncData);
     }
 
     // Add a 1ms delay to ensure no two records have the same timestamp
@@ -317,10 +331,12 @@ class SearchDatabase {
   }
 
   // Delete search history item
-  static Future<void> deleteSearchHistoryItem(int id, {skipSync = false, String? uuid}) async {
+  static Future<void> deleteSearchHistoryItem(int id,
+      {skipSync = false, String? uuid}) async {
     // Get the search history item data before deletion for sync
     final db = await getDatabase();
-    final searchHistoryItem = await db.query(searchHistoryTable, where: '$colId = ?', whereArgs: [id]);
+    final searchHistoryItem = await db
+        .query(searchHistoryTable, where: '$colId = ?', whereArgs: [id]);
 
     // Delete locally first
     await db.delete(searchHistoryTable, where: '$colId = ?', whereArgs: [id]);
@@ -344,12 +360,17 @@ class SearchDatabase {
           'uuid': uuid ?? item['uuid'],
         };
 
-        SupabaseSyncService().markOperation('search_history', item[colTimestamp] as int, 'delete', syncData);
+        SupabaseSyncService().markOperation(
+            'search_history', item[colTimestamp] as int, 'delete', syncData);
       } catch (e) {
         ErrorHandler.logError(
           e,
           customMessage: 'deleteSearchHistoryItem markOperation exception',
-          context: {'class': 'SearchDatabase', 'method': 'deleteSearchHistoryItem', 'id': id},
+          context: {
+            'class': 'SearchDatabase',
+            'method': 'deleteSearchHistoryItem',
+            'id': id
+          },
         );
       }
     }

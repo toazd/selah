@@ -31,7 +31,8 @@ class ResponsiveText extends StatefulWidget {
 }
 
 class _ResponsiveTextState extends State<ResponsiveText> {
-  double _calculateOptimalFontSizeSync(String text, TextStyle style, double maxWidth) {
+  double _calculateOptimalFontSizeSync(
+      String text, TextStyle style, double maxWidth) {
     // Start with the desired font size
     double currentSize = style.fontSize ?? 14.0;
 
@@ -47,7 +48,8 @@ class _ResponsiveTextState extends State<ResponsiveText> {
         text: text,
         style: style.copyWith(fontSize: currentSize),
       );
-      textPainter.layout(maxWidth: double.infinity); // Using infinity to get natural width
+      textPainter.layout(
+          maxWidth: double.infinity); // Using infinity to get natural width
 
       // Check if text fits within available width
       if (textPainter.width <= maxWidth) {

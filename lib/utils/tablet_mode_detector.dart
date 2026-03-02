@@ -137,12 +137,17 @@ class TabletModeDetector {
       if (kDebugMode) debugPrint('isTablet: $isTablet');
 
       // Manually trigger the stream update
-      tabletModeChanges?.listen((mode) {}).cancel(); // Cancel immediately after testing
+      tabletModeChanges
+          ?.listen((mode) {})
+          .cancel(); // Cancel immediately after testing
     } catch (e) {
       ErrorHandler.logError(
         e,
         customMessage: 'Manual tablet mode test failed',
-        context: {'class': 'TabletModeDetector', 'method': 'testTabletModeDetection'},
+        context: {
+          'class': 'TabletModeDetector',
+          'method': 'testTabletModeDetection'
+        },
       );
     }
   }

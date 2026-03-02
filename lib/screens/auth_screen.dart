@@ -156,8 +156,10 @@ class _AuthScreenState extends State<AuthScreen> {
               children: [
                 Text(
                   'Choose which categories of data that you want to sync. You can change these settings later in the main options drawer.',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context)),
                 ),
                 const SizedBox(height: 16),
                 ValueListenableBuilder<bool>(
@@ -165,7 +167,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   builder: (context, value, child) => SwitchListTile(
                     title: Text('Highlights',
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncHighlightsNotifier.value = val;
@@ -177,7 +181,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   builder: (context, value, child) => SwitchListTile(
                     title: Text('Notes',
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncNotesNotifier.value = val;
@@ -189,7 +195,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   builder: (context, value, child) => SwitchListTile(
                     title: Text('Verse History',
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncHistoryNotifier.value = val;
@@ -201,7 +209,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   builder: (context, value, child) => SwitchListTile(
                     title: Text('Search History',
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                     value: value,
                     onChanged: (val) {
                       syncSearchHistoryNotifier.value = val;
@@ -214,8 +224,10 @@ class _AuthScreenState extends State<AuthScreen> {
           actions: [
             TextButton(
               child: Text('Continue',
-                  style:
-                      TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
               onPressed: () async {
                 // Check if all syncs are disabled using shared method
                 final atLeastOneEnabled = await checkAtLeastOneSyncEnabled();
@@ -273,10 +285,13 @@ class _AuthScreenState extends State<AuthScreen> {
   // Load current sync preferences before showing the dialog
   Future<void> _loadSyncPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    syncHighlightsNotifier.value = prefs.getBool('syncHighlights') ?? defaultSyncHighlights;
+    syncHighlightsNotifier.value =
+        prefs.getBool('syncHighlights') ?? defaultSyncHighlights;
     syncNotesNotifier.value = prefs.getBool('syncNotes') ?? defaultSyncNotes;
-    syncHistoryNotifier.value = prefs.getBool('syncHistory') ?? defaultSyncHistory;
-    syncSearchHistoryNotifier.value = prefs.getBool('syncSearchHistory') ?? defaultSyncSearchHistory;
+    syncHistoryNotifier.value =
+        prefs.getBool('syncHistory') ?? defaultSyncHistory;
+    syncSearchHistoryNotifier.value =
+        prefs.getBool('syncSearchHistory') ?? defaultSyncSearchHistory;
   }
 
   @override
@@ -291,7 +306,10 @@ class _AuthScreenState extends State<AuthScreen> {
           color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
         ),
         title: Text(_isSignUp ? 'Sign up' : 'Sign in',
-            style: TextStyle(fontSize: uiFontSize + 4, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            style: TextStyle(
+                fontSize: uiFontSize + 4,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -310,7 +328,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    _isSignUp ? 'Create an account' : 'Sign in to sync your data',
+                    _isSignUp
+                        ? 'Create an account'
+                        : 'Sign in to sync your data',
                     style: TextStyle(
                         fontSize: uiFontSize + 8,
                         fontFamily: uiFontFamily,
@@ -336,12 +356,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Username',
                       labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          fontSize: uiFontSize + 2,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
-                      errorText:
-                          _errorMessage?.contains('username') == true || _errorMessage?.contains('Username') == true
-                              ? _errorMessage
-                              : null,
+                      errorText: _errorMessage?.contains('username') == true ||
+                              _errorMessage?.contains('Username') == true
+                          ? _errorMessage
+                          : null,
                     ),
                     keyboardType: TextInputType.text,
                     onSubmitted: (_) => _authenticate(),
@@ -355,9 +377,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Password',
                       labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          fontSize: uiFontSize + 2,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
-                      errorText: _errorMessage?.contains('password') == true ? _errorMessage : null,
+                      errorText: _errorMessage?.contains('password') == true
+                          ? _errorMessage
+                          : null,
                     ),
                     obscureText: true,
                     onSubmitted: (_) => _authenticate(),
@@ -368,7 +394,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       !_errorMessage!.contains('password'))
                     Text(
                       _errorMessage!,
-                      style: TextStyle(color: Colors.red, fontSize: uiFontSize + 4, fontFamily: uiFontFamily),
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: uiFontSize + 4,
+                          fontFamily: uiFontFamily),
                       textAlign: TextAlign.center,
                     ),
                   const SizedBox(height: 16),
@@ -402,7 +431,8 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: TextStyle(
                                 fontSize: uiFontSize + 2,
                                 fontFamily: uiFontFamily,
-                                color: getAdaptiveTextColor(context, usePrimaryColor: true)),
+                                color: getAdaptiveTextColor(context,
+                                    usePrimaryColor: true)),
                           ),
                   ),
                   const SizedBox(height: 16),
@@ -414,9 +444,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       });
                     },
                     child: Text(
-                      _isSignUp ? 'Already have an account? Sign in' : 'Don\'t have an account? Sign up',
+                      _isSignUp
+                          ? 'Already have an account? Sign in'
+                          : 'Don\'t have an account? Sign up',
                       style: TextStyle(
-                          fontSize: uiFontSize + 6, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          fontSize: uiFontSize + 6,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
                     ),
                   ),
                 ],

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:selah/utils/preferences_constants.dart';
 
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 SnackBar _buildStyledSnackBar(String message, {bool isError = false}) {
   Color? textColor;
@@ -28,12 +29,15 @@ SnackBar _buildStyledSnackBar(String message, {bool isError = false}) {
 
 /// "Global" snackbar replacement that handles formatting so all the snackbar messages
 /// in the app are consistent.
-void showStyledSnackBar(BuildContext context, String message, {bool isError = false}) {
-  ScaffoldMessenger.of(context).showSnackBar(_buildStyledSnackBar(message, isError: isError));
+void showStyledSnackBar(BuildContext context, String message,
+    {bool isError = false}) {
+  ScaffoldMessenger.of(context)
+      .showSnackBar(_buildStyledSnackBar(message, isError: isError));
 }
 
 /// Only used by the error_handler.dart since it doesn't have a context.
 /// Use showStyledSnackBar instead.
 void showStyledSnackBarGlobal(String message, {bool isError = false}) {
-  scaffoldMessengerKey.currentState?.showSnackBar(_buildStyledSnackBar(message, isError: isError));
+  scaffoldMessengerKey.currentState
+      ?.showSnackBar(_buildStyledSnackBar(message, isError: isError));
 }

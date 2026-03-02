@@ -4,7 +4,8 @@ import '../utils/color_mapper.dart';
 import '../utils/preferences_constants.dart';
 
 // Simplified adaptive text color function
-Color getAdaptiveTextColor(BuildContext context, {Color? backgroundColor, bool usePrimaryColor = false}) {
+Color getAdaptiveTextColor(BuildContext context,
+    {Color? backgroundColor, bool usePrimaryColor = false}) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   return isDark ? Colors.white : Colors.black;
 }
@@ -19,10 +20,12 @@ class OliveTreeCategorySelectionDialog extends StatefulWidget {
   });
 
   @override
-  State<OliveTreeCategorySelectionDialog> createState() => _OliveTreeCategorySelectionDialogState();
+  State<OliveTreeCategorySelectionDialog> createState() =>
+      _OliveTreeCategorySelectionDialogState();
 }
 
-class _OliveTreeCategorySelectionDialogState extends State<OliveTreeCategorySelectionDialog> {
+class _OliveTreeCategorySelectionDialogState
+    extends State<OliveTreeCategorySelectionDialog> {
   bool importHighlights = true;
   bool importNotes = true;
 
@@ -82,7 +85,8 @@ class _OliveTreeCategorySelectionDialogState extends State<OliveTreeCategorySele
                 ),
               ),
               value: importHighlights,
-              onChanged: (value) => setState(() => importHighlights = value ?? true),
+              onChanged: (value) =>
+                  setState(() => importHighlights = value ?? true),
             ),
           if (widget.data.noteCount > 0)
             CheckboxListTile(
@@ -158,10 +162,12 @@ class OliveTreeColorMappingDialog extends StatefulWidget {
   });
 
   @override
-  State<OliveTreeColorMappingDialog> createState() => _OliveTreeColorMappingDialogState();
+  State<OliveTreeColorMappingDialog> createState() =>
+      _OliveTreeColorMappingDialogState();
 }
 
-class _OliveTreeColorMappingDialogState extends State<OliveTreeColorMappingDialog> {
+class _OliveTreeColorMappingDialogState
+    extends State<OliveTreeColorMappingDialog> {
   late Map<String, int> colorMappings;
 
   @override
@@ -232,7 +238,8 @@ class _OliveTreeColorMappingDialogState extends State<OliveTreeColorMappingDialo
                     //isExpanded: false,
                     underline: Container(),
                     value: selahIndex,
-                    items: List.generate(widget.currentHighlightColors.length, (index) {
+                    items: List.generate(widget.currentHighlightColors.length,
+                        (index) {
                       return DropdownMenuItem(
                         value: index,
                         child: Row(
@@ -346,8 +353,9 @@ class OliveTreeImportResultsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalImported =
-        results.entries.where((e) => e.key != 'failedRows' && e.value is int).fold<int>(0, (sum, entry) => sum + (entry.value as int));
+    final totalImported = results.entries
+        .where((e) => e.key != 'failedRows' && e.value is int)
+        .fold<int>(0, (sum, entry) => sum + (entry.value as int));
 
     final allFailedRows = <FailedRow>[];
     results.forEach((key, value) {
@@ -382,7 +390,9 @@ class OliveTreeImportResultsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ...results.entries.where((e) => e.key != 'failedRows' && e.value is int).map((entry) {
+          ...results.entries
+              .where((e) => e.key != 'failedRows' && e.value is int)
+              .map((entry) {
             return Text(
               '${entry.key}: ${entry.value} imported',
               style: TextStyle(
@@ -446,7 +456,8 @@ class OliveTreeImportResultsDialog extends StatelessWidget {
                               csvLine,
                               style: TextStyle(
                                 fontSize: uiFontSize - 2,
-                                fontFamily: 'Courier', // Monospace for CSV formatting
+                                fontFamily:
+                                    'Courier', // Monospace for CSV formatting
                                 color: Colors.black87,
                               ),
                             ),

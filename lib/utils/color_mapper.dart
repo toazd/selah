@@ -50,13 +50,15 @@ class ColorMapper {
   }
 
   /// Generate suggested color mappings for Olive Tree colors
-  static Future<Map<String, int>> generateColorMappings(List<String> oliveTreeColors) async {
+  static Future<Map<String, int>> generateColorMappings(
+      List<String> oliveTreeColors) async {
     final selahColors = await getCurrentHighlightColors();
     return _generateMappings(oliveTreeColors, selahColors);
   }
 
   /// Internal method to generate mappings with given colors
-  static Map<String, int> _generateMappings(List<String> oliveTreeColors, List<Color> selahColors) {
+  static Map<String, int> _generateMappings(
+      List<String> oliveTreeColors, List<Color> selahColors) {
     final mappings = <String, int>{};
 
     for (final otColor in oliveTreeColors) {
@@ -78,7 +80,8 @@ class ColorMapper {
 
     // Try partial matches
     for (final entry in commonColors.entries) {
-      if (entry.key.contains(oliveTreeColor) || oliveTreeColor.contains(entry.key)) {
+      if (entry.key.contains(oliveTreeColor) ||
+          oliveTreeColor.contains(entry.key)) {
         return _findClosestColorIndex(entry.value, selahColors);
       }
     }
@@ -88,7 +91,8 @@ class ColorMapper {
   }
 
   /// Find the index of the closest color in Selah's palette
-  static int _findClosestColorIndex(Color targetColor, List<Color> selahColors) {
+  static int _findClosestColorIndex(
+      Color targetColor, List<Color> selahColors) {
     int bestIndex = 0;
     double bestDistance = double.infinity;
 

@@ -68,7 +68,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
   Future<void> _loadInitialSearchHistory() async {
     setState(() => _isLoading = true);
     try {
-      final searchHistory = await SearchDatabase.getSearchHistoryPaginated(0, _pageSize);
+      final searchHistory =
+          await SearchDatabase.getSearchHistoryPaginated(0, _pageSize);
       setState(() {
         _searchHistoryItems = searchHistory;
         _currentOffset = searchHistory.length;
@@ -86,13 +87,14 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
     setState(() => _isLoading = true);
     try {
-      final moreSearchHistory =
-          await SearchDatabase.getSearchHistoryPaginated(_currentOffset, _pageSize);
+      final moreSearchHistory = await SearchDatabase.getSearchHistoryPaginated(
+          _currentOffset, _pageSize);
 
       if (mounted) {
         setState(() {
-          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)
-            ..addAll(moreSearchHistory);
+          _searchHistoryItems =
+              List<Map<String, dynamic>>.from(_searchHistoryItems)
+                ..addAll(moreSearchHistory);
           _currentOffset = _searchHistoryItems.length;
           _hasMoreData = moreSearchHistory.length == _pageSize;
         });
@@ -154,7 +156,9 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
           TextButton(
             child: Text('Clear',
                 style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -193,7 +197,9 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
           TextButton(
             child: Text('Delete',
                 style: TextStyle(
-                    fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -204,14 +210,16 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
       try {
         await SearchDatabase.deleteSearchHistoryItem(itemId);
         setState(() {
-          _searchHistoryItems = List<Map<String, dynamic>>.from(_searchHistoryItems)
-            ..removeAt(indexInList);
+          _searchHistoryItems =
+              List<Map<String, dynamic>>.from(_searchHistoryItems)
+                ..removeAt(indexInList);
           _currentOffset = _searchHistoryItems.length;
         });
         LocalDataChangeNotifier.notifySearchHistoryChanged();
       } catch (e) {
         if (mounted) {
-          showStyledSnackBar(context, 'Failed to delete search history item: $e',
+          showStyledSnackBar(
+              context, 'Failed to delete search history item: $e',
               isError: true);
         }
       }
@@ -297,7 +305,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                   }
 
                   final h = _searchHistoryItems[i];
-                  final dt = DateTime.fromMillisecondsSinceEpoch(h['timestamp']);
+                  final dt =
+                      DateTime.fromMillisecondsSinceEpoch(h['timestamp']);
                   final dateStr =
                       '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
@@ -308,8 +317,10 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
 
                   if ((h['useRegex'] as bool)) enabledOptions.add('Regex');
                   if ((h['useNearby'] as bool)) enabledOptions.add('Nearby');
-                  if ((h['useWholeWord'] as bool)) enabledOptions.add('Whole word');
-                  if ((h['useRedLetter'] as bool)) enabledOptions.add('Red letter');
+                  if ((h['useWholeWord'] as bool))
+                    enabledOptions.add('Whole word');
+                  if ((h['useRedLetter'] as bool))
+                    enabledOptions.add('Red letter');
                   if ((h['caseSensitive'] as bool)) {
                     enabledOptions.add('Case-sensitive');
                   }
@@ -342,8 +353,9 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                   }
 
                   // Create the formatted display text
-                  final optionsText =
-                      enabledOptions.isNotEmpty ? enabledOptions.join(', ') : '';
+                  final optionsText = enabledOptions.isNotEmpty
+                      ? enabledOptions.join(', ')
+                      : '';
                   //debugPrint('optionsText: "$optionsText"');
 
                   // Search history dialog
@@ -372,7 +384,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context)),
                               ),
-                            if (optionsText.isNotEmpty) const TextSpan(text: '\n'),
+                            if (optionsText.isNotEmpty)
+                              const TextSpan(text: '\n'),
                             TextSpan(
                                 text: dateStr,
                                 style: TextStyle(
@@ -385,7 +398,8 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                       onTap: () => {
                             _updateSearchQuery(query, h),
                           },
-                      onLongPress: () => _deleteSearchHistoryItem(h['id'] as int, i));
+                      onLongPress: () =>
+                          _deleteSearchHistoryItem(h['id'] as int, i));
 
                   widgets.add(listTile);
 
@@ -404,7 +418,9 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
               onPressed: _clearSearchHistory,
               child: Text('Clear',
                   style: TextStyle(
-                      fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: Colors.red)),
             ),
             TextButton(
               child: Text('Close',

@@ -996,7 +996,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       fontSize: uiFontSize + 7,
       fontFamily: fontFamilyNotifier.value,
     );
-    final dropdownStyle = TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
+    final dropdownStyle =
+        TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
 
     final bookChipSize = _scaledTileSize(
       context,
@@ -1028,8 +1029,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
 
     const gridSpacing = 8.0;
     const gridColumns = 6;
-    final gridContentWidth =
-        (bookChipSize.width * gridColumns) + (gridSpacing * (gridColumns - 1)) + 24;
+    final gridContentWidth = (bookChipSize.width * gridColumns) +
+        (gridSpacing * (gridColumns - 1)) +
+        24;
     final listBookWidth = _measureTextWidth(
           context,
           _books
@@ -1049,9 +1051,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
         120;
     final listContentWidth = max(285.0, max(listBookWidth, listNumberWidth));
     final maxDialogWidth = max(280.0, MediaQuery.of(context).size.width - 32);
-    final targetDialogWidth =
-        _navigationMode == NavigationMode.grid ? max(480.0, gridContentWidth) : listContentWidth;
-    final dialogWidth = targetDialogWidth.clamp(280.0, maxDialogWidth).toDouble();
+    final targetDialogWidth = _navigationMode == NavigationMode.grid
+        ? max(480.0, gridContentWidth)
+        : listContentWidth;
+    final dialogWidth =
+        targetDialogWidth.clamp(280.0, maxDialogWidth).toDouble();
 
     // Use display key for color of the selected book title
     Color? selectedBookColor;
@@ -1199,10 +1203,12 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           spacing: 8,
                                           runSpacing: 8,
                                           children: _chapters
-                                                  .map((c) => GestureDetector(
+                                              .map((c) => GestureDetector(
                                                     child: Container(
-                                                      width: chapterChipSize.width,
-                                                      height: chapterChipSize.height,
+                                                      width:
+                                                          chapterChipSize.width,
+                                                      height: chapterChipSize
+                                                          .height,
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(
@@ -1295,10 +1301,12 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           spacing: 8,
                                           runSpacing: 8,
                                           children: _verses
-                                                  .map((v) => GestureDetector(
+                                              .map((v) => GestureDetector(
                                                     child: Container(
-                                                      width: verseChipSize.width,
-                                                      height: verseChipSize.height,
+                                                      width:
+                                                          verseChipSize.width,
+                                                      height:
+                                                          verseChipSize.height,
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(

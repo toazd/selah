@@ -70,7 +70,8 @@ class DataValidation {
 
   /// Validates note data for required fields and data integrity
   /// Returns true if valid, logs error and returns false if invalid
-  static Future<bool> validateNoteData(Map<String, dynamic> data, {String context = 'note', String? documentId}) async {
+  static Future<bool> validateNoteData(Map<String, dynamic> data,
+      {String context = 'note', String? documentId}) async {
     try {
       // Check required fields with type safety
       final book = data['book'];
@@ -84,7 +85,10 @@ class DataValidation {
       final isValidVerse = verse != null && verse > 0;
       final isValidNoteText = noteText is String && noteText.trim().isNotEmpty;
 
-      if (!isValidBook || !isValidChapter || !isValidVerse || !isValidNoteText) {
+      if (!isValidBook ||
+          !isValidChapter ||
+          !isValidVerse ||
+          !isValidNoteText) {
         return false;
       }
 
@@ -129,20 +133,25 @@ class DataValidation {
       // Check required fields
       final book = data['book'] as String?;
       final chapter = data['chapter'] as int?;
-      final verse = data['verse'] as int?; // Verse can be null for chapter history
+      final verse =
+          data['verse'] as int?; // Verse can be null for chapter history
       final timestamp = data['timestamp'] as int?;
 
       // Reject if required fields are missing or invalid
       final isValidBook = book != null && book.trim().isNotEmpty;
       final isValidChapter = chapter != null && chapter > 0;
-      final isValidVerse = verse != null && verse > 0;
+      // Verse can be null for chapter-level history entries.
+      final isValidVerse = verse == null || verse > 0;
       final isValidTimestamp = timestamp != null && timestamp > 0;
 
       // if (kDebugMode) {
       //   debugPrint('DEBUG: $context history validation results - book=$isValidBook, chapter=$isValidChapter, timestamp=$isValidTimestamp');
       // }
 
-      if (!isValidBook || !isValidChapter || !isValidVerse || !isValidTimestamp) {
+      if (!isValidBook ||
+          !isValidChapter ||
+          !isValidVerse ||
+          !isValidTimestamp) {
         return false;
       }
 
@@ -177,7 +186,8 @@ class DataValidation {
 
   /// Validates search history data for required fields and data integrity
   /// Returns true if valid, logs error and returns false if invalid
-  static Future<bool> validateSearchHistoryData(Map<String, dynamic> data, {String context = 'search_history'}) async {
+  static Future<bool> validateSearchHistoryData(Map<String, dynamic> data,
+      {String context = 'search_history'}) async {
     try {
       // Check required fields
       final query = data['query'] as String?;
@@ -195,16 +205,27 @@ class DataValidation {
       final useWholeWord = data['useWholeWord'];
       final useRedLetter = data['useRedLetter'];
       final caseSensitive = data['caseSensitive'];
-      final isValidOptions =
-          [useRegex, useNearby, useWholeWord, useRedLetter, caseSensitive].every((opt) => opt is bool);
+      final isValidOptions = [
+        useRegex,
+        useNearby,
+        useWholeWord,
+        useRedLetter,
+        caseSensitive
+      ].every((opt) => opt is bool);
 
       // Validate book filter fields
       final bookFilterType = data['bookFilterType'] as String?;
       final customBookFilter = data['customBookFilter'] as String?;
-      final isValidFilterType = bookFilterType != null && bookFilterType.trim().isNotEmpty;
-      final isValidCustomFilter = customBookFilter is String; // Can be empty but must be string
+      final isValidFilterType =
+          bookFilterType != null && bookFilterType.trim().isNotEmpty;
+      final isValidCustomFilter =
+          customBookFilter is String; // Can be empty but must be string
 
-      if (!isValidQuery || !isValidTimestamp || !isValidOptions || !isValidFilterType || !isValidCustomFilter) {
+      if (!isValidQuery ||
+          !isValidTimestamp ||
+          !isValidOptions ||
+          !isValidFilterType ||
+          !isValidCustomFilter) {
         return false;
       }
 
@@ -238,7 +259,11 @@ class DataValidation {
       ErrorHandler.logError(
         e,
         customMessage: 'Invalid timestamp rejected: $timeStamp',
-        context: {'class': 'DataValidation', 'method': 'validateTimeStamp', 'timestamp': timeStamp.toIso8601String()},
+        context: {
+          'class': 'DataValidation',
+          'method': 'validateTimeStamp',
+          'timestamp': timeStamp.toIso8601String()
+        },
       );
       return null;
     }
@@ -246,21 +271,28 @@ class DataValidation {
 
   /// Validates database record structure for records returned from queries
   /// This ensures database integrity when reading data
-  static Future<bool> validateDatabaseRecord(Map<String, dynamic> record, String dataType,
+  static Future<bool> validateDatabaseRecord(
+      Map<String, dynamic> record, String dataType,
       {String context = 'database'}) async {
     switch (dataType) {
       case 'highlight':
-        return await validateHighlightData(record, context: '$context $dataType');
+        return await validateHighlightData(record,
+            context: '$context $dataType');
       case 'note':
         return await validateNoteData(record, context: '$context $dataType');
       case 'history':
         return await validateHistoryData(record, context: '$context $dataType');
       case 'search_history':
-        return await validateSearchHistoryData(record, context: '$context $dataType');
+        return await validateSearchHistoryData(record,
+            context: '$context $dataType');
       default:
         ErrorHandler.logError(
           'DEBUG: Unknown data type for validation: "$dataType"',
-          context: {'class': 'DataValidation', 'method': 'validateDatabaseRecord', 'dataType': dataType},
+          context: {
+            'class': 'DataValidation',
+            'method': 'validateDatabaseRecord',
+            'dataType': dataType
+          },
         );
         return false;
     }
@@ -268,7 +300,8 @@ class DataValidation {
 
   /// Validates data before database insertion/updates
   /// This ensures we never write corrupt data to local databases
-  static Future<bool> validateBeforeDatabaseWrite(Map<String, dynamic> data, String dataType,
+  static Future<bool> validateBeforeDatabaseWrite(
+      Map<String, dynamic> data, String dataType,
       {String context = 'write'}) async {
     switch (dataType) {
       case 'highlight':
@@ -278,7 +311,8 @@ class DataValidation {
       case 'history':
         return await validateHistoryData(data, context: '$context $dataType');
       case 'search_history':
-        return await validateSearchHistoryData(data, context: '$context $dataType');
+        return await validateSearchHistoryData(data,
+            context: '$context $dataType');
       default:
         ErrorHandler.logError(
           'DEBUG: Unknown data type for $context validation: $dataType',
@@ -295,7 +329,8 @@ class DataValidation {
 
   /// Validates data before upload to remote sync service
   /// This ensures we never send corrupt data to Firestore
-  static Future<bool> validateBeforeUpload(Map<String, dynamic> data, String dataType,
+  static Future<bool> validateBeforeUpload(
+      Map<String, dynamic> data, String dataType,
       {String context = 'upload'}) async {
     switch (dataType) {
       case 'highlight':
@@ -305,7 +340,8 @@ class DataValidation {
       case 'history':
         return await validateHistoryData(data, context: '$context $dataType');
       case 'search_history':
-        return await validateSearchHistoryData(data, context: '$context $dataType');
+        return await validateSearchHistoryData(data,
+            context: '$context $dataType');
       default:
         ErrorHandler.logError(
           'DEBUG: Unknown data type for $context validation: $dataType',

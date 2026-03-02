@@ -33,7 +33,8 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
   @override
   void initState() {
     super.initState();
-    availableVerses = widget.verses.map((v) => v['verse'] as int).toList()..sort();
+    availableVerses = widget.verses.map((v) => v['verse'] as int).toList()
+      ..sort();
     startVerse = widget.initialVerse;
     endVerse = availableVerses.last;
     startController = TextEditingController(text: startVerse.toString());
@@ -50,11 +51,14 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
   Future<void> _copyVerses() async {
     final fullName = BookNameConverter.shortNameToLongName(widget.book);
 
-    final range = startVerse == endVerse ? startVerse.toString() : '$startVerse-$endVerse';
+    final range = startVerse == endVerse
+        ? startVerse.toString()
+        : '$startVerse-$endVerse';
     String text = '$fullName ${widget.chapter}:$range\n';
 
     final selectedVerses = widget.verses
-        .where((v) => v['verse'] as int >= startVerse && v['verse'] as int <= endVerse)
+        .where((v) =>
+            v['verse'] as int >= startVerse && v['verse'] as int <= endVerse)
         .toList()
       ..sort((a, b) => (a['verse'] as int).compareTo(b['verse'] as int));
 
@@ -87,7 +91,8 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final bookDisplayFullName = BookNameConverter.shortNameToLongName(widget.book);
+    final bookDisplayFullName =
+        BookNameConverter.shortNameToLongName(widget.book);
 
     return Dialog(
       child: Container(
@@ -132,7 +137,9 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(' to ',
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context))),
                 ),
                 DropdownButton<int>(
                   value: endVerse,
@@ -162,8 +169,10 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     'Cancel',
-                    style:
-                        TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                    style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -171,7 +180,9 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
                   onPressed: _copyVerses,
                   child: Text('Copy',
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context))),
                 ),
               ],
             ),

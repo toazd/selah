@@ -15,7 +15,8 @@ class BibleDatabase {
   }
 
   // Get all verses for a book/chapter
-  static Future<List<Map<String, dynamic>>> getVerses(String bookShortName, int chapter) async {
+  static Future<List<Map<String, dynamic>>> getVerses(
+      String bookShortName, int chapter) async {
     final bookData = bibleData[bookShortName];
     if (bookData == null) return [];
 
@@ -47,14 +48,19 @@ class BibleDatabase {
       for (final chapter in bookData.keys) {
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
-          final text = caseSensitive ? chapterData[verse]! : chapterData[verse]!.toLowerCase();
+          final text = caseSensitive
+              ? chapterData[verse]!
+              : chapterData[verse]!.toLowerCase();
 
           bool matches = true;
           if (useOrLogic) {
             // OR logic: at least one keyword must be present
             matches = false;
             for (final keyword in preFilterKeywords) {
-              final checkKeyword = caseSensitive ? keyword : keyword.toLowerCase(); // Only lowercase keyword if not case-sensitive
+              final checkKeyword = caseSensitive
+                  ? keyword
+                  : keyword
+                      .toLowerCase(); // Only lowercase keyword if not case-sensitive
               if (text.contains(checkKeyword)) {
                 matches = true;
                 break;
@@ -117,7 +123,8 @@ class BibleDatabase {
   }
 
   // Get book metadata (title, colophon)
-  static Future<Map<String, dynamic>?> getBookMetadata(String bookShortName, {int? chapter}) async {
+  static Future<Map<String, dynamic>?> getBookMetadata(String bookShortName,
+      {int? chapter}) async {
     // Try the specific Psalm lookup first if chapter is provided and book starts with 'Psa'
     if (chapter != null && bookShortName == 'Psa') {
       final psalmSpecificKey = '$bookShortName $chapter';

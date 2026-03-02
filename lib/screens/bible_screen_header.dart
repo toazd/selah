@@ -30,7 +30,9 @@ class BibleScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
+    final barColor = _adjustBarColor(
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value,
+        context);
 
     return Container(
       // decoration: BoxDecoration(
@@ -83,7 +85,8 @@ class BibleScreenHeader extends StatelessWidget {
                 onPressed: onShowNotesSearch,
                 iconSize: 32,
                 padding: EdgeInsets.all(8),
-                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
             ],
           ),
@@ -119,7 +122,8 @@ class BibleScreenHeader extends StatelessWidget {
                 onPressed: onShowHistory,
                 iconSize: 32,
                 padding: EdgeInsets.all(8),
-                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
               IconButton(
                 icon: Icon(
@@ -134,7 +138,8 @@ class BibleScreenHeader extends StatelessWidget {
                     : null,
                 iconSize: 32,
                 padding: EdgeInsets.all(8),
-                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
             ],
           ),
@@ -145,7 +150,9 @@ class BibleScreenHeader extends StatelessWidget {
 
   Widget _buildTitleButton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final barColor = _adjustBarColor(isDark ? darkBackgroundColor.value : lightBackgroundColor.value, context);
+    final barColor = _adjustBarColor(
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value,
+        context);
 
     return Center(
       child: LayoutBuilder(
@@ -168,7 +175,9 @@ class BibleScreenHeader extends StatelessWidget {
             }
 
             // If fullBookName is true display the longBookName (Genesis), otherwise use the short name (Gen)
-            final name = fullBookName ? BookNameConverter.shortNameToLongName(selectedBook!) : selectedBook;
+            final name = fullBookName
+                ? BookNameConverter.shortNameToLongName(selectedBook!)
+                : selectedBook;
 
             // Show just the book name and chapter number
             return '$name ${selectedChapter!}';
@@ -188,11 +197,14 @@ class BibleScreenHeader extends StatelessWidget {
 
           // Button padding we will apply below
           const double horizontalPad = 16.0;
-          final availableForText = (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
+          final availableForText =
+              (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
 
           final fullTitle = makeTitle(fullBookName: true);
           final shortTitle = makeTitle(fullBookName: false);
-          final label = textWidth(fullTitle, style) <= availableForText ? fullTitle : shortTitle;
+          final label = textWidth(fullTitle, style) <= availableForText
+              ? fullTitle
+              : shortTitle;
 
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -208,7 +220,8 @@ class BibleScreenHeader extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSizeNotifier.value - 4,
                 fontFamily: fontFamilyNotifier.value,
-                color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
               maxLines: 1,
               softWrap: false,
@@ -227,13 +240,17 @@ class BibleScreenHeader extends StatelessWidget {
     // If dark mode / dark colors, adjust slightly more than light mode / light colors
     if (isDark) {
       final adjustedLightness = hsl.lightness > 0.5
-          ? (hsl.lightness - 0.05).clamp(0.0, 1.0) // Darker for light backgrounds
-          : (hsl.lightness + 0.05).clamp(0.0, 1.0); // Lighter for dark backgrounds
+          ? (hsl.lightness - 0.05)
+              .clamp(0.0, 1.0) // Darker for light backgrounds
+          : (hsl.lightness + 0.05)
+              .clamp(0.0, 1.0); // Lighter for dark backgrounds
       return hsl.withLightness(adjustedLightness).toColor();
     } else {
       final adjustedLightness = hsl.lightness > 0.5
-          ? (hsl.lightness - 0.02).clamp(0.0, 1.0) // Darker for light backgrounds
-          : (hsl.lightness + 0.02).clamp(0.0, 1.0); // Lighter for dark backgrounds
+          ? (hsl.lightness - 0.02)
+              .clamp(0.0, 1.0) // Darker for light backgrounds
+          : (hsl.lightness + 0.02)
+              .clamp(0.0, 1.0); // Lighter for dark backgrounds
       return hsl.withLightness(adjustedLightness).toColor();
     }
   }

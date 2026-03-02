@@ -38,6 +38,8 @@ class SyncOperation {
   final Map<String, dynamic> data;
   final DateTime timestamp;
   final int retryCount; // Track number of retry attempts
+  final String?
+      userId; // Owner account for safe cross-account queue persistence
 
   SyncOperation({
     required this.id,
@@ -46,9 +48,11 @@ class SyncOperation {
     required this.data,
     required this.timestamp,
     this.retryCount = 0,
+    this.userId,
   });
 
-  SyncOperation copyWith({int? retryCount, DateTime? timestamp}) {
+  SyncOperation copyWith(
+      {int? retryCount, DateTime? timestamp, String? userId}) {
     return SyncOperation(
       id: id,
       type: type,
@@ -56,6 +60,7 @@ class SyncOperation {
       data: data,
       timestamp: timestamp ?? this.timestamp,
       retryCount: retryCount ?? this.retryCount,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -67,6 +72,7 @@ class SyncOperation {
       'data': data,
       'timestamp': timestamp.millisecondsSinceEpoch,
       'retryCount': retryCount,
+      'userId': userId,
     };
   }
 
@@ -78,6 +84,7 @@ class SyncOperation {
       data: Map<String, dynamic>.from(map['data']),
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
       retryCount: map['retryCount'] ?? 0,
+      userId: map['userId'] as String?,
     );
   }
 }
@@ -130,9 +137,6 @@ class SupabaseSyncService {
   // Retry queue for failed sync operations
   final List<SyncOperation> _retryQueue = [];
   Timer? _retryTimer;
-
-  // Flag to control whether failed retries should be preserved during sign out
-  bool preserveRetriesOnSignOut = false;
 
   // Get current user ID
   String? get _currentUserId => _supabase.auth.currentUser?.id;
@@ -295,6 +299,12 @@ class SupabaseSyncService {
   Future<void> _loadPersistedQueues() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // Clear in-memory queues to avoid duplicate loading after re-initialization.
+    _highlightsPendingQueue.clear();
+    _notesPendingQueue.clear();
+    _historyPendingQueue.clear();
+    _searchHistoryPendingQueue.clear();
+
     // Load and deserialize each queue
     final highlightsJson = prefs.getString(_highlightsQueueKey);
     if (highlightsJson != null) {
@@ -379,7 +389,6 @@ class SupabaseSyncService {
             operation, _searchHistoryPendingQueue, _matchesSearchHistory);
         break;
     }
-    _persistQueues();
   }
 
   // Enhanced de-duplication logic that handles operation conflicts intelligently
@@ -390,7 +399,8 @@ class SupabaseSyncService {
     // Find matching operations in queue
     final matchingIndices = <int>[];
     for (int i = 0; i < queue.length; i++) {
-      if (matcher(queue[i], newOperation)) {
+      if (matcher(queue[i], newOperation) &&
+          queue[i].userId == newOperation.userId) {
         matchingIndices.add(i);
       }
     }
@@ -441,6 +451,7 @@ class SupabaseSyncService {
             type: newOperation.type,
             operation: 'delete',
             data: newOperation.data,
+            userId: newOperation.userId,
             timestamp:
                 newOperation.timestamp.isAfter(existingOperation.timestamp)
                     ? newOperation.timestamp
@@ -460,6 +471,7 @@ class SupabaseSyncService {
             type: newOperation.type,
             operation: 'create',
             data: newOperation.data,
+            userId: newOperation.userId,
             timestamp:
                 newOperation.timestamp.isAfter(existingOperation.timestamp)
                     ? newOperation.timestamp
@@ -700,9 +712,11 @@ class SupabaseSyncService {
 
   // Queue a specific operation persistently (replaces old queuing methods)
   Future<void> _queuePersistentOperation(String operationKey, String type,
-      String operation, Map<String, dynamic> data) async {
+      String operation, Map<String, dynamic> data,
+      {String? userId}) async {
     // Only queue operations when user is logged in but offline (can't sync immediately)
-    if (_currentUserId == null) {
+    final ownerId = userId ?? _currentUserId;
+    if (ownerId == null) {
       return;
     }
 
@@ -736,8 +750,10 @@ class SupabaseSyncService {
     }
 
     // Don't add duplicate operations
-    final isDuplicate = existingOps
-        .any((op) => op.id == operationKey && op.operation == operation);
+    final isDuplicate = existingOps.any((op) =>
+        op.id == operationKey &&
+        op.operation == operation &&
+        (op.userId ?? ownerId) == ownerId);
     if (isDuplicate) {
       return;
     }
@@ -749,9 +765,11 @@ class SupabaseSyncService {
       operation: operation,
       data: data,
       timestamp: operationTimestamp,
+      userId: ownerId,
     );
 
     _queueOperation(syncOperation);
+    await _persistQueues();
   }
 
   // Process persistent queues when coming online
@@ -762,26 +780,59 @@ class SupabaseSyncService {
       return;
     }
 
-    // Process each queue
+    // Process each queue for the current user only.
     await _processPendingQueue(_highlightsPendingQueue);
     await _processPendingQueue(_notesPendingQueue);
     await _processPendingQueue(_historyPendingQueue);
     await _processPendingQueue(_searchHistoryPendingQueue);
 
-    // Persist empty queues
+    // Persist queue updates.
     await _persistQueues();
+  }
+
+  // Flush in-memory retry queue and persistent queue after connectivity restoration.
+  Future<void> _flushQueuedOperations() async {
+    if (!isOnline || _currentUserId == null) return;
+
+    // First, retry fast-fail operations that were attempted while status was stale.
+    await _processRetryQueue();
+
+    // Then process persisted offline queue.
+    await _processPendingQueues();
+
+    // Run retry queue once more in case anything was re-enqueued during processing.
+    if (_retryQueue.isNotEmpty) {
+      await _processRetryQueue();
+    }
   }
 
   // Process a specific pending queue
   Future<void> _processPendingQueue(List<SyncOperation> queue) async {
-    if (queue.isEmpty) return;
+    if (queue.isEmpty || _currentUserId == null) return;
 
-    final operationsToProcess = List<SyncOperation>.from(queue);
-    queue.clear();
+    final queuedForOtherUsers = <SyncOperation>[];
+    final operationsToProcess = <SyncOperation>[];
+
+    for (final operation in queue) {
+      final ownerId = operation.userId ?? _currentUserId;
+      if (ownerId != _currentUserId) {
+        queuedForOtherUsers.add(operation);
+        continue;
+      }
+
+      // Backfill missing ownership metadata for legacy queued operations.
+      operationsToProcess.add(operation.userId == ownerId
+          ? operation
+          : operation.copyWith(userId: ownerId));
+    }
+
+    queue
+      ..clear()
+      ..addAll(queuedForOtherUsers);
 
     for (final operation in operationsToProcess) {
       // Determine what data to upload - use current local data for create/update if exists
-      Map<String, dynamic>? uploadData = operation.data;
+      Map<String, dynamic> uploadData = operation.data;
 
       if (operation.operation == 'create' || operation.operation == 'update') {
         final currentLocal =
@@ -794,154 +845,74 @@ class SupabaseSyncService {
       }
 
       try {
-        switch (operation.type) {
-          case 'highlight':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              try {
-                await _uploadHighlight(uploadData);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage:
-                      '_processPendingQueue highlights upload exception',
-                  context: {
-                    'class': 'SupabaseSyncService',
-                    'method': '_processPendingQueue',
-                    'operation': 'upload_highlight'
-                  },
-                );
-              }
-            } else if (operation.operation == 'delete') {
-              try {
-                await deleteRemoteHighlight(uploadData['created_at'] as int);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage:
-                      '_processPendingQueue highlights delete exception',
-                  context: {
-                    'class': 'SupabaseSyncService',
-                    'method': '_processPendingQueue',
-                    'operation': 'delete_highlight'
-                  },
-                );
-              }
-            }
-            break;
-          case 'note':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              try {
-                await _uploadNote(uploadData);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            } else if (operation.operation == 'delete') {
-              try {
-                await deleteRemoteNote(uploadData['created_at'] as int);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            }
-            break;
-          case 'history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              try {
-                await _uploadHistoryItem(uploadData);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            } else if (operation.operation == 'delete') {
-              try {
-                await deleteRemoteHistoryItem(uploadData['timestamp']);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            }
-            break;
-          case 'search_history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              try {
-                await _uploadSearchHistoryItem(uploadData);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            } else if (operation.operation == 'delete') {
-              try {
-                await deleteRemoteSearchHistoryItem(uploadData['timestamp']);
-              } catch (e) {
-                ErrorHandler.logError(
-                  e,
-                  customMessage: '_processPendingQueue exception',
-                  context: {
-                    'operationId': operation.id,
-                    'type': operation.type,
-                    'operation': operation.operation
-                  },
-                );
-              }
-            }
-            break;
-        }
+        await _processSingleSyncOperation(operation, dataOverride: uploadData);
       } catch (e) {
-        // Re-queue failed operations
-        try {
-          queue.add(operation);
-        } catch (e) {
-          ErrorHandler.logError(
-            e,
-            customMessage: '_processPendingQueue exception',
-            context: {
-              'operationId': operation.id,
-              'type': operation.type,
-              'operation': operation.operation
-            },
-          );
-        }
+        ErrorHandler.logError(
+          e,
+          customMessage: '_processPendingQueue failed - re-queueing operation',
+          context: {
+            'operationId': operation.id,
+            'type': operation.type,
+            'operation': operation.operation
+          },
+        );
+        queue.add(
+            operation.copyWith(userId: operation.userId ?? _currentUserId));
       }
+    }
+  }
+
+  Future<void> _processSingleSyncOperation(SyncOperation operation,
+      {Map<String, dynamic>? dataOverride}) async {
+    final data = dataOverride ?? operation.data;
+
+    switch (operation.type) {
+      case 'highlight':
+        if (operation.operation == 'create' ||
+            operation.operation == 'update') {
+          await _uploadHighlight(data);
+        } else if (operation.operation == 'delete') {
+          await deleteRemoteHighlight(data['created_at'] as int);
+        } else {
+          throw ArgumentError(
+              'Unknown operation "${operation.operation}" for highlight');
+        }
+        break;
+      case 'note':
+        if (operation.operation == 'create' ||
+            operation.operation == 'update') {
+          await _uploadNote(data);
+        } else if (operation.operation == 'delete') {
+          await deleteRemoteNote(data['created_at'] as int);
+        } else {
+          throw ArgumentError(
+              'Unknown operation "${operation.operation}" for note');
+        }
+        break;
+      case 'history':
+        if (operation.operation == 'create' ||
+            operation.operation == 'update') {
+          await _uploadHistoryItem(data);
+        } else if (operation.operation == 'delete') {
+          await deleteRemoteHistoryItem(data['timestamp'] as int);
+        } else {
+          throw ArgumentError(
+              'Unknown operation "${operation.operation}" for history');
+        }
+        break;
+      case 'search_history':
+        if (operation.operation == 'create' ||
+            operation.operation == 'update') {
+          await _uploadSearchHistoryItem(data);
+        } else if (operation.operation == 'delete') {
+          await deleteRemoteSearchHistoryItem(data['timestamp'] as int);
+        } else {
+          throw ArgumentError(
+              'Unknown operation "${operation.operation}" for search_history');
+        }
+        break;
+      default:
+        throw ArgumentError('Unknown operation type: ${operation.type}');
     }
   }
 
@@ -993,9 +964,9 @@ class SupabaseSyncService {
     // Setup listeners and connection monitoring
     await _checkConnectionAndSetup();
 
-    // Process any queued operations from offline changes
+    // Process any queued operations from offline or retry queues
     if (isOnline) {
-      await _processPendingQueues();
+      await _flushQueuedOperations();
     }
 
     // Perform full sync on login (download all remote + upload local changes)
@@ -1069,6 +1040,7 @@ class SupabaseSyncService {
   // Check connection and setup listeners
   Future<void> _checkConnectionAndSetup() async {
     try {
+      final wasOnline = _syncStatus == SyncStatus.online;
       final connectivityResult = await _connectivity.checkConnectivity();
       //final hasConnection = connectivityResult != ConnectivityResult.none;
       final hasConnection =
@@ -1080,7 +1052,10 @@ class SupabaseSyncService {
           await _setupRealtimeListeners();
           _syncStatus = SyncStatus.online;
           syncStatusNotifier.value = _syncStatus;
-          await _processPendingQueues();
+          await _flushQueuedOperations();
+          if (!wasOnline) {
+            await syncRecentChangesOnly();
+          }
         } catch (e) {
           // Connection test or setup failed - go offline but don't crash
           ErrorHandler.logError(
@@ -2062,6 +2037,7 @@ class SupabaseSyncService {
                 data: highlight,
                 timestamp: DateTime.fromMillisecondsSinceEpoch(
                     highlight['created_at'] as int),
+                userId: _currentUserId,
               ));
             }
           }
@@ -2506,7 +2482,7 @@ class SupabaseSyncService {
     final isValid =
         await DataValidation.validateBeforeUpload(highlight, 'highlight');
     if (!isValid) {
-      return;
+      throw StateError('Invalid highlight data for upload');
     }
 
     final dataToInsert = {
@@ -2551,6 +2527,7 @@ class SupabaseSyncService {
         e,
         customMessage: '_uploadHighlight exception',
       );
+      rethrow;
     }
   }
 
@@ -2762,6 +2739,7 @@ class SupabaseSyncService {
                 data: note,
                 timestamp: DateTime.fromMillisecondsSinceEpoch(
                     note['created_at'] as int),
+                userId: _currentUserId,
               ));
             }
           }
@@ -2800,7 +2778,7 @@ class SupabaseSyncService {
     // Validate data before uploading to prevent sending corrupt data to Supabase
     final isValid = await DataValidation.validateBeforeUpload(note, 'note');
     if (!isValid) {
-      return;
+      throw StateError('Invalid note data for upload');
     }
 
     final dataToInsert = {
@@ -2844,6 +2822,7 @@ class SupabaseSyncService {
         e,
         customMessage: '_uploadNote exception',
       );
+      rethrow;
     }
   }
 
@@ -3048,6 +3027,7 @@ class SupabaseSyncService {
                 data: searchHistoryItem,
                 timestamp: DateTime.fromMillisecondsSinceEpoch(
                     searchHistoryItem['timestamp'] as int),
+                userId: _currentUserId,
               ));
             }
           }
@@ -3307,6 +3287,7 @@ class SupabaseSyncService {
                 data: historyItem,
                 timestamp: DateTime.fromMillisecondsSinceEpoch(
                     historyItem['timestamp'] as int),
+                userId: _currentUserId,
               ));
             }
           }
@@ -3349,7 +3330,7 @@ class SupabaseSyncService {
     final isValid =
         await DataValidation.validateBeforeUpload(historyItem, 'history');
     if (!isValid) {
-      return;
+      throw StateError('Invalid history data for upload');
     }
 
     final dataToInsert = {
@@ -3390,6 +3371,7 @@ class SupabaseSyncService {
         e,
         customMessage: '_uploadHistoryItem exception',
       );
+      rethrow;
     }
   }
 
@@ -3655,22 +3637,27 @@ class SupabaseSyncService {
 
         final hasConnection = await InternetAccessChecker.hasInternetAccess();
 
-        if (hasConnection && _syncStatus != SyncStatus.online) {
-          // Connection restored - test and setup
-          try {
-            await _checkConnectionAndSetup();
-          } catch (e) {
-            // Handle connection setup errors gracefully
-            ErrorHandler.logError(
-              e,
-              customMessage:
-                  'Connection setup failed during connectivity change',
-            );
-            _syncStatus = SyncStatus.offline;
-            syncStatusNotifier.value = _syncStatus;
-            await ErrorHandler.handleNetworkError(e);
+        if (hasConnection) {
+          if (_syncStatus != SyncStatus.online) {
+            // Connection restored - test and setup
+            try {
+              await _checkConnectionAndSetup();
+            } catch (e) {
+              // Handle connection setup errors gracefully
+              ErrorHandler.logError(
+                e,
+                customMessage:
+                    'Connection setup failed during connectivity change',
+              );
+              _syncStatus = SyncStatus.offline;
+              syncStatusNotifier.value = _syncStatus;
+              await ErrorHandler.handleNetworkError(e);
+            }
+          } else {
+            // Status may be stale "online" after transient drops. Flush queued work anyway.
+            await _flushQueuedOperations();
           }
-        } else if (!hasConnection && _syncStatus != SyncStatus.offline) {
+        } else if (_syncStatus != SyncStatus.offline) {
           // Connection lost
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
@@ -4025,8 +4012,7 @@ class SupabaseSyncService {
 
     // Handle offline queuing
     if (!isOnline || _currentUserId == null) {
-      _queuePersistentOperation('${type}_$itemId', type, operation, data);
-      _persistQueues();
+      await _queuePersistentOperation('${type}_$itemId', type, operation, data);
       return;
     }
 
@@ -4056,6 +4042,7 @@ class SupabaseSyncService {
               );
               rethrow;
             }
+            break;
           case 'history':
             try {
               await deleteRemoteHistoryItem(itemId);
@@ -4157,6 +4144,7 @@ class SupabaseSyncService {
         operation: operation,
         data: data,
         timestamp: timestamp,
+        userId: _currentUserId,
       ));
     }
 
@@ -4281,7 +4269,7 @@ class SupabaseSyncService {
     final isValid = await DataValidation.validateBeforeUpload(
         searchHistoryItem, 'search_history');
     if (!isValid) {
-      return;
+      throw StateError('Invalid search history data for upload');
     }
 
     final dataToInsert = {
@@ -4363,9 +4351,28 @@ class SupabaseSyncService {
 
   // Add failed operation to retry queue for later retry
   void _enqueueFailedOperation(SyncOperation operation) {
-    final operationWithRetryCount =
-        operation.copyWith(retryCount: operation.retryCount + 1);
-    _retryQueue.add(operationWithRetryCount);
+    final ownerId = operation.userId ?? _currentUserId;
+    if (ownerId == null) {
+      return;
+    }
+
+    final operationWithRetryCount = operation.copyWith(
+        retryCount: operation.retryCount + 1, userId: ownerId);
+    final existingIndex = _retryQueue.indexWhere((queued) =>
+        queued.id == operationWithRetryCount.id &&
+        queued.type == operationWithRetryCount.type &&
+        queued.operation == operationWithRetryCount.operation &&
+        (queued.userId ?? ownerId) == ownerId);
+
+    if (existingIndex == -1) {
+      _retryQueue.add(operationWithRetryCount);
+    } else {
+      final existing = _retryQueue[existingIndex];
+      _retryQueue[existingIndex] =
+          operationWithRetryCount.retryCount > existing.retryCount
+              ? operationWithRetryCount
+              : existing.copyWith(userId: existing.userId ?? ownerId);
+    }
 
     _startRetryTimer();
   }
@@ -4406,53 +4413,37 @@ class SupabaseSyncService {
       return;
     }
 
-    final operationsToRetry = List<SyncOperation>.from(_retryQueue);
-    _retryQueue.clear();
+    final queuedForOtherUsers = <SyncOperation>[];
+    final operationsToRetry = <SyncOperation>[];
+
+    for (final operation in _retryQueue) {
+      final ownerId = operation.userId ?? _currentUserId;
+      if (ownerId != _currentUserId) {
+        queuedForOtherUsers.add(operation);
+        continue;
+      }
+
+      operationsToRetry.add(operation.userId == ownerId
+          ? operation
+          : operation.copyWith(userId: ownerId));
+    }
+
+    _retryQueue
+      ..clear()
+      ..addAll(queuedForOtherUsers);
 
     for (final operation in operationsToRetry) {
       // Check if this operation has exceeded max retries
       if (operation.retryCount >= 3) {
         // Move to persistent queue instead of retrying
-        _queuePersistentOperation(
-            operation.id, operation.type, operation.operation, operation.data);
+        await _queuePersistentOperation(
+            operation.id, operation.type, operation.operation, operation.data,
+            userId: operation.userId);
         continue;
       }
 
       try {
-        switch (operation.type) {
-          case 'highlight':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              await _uploadHighlight(operation.data);
-            } else if (operation.operation == 'delete') {
-              await deleteRemoteHighlight(operation.data['created_at'] as int);
-            }
-            break;
-          case 'note':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              await _uploadNote(operation.data);
-            } else if (operation.operation == 'delete') {
-              await deleteRemoteNote(operation.data['created_at'] as int);
-            }
-            break;
-          case 'history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              await _uploadHistoryItem(operation.data);
-            } else if (operation.operation == 'delete') {
-              await deleteRemoteHistoryItem(operation.data['timestamp']);
-            }
-            break;
-          case 'search_history':
-            if (operation.operation == 'create' ||
-                operation.operation == 'update') {
-              await _uploadSearchHistoryItem(operation.data);
-            } else if (operation.operation == 'delete') {
-              await deleteRemoteSearchHistoryItem(operation.data['timestamp']);
-            }
-            break;
-        }
+        await _processSingleSyncOperation(operation);
 
         // Success - operation complete, no need to re-queue
       } catch (e) {
@@ -4465,10 +4456,11 @@ class SupabaseSyncService {
   // Cleanup - called when user signs out or app is terminated
   void dispose() {
     // Move any remaining retry operations to persistent queues before cleanup
-    if (_currentUserId != null) {
+    if (_currentUserId != null && _retryQueue.isNotEmpty) {
       for (final operation in _retryQueue) {
         _queueOperation(operation);
       }
+      unawaited(_persistQueues());
     }
 
     _retryTimer?.cancel();
@@ -4491,11 +4483,14 @@ class SupabaseSyncService {
   }
 
   // Prepare for sign-out - clean up listeners and reset state
-  Future<void> prepareForSignOut() async {
-    // If user chose to keep data, preserve failed retries by moving them to persistent queues
-    if (preserveRetriesOnSignOut) {
+  Future<void> prepareForSignOut(
+      {bool preservePendingOperations = true}) async {
+    final currentUserId = _currentUserId;
+
+    if (preservePendingOperations && currentUserId != null) {
       for (final operation in _retryQueue) {
-        _queueOperation(operation);
+        _queueOperation(
+            operation.copyWith(userId: operation.userId ?? currentUserId));
       }
     }
 
@@ -4506,6 +4501,7 @@ class SupabaseSyncService {
     _searchHistoryChannel?.unsubscribe();
 
     _retryTimer?.cancel();
+    stopConnectionMonitoring();
 
     // Reset flags
     _isListening = false;
@@ -4529,13 +4525,14 @@ class SupabaseSyncService {
     await prefs.remove('lastHistorySync');
     await prefs.remove('lastSearchHistorySync');
 
-    // Clear persistent queues (they were already persisted above if we preserved retries)
-    _highlightsPendingQueue.clear();
-    _notesPendingQueue.clear();
-    _historyPendingQueue.clear();
-    _searchHistoryPendingQueue.clear();
+    if (!preservePendingOperations) {
+      _highlightsPendingQueue.clear();
+      _notesPendingQueue.clear();
+      _historyPendingQueue.clear();
+      _searchHistoryPendingQueue.clear();
+    }
 
-    // Persist empty queues
+    // Persist queue state.
     await _persistQueues();
 
     // Clear retry queue
@@ -4543,9 +4540,6 @@ class SupabaseSyncService {
 
     // Clear cached username on sign out
     await clearCachedUsername();
-
-    // Reset the preservation flag
-    preserveRetriesOnSignOut = false;
 
     _isInitialized = false;
   }

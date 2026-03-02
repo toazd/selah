@@ -37,7 +37,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
   ValueNotifier<int?> selectedColorIndexNotifier = ValueNotifier(null);
   ValueNotifier<int?> pressedColorIndexNotifier = ValueNotifier(null);
 
-  String get _fullyCleanedVerseText => widget.rawVerseText.replaceAll(RegExp(r'</?r>'), ''); //.replaceAll('¶ ', '');
+  String get _fullyCleanedVerseText => widget.rawVerseText
+      .replaceAll(RegExp(r'</?r>'), ''); //.replaceAll('¶ ', '');
 
   @override
   void initState() {
@@ -75,12 +76,16 @@ class _HighlightDialogState extends State<HighlightDialog> {
       }
     } catch (e) {
       if (mounted) {
-        showStyledSnackBar(context, 'HighlightDialog _loadCurrentHighlights exception: $e');
+        showStyledSnackBar(
+            context, 'HighlightDialog _loadCurrentHighlights exception: $e');
       }
       ErrorHandler.logError(
         e,
         customMessage: 'HighlightDialog _loadCurrentHighlights exception',
-        context: {'widget': 'HighlightDialog', 'method': '_loadCurrentHighlights'},
+        context: {
+          'widget': 'HighlightDialog',
+          'method': '_loadCurrentHighlights'
+        },
       );
     }
   }
@@ -110,7 +115,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
               widget.rawVerseText,
               rawText,
               baseStyle.copyWith(
-                fontSize: FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSizeNotifier.value),
+                fontSize: FontSizeAdjustments.getAdjustedSize(
+                    fontFamilyNotifier.value, fontSizeNotifier.value),
               ),
               verseNumber,
               Theme.of(context).scaffoldBackgroundColor,
@@ -121,7 +127,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
               darkTextColor.value,
             ),
           ),
-          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+          contextMenuBuilder:
+              (BuildContext context, EditableTextState editableTextState) {
             return Container(); // Disable default context menu to prevent interference with highlighting
           },
           onSelectionChanged: (selection, cause) {
@@ -132,7 +139,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
     );
   }
 
-  void _applyHighlight(int verseNumber, TextSelection selection, int colorIndex) async {
+  void _applyHighlight(
+      int verseNumber, TextSelection selection, int colorIndex) async {
     // Get the selected text from the CLEAN verse (what user sees in dialog)
     final start = selection.start;
     final end = selection.end;
@@ -144,12 +152,16 @@ class _HighlightDialogState extends State<HighlightDialog> {
         final selectedColor = colors[colorIndex];
 
         // Convert clean text positions to raw text positions
-        final actualStart = convertCleanPositionToRaw(widget.rawVerseText, start);
+        final actualStart =
+            convertCleanPositionToRaw(widget.rawVerseText, start);
         final actualEnd = convertCleanPositionToRaw(widget.rawVerseText, end);
 
-        if (actualStart >= 0 && actualEnd > actualStart && actualEnd <= widget.rawVerseText.length) {
+        if (actualStart >= 0 &&
+            actualEnd > actualStart &&
+            actualEnd <= widget.rawVerseText.length) {
           // Check for overlap with existing highlights
-          final existingHighlights = await HighlightsDatabase.getHighlightsForVerse(
+          final existingHighlights =
+              await HighlightsDatabase.getHighlightsForVerse(
             widget.book,
             widget.chapter,
             verseNumber,
@@ -192,22 +204,33 @@ class _HighlightDialogState extends State<HighlightDialog> {
     }
   }
 
-  void _editExistingHighlight(BuildContext context, Map<String, dynamic> highlight) async {
+  void _editExistingHighlight(
+      BuildContext context, Map<String, dynamic> highlight) async {
     // For now, just delete the highlight
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         //title: Text('Edit Highlight'),
         content: Text('Delete this highlight?',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
             child: Text('No',
-                style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: Text('Yes', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Yes',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () async {
               final highlightId = highlight['id'] as int;
 
@@ -234,7 +257,8 @@ class _HighlightDialogState extends State<HighlightDialog> {
   Widget build(BuildContext context) {
     final existingHighlights = _currentHighlights[widget.verseNumber] ?? [];
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double dialogWidth = screenWidth > 650 ? screenWidth * 0.6 : screenWidth * 0.9;
+    final double dialogWidth =
+        screenWidth > 650 ? screenWidth * 0.6 : screenWidth * 0.9;
 
     return Dialog(
       child: Container(
@@ -251,7 +275,9 @@ class _HighlightDialogState extends State<HighlightDialog> {
               children: [
                 Text('Select text:',
                     style: TextStyle(
-                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -268,7 +294,9 @@ class _HighlightDialogState extends State<HighlightDialog> {
                 const SizedBox(height: 32),
                 Text('Choose highlight color:',
                     style: TextStyle(
-                        fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))),
                 const SizedBox(height: 8),
                 ValueListenableBuilder<List<Color>>(
                   valueListenable: highlightColorsNotifier,
@@ -283,26 +311,35 @@ class _HighlightDialogState extends State<HighlightDialog> {
                               valueListenable: pressedColorIndexNotifier,
                               builder: (context, pressedIndex, _) {
                                 // Create color widgets
-                                final colorWidgets = colors.asMap().entries.map((entry) {
+                                final colorWidgets =
+                                    colors.asMap().entries.map((entry) {
                                   final index = entry.key;
                                   final color = entry.value;
                                   return GestureDetector(
-                                    onTapDown: (_) => pressedColorIndexNotifier.value = index,
-                                    onTapUp: (_) => pressedColorIndexNotifier.value = null,
-                                    onTapCancel: () => pressedColorIndexNotifier.value = null,
+                                    onTapDown: (_) =>
+                                        pressedColorIndexNotifier.value = index,
+                                    onTapUp: (_) =>
+                                        pressedColorIndexNotifier.value = null,
+                                    onTapCancel: () =>
+                                        pressedColorIndexNotifier.value = null,
                                     onTap: () {
-                                      if (textSelection != null && textSelection.start != textSelection.end) {
+                                      if (textSelection != null &&
+                                          textSelection.start !=
+                                              textSelection.end) {
                                         // Apply the highlight immediately and show it in the dialog
-                                        _applyHighlight(widget.verseNumber, textSelection, index);
+                                        _applyHighlight(widget.verseNumber,
+                                            textSelection, index);
 
                                         // Clear the text selection to prevent duplication in preview
                                         textSelectionNotifier.value = null;
 
                                         // Update the selected color for preview
-                                        selectedColorIndexNotifier.value = index;
+                                        selectedColorIndexNotifier.value =
+                                            index;
                                       } else {
                                         // Update the selected color for preview
-                                        selectedColorIndexNotifier.value = index;
+                                        selectedColorIndexNotifier.value =
+                                            index;
                                       }
                                     },
                                     child: Container(
@@ -315,8 +352,9 @@ class _HighlightDialogState extends State<HighlightDialog> {
                                         //   width: selectedIndex == index ? 3 : 1,
                                         // ),
                                         border: Border.all(
-                                          color:
-                                              pressedIndex == index ? getAdaptiveTextColor(context) : Colors.blueGrey,
+                                          color: pressedIndex == index
+                                              ? getAdaptiveTextColor(context)
+                                              : Colors.blueGrey,
                                           width: pressedIndex == index ? 3 : 2,
                                         ),
                                         borderRadius: BorderRadius.circular(6),
@@ -328,31 +366,40 @@ class _HighlightDialogState extends State<HighlightDialog> {
                                 // Use LayoutBuilder to switch between 2×8 grid and responsive Wrap
                                 return LayoutBuilder(
                                   builder: (context, constraints) {
-                                    const double breakpoint = 460.0; // Minimum width for 2×8 layout
+                                    const double breakpoint =
+                                        460.0; // Minimum width for 2×8 layout
 
                                     if (constraints.maxWidth >= breakpoint) {
                                       // Wide layout: keep the intended 2×8 grid
-                                      final firstRow = colorWidgets.sublist(0, 8);
-                                      final secondRow = colorWidgets.sublist(8, 16);
+                                      final firstRow =
+                                          colorWidgets.sublist(0, 8);
+                                      final secondRow =
+                                          colorWidgets.sublist(8, 16);
 
                                       return Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: firstRow
                                                 .map((widget) => Padding(
-                                                      padding: const EdgeInsets.only(right: 8.0),
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 8.0),
                                                       child: widget,
                                                     ))
                                                 .toList(),
                                           ),
                                           const SizedBox(height: 8),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: secondRow
                                                 .map((widget) => Padding(
-                                                      padding: const EdgeInsets.only(right: 8.0),
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 8.0),
                                                       child: widget,
                                                     ))
                                                 .toList(),
@@ -382,7 +429,9 @@ class _HighlightDialogState extends State<HighlightDialog> {
                   const SizedBox(height: 32),
                   Text('Remove existing highlights:',
                       style: TextStyle(
-                          fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context))),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -397,13 +446,19 @@ class _HighlightDialogState extends State<HighlightDialog> {
                       String highlightedText;
                       try {
                         // Convert raw positions to clean positions for substring
-                        final cleanStart = convertRawPositionToClean(widget.rawVerseText, start);
-                        final cleanEnd = convertRawPositionToClean(widget.rawVerseText, end);
-                        if (cleanStart >= 0 && cleanEnd > cleanStart && cleanEnd <= _fullyCleanedVerseText.length) {
-                          highlightedText = _fullyCleanedVerseText.substring(cleanStart, cleanEnd);
+                        final cleanStart = convertRawPositionToClean(
+                            widget.rawVerseText, start);
+                        final cleanEnd =
+                            convertRawPositionToClean(widget.rawVerseText, end);
+                        if (cleanStart >= 0 &&
+                            cleanEnd > cleanStart &&
+                            cleanEnd <= _fullyCleanedVerseText.length) {
+                          highlightedText = _fullyCleanedVerseText.substring(
+                              cleanStart, cleanEnd);
                           // Truncate very long highlights for display
                           if (highlightedText.length > 20) {
-                            highlightedText = '${highlightedText.substring(0, 17)}...';
+                            highlightedText =
+                                '${highlightedText.substring(0, 17)}...';
                           }
                         } else {
                           highlightedText = 'Invalid range';
@@ -430,15 +485,20 @@ class _HighlightDialogState extends State<HighlightDialog> {
                           _editExistingHighlight(context, highlight);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: defaultHighlightAlpha),
+                            color:
+                                color.withValues(alpha: defaultHighlightAlpha),
                             //border: Border.all(color: color, width: 1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             highlightedText,
-                            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: adjustedTextColor),
+                            style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: adjustedTextColor),
                           ),
                         ),
                       );
@@ -460,7 +520,9 @@ class _HighlightDialogState extends State<HighlightDialog> {
                     },
                     child: Text('Finished',
                         style: TextStyle(
-                            fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                   ),
                 ),
               ],

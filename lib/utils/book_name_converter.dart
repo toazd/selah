@@ -73,7 +73,8 @@ class BookNameConverter {
   };
 
   // Reverse map: Full name -> Short name
-  static final Map<String, String> _longToShort = _shortToLong.map((key, value) => MapEntry(value, key));
+  static final Map<String, String> _longToShort =
+      _shortToLong.map((key, value) => MapEntry(value, key));
 
   // --- PRIVATE DEBUG HELPER METHOD ---
   /// Helper method to extract the function name and simplified location from a raw stack frame.
@@ -112,7 +113,9 @@ class BookNameConverter {
     if ('0123456789'.contains(shortName[0])) {
       final digitPart = shortName[0]; // "1"
       final letterPart = shortName.substring(1); // "co"
-      return digitPart + letterPart[0].toUpperCase() + letterPart.substring(1).toLowerCase();
+      return digitPart +
+          letterPart[0].toUpperCase() +
+          letterPart.substring(1).toLowerCase();
     }
 
     // Regular case: first char uppercase, rest lowercase
@@ -127,7 +130,9 @@ class BookNameConverter {
     // Normalize input by capitalizing the first letter of every word.
     final normalizedLongName = longName
         .split(' ')
-        .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : word)
+        .map((word) => word.isNotEmpty
+            ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+            : word)
         .join(' ');
 
     return normalizedLongName;

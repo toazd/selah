@@ -13,17 +13,21 @@ class AuthService {
     if (error is AuthException) {
       switch (error.message) {
         case 'User already registered':
-          return Exception('An account with this email already exists. Please sign in instead.');
+          return Exception(
+              'An account with this email already exists. Please sign in instead.');
         case 'Invalid login credentials':
-          return Exception('Invalid username or password. Please check your credentials.');
+          return Exception(
+              'Invalid username or password. Please check your credentials.');
         case 'Email not confirmed':
-          return Exception('Please check your email and confirm your account before signing in.');
+          return Exception(
+              'Please check your email and confirm your account before signing in.');
         case 'Too many requests':
           return Exception('Too many failed attempts. Please try again later.');
         case 'Signup is disabled':
           return Exception('New account registration is currently disabled.');
         default:
-          return Exception('An authentication error occurred: ${error.message}');
+          return Exception(
+              'An authentication error occurred: ${error.message}');
       }
     } else {
       return Exception('$error');
@@ -31,9 +35,10 @@ class AuthService {
   }
 
   // Sign Out
-  Future<void> signOut() async {
+  Future<void> signOut({bool preservePendingOperations = true}) async {
     try {
-      await SupabaseSyncService().prepareForSignOut();
+      await SupabaseSyncService().prepareForSignOut(
+          preservePendingOperations: preservePendingOperations);
       await _supabase.auth.signOut();
     } catch (e) {
       throw Exception('Sign out failed: ${e.toString()}');
@@ -46,17 +51,22 @@ class AuthService {
       // Check if username already exists using RPC to bypass RLS
       // This requires the database function created using supabase/get_user_email_by_username.sql
       try {
-        final response =
-            await _supabase.rpc('get_user_email_by_username', params: {'username_param': username}).single();
+        final response = await _supabase.rpc('get_user_email_by_username',
+            params: {'username_param': username}).single();
         if (response['email'] != null) {
-          throw Exception('That username is already taken. Please choose a different one.');
+          throw Exception(
+              'That username is already taken. Please choose a different one.');
         }
       } catch (e) {
         // If RPC fails or no user found, continue with signup
         ErrorHandler.logError(
           e,
           customMessage: 'RPC get_user_email_by_username lookup failed',
-          context: {'class': 'AuthService', 'method': 'signUpWithUsername', 'username': username},
+          context: {
+            'class': 'AuthService',
+            'method': 'signUpWithUsername',
+            'username': username
+          },
         );
       }
 
@@ -88,7 +98,8 @@ class AuthService {
       // Check network connectivity before attempting authentication
       final hasInternet = await InternetAccessChecker.hasInternetAccess();
       if (!hasInternet) {
-        throw Exception('No internet connection. Please check your network settings and try again.');
+        throw Exception(
+            'No internet connection. Please check your network settings and try again.');
       }
 
       // Get the email associated with the username
@@ -97,7 +108,11 @@ class AuthService {
       if (userData == null) {
         ErrorHandler.logError(
           'No user data found for username: $username',
-          context: {'class': 'AuthService', 'method': 'signInWithUsername', 'username': username},
+          context: {
+            'class': 'AuthService',
+            'method': 'signInWithUsername',
+            'username': username
+          },
         );
         throw Exception('No account found with this username.');
       }
@@ -115,7 +130,11 @@ class AuthService {
       ErrorHandler.logError(
         e,
         customMessage: 'SignInWithUsername exception',
-        context: {'class': 'AuthService', 'method': 'signInWithUsername', 'error': e.toString()},
+        context: {
+          'class': 'AuthService',
+          'method': 'signInWithUsername',
+          'error': e.toString()
+        },
       );
       throw _handleAuthError(e);
     }
@@ -125,13 +144,18 @@ class AuthService {
   Future<Map<String, dynamic>?> _getUserByUsername(String username) async {
     try {
       // Use RPC function to get email by username (bypasses RLS)
-      final response = await _supabase.rpc('get_user_email_by_username', params: {'username_param': username}).single();
+      final response = await _supabase.rpc('get_user_email_by_username',
+          params: {'username_param': username}).single();
 
       if (response['email'] == null) {
         ErrorHandler.logError(
           null,
           customMessage: 'No email found for username',
-          context: {'class': 'AuthService', 'method': '_getUserByUsername', 'username': username},
+          context: {
+            'class': 'AuthService',
+            'method': '_getUserByUsername',
+            'username': username
+          },
         );
         return null;
       }
@@ -155,7 +179,8 @@ class AuthService {
       if (e.toString().contains('NetworkError') ||
           e.toString().contains('SocketException') ||
           e.toString().contains('Connection failed')) {
-        throw Exception('Network connection error. Please check your internet connection and try again.');
+        throw Exception(
+            'Network connection error. Please check your internet connection and try again.');
       }
 
       return null;
@@ -163,7 +188,8 @@ class AuthService {
   }
 
   // Change password - Supabase approach
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       throw Exception('No user is currently signed in');
@@ -179,13 +205,15 @@ class AuthService {
       if (e is AuthException) {
         switch (e.message) {
           case 'Password should be at least 6 characters':
-            throw Exception('The new password is too weak. Please choose a stronger password.');
+            throw Exception(
+                'The new password is too weak. Please choose a stronger password.');
           case 'session_not_found':
           case 'refresh_token_not_found':
             throw Exception(
                 'Your session has expired. Please sign out and sign back in before changing your password.');
           default:
-            throw Exception('Password change failed. Please sign out and sign back in to try again.');
+            throw Exception(
+                'Password change failed. Please sign out and sign back in to try again.');
         }
       }
       throw Exception('Password change failed: ${e.toString()}');
@@ -208,7 +236,8 @@ class AuthService {
       await syncService.deleteAllRemoteSearchHistory();
 
       // Call Edge Function to delete the auth user (secure - uses service role on server)
-      final response = await _supabase.functions.invoke('delete-user-account', body: {'userId': user.id});
+      final response = await _supabase.functions
+          .invoke('delete-user-account', body: {'userId': user.id});
 
       // Check if Edge Function call succeeded
       if (response.data == null || response.data['success'] != true) {
@@ -216,7 +245,7 @@ class AuthService {
       }
 
       // ✅ NEW: Cleanup sync service and sign out
-      await syncService.prepareForSignOut();
+      await syncService.prepareForSignOut(preservePendingOperations: false);
       await _supabase.auth.signOut();
 
       // ✅ NEW: Clear all sync timestamps from SharedPreferences
@@ -237,7 +266,11 @@ class AuthService {
     } catch (e) {
       ErrorHandler.logError(
         'Account deletion failed: ${e.toString()}',
-        context: {'class': 'AuthService', 'method': 'deleteAccount', 'error': e.toString()},
+        context: {
+          'class': 'AuthService',
+          'method': 'deleteAccount',
+          'error': e.toString()
+        },
       );
       throw Exception('Account deletion failed: ${e.toString()}');
     }

@@ -21,7 +21,8 @@ class VerseHistoryDialog extends StatefulWidget {
   State<VerseHistoryDialog> createState() => _VerseHistoryDialogState();
 }
 
-class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticKeepAliveClientMixin {
+class _VerseHistoryDialogState extends State<VerseHistoryDialog>
+    with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> _historyItems = [];
   bool _isLoading = false;
@@ -48,7 +49,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
     _scrollController.addListener(_onScroll);
 
     // Listen to Firestore sync service changes for remote history updates
-    _firestoreHistorySubscription = SupabaseSyncService.historyChangedStream.listen((_) async {
+    _firestoreHistorySubscription =
+        SupabaseSyncService.historyChangedStream.listen((_) async {
       await _loadInitialHistory();
       if (mounted) {
         setState(() {});
@@ -56,7 +58,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
     });
 
     // Listen to local data change notifier for immediate local history updates
-    _localHistorySubscription = LocalDataChangeNotifier.historyChangedStream.listen((_) async {
+    _localHistorySubscription =
+        LocalDataChangeNotifier.historyChangedStream.listen((_) async {
       await _loadInitialHistory();
       if (mounted) {
         setState(() {});
@@ -80,7 +83,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
         _historyItems = history
             .map((item) => {
                   ...item,
-                  'bookLongName': BookNameConverter.shortNameToLongName(item['book'] as String),
+                  'bookLongName': BookNameConverter.shortNameToLongName(
+                      item['book'] as String),
                 })
             .toList();
         _currentOffset = history.length;
@@ -103,7 +107,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
 
     setState(() => _isLoading = true);
     try {
-      final moreHistory = await HistoryDatabase.getHistoryPaginated(_currentOffset, _pageSize);
+      final moreHistory =
+          await HistoryDatabase.getHistoryPaginated(_currentOffset, _pageSize);
 
       if (mounted) {
         setState(() {
@@ -111,7 +116,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
           _historyItems = List<Map<String, dynamic>>.from(_historyItems)
             ..addAll(moreHistory.map((item) => {
                   ...item,
-                  'bookLongName': BookNameConverter.shortNameToLongName(item['book'] as String),
+                  'bookLongName': BookNameConverter.shortNameToLongName(
+                      item['book'] as String),
                 }));
           _currentOffset = _historyItems.length;
           _hasMoreData = moreHistory.length == _pageSize;
@@ -132,7 +138,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMoreHistory();
     }
   }
@@ -147,15 +154,27 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
       context: context,
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
-        content: Text('Are you sure you want to clear all history? This action cannot be undone.',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        content: Text(
+            'Are you sure you want to clear all history? This action cannot be undone.',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Clear', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Clear',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -180,14 +199,26 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
       context: context,
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
-        content: Text('Delete this history item?', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        content: Text('Delete this history item?',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Delete', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Delete',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -199,13 +230,15 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
         await HistoryDatabase.deleteHistoryItem(itemId);
         setState(() {
           // Create a new modifiable list to avoid read-only issues
-          _historyItems = List<Map<String, dynamic>>.from(_historyItems)..removeAt(indexInList);
+          _historyItems = List<Map<String, dynamic>>.from(_historyItems)
+            ..removeAt(indexInList);
           _currentOffset = _historyItems.length;
         });
         LocalDataChangeNotifier.notifyHistoryChanged();
       } catch (e) {
         if (mounted) {
-          showStyledSnackBar(context, 'Failed to delete history item: $e', isError: true);
+          showStyledSnackBar(context, 'Failed to delete history item: $e',
+              isError: true);
         }
       }
     }
@@ -218,15 +251,27 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
       context: context,
       builder: (context) => AlertDialog(
         constraints: const BoxConstraints(maxWidth: 400),
-        content: Text('Delete ${_selectedItemIds.length} selected history items?',
-            style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+        content: Text(
+            'Delete ${_selectedItemIds.length} selected history items?',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
         actions: [
           TextButton(
-            child: Text('Cancel', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Delete', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+            child: Text('Delete',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],
@@ -242,14 +287,18 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
 
         setState(() {
           // Remove deleted items from the list
-          _historyItems = List<Map<String, dynamic>>.from(_historyItems).where((item) => !_selectedItemIds.contains(item['id'])).toList();
+          _historyItems = List<Map<String, dynamic>>.from(_historyItems)
+              .where((item) => !_selectedItemIds.contains(item['id']))
+              .toList();
           _currentOffset = _historyItems.length;
           _selectedItemIds.clear();
           _isSelectMode = false; // Exit select mode after deletion
         });
       } catch (e) {
         if (mounted) {
-          showStyledSnackBar(context, 'Failed to delete selected history items: $e', isError: true);
+          showStyledSnackBar(
+              context, 'Failed to delete selected history items: $e',
+              isError: true);
         }
       }
     }
@@ -270,7 +319,12 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
         width: 300,
         height: MediaQuery.of(context).size.height * 0.9,
         child: _historyItems.isEmpty && !_isLoading
-            ? Center(child: Text('No history yet.', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))))
+            ? Center(
+                child: Text('No history yet.',
+                    style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context))))
             : ListView.builder(
                 controller: _scrollController,
                 itemCount: _historyItems.length + (_hasMoreData ? 1 : 0),
@@ -290,7 +344,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                   // Add date header for first entry or when date changes
                   if (i == 0) {
                     // Always show date header for the first entry
-                    final currentDate = DateTime.fromMillisecondsSinceEpoch(_historyItems[i]['timestamp']);
+                    final currentDate = DateTime.fromMillisecondsSinceEpoch(
+                        _historyItems[i]['timestamp']);
                     widgets.add(
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -308,10 +363,14 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                     );
                   } else {
                     // For subsequent entries, check if date changed from previous entry
-                    final currentDate = DateTime.fromMillisecondsSinceEpoch(_historyItems[i]['timestamp']);
-                    final previousDate = DateTime.fromMillisecondsSinceEpoch(_historyItems[i - 1]['timestamp']);
+                    final currentDate = DateTime.fromMillisecondsSinceEpoch(
+                        _historyItems[i]['timestamp']);
+                    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+                        _historyItems[i - 1]['timestamp']);
 
-                    if (currentDate.year != previousDate.year || currentDate.month != previousDate.month || currentDate.day != previousDate.day) {
+                    if (currentDate.year != previousDate.year ||
+                        currentDate.month != previousDate.month ||
+                        currentDate.day != previousDate.day) {
                       widgets.add(Divider());
                       widgets.add(
                         Padding(
@@ -332,13 +391,16 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                   }
 
                   final h = _historyItems[i];
-                  final dt = DateTime.fromMillisecondsSinceEpoch(h['timestamp']);
+                  final dt =
+                      DateTime.fromMillisecondsSinceEpoch(h['timestamp']);
                   final dateStr =
                       '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
                   // Convert short book name to full book name for display
                   final fullBookName = h['bookLongName'] as String;
-                  final locStr = h['verse'] != null && h['verse'] != 0 ? '$fullBookName ${h['chapter']}:${h['verse']}' : '$fullBookName ${h['chapter']}:1';
+                  final locStr = h['verse'] != null && h['verse'] != 0
+                      ? '$fullBookName ${h['chapter']}:${h['verse']}'
+                      : '$fullBookName ${h['chapter']}:1';
 
                   final listTile = ListTile(
                       leading: _isSelectMode
@@ -357,14 +419,26 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                           : null,
                       subtitle: Text.rich(
                         TextSpan(
-                          style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context)),
                           children: <TextSpan>[
                             TextSpan(
                               text: locStr,
-                              style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, fontWeight: FontWeight.bold, color: getAdaptiveTextColor(context)),
+                              style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  fontWeight: FontWeight.bold,
+                                  color: getAdaptiveTextColor(context)),
                             ),
                             const TextSpan(text: '\n'),
-                            TextSpan(text: dateStr, style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                            TextSpan(
+                                text: dateStr,
+                                style: TextStyle(
+                                    fontSize: uiFontSize,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context))),
                           ],
                         ),
                       ),
@@ -378,7 +452,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                                 }
                               });
                             }
-                          : () => _updateLocation(h['book'], h['chapter'], h['verse'] ?? 1),
+                          : () => _updateLocation(
+                              h['book'], h['chapter'], h['verse'] ?? 1),
                       onLongPress: _isSelectMode
                           ? () {
                               setState(() {
@@ -406,19 +481,25 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: _selectedItemIds.isEmpty ? null : _deleteSelectedItems,
+                    onPressed:
+                        _selectedItemIds.isEmpty ? null : _deleteSelectedItems,
                     child: Text(
                       'Delete Selected (${_selectedItemIds.length})',
                       style: TextStyle(
                         fontSize: uiFontSize,
                         fontFamily: uiFontFamily,
-                        color: _selectedItemIds.isEmpty ? Colors.grey : Colors.red,
+                        color:
+                            _selectedItemIds.isEmpty ? Colors.grey : Colors.red,
                       ),
                     ),
                   ),
                   TextButton(
                     onPressed: _toggleSelectMode,
-                    child: Text('Done', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                    child: Text('Done',
+                        style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context))),
                   ),
                 ],
               ),
@@ -429,17 +510,29 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog> with AutomaticK
                 children: [
                   TextButton(
                     onPressed: _clearHistory,
-                    child: Text('Clear', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: Colors.red)),
+                    child: Text('Clear',
+                        style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: Colors.red)),
                   ),
                   Row(
                     children: [
                       TextButton(
                         onPressed: _toggleSelectMode,
-                        child: Text('Select', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        child: Text('Select',
+                            style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context))),
                       ),
                       const SizedBox(width: 8),
                       TextButton(
-                        child: Text('Close', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context))),
+                        child: Text('Close',
+                            style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context))),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
