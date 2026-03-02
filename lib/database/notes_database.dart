@@ -137,6 +137,57 @@ class NotesDatabase {
     return null;
   }
 
+  static Future<int> upsertNoteFromSync({
+    required String book,
+    required int chapter,
+    required int verse,
+    required String noteText,
+    required int createdAt,
+    required int updatedAt,
+    String? uuid,
+  }) async {
+    final db = await getDatabase();
+
+    final byCreatedAt = await db.query('user_notes',
+        where: 'created_at = ?', whereArgs: [createdAt], limit: 1);
+    Map<String, dynamic>? existing =
+        byCreatedAt.isNotEmpty ? byCreatedAt.first : null;
+
+    existing ??= await getNoteForVerse(book, chapter, verse);
+
+    final noteData = {
+      'book': book,
+      'chapter': chapter,
+      'verse': verse,
+      'note_text': noteText,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'uuid': uuid ?? existing?['uuid'],
+    };
+
+    final isValid =
+        await DataValidation.validateBeforeDatabaseWrite(noteData, 'note');
+    if (!isValid) {
+      if (kDebugMode) {
+        debugPrint('upsertNoteFromSync rejected invalid note: $noteData');
+      }
+      throw Exception(
+          'Invalid note data - failed validation. Sync upsert rejected.');
+    }
+
+    if (existing != null) {
+      await db.update(
+        'user_notes',
+        noteData,
+        where: 'id = ?',
+        whereArgs: [existing['id']],
+      );
+      return existing['id'] as int;
+    }
+
+    return await db.insert('user_notes', noteData);
+  }
+
   static Future<int> addOrUpdateNote({
     required String book,
     required int chapter,
@@ -193,6 +244,7 @@ class NotesDatabase {
         {
           'note_text': noteText,
           'updated_at': updatedAt,
+          'uuid': uuid ?? existing['uuid'],
         },
         where: 'id = ?',
         whereArgs: [existing['id']],
@@ -211,6 +263,7 @@ class NotesDatabase {
           'note_text': noteText,
           'created_at': existing['created_at'],
           'updated_at': updatedAt,
+          'uuid': uuid ?? existing['uuid'],
         };
         SupabaseSyncService().markOperation(
             'note', existing['created_at'] as int, 'update', syncData);
@@ -234,6 +287,7 @@ class NotesDatabase {
           'note_text': noteText,
           'created_at': createdAt,
           'updated_at': updatedAt,
+          'uuid': uuid,
         };
         await SupabaseSyncService()
             .markOperation('note', createdAt.toInt(), 'create', syncData);

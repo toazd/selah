@@ -91,6 +91,20 @@ class SyncOperation {
   }
 }
 
+class SyncReconciliationAction {
+  final int localId;
+  final int naturalKey;
+  final String operation;
+  final String? uuid;
+
+  const SyncReconciliationAction({
+    required this.localId,
+    required this.naturalKey,
+    required this.operation,
+    this.uuid,
+  });
+}
+
 class SupabaseSyncService {
   /// Simple, fault-tolerant sync service for multi-device Bible study app.
   /// Uploads local changes immediately, downloads remote changes incrementally.
@@ -142,6 +156,50 @@ class SupabaseSyncService {
 
   // Get current user ID
   String? get _currentUserId => _supabase.auth.currentUser?.id;
+
+  @visibleForTesting
+  static List<SyncReconciliationAction> buildReconciliationActions({
+    required Iterable<Map<String, dynamic>> localRecords,
+    required Map<int, String> remoteUuidByNaturalKey,
+    required Set<int> pendingNaturalKeys,
+    required String naturalKeyColumn,
+  }) {
+    final actions = <SyncReconciliationAction>[];
+
+    for (final record in localRecords) {
+      final localId = record['id'] as int?;
+      final naturalKey = record[naturalKeyColumn] as int?;
+      if (localId == null || naturalKey == null) {
+        continue;
+      }
+
+      final localUuid = record['uuid'] as String?;
+      final remoteUuid = remoteUuidByNaturalKey[naturalKey];
+      final hasLocalUuid = localUuid != null && localUuid.isNotEmpty;
+
+      if (remoteUuid != null) {
+        if (!hasLocalUuid || localUuid != remoteUuid) {
+          actions.add(SyncReconciliationAction(
+            localId: localId,
+            naturalKey: naturalKey,
+            operation: 'repair_uuid',
+            uuid: remoteUuid,
+          ));
+        }
+        continue;
+      }
+
+      if (!pendingNaturalKeys.contains(naturalKey)) {
+        actions.add(SyncReconciliationAction(
+          localId: localId,
+          naturalKey: naturalKey,
+          operation: 'delete_local',
+        ));
+      }
+    }
+
+    return actions;
+  }
 
   Future<List<Map<String, dynamic>>> _fetchRemoteRows({
     required String table,
@@ -1730,11 +1788,17 @@ class SupabaseSyncService {
                 orElse: () => <String, dynamic>{});
             if (highlightToDelete.isNotEmpty) {
               await HighlightsDatabase.deleteHighlight(
-                  highlightToDelete['id'] as int);
+                  highlightToDelete['id'] as int,
+                  skipSync: true);
               LocalDataChangeNotifier.notifyHighlightsChanged();
               _highlightsChangedController?.add(null);
-            } else {}
-          } else {}
+            } else if (kDebugMode) {
+              debugPrint(
+                  'Realtime highlight delete could not match local UUID: $uuid');
+            }
+          } else if (kDebugMode) {
+            debugPrint('Realtime highlight delete payload missing UUID.');
+          }
           break;
         default:
       }
@@ -1781,10 +1845,16 @@ class SupabaseSyncService {
             final noteToDelete = localNotes.firstWhere((n) => n['uuid'] == uuid,
                 orElse: () => <String, dynamic>{});
             if (noteToDelete.isNotEmpty) {
-              await NotesDatabase.deleteNote(noteToDelete['id'] as int);
+              await NotesDatabase.deleteNote(noteToDelete['id'] as int,
+                  skipSync: true);
               LocalDataChangeNotifier.notifyNotesChanged();
               _notesChangedController?.add(null);
+            } else if (kDebugMode) {
+              debugPrint(
+                  'Realtime note delete could not match local UUID: $uuid');
             }
+          } else if (kDebugMode) {
+            debugPrint('Realtime note delete payload missing UUID.');
           }
           break;
         default:
@@ -1834,10 +1904,16 @@ class SupabaseSyncService {
                 orElse: () => <String, dynamic>{});
             if (historyToDelete.isNotEmpty) {
               await HistoryDatabase.deleteHistoryItem(
-                  historyToDelete['id'] as int);
+                  historyToDelete['id'] as int,
+                  skipSync: true);
               LocalDataChangeNotifier.notifyHistoryChanged();
               _historyChangedController?.add(null);
+            } else if (kDebugMode) {
+              debugPrint(
+                  'Realtime history delete could not match local UUID: $uuid');
             }
+          } else if (kDebugMode) {
+            debugPrint('Realtime history delete payload missing UUID.');
           }
           break;
         default:
@@ -1887,10 +1963,16 @@ class SupabaseSyncService {
                 orElse: () => <String, dynamic>{});
             if (searchHistoryToDelete.isNotEmpty) {
               await SearchDatabase.deleteSearchHistoryItem(
-                  searchHistoryToDelete['id'] as int);
+                  searchHistoryToDelete['id'] as int,
+                  skipSync: true);
               LocalDataChangeNotifier.notifySearchHistoryChanged();
               _searchHistoryChangedController?.add(null);
+            } else if (kDebugMode) {
+              debugPrint(
+                  'Realtime search_history delete could not match local UUID: $uuid');
             }
+          } else if (kDebugMode) {
+            debugPrint('Realtime search_history delete payload missing UUID.');
           }
           break;
         default:
@@ -2098,8 +2180,11 @@ class SupabaseSyncService {
       bool hasChanges = false;
       int processedCount = 0;
 
-      // Get local highlights - match by created_at timestamp only
       final localHighlights = await HighlightsDatabase.getHighlights();
+      final localByCreatedAt = <int, Map<String, dynamic>>{
+        for (final highlight in localHighlights)
+          highlight['created_at'] as int: Map<String, dynamic>.from(highlight),
+      };
 
       for (final data in docs) {
         // Validate data before processing
@@ -2118,58 +2203,62 @@ class SupabaseSyncService {
 
         final remoteTime = data['updated_at'] as int;
         final remoteCreatedAt = data['created_at'] as int;
+        final remoteUuid = data['id'] as String?;
 
-        // Match highlights by created_at timestamp
-        final localHighlight = localHighlights
-            .where((h) => h['created_at'] == remoteCreatedAt)
-            .firstOrNull;
+        final localHighlight = localByCreatedAt[remoteCreatedAt];
         final localTime = (localHighlight?['updated_at'] ??
             localHighlight?['created_at'] ??
             0) as int;
+        final shouldApplyRemote =
+            localHighlight == null || remoteTime > localTime;
+        final shouldRepairUuid = remoteUuid != null &&
+            remoteUuid.isNotEmpty &&
+            (localHighlight == null ||
+                (localHighlight['uuid'] as String?) != remoteUuid);
 
-        // Only update if remote is newer or new
-        if (localHighlight == null || remoteTime > localTime) {
-          final highlightData = Map<String, dynamic>.from({
-            'book': data['book'] as String,
-            'chapter': data['chapter'] as int,
-            'verse': data['verse'] as int,
-            'start': data['start'] as int,
-            'end': data['end'] as int,
-            'color': data['color'] as int,
-            'created_at': remoteCreatedAt,
-            'updated_at': remoteTime,
-            'uuid': data['id']
-                as String?, // Store Supabase UUID for delete operations
-          });
+        if (shouldApplyRemote || shouldRepairUuid) {
+          final highlightToPersist = shouldApplyRemote
+              ? {
+                  'book': data['book'] as String,
+                  'chapter': data['chapter'] as int,
+                  'verse': data['verse'] as int,
+                  'start': data['start'] as int,
+                  'end': data['end'] as int,
+                  'color': data['color'] as int,
+                  'created_at': remoteCreatedAt,
+                  'updated_at': remoteTime,
+                  'uuid': remoteUuid,
+                }
+              : {
+                  'book': localHighlight['book'] as String,
+                  'chapter': localHighlight['chapter'] as int,
+                  'verse': localHighlight['verse'] as int,
+                  'start': localHighlight['start'] as int,
+                  'end': localHighlight['end'] as int,
+                  'color': localHighlight['color'] as int,
+                  'created_at': localHighlight['created_at'] as int,
+                  'updated_at': localTime,
+                  'uuid': remoteUuid,
+                };
 
-          if (localHighlight == null) {
-            // New highlight - add to local
-            await HighlightsDatabase.addHighlight(
-              book: highlightData['book'],
-              chapter: highlightData['chapter'],
-              verse: highlightData['verse'],
-              start: highlightData['start'],
-              end: highlightData['end'],
-              color: highlightData['color'],
-              createdAt: highlightData['created_at'] as int,
-              updatedAt: highlightData['updated_at'] as int,
-              skipSync: true,
-              uuid: highlightData['uuid'],
-            );
-          } else {
-            // Update existing - use the local ID
-            await HighlightsDatabase.updateHighlight(
-              id: localHighlight['id'] as int,
-              start: highlightData['start'],
-              end: highlightData['end'],
-              color: highlightData['color'],
-              updateAt: highlightData['updated_at'] as int,
-            );
-          }
-
+          final localId = await HighlightsDatabase.upsertHighlightFromSync(
+            book: highlightToPersist['book'] as String,
+            chapter: highlightToPersist['chapter'] as int,
+            verse: highlightToPersist['verse'] as int,
+            start: highlightToPersist['start'] as int,
+            end: highlightToPersist['end'] as int,
+            color: highlightToPersist['color'] as int,
+            createdAt: highlightToPersist['created_at'] as int,
+            updatedAt: highlightToPersist['updated_at'] as int,
+            uuid: highlightToPersist['uuid'] as String?,
+          );
+          localByCreatedAt[remoteCreatedAt] = {
+            ...highlightToPersist,
+            'id': localId,
+          };
           hasChanges = true;
           processedCount++;
-        } else {}
+        }
       }
 
       // Only notify if there were actual changes
@@ -2193,6 +2282,16 @@ class SupabaseSyncService {
     try {
       bool hasChanges = false;
       int processedCount = 0;
+      final localNotes = await NotesDatabase.getNotes();
+      final localByCreatedAt = <int, Map<String, dynamic>>{
+        for (final note in localNotes)
+          note['created_at'] as int: Map<String, dynamic>.from(note),
+      };
+      final localByVerse = <String, Map<String, dynamic>>{
+        for (final note in localNotes)
+          '${note['book']}:${note['chapter']}:${note['verse']}':
+              Map<String, dynamic>.from(note),
+      };
 
       for (final data in docs) {
         // Validate data before processing
@@ -2216,26 +2315,59 @@ class SupabaseSyncService {
         final book = data['book'] as String;
         final chapter = data['chapter'] as int;
         final verse = data['verse'] as int;
-        final noteText = data['note_text'] as String;
+        final noteText =
+            NoteStorageFormat.ensureDeltaFormat(data['note_text'] as String);
+        final createdAt = data['created_at'] as int;
+        final remoteUuid = data['id'] as String?;
+        final verseKey = '$book:$chapter:$verse';
 
-        final localNote =
-            await NotesDatabase.getNoteForVerse(book, chapter, verse);
+        final localNote = localByCreatedAt[createdAt] ?? localByVerse[verseKey];
         final localTime =
             (localNote?['updated_at'] ?? localNote?['created_at'] ?? 0) as int;
+        final shouldApplyRemote = localNote == null || remoteTime > localTime;
+        final shouldRepairUuid = remoteUuid != null &&
+            remoteUuid.isNotEmpty &&
+            localNote != null &&
+            (localNote['uuid'] as String?) != remoteUuid;
 
-        if (localNote == null || remoteTime > localTime) {
-          // Convert to Delta format before storing
-          final deltaNoteText = NoteStorageFormat.ensureDeltaFormat(noteText);
+        if (shouldApplyRemote || shouldRepairUuid) {
+          final noteToPersist = shouldApplyRemote
+              ? {
+                  'book': book,
+                  'chapter': chapter,
+                  'verse': verse,
+                  'note_text': noteText,
+                  'created_at': createdAt,
+                  'updated_at': remoteTime,
+                  'uuid': remoteUuid,
+                }
+              : {
+                  'book': localNote['book'] as String,
+                  'chapter': localNote['chapter'] as int,
+                  'verse': localNote['verse'] as int,
+                  'note_text': localNote['note_text'] as String,
+                  'created_at': localNote['created_at'] as int,
+                  'updated_at': localTime,
+                  'uuid': remoteUuid,
+                };
 
-          await NotesDatabase.addOrUpdateNote(
-              book: book,
-              chapter: chapter,
-              verse: verse,
-              noteText: deltaNoteText,
-              createdAt: data['created_at'] as int,
-              skipSync: true,
-              uuid: data['id']
-                  as String?); // Store Supabase UUID for delete operations
+          final localId = await NotesDatabase.upsertNoteFromSync(
+            book: noteToPersist['book'] as String,
+            chapter: noteToPersist['chapter'] as int,
+            verse: noteToPersist['verse'] as int,
+            noteText: noteToPersist['note_text'] as String,
+            createdAt: noteToPersist['created_at'] as int,
+            updatedAt: noteToPersist['updated_at'] as int,
+            uuid: noteToPersist['uuid'] as String?,
+          );
+          localByCreatedAt[noteToPersist['created_at'] as int] = {
+            ...noteToPersist,
+            'id': localId,
+          };
+          localByVerse[verseKey] = {
+            ...noteToPersist,
+            'id': localId,
+          };
           hasChanges = true;
           processedCount++;
         }
@@ -2260,10 +2392,12 @@ class SupabaseSyncService {
   // Download history from Supabase to local database
   Future<void> _downloadHistory(List<Map<String, dynamic>> docs) async {
     try {
-      // Get all local history once for efficiency
       final localHistory = await HistoryDatabase.getHistory();
-      final localTimestamps =
-          Set<int>.from(localHistory.map((h) => h['timestamp'] as int));
+      final localByTimestamp = <int, Map<String, dynamic>>{
+        for (final historyItem in localHistory)
+          historyItem['timestamp'] as int:
+              Map<String, dynamic>.from(historyItem),
+      };
 
       bool hasChanges = false;
       int processedCount = 0;
@@ -2283,19 +2417,31 @@ class SupabaseSyncService {
         }
 
         final remoteTime = (data['timestamp'] ?? 0) as int;
+        final remoteUuid = data['id'] as String?;
+        final localHistoryItem = localByTimestamp[remoteTime];
+        final shouldUpsert = localHistoryItem == null ||
+            (remoteUuid != null &&
+                remoteUuid.isNotEmpty &&
+                (localHistoryItem['uuid'] as String?) != remoteUuid) ||
+            localHistoryItem['book'] != data['book'] ||
+            localHistoryItem['chapter'] != data['chapter'] ||
+            localHistoryItem['verse'] != data['verse'];
 
-        // Only add remote history if no local item exists with exact same timestamp
-        // If timestamps match, local takes precedence (no duplicate entries)
-        if (!localTimestamps.contains(remoteTime)) {
-          // Add remote history item with exact remote timestamp
-          await HistoryDatabase.addHistory(
+        if (shouldUpsert) {
+          await HistoryDatabase.upsertHistoryFromSync(
             data['book'] as String,
             data['chapter'] as int,
             data['verse'] as int?,
             remoteTime,
-            true,
-            uuid: data['id'] as String?,
+            uuid: remoteUuid,
           );
+          localByTimestamp[remoteTime] = {
+            'book': data['book'],
+            'chapter': data['chapter'],
+            'verse': data['verse'],
+            'timestamp': remoteTime,
+            'uuid': remoteUuid,
+          };
           hasChanges = true;
           processedCount++;
         }
@@ -2320,10 +2466,11 @@ class SupabaseSyncService {
   // Download search history from Supabase to local database
   Future<void> _downloadSearchHistory(List<Map<String, dynamic>> docs) async {
     try {
-      // Get all local search history once for efficiency
       final localSearchHistory = await SearchDatabase.getSearchHistory();
-      final localTimestamps =
-          Set<int>.from(localSearchHistory.map((h) => h['timestamp'] as int));
+      final localByTimestamp = <int, Map<String, dynamic>>{
+        for (final item in localSearchHistory)
+          item['timestamp'] as int: Map<String, dynamic>.from(item),
+      };
 
       bool hasChanges = false;
       int processedCount = 0;
@@ -2343,14 +2490,26 @@ class SupabaseSyncService {
         }
 
         final remoteTime = (data['timestamp'] ?? 0) as int;
+        final remoteUuid = data['id'] as String?;
+        final localSearchHistoryItem = localByTimestamp[remoteTime];
+        final shouldUpsert = localSearchHistoryItem == null ||
+            (remoteUuid != null &&
+                remoteUuid.isNotEmpty &&
+                (localSearchHistoryItem['uuid'] as String?) != remoteUuid) ||
+            localSearchHistoryItem['query'] != data['query'] ||
+            localSearchHistoryItem['useRegex'] != data['useRegex'] ||
+            localSearchHistoryItem['useNearby'] != data['useNearby'] ||
+            localSearchHistoryItem['useWholeWord'] != data['useWholeWord'] ||
+            localSearchHistoryItem['useRedLetter'] != data['useRedLetter'] ||
+            localSearchHistoryItem['caseSensitive'] != data['caseSensitive'] ||
+            localSearchHistoryItem['bookFilterType'] !=
+                data['bookFilterType'] ||
+            localSearchHistoryItem['customBookFilter'] !=
+                data['customBookFilter'];
 
-        // Only add remote search history if no local item exists with exact same timestamp
-        // If timestamps match, local takes precedence (no duplicate entries)
-        if (!localTimestamps.contains(remoteTime)) {
-          // Add remote search history item with exact remote timestamp and query
-          // Use actual search options from remote data
+        if (shouldUpsert) {
           try {
-            await SearchDatabase.addSearchHistory(
+            await SearchDatabase.upsertSearchHistoryFromSync(
               data['query'] as String,
               data['useRegex'] as bool,
               data['useNearby'] as bool,
@@ -2360,16 +2519,27 @@ class SupabaseSyncService {
               data['bookFilterType'] as String,
               data['customBookFilter'] as String,
               remoteTime,
-              skipSync: true, // Add skipSync to prevent feedback loops
-              uuid: data['id'] as String?,
+              uuid: remoteUuid,
             );
+            localByTimestamp[remoteTime] = {
+              'query': data['query'],
+              'useRegex': data['useRegex'],
+              'useNearby': data['useNearby'],
+              'useWholeWord': data['useWholeWord'],
+              'useRedLetter': data['useRedLetter'],
+              'caseSensitive': data['caseSensitive'],
+              'bookFilterType': data['bookFilterType'],
+              'customBookFilter': data['customBookFilter'],
+              'timestamp': remoteTime,
+              'uuid': remoteUuid,
+            };
             hasChanges = true;
             processedCount++;
           } catch (e) {
             ErrorHandler.logError(
               e,
               customMessage:
-                  '_downloadSearchHistory addSearchHistory exception',
+                  '_downloadSearchHistory upsertSearchHistoryFromSync exception',
             );
           }
         }
@@ -2396,34 +2566,58 @@ class SupabaseSyncService {
     if (_currentUserId == null) return;
 
     try {
-      // Get all remote UUIDs
+      final naturalKeyColumn = _getNaturalKeyColumn(type);
+
+      // Get all remote UUIDs plus the natural sync key for reconciliation.
       final remoteResponse = await _fetchRemoteRows(
         table: _getTableName(type),
-        columns: 'id',
-        orderColumn: 'id',
+        columns: 'id, $naturalKeyColumn',
+        orderColumn: naturalKeyColumn,
       );
-      final remoteUuids =
-          Set<String>.from(remoteResponse.map((r) => r['id'] as String));
+      final remoteUuidByNaturalKey = <int, String>{};
+      for (final record in remoteResponse) {
+        final naturalKey = record[naturalKeyColumn] as int?;
+        final uuid = record['id'] as String?;
+        if (naturalKey != null && uuid != null && uuid.isNotEmpty) {
+          remoteUuidByNaturalKey[naturalKey] = uuid;
+        }
+      }
 
-      // Get local records with UUIDs
       final localRecords = await _getLocalRecords(type);
-      final localRecordsWithUuid = localRecords
-          .where((r) => r['uuid'] != null && (r['uuid'] as String).isNotEmpty)
-          .toList();
-      final localUuids = Set<String>.from(
-          localRecordsWithUuid.map((r) => r['uuid'] as String));
+      final pendingNaturalKeys = _getPendingNaturalKeys(type);
+      final actions = buildReconciliationActions(
+        localRecords: localRecords,
+        remoteUuidByNaturalKey: remoteUuidByNaturalKey,
+        pendingNaturalKeys: pendingNaturalKeys,
+        naturalKeyColumn: naturalKeyColumn,
+      );
 
-      // Find deleted: local UUIDs not in remote
-      final deletedUuids = localUuids.difference(remoteUuids);
+      if (actions.isNotEmpty) {
+        for (final action in actions) {
+          final localRecord = localRecords.firstWhere(
+              (record) => record['id'] == action.localId,
+              orElse: () => <String, dynamic>{});
+          if (localRecord.isEmpty) {
+            continue;
+          }
 
-      if (deletedUuids.isNotEmpty) {
-        for (final uuid in deletedUuids) {
-          final record =
-              localRecordsWithUuid.firstWhere((r) => r['uuid'] == uuid);
-          await _deleteLocalRecord(type, record['id'] as int);
+          if (action.operation == 'repair_uuid' &&
+              action.uuid != null &&
+              action.uuid!.isNotEmpty) {
+            await _repairLocalRecordUuid(type, localRecord, action.uuid!);
+            if (kDebugMode) {
+              debugPrint(
+                  'Reconciled missing/stale UUID for $type naturalKey=${action.naturalKey}');
+            }
+          } else if (action.operation == 'delete_local') {
+            await _deleteLocalRecord(type, action.localId);
+            if (kDebugMode) {
+              debugPrint(
+                  'Deleted stale local $type record during reconciliation naturalKey=${action.naturalKey}');
+            }
+          }
         }
 
-        // Notify UI of changes
         _notifyChange(type);
       }
     } catch (e) {
@@ -2451,6 +2645,19 @@ class SupabaseSyncService {
     }
   }
 
+  String _getNaturalKeyColumn(String type) {
+    switch (type) {
+      case 'highlight':
+      case 'note':
+        return 'created_at';
+      case 'history':
+      case 'search_history':
+        return 'timestamp';
+      default:
+        throw ArgumentError('Unknown type: $type');
+    }
+  }
+
   // Helper: Get local records for type
   Future<List<Map<String, dynamic>>> _getLocalRecords(String type) async {
     switch (type) {
@@ -2467,20 +2674,103 @@ class SupabaseSyncService {
     }
   }
 
+  Set<int> _getPendingNaturalKeys(String type) {
+    if (_currentUserId == null) return <int>{};
+
+    final pendingNaturalKeys = <int>{};
+    final queues = [
+      ..._highlightsPendingQueue,
+      ..._notesPendingQueue,
+      ..._historyPendingQueue,
+      ..._searchHistoryPendingQueue,
+      ..._retryQueue,
+    ];
+
+    for (final operation in queues) {
+      if (operation.type != type ||
+          (operation.userId ?? _currentUserId) != _currentUserId ||
+          (operation.operation != 'create' &&
+              operation.operation != 'update')) {
+        continue;
+      }
+
+      final keyColumn = _getNaturalKeyColumn(type);
+      final naturalKey = operation.data[keyColumn] as int?;
+      if (naturalKey != null) {
+        pendingNaturalKeys.add(naturalKey);
+      }
+    }
+
+    return pendingNaturalKeys;
+  }
+
+  Future<void> _repairLocalRecordUuid(
+      String type, Map<String, dynamic> localRecord, String uuid) async {
+    switch (type) {
+      case 'highlight':
+        await HighlightsDatabase.upsertHighlightFromSync(
+          book: localRecord['book'] as String,
+          chapter: localRecord['chapter'] as int,
+          verse: localRecord['verse'] as int,
+          start: localRecord['start'] as int,
+          end: localRecord['end'] as int,
+          color: localRecord['color'] as int,
+          createdAt: localRecord['created_at'] as int,
+          updatedAt: localRecord['updated_at'] as int,
+          uuid: uuid,
+        );
+        break;
+      case 'note':
+        await NotesDatabase.upsertNoteFromSync(
+          book: localRecord['book'] as String,
+          chapter: localRecord['chapter'] as int,
+          verse: localRecord['verse'] as int,
+          noteText: localRecord['note_text'] as String,
+          createdAt: localRecord['created_at'] as int,
+          updatedAt: localRecord['updated_at'] as int,
+          uuid: uuid,
+        );
+        break;
+      case 'history':
+        await HistoryDatabase.upsertHistoryFromSync(
+          localRecord['book'] as String,
+          localRecord['chapter'] as int,
+          localRecord['verse'] as int?,
+          localRecord['timestamp'] as int,
+          uuid: uuid,
+        );
+        break;
+      case 'search_history':
+        await SearchDatabase.upsertSearchHistoryFromSync(
+          localRecord['query'] as String,
+          localRecord['useRegex'] as bool,
+          localRecord['useNearby'] as bool,
+          localRecord['useWholeWord'] as bool,
+          localRecord['useRedLetter'] as bool,
+          localRecord['caseSensitive'] as bool,
+          localRecord['bookFilterType'] as String,
+          localRecord['customBookFilter'] as String,
+          localRecord['timestamp'] as int,
+          uuid: uuid,
+        );
+        break;
+    }
+  }
+
   // Helper: Delete local record by type and id
   Future<void> _deleteLocalRecord(String type, int id) async {
     switch (type) {
       case 'highlight':
-        await HighlightsDatabase.deleteHighlight(id);
+        await HighlightsDatabase.deleteHighlight(id, skipSync: true);
         break;
       case 'note':
-        await NotesDatabase.deleteNote(id);
+        await NotesDatabase.deleteNote(id, skipSync: true);
         break;
       case 'history':
-        await HistoryDatabase.deleteHistoryItem(id);
+        await HistoryDatabase.deleteHistoryItem(id, skipSync: true);
         break;
       case 'search_history':
-        await SearchDatabase.deleteSearchHistoryItem(id);
+        await SearchDatabase.deleteSearchHistoryItem(id, skipSync: true);
         break;
     }
   }
@@ -2546,14 +2836,17 @@ class SupabaseSyncService {
       final supabaseUuid = response?['id'] as String?;
       if (supabaseUuid != null &&
           (highlight['uuid'] == null || highlight['uuid'].isEmpty)) {
-        // Update the local highlight with the UUID from Supabase
-        await HighlightsDatabase.updateHighlight(
-            id: highlight['id'] as int,
-            start: highlight['start'] as int,
-            end: highlight['end'] as int,
-            color: highlight['color'] as int,
-            updateAt: highlight['updated_at'] as int,
-            uuid: supabaseUuid);
+        await HighlightsDatabase.upsertHighlightFromSync(
+          book: highlight['book'] as String,
+          chapter: highlight['chapter'] as int,
+          verse: highlight['verse'] as int,
+          start: highlight['start'] as int,
+          end: highlight['end'] as int,
+          color: highlight['color'] as int,
+          createdAt: highlight['created_at'] as int,
+          updatedAt: highlight['updated_at'] as int,
+          uuid: supabaseUuid,
+        );
       }
     } catch (e) {
       ErrorHandler.logError(
@@ -2657,14 +2950,17 @@ class SupabaseSyncService {
               orElse: () => <String, dynamic>{});
 
           if (localHighlight.isNotEmpty && supabaseUuid != null) {
-            // Update the local highlight with the UUID from Supabase
-            await HighlightsDatabase.updateHighlight(
-                id: localHighlight['id'] as int,
-                start: localHighlight['start'] as int,
-                end: localHighlight['end'] as int,
-                color: localHighlight['color'] as int,
-                updateAt: localHighlight['updated_at'] as int,
-                uuid: supabaseUuid);
+            await HighlightsDatabase.upsertHighlightFromSync(
+              book: localHighlight['book'] as String,
+              chapter: localHighlight['chapter'] as int,
+              verse: localHighlight['verse'] as int,
+              start: localHighlight['start'] as int,
+              end: localHighlight['end'] as int,
+              color: localHighlight['color'] as int,
+              createdAt: localHighlight['created_at'] as int,
+              updatedAt: localHighlight['updated_at'] as int,
+              uuid: supabaseUuid,
+            );
           }
         }
       } catch (e) {
@@ -2839,15 +3135,15 @@ class SupabaseSyncService {
       final supabaseUuid = response?['id'] as String?;
       if (supabaseUuid != null &&
           (note['uuid'] == null || note['uuid'].isEmpty)) {
-        // Update the local note with the UUID from Supabase
-        await NotesDatabase.addOrUpdateNote(
-            book: note['book'] as String,
-            chapter: note['chapter'] as int,
-            verse: note['verse'] as int,
-            noteText: note['note_text'] as String,
-            createdAt: note['created_at'] as int,
-            skipSync: true,
-            uuid: supabaseUuid);
+        await NotesDatabase.upsertNoteFromSync(
+          book: note['book'] as String,
+          chapter: note['chapter'] as int,
+          verse: note['verse'] as int,
+          noteText: note['note_text'] as String,
+          createdAt: note['created_at'] as int,
+          updatedAt: note['updated_at'] as int,
+          uuid: supabaseUuid,
+        );
       }
     } catch (e) {
       ErrorHandler.logError(
@@ -2958,15 +3254,15 @@ class SupabaseSyncService {
               orElse: () => <String, dynamic>{});
 
           if (localNote.isNotEmpty && supabaseUuid != null) {
-            // Update the local note with the UUID from Supabase
-            await NotesDatabase.addOrUpdateNote(
-                book: localNote['book'] as String,
-                chapter: localNote['chapter'] as int,
-                verse: localNote['verse'] as int,
-                noteText: localNote['note_text'] as String,
-                createdAt: localNote['created_at'] as int,
-                skipSync: true,
-                uuid: supabaseUuid);
+            await NotesDatabase.upsertNoteFromSync(
+              book: localNote['book'] as String,
+              chapter: localNote['chapter'] as int,
+              verse: localNote['verse'] as int,
+              noteText: localNote['note_text'] as String,
+              createdAt: localNote['created_at'] as int,
+              updatedAt: localNote['updated_at'] as int,
+              uuid: supabaseUuid,
+            );
           }
         }
       } catch (e) {
@@ -3211,19 +3507,18 @@ class SupabaseSyncService {
               orElse: () => <String, dynamic>{});
 
           if (localSearchHistoryItem.isNotEmpty && supabaseUuid != null) {
-            // Update the local search history item with the UUID from Supabase
-            await SearchDatabase.addSearchHistory(
-                localSearchHistoryItem['query'] as String,
-                localSearchHistoryItem['useRegex'] as bool,
-                localSearchHistoryItem['useNearby'] as bool,
-                localSearchHistoryItem['useWholeWord'] as bool,
-                localSearchHistoryItem['useRedLetter'] as bool,
-                localSearchHistoryItem['caseSensitive'] as bool,
-                localSearchHistoryItem['bookFilterType'] as String,
-                localSearchHistoryItem['customBookFilter'] as String,
-                localSearchHistoryItem['timestamp'] as int,
-                skipSync: true, // skipSync to avoid recursion
-                uuid: supabaseUuid);
+            await SearchDatabase.upsertSearchHistoryFromSync(
+              localSearchHistoryItem['query'] as String,
+              localSearchHistoryItem['useRegex'] as bool,
+              localSearchHistoryItem['useNearby'] as bool,
+              localSearchHistoryItem['useWholeWord'] as bool,
+              localSearchHistoryItem['useRedLetter'] as bool,
+              localSearchHistoryItem['caseSensitive'] as bool,
+              localSearchHistoryItem['bookFilterType'] as String,
+              localSearchHistoryItem['customBookFilter'] as String,
+              localSearchHistoryItem['timestamp'] as int,
+              uuid: supabaseUuid,
+            );
           }
         }
       } catch (e) {
@@ -3385,14 +3680,13 @@ class SupabaseSyncService {
       final supabaseUuid = response?['id'] as String?;
       if (supabaseUuid != null &&
           (historyItem['uuid'] == null || historyItem['uuid'].isEmpty)) {
-        // Update the local history item with the UUID from Supabase
-        await HistoryDatabase.addHistory(
-            historyItem['book'] as String,
-            historyItem['chapter'] as int,
-            historyItem['verse'] as int?,
-            historyItem['timestamp'] as int,
-            true, // skipSync to avoid recursion
-            uuid: supabaseUuid);
+        await HistoryDatabase.upsertHistoryFromSync(
+          historyItem['book'] as String,
+          historyItem['chapter'] as int,
+          historyItem['verse'] as int?,
+          historyItem['timestamp'] as int,
+          uuid: supabaseUuid,
+        );
       }
     } catch (e) {
       ErrorHandler.logError(
@@ -3499,14 +3793,13 @@ class SupabaseSyncService {
               orElse: () => <String, dynamic>{});
 
           if (localHistoryItem.isNotEmpty && supabaseUuid != null) {
-            // Update the local history item with the UUID from Supabase
-            await HistoryDatabase.addHistory(
-                localHistoryItem['book'] as String,
-                localHistoryItem['chapter'] as int,
-                localHistoryItem['verse'] as int?,
-                localHistoryItem['timestamp'] as int,
-                true, // skipSync to avoid recursion
-                uuid: supabaseUuid);
+            await HistoryDatabase.upsertHistoryFromSync(
+              localHistoryItem['book'] as String,
+              localHistoryItem['chapter'] as int,
+              localHistoryItem['verse'] as int?,
+              localHistoryItem['timestamp'] as int,
+              uuid: supabaseUuid,
+            );
           }
         }
       } catch (e) {
@@ -4343,19 +4636,18 @@ class SupabaseSyncService {
       if (supabaseUuid != null &&
           (searchHistoryItem['uuid'] == null ||
               searchHistoryItem['uuid'].isEmpty)) {
-        // Update the local search history item with the UUID from Supabase
-        await SearchDatabase.addSearchHistory(
-            searchHistoryItem['query'] as String,
-            searchHistoryItem['useRegex'] as bool,
-            searchHistoryItem['useNearby'] as bool,
-            searchHistoryItem['useWholeWord'] as bool,
-            searchHistoryItem['useRedLetter'] as bool,
-            searchHistoryItem['caseSensitive'] as bool,
-            searchHistoryItem['bookFilterType'] as String,
-            searchHistoryItem['customBookFilter'] as String,
-            searchHistoryItem['timestamp'] as int,
-            skipSync: true, // skipSync to avoid recursion
-            uuid: supabaseUuid);
+        await SearchDatabase.upsertSearchHistoryFromSync(
+          searchHistoryItem['query'] as String,
+          searchHistoryItem['useRegex'] as bool,
+          searchHistoryItem['useNearby'] as bool,
+          searchHistoryItem['useWholeWord'] as bool,
+          searchHistoryItem['useRedLetter'] as bool,
+          searchHistoryItem['caseSensitive'] as bool,
+          searchHistoryItem['bookFilterType'] as String,
+          searchHistoryItem['customBookFilter'] as String,
+          searchHistoryItem['timestamp'] as int,
+          uuid: supabaseUuid,
+        );
       }
     } catch (e) {
       ErrorHandler.logError(

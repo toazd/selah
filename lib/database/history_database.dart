@@ -309,8 +309,60 @@ class HistoryDatabase {
     // If an existing entry was found, skip adding this duplicate
   }
 
+  static Future<void> upsertHistoryFromSync(
+      String book, int chapter, int? verse, int timestamp,
+      {String? uuid}) async {
+    final historyData = {
+      'book': book,
+      'chapter': chapter,
+      'verse': verse,
+      'timestamp': timestamp,
+      'uuid': uuid,
+    };
+
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        historyData, 'history');
+    if (!isValid) {
+      if (kDebugMode) {
+        debugPrint(
+            'upsertHistoryFromSync rejected invalid history item: $historyData');
+      }
+      throw Exception(
+          'Invalid history data - failed validation. Sync upsert rejected.');
+    }
+
+    final db = await getDatabase();
+    final existing = await db.query(historyTable,
+        where: '$colTimestamp = ?', whereArgs: [timestamp], limit: 1);
+
+    if (existing.isNotEmpty) {
+      await db.update(
+        historyTable,
+        {
+          colBook: book,
+          colChapter: chapter,
+          colVerse: verse,
+          colTimestamp: timestamp,
+          'uuid': uuid ?? existing.first['uuid'],
+        },
+        where: '$colId = ?',
+        whereArgs: [existing.first[colId]],
+      );
+      return;
+    }
+
+    await db.insert(historyTable, {
+      colBook: book,
+      colChapter: chapter,
+      colVerse: verse,
+      colTimestamp: timestamp,
+      'uuid': uuid,
+    });
+  }
+
   // Delete history item
-  static Future<void> deleteHistoryItem(int id, {String? uuid}) async {
+  static Future<void> deleteHistoryItem(int id,
+      {bool skipSync = false, String? uuid}) async {
     try {
       // Get the history item data before deletion for sync
       final db = await getDatabase();
@@ -322,12 +374,14 @@ class HistoryDatabase {
         await db.delete(historyTable, where: '$colId = ?', whereArgs: [id]);
 
         // Queue delete operation for sync service
-        final historyData = Map<String, dynamic>.from(historyItem.first);
-        if (uuid != null) {
-          historyData['uuid'] = uuid;
+        if (!skipSync) {
+          final historyData = Map<String, dynamic>.from(historyItem.first);
+          if (uuid != null) {
+            historyData['uuid'] = uuid;
+          }
+          SupabaseSyncService().markOperation('history',
+              historyData['timestamp'] as int, 'delete', historyData);
         }
-        SupabaseSyncService().markOperation(
-            'history', historyData['timestamp'] as int, 'delete', historyData);
       }
     } catch (e) {
       ErrorHandler.logError(

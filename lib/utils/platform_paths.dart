@@ -4,8 +4,19 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PlatformPaths {
+  static String? _userDataDirectoryOverride;
+
+  @visibleForTesting
+  static void debugSetUserDataDirectoryOverride(String? path) {
+    _userDataDirectoryOverride = path;
+  }
+
   // Get the appropriate user data directory for the current platform
   static Future<String> getUserDataDirectory() async {
+    if (_userDataDirectoryOverride != null) {
+      return _userDataDirectoryOverride!;
+    }
+
     if (kIsWeb) {
       // Web: Use browser's local storage (handled by Flutter)
       return 'web_storage';

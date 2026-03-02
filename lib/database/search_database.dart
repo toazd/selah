@@ -330,6 +330,81 @@ class SearchDatabase {
     await Future.delayed(Duration(milliseconds: 1));
   }
 
+  static Future<void> upsertSearchHistoryFromSync(
+    String query,
+    bool useRegex,
+    bool useNearby,
+    bool useWholeWord,
+    bool useRedLetter,
+    bool caseSensitive,
+    String bookFilterType,
+    String customBookFilter,
+    int timestamp, {
+    String? uuid,
+  }) async {
+    final searchHistoryData = {
+      'query': query,
+      'useRegex': useRegex,
+      'useNearby': useNearby,
+      'useWholeWord': useWholeWord,
+      'useRedLetter': useRedLetter,
+      'caseSensitive': caseSensitive,
+      'bookFilterType': bookFilterType,
+      'customBookFilter': customBookFilter,
+      'timestamp': timestamp,
+      'uuid': uuid,
+    };
+
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        searchHistoryData, 'search_history');
+    if (!isValid) {
+      if (kDebugMode) {
+        debugPrint(
+            'upsertSearchHistoryFromSync rejected invalid search history item: $searchHistoryData');
+      }
+      throw Exception(
+          'Invalid search history data - failed validation. Sync upsert rejected.');
+    }
+
+    final db = await getDatabase();
+    final existing = await db.query(searchHistoryTable,
+        where: '$colTimestamp = ?', whereArgs: [timestamp], limit: 1);
+
+    if (existing.isNotEmpty) {
+      await db.update(
+        searchHistoryTable,
+        {
+          colQuery: query,
+          colUseRegex: useRegex ? 1 : 0,
+          colUseNearby: useNearby ? 1 : 0,
+          colUseWholeWord: useWholeWord ? 1 : 0,
+          colUseRedLetter: useRedLetter ? 1 : 0,
+          colCaseSensitive: caseSensitive ? 1 : 0,
+          colBookFilterType: bookFilterType,
+          colCustomBookFilter: customBookFilter,
+          colTimestamp: timestamp,
+          'uuid': uuid ?? existing.first['uuid'],
+        },
+        where: '$colId = ?',
+        whereArgs: [existing.first[colId]],
+      );
+      return;
+    }
+
+    await db.insert(searchHistoryTable, {
+      colQuery: query,
+      colUseRegex: useRegex ? 1 : 0,
+      colUseNearby: useNearby ? 1 : 0,
+      colUseWholeWord: useWholeWord ? 1 : 0,
+      colUseRedLetter: useRedLetter ? 1 : 0,
+      colCaseSensitive: caseSensitive ? 1 : 0,
+      colBookFilterType: bookFilterType,
+      colCustomBookFilter: customBookFilter,
+      colTimestamp: timestamp,
+      'uuid': uuid,
+    });
+  }
+
   // Delete search history item
   static Future<void> deleteSearchHistoryItem(int id,
       {skipSync = false, String? uuid}) async {

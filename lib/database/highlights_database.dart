@@ -239,6 +239,68 @@ class HighlightsDatabase {
     return id;
   }
 
+  static Future<int> upsertHighlightFromSync({
+    required String book,
+    required int chapter,
+    required int verse,
+    required int start,
+    required int end,
+    required int color,
+    required int createdAt,
+    required int updatedAt,
+    String? uuid,
+  }) async {
+    final highlightData = {
+      'book': book,
+      'chapter': chapter,
+      'verse': verse,
+      'start': start,
+      'end': end,
+      'color': color,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'uuid': uuid,
+    };
+
+    final isValid = await DataValidation.validateBeforeDatabaseWrite(
+        highlightData, 'highlight');
+    if (!isValid) {
+      if (kDebugMode) {
+        debugPrint(
+            'upsertHighlightFromSync rejected invalid highlight: $highlightData');
+      }
+      throw Exception(
+          'Invalid highlight data - failed validation. Sync upsert rejected.');
+    }
+
+    final db = await getDatabase();
+    final existing = await db.query('user_highlights',
+        where: 'created_at = ?', whereArgs: [createdAt], limit: 1);
+
+    if (existing.isNotEmpty) {
+      final existingData = existing.first;
+      await db.update(
+        'user_highlights',
+        {
+          'book': book,
+          'chapter': chapter,
+          'verse': verse,
+          'start': start,
+          'end': end,
+          'color': color,
+          'created_at': createdAt,
+          'updated_at': updatedAt,
+          'uuid': uuid ?? existingData['uuid'],
+        },
+        where: 'id = ?',
+        whereArgs: [existingData['id']],
+      );
+      return existingData['id'] as int;
+    }
+
+    return await db.insert('user_highlights', highlightData);
+  }
+
   static Future<void> updateHighlight({
     required int id,
     required int start,
@@ -246,6 +308,7 @@ class HighlightsDatabase {
     required int color,
     int? updateAt,
     String? uuid,
+    bool skipSync = false,
   }) async {
     final timestamp = updateAt ?? DateTime.now().millisecondsSinceEpoch;
 
@@ -305,11 +368,14 @@ class HighlightsDatabase {
       'created_at': existingData['created_at'],
       'uuid': uuid ?? existingData['uuid'],
     };
-    SupabaseSyncService().markOperation('highlight',
-        existingData['created_at'] as int, 'update', highlightData);
+    if (!skipSync) {
+      SupabaseSyncService().markOperation('highlight',
+          existingData['created_at'] as int, 'update', highlightData);
+    }
   }
 
-  static Future<void> deleteHighlight(int id, {String? uuid}) async {
+  static Future<void> deleteHighlight(int id,
+      {bool skipSync = false, String? uuid}) async {
     // Get the highlight data before deletion for sync
     final db = await getDatabase();
     final highlightToDelete =
@@ -319,7 +385,7 @@ class HighlightsDatabase {
     await db.delete('user_highlights', where: 'id = ?', whereArgs: [id]);
 
     // Queue delete operation for sync service
-    if (highlightToDelete.isNotEmpty) {
+    if (!skipSync && highlightToDelete.isNotEmpty) {
       final data = Map<String, dynamic>.from(highlightToDelete.first);
       if (uuid != null) {
         data['uuid'] = uuid;
