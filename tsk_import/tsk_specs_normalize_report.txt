@@ -1,0 +1,12 @@
+Input: /run/media/wmcdannell/F4A81646A81607AE/Users/wmcda/Documents/Bible Study/Apps/Selah_dev/selah/lib/data/tsk_data_specs.dart
+Output: /run/media/wmcdannell/F4A81646A81607AE/Users/wmcda/Documents/Bible Study/Apps/Selah_dev/selah/lib/data/tsk_data_specs.dart
+Converted tokens: 597
+Fields unchanged: 28994
+Unrecognized tokens: 6
+
+line 744 | Gen 27:39 | Unrecognized token | !it is:
+line 847 | Gen 31:19 | Unrecognized token | !SIZE=
+line 2757 | Lev 7:21 | Unrecognized token | !Lev 12,1-13:59
+line 5042 | Deu 21:22 | Unrecognized token | !Son in:
+line 6555 | Jdg 18:30 | Unrecognized token | !SIZE=
+line 10288 | 1Ch 19:11 | Unrecognized token | !SIZE=

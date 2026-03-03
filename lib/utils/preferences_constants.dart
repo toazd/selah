@@ -7,7 +7,6 @@ const double defaultFontSize = 22.0;
 const String defaultFontFamily = 'IBM Plex Sans';
 const String defaultNoteFontFamily = 'Scope One';
 const double defaultLineHeight = 1.2;
-// TODO: remove usage throughout app if not needed
 const double defaultHighlightAlpha = 0.90; // Not user-configurable
 
 // Color defaults in hex
@@ -94,7 +93,12 @@ const int defaultNightStartHour = 18; // 6 PM
 const double uiFontSize = 18.0;
 const String uiFontFamily = 'IBM Plex Sans';
 
-// use getAdaptiveTextColor instead because it adapts
-// to any colors that the user chooses
+// Notes (quill_note_display.dart) and TSK references (tsk_reference_display.dart) display at a slightly smaller sizes
+const double fontSizeAdjustmentDesktop = 4.0;
+const double fontSizeAdjustmentMobile = 2.0;
+
+// use getAdaptiveTextColor instead of hard-coded
+// colors because it adapts to any color that the user chooses
+//
 //const Color uiLightColor = Colors.black;
 //const Color uiDarkColor = Colors.white;

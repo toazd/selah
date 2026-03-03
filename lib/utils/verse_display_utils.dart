@@ -5,6 +5,7 @@ import '../utils/highlight_text_color_adjustments.dart';
 import '../main.dart'; // For global notifiers and colors
 import '../utils/preferences_constants.dart';
 import '../widgets/quill_note_display.dart';
+import '../widgets/tsk_reference_display.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 
@@ -608,9 +609,8 @@ List<Widget> buildVerseListWidget({
             margin: EdgeInsets.all(0.0),
             padding:
                 EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
-            child: QuillNoteDisplay(
+            child: TskReferenceDisplay(
               noteText: rawTskText,
-              autoLinkVerseReferences: false,
               onLinkTap: onLinkTap,
             ),
           ),
