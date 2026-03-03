@@ -2406,505 +2406,532 @@ class _MultiBibleViewState extends State<MultiBibleView>
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? darkBackgroundColor.value
             : lightBackgroundColor.value,
-        child: ValueListenableBuilder<String>(
-          valueListenable: fontFamilyNotifier,
-          builder: (context, fontFamily, _) {
-            return SingleChildScrollView(
-              child: Column(
-                //mainAxisSize: MainAxisSize.min,
-                children: [
-                  //const SizedBox(height: 8),
-                  SizedBox(
-                    height: 50,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: isVerticalTile,
-                      builder: (context, isVertical, _) {
-                        return SwitchListTile(
-                          title: Text(
-                            isVertical
-                                ? 'Vertical layout'
-                                : 'Horizontal layout',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                          value: isVertical,
-                          onChanged: (val) {
-                            _toggleTile();
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  if (!kIsWeb)
+        child: SafeArea(
+          child: ValueListenableBuilder<String>(
+            valueListenable: fontFamilyNotifier,
+            builder: (context, fontFamily, _) {
+              return SingleChildScrollView(
+                child: Column(
+                  //mainAxisSize: MainAxisSize.min,
+                  children: [
+                    //const SizedBox(height: 8),
                     SizedBox(
                       height: 50,
                       child: ValueListenableBuilder<bool>(
-                        valueListenable: fullscreenNotifier,
-                        builder: (context, fullscreen, _) {
+                        valueListenable: isVerticalTile,
+                        builder: (context, isVertical, _) {
                           return SwitchListTile(
                             title: Text(
-                              'Fullscreen',
+                              isVertical
+                                  ? 'Vertical layout'
+                                  : 'Horizontal layout',
                               style: TextStyle(
                                 fontSize: uiFontSize,
                                 fontFamily: uiFontFamily,
                                 color: getAdaptiveTextColor(context),
                               ),
                             ),
-                            value: fullscreen,
+                            value: isVertical,
                             onChanged: (val) {
-                              fullscreenNotifier.value = val;
+                              _toggleTile();
                             },
                           );
                         },
                       ),
                     ),
-                  // Add: navigation bar display mode toggle
-                  SizedBox(
-                    height: 50,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: showNavigationBarNotifier,
-                      builder: (context, showNavBar, _) {
-                        return SwitchListTile(
-                          title: Text(
-                            'Navigation Bar', //showNavBar ? 'Show navigation bar' : 'Hide navigation bar',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                          value: showNavBar,
-                          onChanged: (val) async {
-                            showNavigationBarNotifier.value = val;
-                            _saveNavigationbarPrefs();
+                    if (!kIsWeb)
+                      SizedBox(
+                        height: 50,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: fullscreenNotifier,
+                          builder: (context, fullscreen, _) {
+                            return SwitchListTile(
+                              title: Text(
+                                'Fullscreen',
+                                style: TextStyle(
+                                  fontSize: uiFontSize,
+                                  fontFamily: uiFontFamily,
+                                  color: getAdaptiveTextColor(context),
+                                ),
+                              ),
+                              value: fullscreen,
+                              onChanged: (val) {
+                                fullscreenNotifier.value = val;
+                              },
+                            );
                           },
-                        );
-                      },
-                    ),
-                  ),
-                  // Add: notes display mode toggle
-                  SizedBox(
-                    height: 50,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: showNotesInlineNotifier,
-                      builder: (context, showInline, _) {
-                        return SwitchListTile(
-                          title: Text(
-                            'Inline Notes', //showInline ? 'Inline Notes' : 'Notes as Icons',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
+                        ),
+                      ),
+                    // Add: navigation bar display mode toggle
+                    SizedBox(
+                      height: 50,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: showNavigationBarNotifier,
+                        builder: (context, showNavBar, _) {
+                          return SwitchListTile(
+                            title: Text(
+                              'Navigation Bar', //showNavBar ? 'Show navigation bar' : 'Hide navigation bar',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
                             ),
-                          ),
-                          value: showInline,
-                          onChanged: (val) async {
-                            showNotesInlineNotifier.value = val;
-                            _saveInlineNotesPrefs();
-                          },
-                        );
-                      },
+                            value: showNavBar,
+                            onChanged: (val) async {
+                              showNavigationBarNotifier.value = val;
+                              _saveNavigationbarPrefs();
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 50,
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: showTskReferencesNotifier,
-                      builder: (context, showTskReferences, _) {
-                        return SwitchListTile(
-                          title: Text(
-                            'TSK References',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
+                    // Add: notes display mode toggle
+                    SizedBox(
+                      height: 50,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: showNotesInlineNotifier,
+                        builder: (context, showInline, _) {
+                          return SwitchListTile(
+                            title: Text(
+                              'Inline Notes', //showInline ? 'Inline Notes' : 'Notes as Icons',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
                             ),
-                          ),
-                          value: showTskReferences,
-                          onChanged: (val) async {
-                            showTskReferencesNotifier.value = val;
-                            _saveTskReferencesPrefs();
-                          },
-                        );
-                      },
+                            value: showInline,
+                            onChanged: (val) async {
+                              showNotesInlineNotifier.value = val;
+                              _saveInlineNotesPrefs();
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  Divider(),
-                  Text(
-                    'Screens',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
+                    SizedBox(
+                      height: 50,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: showTskReferencesNotifier,
+                        builder: (context, showTskReferences, _) {
+                          return SwitchListTile(
+                            title: Text(
+                              'TSK References',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                            value: showTskReferences,
+                            onChanged: (val) async {
+                              showTskReferencesNotifier.value = val;
+                              _saveTskReferencesPrefs();
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      _addView();
-                    },
-                    label: Text(
-                      'Add Bible View',
+                    Divider(),
+                    Text(
+                      'Screens',
                       style: TextStyle(
                         fontSize: uiFontSize,
                         fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _addView();
+                      },
+                      label: Text(
+                        'Add Bible View',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(
+                            context,
+                            usePrimaryColor: true,
+                          ),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.add_box,
                         color: getAdaptiveTextColor(
                           context,
                           usePrimaryColor: true,
                         ),
+                        semanticLabel: 'Add Bible View',
                       ),
                     ),
-                    icon: Icon(
-                      Icons.add_box,
-                      color: getAdaptiveTextColor(
-                        context,
-                        usePrimaryColor: true,
-                      ),
-                      semanticLabel: 'Add Bible View',
-                    ),
-                  ),
-                  ..._screenLocations.length > 1
-                      ? _screenLocations
-                          .asMap()
-                          .entries
-                          .where((entry) => entry.key != 0)
-                          .map(
-                            (entry) => Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _removeView(entry.key);
-                                  },
-                                  label: Text(
-                                    'Remove View ${entry.key + 1}',
-                                    style: TextStyle(
-                                      fontSize: uiFontSize,
-                                      fontFamily: uiFontFamily,
+                    ..._screenLocations.length > 1
+                        ? _screenLocations
+                            .asMap()
+                            .entries
+                            .where((entry) => entry.key != 0)
+                            .map(
+                              (entry) => Column(
+                                children: [
+                                  const SizedBox(height: 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      _removeView(entry.key);
+                                    },
+                                    label: Text(
+                                      'Remove View ${entry.key + 1}',
+                                      style: TextStyle(
+                                        fontSize: uiFontSize,
+                                        fontFamily: uiFontFamily,
+                                        color: getAdaptiveTextColor(
+                                          context,
+                                          usePrimaryColor: true,
+                                        ),
+                                      ),
+                                    ),
+                                    icon: Icon(
+                                      Icons.remove,
                                       color: getAdaptiveTextColor(
                                         context,
                                         usePrimaryColor: true,
                                       ),
+                                      semanticLabel:
+                                          'Remove Bible View ${entry.key + 1}',
                                     ),
                                   ),
-                                  icon: Icon(
-                                    Icons.remove,
-                                    color: getAdaptiveTextColor(
-                                      context,
-                                      usePrimaryColor: true,
-                                    ),
-                                    semanticLabel:
-                                        'Remove Bible View ${entry.key + 1}',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                      : [],
-                  const SizedBox(height: 16),
-                  Divider(),
-                  Text(
-                    'Bible Font',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
+                                ],
+                              ),
+                            )
+                        : [],
+                    const SizedBox(height: 16),
+                    Divider(),
+                    Text(
+                      'Bible Font',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context),
+                      ),
                     ),
-                  ),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SizedBox(
-                        width: constraints.maxWidth * 0.70,
-                        child: DropdownButton<String>(
-                          value: fontFamilyNotifier.value,
-                          items: availableFonts
-                              .map(
-                                (fontPreview) => DropdownMenuItem(
-                                  value: fontPreview,
-                                  child: Text(
-                                    fontPreview,
-                                    style: TextStyle(
-                                      fontSize: uiFontSize,
-                                      fontFamily: fontPreview,
-                                      color: getAdaptiveTextColor(context),
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              fontFamilyNotifier.value = val;
-                              _saveFontPrefs();
-                            }
-                          },
-                          isExpanded: true,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          fontSizeNotifier.value =
-                              (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
-                          _saveFontPrefs();
-                        },
-                        //child: Text('-', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                        child: Icon(
-                          Icons.remove,
-                          color: getAdaptiveTextColor(
-                            context,
-                            usePrimaryColor: true,
-                          ),
-                          semanticLabel: 'Decrease Font Size',
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        '${fontSizeNotifier.value.toInt()}',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          fontSizeNotifier.value =
-                              (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
-                          _saveFontPrefs();
-                        },
-                        child: Icon(
-                          Icons.add,
-                          color: getAdaptiveTextColor(
-                            context,
-                            usePrimaryColor: true,
-                          ),
-                          semanticLabel: 'Increase Font Size',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Note Font',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
-                    ),
-                  ),
-                  ValueListenableBuilder<String>(
-                    valueListenable: noteFontFamilyNotifier,
-                    builder: (context, noteFontFamily, _) {
-                      return LayoutBuilder(
-                        builder: (context, constraints) {
-                          return SizedBox(
-                            width: constraints.maxWidth * 0.70,
-                            child: DropdownButton<String>(
-                              value: noteFontFamily,
-                              items: availableFonts
-                                  .map(
-                                    (fontPreview) => DropdownMenuItem(
-                                      value: fontPreview,
-                                      child: Text(
-                                        fontPreview,
-                                        style: TextStyle(
-                                          fontSize: uiFontSize,
-                                          fontFamily: fontPreview,
-                                          color: getAdaptiveTextColor(context),
-                                        ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SizedBox(
+                          width: constraints.maxWidth * 0.70,
+                          child: DropdownButton<String>(
+                            value: fontFamilyNotifier.value,
+                            items: availableFonts
+                                .map(
+                                  (fontPreview) => DropdownMenuItem(
+                                    value: fontPreview,
+                                    child: Text(
+                                      fontPreview,
+                                      style: TextStyle(
+                                        fontSize: uiFontSize,
+                                        fontFamily: fontPreview,
+                                        color: getAdaptiveTextColor(context),
                                       ),
                                     ),
-                                  )
-                                  .toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  noteFontFamilyNotifier.value = val;
-                                  _saveFontPrefs();
-                                }
-                              },
-                              isExpanded: true,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Divider(),
-                  Text(
-                    'Theme',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: CheckboxListTile(
-                      title: Text(
-                        'Auto',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
-                      ),
-                      value: _isTimeBasedThemeEnabled
-                          ? false
-                          : themeModeNotifier.value == ThemeMode.system,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0.0,
-                        horizontal: 50.0,
-                      ),
-                      onChanged: (val) {
-                        themeModeNotifier.value = ThemeMode.system;
-                        _isTimeBasedThemeEnabled = false;
-                        _timeBasedThemeTimer?.cancel();
-                        _timeBasedThemeTimer = null;
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: CheckboxListTile(
-                      title: Text(
-                        'Light',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
-                      ),
-                      value: _isTimeBasedThemeEnabled
-                          ? false
-                          : themeModeNotifier.value == ThemeMode.light,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0.0,
-                        horizontal: 50.0,
-                      ),
-                      onChanged: (val) {
-                        themeModeNotifier.value = ThemeMode.light;
-                        _isTimeBasedThemeEnabled = false;
-                        _timeBasedThemeTimer?.cancel();
-                        _timeBasedThemeTimer = null;
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: CheckboxListTile(
-                      title: Text(
-                        'Dark',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
-                      ),
-                      value: _isTimeBasedThemeEnabled
-                          ? false
-                          : themeModeNotifier.value == ThemeMode.dark,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0.0,
-                        horizontal: 50.0,
-                      ),
-                      onChanged: (val) {
-                        themeModeNotifier.value = ThemeMode.dark;
-                        _isTimeBasedThemeEnabled = false;
-                        _timeBasedThemeTimer?.cancel();
-                        _timeBasedThemeTimer = null;
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: CheckboxListTile(
-                      title: Text(
-                        'Time-based',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
-                      ),
-                      value: _isTimeBasedThemeSelected(),
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 0.0,
-                        horizontal: 50.0,
-                      ),
-                      onChanged: (val) async {
-                        if (val == true) {
-                          // Enable time-based theme
-                          _isTimeBasedThemeEnabled = true;
-                          //final prefs = await SharedPreferences.getInstance();
-                          //await prefs.setInt('themeMode', 3); // 3 = time-based
-                          _initializeTimeBasedTheme();
-                          // Update theme immediately based on current time
-                          _updateThemeBasedOnTime();
-                        } else {
-                          // Disable time-based theme - revert to system
-                          _isTimeBasedThemeEnabled = false;
-                          themeModeNotifier.value = ThemeMode.system;
-                        }
-                        _saveThemeMode();
-                      },
-                    ),
-                  ),
-                  // Time-based theme status (only show when time-based theme is enabled)
-                  if (_isTimeBasedThemeEnabled)
-                    ValueListenableBuilder<int>(
-                      valueListenable: dayStartHourNotifier,
-                      builder: (context, dayStartHour, _) {
-                        return ValueListenableBuilder<int>(
-                          valueListenable: nightStartHourNotifier,
-                          builder: (context, nightStartHour, _) {
-                            return ListTile(
-                              title: Center(
-                                child: Text(
-                                  _getTimeBasedThemeStatus(),
-                                  style: TextStyle(
-                                    fontSize: uiFontSize - 2,
-                                    fontFamily: uiFontFamily,
-                                    color: getAdaptiveTextColor(context),
-                                    fontStyle: FontStyle.italic,
                                   ),
-                                ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                fontFamilyNotifier.value = val;
+                                _saveFontPrefs();
+                              }
+                            },
+                            isExpanded: true,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            fontSizeNotifier.value =
+                                (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
+                            _saveFontPrefs();
+                          },
+                          //child: Text('-', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
+                          child: Icon(
+                            Icons.remove,
+                            color: getAdaptiveTextColor(
+                              context,
+                              usePrimaryColor: true,
+                            ),
+                            semanticLabel: 'Decrease Font Size',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '${fontSizeNotifier.value.toInt()}',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            fontSizeNotifier.value =
+                                (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
+                            _saveFontPrefs();
+                          },
+                          child: Icon(
+                            Icons.add,
+                            color: getAdaptiveTextColor(
+                              context,
+                              usePrimaryColor: true,
+                            ),
+                            semanticLabel: 'Increase Font Size',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Note Font',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context),
+                      ),
+                    ),
+                    ValueListenableBuilder<String>(
+                      valueListenable: noteFontFamilyNotifier,
+                      builder: (context, noteFontFamily, _) {
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
+                            return SizedBox(
+                              width: constraints.maxWidth * 0.70,
+                              child: DropdownButton<String>(
+                                value: noteFontFamily,
+                                items: availableFonts
+                                    .map(
+                                      (fontPreview) => DropdownMenuItem(
+                                        value: fontPreview,
+                                        child: Text(
+                                          fontPreview,
+                                          style: TextStyle(
+                                            fontSize: uiFontSize,
+                                            fontFamily: fontPreview,
+                                            color:
+                                                getAdaptiveTextColor(context),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    noteFontFamilyNotifier.value = val;
+                                    _saveFontPrefs();
+                                  }
+                                },
+                                isExpanded: true,
                               ),
                             );
                           },
                         );
                       },
                     ),
-                  // Time-based theme settings (only show when time-based theme is enabled)
-                  if (_isTimeBasedThemeEnabled)
+                    const SizedBox(height: 16),
+                    Divider(),
+                    Text(
+                      'Theme',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: CheckboxListTile(
+                        title: Text(
+                          'Auto',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        value: _isTimeBasedThemeEnabled
+                            ? false
+                            : themeModeNotifier.value == ThemeMode.system,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0.0,
+                          horizontal: 50.0,
+                        ),
+                        onChanged: (val) {
+                          themeModeNotifier.value = ThemeMode.system;
+                          _isTimeBasedThemeEnabled = false;
+                          _timeBasedThemeTimer?.cancel();
+                          _timeBasedThemeTimer = null;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: CheckboxListTile(
+                        title: Text(
+                          'Light',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        value: _isTimeBasedThemeEnabled
+                            ? false
+                            : themeModeNotifier.value == ThemeMode.light,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0.0,
+                          horizontal: 50.0,
+                        ),
+                        onChanged: (val) {
+                          themeModeNotifier.value = ThemeMode.light;
+                          _isTimeBasedThemeEnabled = false;
+                          _timeBasedThemeTimer?.cancel();
+                          _timeBasedThemeTimer = null;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: CheckboxListTile(
+                        title: Text(
+                          'Dark',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        value: _isTimeBasedThemeEnabled
+                            ? false
+                            : themeModeNotifier.value == ThemeMode.dark,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0.0,
+                          horizontal: 50.0,
+                        ),
+                        onChanged: (val) {
+                          themeModeNotifier.value = ThemeMode.dark;
+                          _isTimeBasedThemeEnabled = false;
+                          _timeBasedThemeTimer?.cancel();
+                          _timeBasedThemeTimer = null;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: CheckboxListTile(
+                        title: Text(
+                          'Time-based',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        value: _isTimeBasedThemeSelected(),
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0.0,
+                          horizontal: 50.0,
+                        ),
+                        onChanged: (val) async {
+                          if (val == true) {
+                            // Enable time-based theme
+                            _isTimeBasedThemeEnabled = true;
+                            //final prefs = await SharedPreferences.getInstance();
+                            //await prefs.setInt('themeMode', 3); // 3 = time-based
+                            _initializeTimeBasedTheme();
+                            // Update theme immediately based on current time
+                            _updateThemeBasedOnTime();
+                          } else {
+                            // Disable time-based theme - revert to system
+                            _isTimeBasedThemeEnabled = false;
+                            themeModeNotifier.value = ThemeMode.system;
+                          }
+                          _saveThemeMode();
+                        },
+                      ),
+                    ),
+                    // Time-based theme status (only show when time-based theme is enabled)
+                    if (_isTimeBasedThemeEnabled)
+                      ValueListenableBuilder<int>(
+                        valueListenable: dayStartHourNotifier,
+                        builder: (context, dayStartHour, _) {
+                          return ValueListenableBuilder<int>(
+                            valueListenable: nightStartHourNotifier,
+                            builder: (context, nightStartHour, _) {
+                              return ListTile(
+                                title: Center(
+                                  child: Text(
+                                    _getTimeBasedThemeStatus(),
+                                    style: TextStyle(
+                                      fontSize: uiFontSize - 2,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    // Time-based theme settings (only show when time-based theme is enabled)
+                    if (_isTimeBasedThemeEnabled)
+                      ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              color: getAdaptiveTextColor(context),
+                              semanticLabel:
+                                  'Configure Time Based Theme Color Options',
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Configure',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                        onTap: () => _showTimeBasedThemeSettingsDialog(context),
+                      ),
+                    Divider(),
                     ListTile(
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.schedule,
-                            color: getAdaptiveTextColor(context),
-                            semanticLabel:
-                                'Configure Time Based Theme Color Options',
+                            Icons.highlight,
+                            color: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
+                            semanticLabel: 'Customize Highlights',
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Configure',
+                            'Customize Highlights',
                             style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,
@@ -2913,1308 +2940,1292 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           ),
                         ],
                       ),
-                      onTap: () => _showTimeBasedThemeSettingsDialog(context),
+                      onTap: () => _showCustomizeHighlightColorsDialog(context),
                     ),
-                  Divider(),
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.highlight,
-                          color: isDark
-                              ? darkPrimaryColor.value
-                              : lightPrimaryColor.value,
-                          semanticLabel: 'Customize Highlights',
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Customize Highlights',
-                          style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () => _showCustomizeHighlightColorsDialog(context),
-                  ),
 
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.color_lens,
-                          color: isDark
-                              ? darkPrimaryColor.value
-                              : lightPrimaryColor.value,
-                          semanticLabel: 'Customize Colors',
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Customize Colors',
-                          style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context),
+                    ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.color_lens,
+                            color: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
+                            semanticLabel: 'Customize Colors',
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            'Customize Colors',
+                            style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => _showCustomizeColorsDialog(context),
                     ),
-                    onTap: () => _showCustomizeColorsDialog(context),
-                  ),
 
-                  Divider(),
-                  // Authentication UI
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isSignedIn,
-                    builder: (context, signedIn, _) {
-                      if (signedIn) {
-                        return ValueListenableBuilder<User?>(
-                          valueListenable: currentUser,
-                          builder: (context, user, _) {
-                            return FutureBuilder<String?>(
-                              future: _getUsername(user),
-                              builder: (context, snapshot) {
-                                final username = snapshot.data ?? 'Unknown';
-                                return ListTile(
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      //Icon(Icons.cloud_done, color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          '✅ Signed in as $username',
-                                          textAlign: TextAlign.center,
+                    Divider(),
+                    // Authentication UI
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isSignedIn,
+                      builder: (context, signedIn, _) {
+                        if (signedIn) {
+                          return ValueListenableBuilder<User?>(
+                            valueListenable: currentUser,
+                            builder: (context, user, _) {
+                              return FutureBuilder<String?>(
+                                future: _getUsername(user),
+                                builder: (context, snapshot) {
+                                  final username = snapshot.data ?? 'Unknown';
+                                  return ListTile(
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        //Icon(Icons.cloud_done, color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '✅ Signed in as $username',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: uiFontSize,
+                                              fontFamily: uiFontFamily,
+                                              color: getAdaptiveTextColor(
+                                                context,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () =>
+                                        _showAccountOptionsDialog(context),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        } else {
+                          return ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.sync,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel: 'Sign in to Sync Data',
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Sign in to Sync Data',
+                                  style: TextStyle(
+                                    fontSize: uiFontSize,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () => _showAuthScreen(context),
+                          );
+                        }
+                      },
+                    ),
+                    ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.save,
+                            color: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
+                            semanticLabel: 'Export Selah Data',
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Export Data',
+                            style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => _exportData(),
+                    ),
+                    ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.drive_file_move,
+                            color: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
+                            semanticLabel: 'Import Data',
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Import Data',
+                            style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => _showImportTypeDialog(),
+                    ),
+                    ExpansionTile(
+                      title: Text(
+                        'Sync Options',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context),
+                        ),
+                      ),
+                      initiallyExpanded: false,
+                      childrenPadding: EdgeInsets.all(8),
+                      children: [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: syncHighlightsNotifier,
+                          builder: (context, value, child) => SwitchListTile(
+                            title: Text(
+                              'Highlights',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                            value: value,
+                            onChanged: (val) async {
+                              // Temporarily set the value to show immediate UI feedback
+                              syncHighlightsNotifier.value = val;
+
+                              _saveSyncPrefs('highlights');
+
+                              // Update listener state
+                              await SupabaseSyncService()
+                                  .updateListenerForCategory('highlights', val);
+
+                              if (!val) {
+                                // Disabling sync - only show confirmation dialog if user is signed in
+                                if (isSignedIn.value) {
+                                  // Show confirmation dialog with data options
+                                  if (!context.mounted) return;
+                                  final result = await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Center(
+                                      child: AlertDialog(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 400,
+                                        ),
+                                        //title: Text('Disable Sync for Highlights', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
+                                        content: Text(
+                                          'Choose what to do with your synced highlights. Your local highlights are not affected by this action.',
                                           style: TextStyle(
                                             fontSize: uiFontSize,
                                             fontFamily: uiFontFamily,
-                                            color: getAdaptiveTextColor(
-                                              context,
-                                            ),
+                                            color:
+                                                getAdaptiveTextColor(context),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () =>
-                                      _showAccountOptionsDialog(context),
-                                );
-                              },
-                            );
-                          },
-                        );
-                      } else {
-                        return ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.sync,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel: 'Sign in to Sync Data',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Sign in to Sync Data',
-                                style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () => _showAuthScreen(context),
-                        );
-                      }
-                    },
-                  ),
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.save,
-                          color: isDark
-                              ? darkPrimaryColor.value
-                              : lightPrimaryColor.value,
-                          semanticLabel: 'Export Selah Data',
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Export Data',
-                          style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () => _exportData(),
-                  ),
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.drive_file_move,
-                          color: isDark
-                              ? darkPrimaryColor.value
-                              : lightPrimaryColor.value,
-                          semanticLabel: 'Import Data',
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Import Data',
-                          style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () => _showImportTypeDialog(),
-                  ),
-                  ExpansionTile(
-                    title: Text(
-                      'Sync Options',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context),
-                      ),
-                    ),
-                    initiallyExpanded: false,
-                    childrenPadding: EdgeInsets.all(8),
-                    children: [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: syncHighlightsNotifier,
-                        builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Highlights',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                          value: value,
-                          onChanged: (val) async {
-                            // Temporarily set the value to show immediate UI feedback
-                            syncHighlightsNotifier.value = val;
-
-                            _saveSyncPrefs('highlights');
-
-                            // Update listener state
-                            await SupabaseSyncService()
-                                .updateListenerForCategory('highlights', val);
-
-                            if (!val) {
-                              // Disabling sync - only show confirmation dialog if user is signed in
-                              if (isSignedIn.value) {
-                                // Show confirmation dialog with data options
-                                if (!context.mounted) return;
-                                final result = await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => Center(
-                                    child: AlertDialog(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 400,
-                                      ),
-                                      //title: Text('Disable Sync for Highlights', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                                      content: Text(
-                                        'Choose what to do with your synced highlights. Your local highlights are not affected by this action.',
-                                        style: TextStyle(
-                                          fontSize: uiFontSize,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context),
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: Text(
-                                            'Cancel',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
                                               ),
                                             ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'cancel'),
                                           ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'cancel'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Keep Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
+                                          TextButton(
+                                            child: Text(
+                                              'Keep Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
                                               ),
                                             ),
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'keep'),
                                           ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'keep'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Delete Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: Colors.red,
+                                          TextButton(
+                                            child: Text(
+                                              'Delete Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: Colors.red,
+                                              ),
                                             ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'delete'),
                                           ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'delete'),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
 
-                                if (result == 'cancel') {
-                                  // Cancelled - revert the toggle back to ON
-                                  syncHighlightsNotifier.value = true;
-                                  _saveSyncPrefs('highlights');
-                                  return;
-                                } else if (result == 'delete') {
-                                  // Delete remote data
-                                  await SupabaseSyncService()
-                                      .deleteAllRemoteHighlights();
-                                } else if (result == 'keep') {
-                                  // Keep remote data - do nothing, sync already disabled
+                                  if (result == 'cancel') {
+                                    // Cancelled - revert the toggle back to ON
+                                    syncHighlightsNotifier.value = true;
+                                    _saveSyncPrefs('highlights');
+                                    return;
+                                  } else if (result == 'delete') {
+                                    // Delete remote data
+                                    await SupabaseSyncService()
+                                        .deleteAllRemoteHighlights();
+                                  } else if (result == 'keep') {
+                                    // Keep remote data - do nothing, sync already disabled
+                                  }
                                 }
+                                // If not signed in, just leave sync disabled without dialog
+                              } else {
+                                // Enabling sync - upload existing local data
+                                await SupabaseSyncService().syncHighlights();
                               }
-                              // If not signed in, just leave sync disabled without dialog
-                            } else {
-                              // Enabling sync - upload existing local data
-                              await SupabaseSyncService().syncHighlights();
-                            }
-                          },
-                        ),
-                      ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: syncNotesNotifier,
-                        builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Notes',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
+                            },
                           ),
-                          value: value,
-                          onChanged: (val) async {
-                            // Temporarily set the value to show immediate UI feedback
-                            syncNotesNotifier.value = val;
-
-                            _saveSyncPrefs('notes');
-
-                            // Update listener state
-                            await SupabaseSyncService()
-                                .updateListenerForCategory('notes', val);
-
-                            if (!val) {
-                              // Disabling sync - only show confirmation dialog if user is signed in
-                              if (isSignedIn.value) {
-                                // Show confirmation dialog with data options
-                                if (!context.mounted) return;
-                                final result = await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => Center(
-                                    child: AlertDialog(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 400,
-                                      ),
-                                      //title: Text('Disable Sync for Notes', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                                      content: Text(
-                                        'Choose what to do with your synced notes. Your local notes are not affected by this action.',
-                                        style: TextStyle(
-                                          fontSize: uiFontSize,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context),
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: Text(
-                                            'Cancel',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'cancel'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Keep Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'keep'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Delete Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'delete'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-
-                                if (result == 'cancel') {
-                                  // Cancelled - revert the toggle back to ON
-                                  syncNotesNotifier.value = true;
-                                  _saveSyncPrefs('notes');
-                                  return;
-                                } else if (result == 'delete') {
-                                  // Delete remote data
-                                  await SupabaseSyncService()
-                                      .deleteAllRemoteNotes();
-                                } else if (result == 'keep') {
-                                  // Keep remote data - do nothing, sync already disabled
-                                }
-                              }
-                              // If not signed in, just leave sync disabled without dialog
-                            } else {
-                              // Enabling sync - upload existing local data
-                              await SupabaseSyncService().syncNotes();
-                            }
-                          },
                         ),
-                      ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: syncHistoryNotifier,
-                        builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'History',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                          value: value,
-                          onChanged: (val) async {
-                            // Temporarily set the value to show immediate UI feedback
-                            syncHistoryNotifier.value = val;
-
-                            _saveSyncPrefs('history');
-
-                            // Update listener state
-                            await SupabaseSyncService()
-                                .updateListenerForCategory('history', val);
-
-                            if (!val) {
-                              // Disabling sync - only show confirmation dialog if user is signed in
-                              if (isSignedIn.value) {
-                                // Show confirmation dialog with data options
-                                if (!context.mounted) return;
-                                final result = await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => Center(
-                                    child: AlertDialog(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 400,
-                                      ),
-                                      //title: Text('Disable Sync for History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                                      content: Text(
-                                        'Choose what to do with your synced history. Your local history are not affected by this action.',
-                                        style: TextStyle(
-                                          fontSize: uiFontSize,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context),
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: Text(
-                                            'Cancel',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'cancel'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Keep Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'keep'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Delete Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'delete'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-
-                                if (result == 'cancel') {
-                                  // Cancelled - revert the toggle back to ON
-                                  syncHistoryNotifier.value = true;
-
-                                  _saveSyncPrefs('history');
-
-                                  return;
-                                } else if (result == 'delete') {
-                                  // Delete remote data
-                                  await SupabaseSyncService()
-                                      .deleteAllRemoteHistory();
-                                } else if (result == 'keep') {
-                                  // Keep remote data - do nothing, sync already disabled
-                                }
-                              }
-                              // If not signed in, just leave sync disabled without dialog
-                            } else {
-                              // Enabling sync - upload existing local data
-                              await SupabaseSyncService().syncHistory();
-                            }
-                          },
-                        ),
-                      ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: syncSearchHistoryNotifier,
-                        builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Search History',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
-                          ),
-                          value: value,
-                          onChanged: (val) async {
-                            // Temporarily set the value to show immediate UI feedback
-                            syncSearchHistoryNotifier.value = val;
-
-                            _saveSyncPrefs('search_history');
-
-                            // Update listener state
-                            await SupabaseSyncService()
-                                .updateListenerForCategory(
-                              'searchHistory',
-                              val,
-                            );
-
-                            if (!val) {
-                              // Disabling sync - only show confirmation dialog if user is signed in
-                              if (isSignedIn.value) {
-                                // Show confirmation dialog with data options
-                                if (!context.mounted) return;
-                                final result = await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => Center(
-                                    child: AlertDialog(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 400,
-                                      ),
-                                      //title: Text('Disable Sync for Search History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                                      content: Text(
-                                        'Choose what to do with your synced search history. Your local search history is not affected by this action.',
-                                        style: TextStyle(
-                                          fontSize: uiFontSize,
-                                          fontFamily: uiFontFamily,
-                                          color: getAdaptiveTextColor(context),
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: Text(
-                                            'Cancel',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'cancel'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Keep Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: getAdaptiveTextColor(
-                                                context,
-                                              ),
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'keep'),
-                                        ),
-                                        TextButton(
-                                          child: Text(
-                                            'Delete Synced Data',
-                                            style: TextStyle(
-                                              fontSize: uiFontSize,
-                                              fontFamily: uiFontFamily,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'delete'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-
-                                if (result == 'cancel') {
-                                  // Cancelled - revert the toggle back to ON
-                                  syncSearchHistoryNotifier.value = true;
-                                  _saveSyncPrefs('search_history');
-                                  return;
-                                } else if (result == 'delete') {
-                                  // Delete remote data
-                                  await SupabaseSyncService()
-                                      .deleteAllRemoteSearchHistory();
-                                } else if (result == 'keep') {
-                                  // Keep remote data - do nothing, sync already disabled
-                                }
-                              }
-                              // If not signed in, just leave sync disabled without dialog
-                            } else {
-                              // Enabling sync - upload existing local data
-                              await SupabaseSyncService().syncSearchHistory();
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  ExpansionTile(
-                    title: Text(
-                      'Advanced',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context),
-                      ),
-                    ),
-                    initiallyExpanded: false,
-                    childrenPadding: EdgeInsets.all(8),
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.sync,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel: 'Advanced - Execute Manual Sync',
+                        ValueListenableBuilder<bool>(
+                          valueListenable: syncNotesNotifier,
+                          builder: (context, value, child) => SwitchListTile(
+                            title: Text(
+                              'Notes',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Manual Sync',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            ),
+                            value: value,
+                            onChanged: (val) async {
+                              // Temporarily set the value to show immediate UI feedback
+                              syncNotesNotifier.value = val;
+
+                              _saveSyncPrefs('notes');
+
+                              // Update listener state
+                              await SupabaseSyncService()
+                                  .updateListenerForCategory('notes', val);
+
+                              if (!val) {
+                                // Disabling sync - only show confirmation dialog if user is signed in
+                                if (isSignedIn.value) {
+                                  // Show confirmation dialog with data options
+                                  if (!context.mounted) return;
+                                  final result = await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Center(
+                                      child: AlertDialog(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 400,
+                                        ),
+                                        //title: Text('Disable Sync for Notes', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
+                                        content: Text(
+                                          'Choose what to do with your synced notes. Your local notes are not affected by this action.',
+                                          style: TextStyle(
+                                            fontSize: uiFontSize,
+                                            fontFamily: uiFontFamily,
+                                            color:
+                                                getAdaptiveTextColor(context),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'cancel'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Keep Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'keep'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Delete Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+
+                                  if (result == 'cancel') {
+                                    // Cancelled - revert the toggle back to ON
+                                    syncNotesNotifier.value = true;
+                                    _saveSyncPrefs('notes');
+                                    return;
+                                  } else if (result == 'delete') {
+                                    // Delete remote data
+                                    await SupabaseSyncService()
+                                        .deleteAllRemoteNotes();
+                                  } else if (result == 'keep') {
+                                    // Keep remote data - do nothing, sync already disabled
+                                  }
+                                }
+                                // If not signed in, just leave sync disabled without dialog
+                              } else {
+                                // Enabling sync - upload existing local data
+                                await SupabaseSyncService().syncNotes();
+                              }
+                            },
                           ),
-                          onTap: () async {
-                            if (!isSignedIn.value) {
-                              showStyledSnackBar(
-                                context,
-                                'You must be signed in to perform a sync',
-                                isError: true,
+                        ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: syncHistoryNotifier,
+                          builder: (context, value, child) => SwitchListTile(
+                            title: Text(
+                              'History',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                            value: value,
+                            onChanged: (val) async {
+                              // Temporarily set the value to show immediate UI feedback
+                              syncHistoryNotifier.value = val;
+
+                              _saveSyncPrefs('history');
+
+                              // Update listener state
+                              await SupabaseSyncService()
+                                  .updateListenerForCategory('history', val);
+
+                              if (!val) {
+                                // Disabling sync - only show confirmation dialog if user is signed in
+                                if (isSignedIn.value) {
+                                  // Show confirmation dialog with data options
+                                  if (!context.mounted) return;
+                                  final result = await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Center(
+                                      child: AlertDialog(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 400,
+                                        ),
+                                        //title: Text('Disable Sync for History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
+                                        content: Text(
+                                          'Choose what to do with your synced history. Your local history are not affected by this action.',
+                                          style: TextStyle(
+                                            fontSize: uiFontSize,
+                                            fontFamily: uiFontFamily,
+                                            color:
+                                                getAdaptiveTextColor(context),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'cancel'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Keep Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'keep'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Delete Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+
+                                  if (result == 'cancel') {
+                                    // Cancelled - revert the toggle back to ON
+                                    syncHistoryNotifier.value = true;
+
+                                    _saveSyncPrefs('history');
+
+                                    return;
+                                  } else if (result == 'delete') {
+                                    // Delete remote data
+                                    await SupabaseSyncService()
+                                        .deleteAllRemoteHistory();
+                                  } else if (result == 'keep') {
+                                    // Keep remote data - do nothing, sync already disabled
+                                  }
+                                }
+                                // If not signed in, just leave sync disabled without dialog
+                              } else {
+                                // Enabling sync - upload existing local data
+                                await SupabaseSyncService().syncHistory();
+                              }
+                            },
+                          ),
+                        ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: syncSearchHistoryNotifier,
+                          builder: (context, value, child) => SwitchListTile(
+                            title: Text(
+                              'Search History',
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                            value: value,
+                            onChanged: (val) async {
+                              // Temporarily set the value to show immediate UI feedback
+                              syncSearchHistoryNotifier.value = val;
+
+                              _saveSyncPrefs('search_history');
+
+                              // Update listener state
+                              await SupabaseSyncService()
+                                  .updateListenerForCategory(
+                                'searchHistory',
+                                val,
                               );
-                              return;
-                            }
-                            if (!(await InternetAccessChecker
-                                .hasInternetAccess())) {
-                              if (context.mounted) {
+
+                              if (!val) {
+                                // Disabling sync - only show confirmation dialog if user is signed in
+                                if (isSignedIn.value) {
+                                  // Show confirmation dialog with data options
+                                  if (!context.mounted) return;
+                                  final result = await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Center(
+                                      child: AlertDialog(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 400,
+                                        ),
+                                        //title: Text('Disable Sync for Search History', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
+                                        content: Text(
+                                          'Choose what to do with your synced search history. Your local search history is not affected by this action.',
+                                          style: TextStyle(
+                                            fontSize: uiFontSize,
+                                            fontFamily: uiFontFamily,
+                                            color:
+                                                getAdaptiveTextColor(context),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'cancel'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Keep Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                  context,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.pop(context, 'keep'),
+                                          ),
+                                          TextButton(
+                                            child: Text(
+                                              'Delete Synced Data',
+                                              style: TextStyle(
+                                                fontSize: uiFontSize,
+                                                fontFamily: uiFontFamily,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.pop(
+                                                context, 'delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+
+                                  if (result == 'cancel') {
+                                    // Cancelled - revert the toggle back to ON
+                                    syncSearchHistoryNotifier.value = true;
+                                    _saveSyncPrefs('search_history');
+                                    return;
+                                  } else if (result == 'delete') {
+                                    // Delete remote data
+                                    await SupabaseSyncService()
+                                        .deleteAllRemoteSearchHistory();
+                                  } else if (result == 'keep') {
+                                    // Keep remote data - do nothing, sync already disabled
+                                  }
+                                }
+                                // If not signed in, just leave sync disabled without dialog
+                              } else {
+                                // Enabling sync - upload existing local data
+                                await SupabaseSyncService().syncSearchHistory();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    ExpansionTile(
+                      title: Text(
+                        'Advanced',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context),
+                        ),
+                      ),
+                      initiallyExpanded: false,
+                      childrenPadding: EdgeInsets.all(8),
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.sync,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Execute Manual Sync',
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Manual Sync',
+                                  style: TextStyle(
+                                    fontSize: uiFontSize - 2,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () async {
+                              if (!isSignedIn.value) {
                                 showStyledSnackBar(
                                   context,
-                                  'No internet connection available',
+                                  'You must be signed in to perform a sync',
                                   isError: true,
                                 );
+                                return;
                               }
-                              return;
-                            }
+                              if (!(await InternetAccessChecker
+                                  .hasInternetAccess())) {
+                                if (context.mounted) {
+                                  showStyledSnackBar(
+                                    context,
+                                    'No internet connection available',
+                                    isError: true,
+                                  );
+                                }
+                                return;
+                              }
 
-                            // Show progress dialog
-                            if (context.mounted) {
-                              showDialog(
+                              // Show progress dialog
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => const SyncDialog(),
+                                );
+                              }
+
+                              try {
+                                // Perform sync operation
+                                await SupabaseSyncService().triggerManualSync();
+
+                                if (context.mounted) {
+                                  Navigator.pop(
+                                      context); // Close progress dialog
+                                  showStyledSnackBar(
+                                    context,
+                                    'Sync completed successfully',
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  showStyledSnackBar(
+                                    context,
+                                    'Sync failed: ${e.toString()}',
+                                    isError: true,
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.edit,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Edit Saved Shared Preferences',
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Edit Preferences',
+                                  style: TextStyle(
+                                    fontSize: uiFontSize - 2,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () async {
+                              await _showEditPreferencesDialog(context);
+                            },
+                          ),
+                        ),
+                        //SizedBox(height: 8),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.settings_backup_restore,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Reset Preferences and exit. A Restart is required for the changes to take effect.',
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Preferences',
+                                  style: TextStyle(
+                                    fontSize: uiFontSize - 2,
+                                    fontFamily: uiFontFamily,
+                                    color: getAdaptiveTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
                                 context: context,
-                                barrierDismissible: false,
-                                builder: (context) => const SyncDialog(),
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
+                                  ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'This will reset all of the saved preferences to the defaults. The app will then exit because a restart is required for the changes to take effect. Are you sure?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                    ),
+                                  ],
+                                ),
                               );
-                            }
-
-                            try {
-                              // Perform sync operation
-                              await SupabaseSyncService().triggerManualSync();
-
-                              if (context.mounted) {
-                                Navigator.pop(context); // Close progress dialog
-                                showStyledSnackBar(
-                                  context,
-                                  'Sync completed successfully',
-                                );
+                              if (confirm == true) {
+                                await _resetPreferencesAndExit();
                               }
-                            } catch (e) {
-                              if (context.mounted) {
-                                showStyledSnackBar(
-                                  context,
-                                  'Sync failed: ${e.toString()}',
-                                  isError: true,
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.edit,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel:
-                                    'Advanced - Edit Saved Shared Preferences',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Edit Preferences',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            },
                           ),
-                          onTap: () async {
-                            await _showEditPreferencesDialog(context);
-                          },
                         ),
-                      ),
-                      //SizedBox(height: 8),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.settings_backup_restore,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel:
-                                    'Advanced - Reset Preferences and exit. A Restart is required for the changes to take effect.',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Preferences',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
+                        //SizedBox(height: 8),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.highlight_off,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel: 'Advanced - Reset Highlights',
                                 ),
-                              ),
-                            ],
-                          ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
-                                ),
-                                title: Text(
-                                  'Warning',
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Highlights',
                                   style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This will reset all of the saved preferences to the defaults. The app will then exit because a restart is required for the changes to take effect. Are you sure?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
-                                      ),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
+                                  ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
                                   ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
-                                      ),
+                                  content: Text(
+                                    'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all highlights?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
                                   ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              await _resetPreferencesAndExit();
-                            }
-                          },
-                        ),
-                      ),
-                      //SizedBox(height: 8),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.highlight_off,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel: 'Advanced - Reset Highlights',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Highlights',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
-                                ),
-                                title: Text(
-                                  'Warning',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all highlights?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: getAdaptiveTextColor(context),
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
                                       ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                  ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
                                       ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              final syncService = SupabaseSyncService();
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                final syncService = SupabaseSyncService();
 
-                              // Delete remote data first if logged in
-                              if (Supabase.instance.client.auth.currentUser !=
-                                  null) {
-                                await syncService.deleteAllRemoteHighlights();
+                                // Delete remote data first if logged in
+                                if (Supabase.instance.client.auth.currentUser !=
+                                    null) {
+                                  await syncService.deleteAllRemoteHighlights();
+                                }
+
+                                final dbHighlights =
+                                    await HighlightsDatabase.getDatabase();
+                                await dbHighlights.delete('user_highlights');
+
+                                // Update the ui
+                                LocalDataChangeNotifier
+                                    .notifyHighlightsChanged();
                               }
-
-                              final dbHighlights =
-                                  await HighlightsDatabase.getDatabase();
-                              await dbHighlights.delete('user_highlights');
-
-                              // Update the ui
-                              LocalDataChangeNotifier.notifyHighlightsChanged();
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.note_alt,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel: 'Advanced - Reset Notes',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Notes',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            },
                           ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.note_alt,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel: 'Advanced - Reset Notes',
                                 ),
-                                title: Text(
-                                  'Warning',
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Notes',
                                   style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all notes?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
-                                      ),
-                                    ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
                                   ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
-                                      ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
                                   ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              final syncService = SupabaseSyncService();
+                                  content: Text(
+                                    'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all notes?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                final syncService = SupabaseSyncService();
 
-                              // Delete remote data first if logged in
-                              if (Supabase.instance.client.auth.currentUser !=
-                                  null) {
-                                await syncService.deleteAllRemoteNotes();
+                                // Delete remote data first if logged in
+                                if (Supabase.instance.client.auth.currentUser !=
+                                    null) {
+                                  await syncService.deleteAllRemoteNotes();
+                                }
+
+                                final db = await NotesDatabase.getDatabase();
+                                await db.delete('user_notes');
+
+                                // Notify UI
+                                LocalDataChangeNotifier.notifyNotesChanged();
                               }
-
-                              final db = await NotesDatabase.getDatabase();
-                              await db.delete('user_notes');
-
-                              // Notify UI
-                              LocalDataChangeNotifier.notifyNotesChanged();
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.history,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel:
-                                    'Advanced - Reset Verse Reference History',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Verse History',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            },
                           ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Reset Verse Reference History',
                                 ),
-                                title: Text(
-                                  'Warning',
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Verse History',
                                   style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all history?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
-                                      ),
-                                    ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
                                   ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
-                                      ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
                                   ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              final syncService = SupabaseSyncService();
+                                  content: Text(
+                                    'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all history?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                final syncService = SupabaseSyncService();
 
-                              // Delete remote data first if logged in
-                              if (Supabase.instance.client.auth.currentUser !=
-                                  null) {
-                                await syncService.deleteAllRemoteHistory();
+                                // Delete remote data first if logged in
+                                if (Supabase.instance.client.auth.currentUser !=
+                                    null) {
+                                  await syncService.deleteAllRemoteHistory();
+                                }
+
+                                final db = await HistoryDatabase.getDatabase();
+                                await db.delete('history');
                               }
-
-                              final db = await HistoryDatabase.getDatabase();
-                              await db.delete('history');
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.history,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel:
-                                    'Advanced - Reset Saved Searches',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Saved Searches',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            },
                           ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Reset Saved Searches',
                                 ),
-                                title: Text(
-                                  'Warning',
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Saved Searches',
                                   style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all saved searches?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
-                                      ),
-                                    ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
                                   ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
-                                      ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
                                   ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              final syncService = SupabaseSyncService();
+                                  content: Text(
+                                    'This action cannot be undone! If you are logged in then your remote data will also be removed during sync (which is automatic and occurs immediately when you are online).\n\nYou can use the "Export Data" option to backup your data locally.\n\nAre you sure you want to clear all saved searches?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                final syncService = SupabaseSyncService();
 
-                              // Delete remote data first if logged in
-                              if (Supabase.instance.client.auth.currentUser !=
-                                  null) {
-                                await syncService
-                                    .deleteAllRemoteSearchHistory();
+                                // Delete remote data first if logged in
+                                if (Supabase.instance.client.auth.currentUser !=
+                                    null) {
+                                  await syncService
+                                      .deleteAllRemoteSearchHistory();
+                                }
+
+                                final db = await SearchDatabase.getDatabase();
+                                await db.delete('search_history');
                               }
-
-                              final db = await SearchDatabase.getDatabase();
-                              await db.delete('search_history');
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.restore_from_trash,
-                                color: isDark
-                                    ? darkPrimaryColor.value
-                                    : lightPrimaryColor.value,
-                                semanticLabel:
-                                    'Advanced - Reset Preferences, Highlights, History, Notes, and exit. A restart is required for the changes to take effect.',
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Reset Everything',
-                                style: TextStyle(
-                                  fontSize: uiFontSize - 2,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ],
+                            },
                           ),
-                          onTap: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 400,
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.restore_from_trash,
+                                  color: isDark
+                                      ? darkPrimaryColor.value
+                                      : lightPrimaryColor.value,
+                                  semanticLabel:
+                                      'Advanced - Reset Preferences, Highlights, History, Notes, and exit. A restart is required for the changes to take effect.',
                                 ),
-                                title: Text(
-                                  'Warning',
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Reset Everything',
                                   style: TextStyle(
-                                    fontSize: uiFontSize,
-                                    fontFamily: uiFontFamily,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                content: Text(
-                                  'This will reset all preferences, highlights, history, notes, and search history. This action cannot be undone. The app will then exit because a restart is required for all of the changes to take effect. Are you sure?',
-                                  style: TextStyle(
-                                    fontSize: uiFontSize,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context),
                                   ),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: getAdaptiveTextColor(context),
-                                      ),
-                                    ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
+                              ],
+                            ),
+                            onTap: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 400,
                                   ),
-                                  TextButton(
-                                    child: Text(
-                                      'Yes',
-                                      style: TextStyle(
-                                        fontSize: uiFontSize,
-                                        fontFamily: uiFontFamily,
-                                        color: Colors.red,
-                                      ),
+                                  title: Text(
+                                    'Warning',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: Colors.red,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
                                   ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              await _resetEverythingAndExit();
-                            }
-                          },
+                                  content: Text(
+                                    'This will reset all preferences, highlights, history, notes, and search history. This action cannot be undone. The app will then exit because a restart is required for all of the changes to take effect. Are you sure?',
+                                    style: TextStyle(
+                                      fontSize: uiFontSize,
+                                      fontFamily: uiFontFamily,
+                                      color: getAdaptiveTextColor(context),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text(
+                                        'No',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: getAdaptiveTextColor(context),
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        'Yes',
+                                        style: TextStyle(
+                                          fontSize: uiFontSize,
+                                          fontFamily: uiFontFamily,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                await _resetEverythingAndExit();
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
       body: Stack(
@@ -4243,18 +4254,12 @@ class _MultiBibleViewState extends State<MultiBibleView>
             child: SizedBox.shrink(),
           ),
           SafeArea(
-            //Row(
-            //mainAxisSize: MainAxisSize.min,
-            //children: [
-            //Expanded(
-            //child:
             child: ValueListenableBuilder<bool>(
               valueListenable: isVerticalTile,
               builder: (context, vertical, _) {
                 if (vertical) {
                   return Row(
                     // Main Bible screen row
-                    //mainAxisSize: MainAxisSize.min,
                     children: List.generate(_screenLocations.length, (i) {
                       return Expanded(
                         child: BibleScreen(
@@ -4315,7 +4320,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           showNotesInline: showNotesInlineNotifier,
                           showTskReferences: showTskReferencesNotifier,
                           // Force focus to invisible button when the note screen closes
-                          // to prevent the Windows OSK bug
+                          // to circumvent the Windows OSK bug
                           onNoteScreenClosed: () {
                             // debugPrint(
                             //     '>>> onNoteScreenClosed callback received in main.dart (vertical)');
@@ -4323,20 +4328,22 @@ class _MultiBibleViewState extends State<MultiBibleView>
                             //     '>>> mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
                             // debugPrint(
                             //     '>>> FocusNode hasFocus before: ${_invisibleElevatedButtonNode.hasFocus}');
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              // debugPrint('>>> Inside postFrameCallback');
-                              if (mounted &&
-                                  _invisibleElevatedButtonNode
-                                      .canRequestFocus) {
-                                // debugPrint('>>> Calling requestFocus()');
-                                _invisibleElevatedButtonNode.requestFocus();
-                                // debugPrint(
-                                //     '>>> FocusNode hasFocus after: ${_invisibleElevatedButtonNode.hasFocus}');
-                              } else {
-                                // debugPrint(
-                                //     '>>> SKIPPED requestFocus - mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-                              }
-                            });
+                            if (!kIsWeb && Platform.isWindows) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                // debugPrint('>>> Inside postFrameCallback');
+                                if (mounted &&
+                                    _invisibleElevatedButtonNode
+                                        .canRequestFocus) {
+                                  // debugPrint('>>> Calling requestFocus()');
+                                  _invisibleElevatedButtonNode.requestFocus();
+                                  // debugPrint(
+                                  //     '>>> FocusNode hasFocus after: ${_invisibleElevatedButtonNode.hasFocus}');
+                                } else {
+                                  // debugPrint(
+                                  //     '>>> SKIPPED requestFocus - mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
+                                }
+                              });
+                            }
                           },
                         ),
                       );
