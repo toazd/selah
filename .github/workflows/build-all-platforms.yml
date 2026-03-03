@@ -298,16 +298,16 @@ jobs:
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
-          NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE). I've only encountered this issue on Arch based platforms so far (Vanilla & CachyOS). I have tested both of the following themes and they work well (each may require their own configuration depending on your distribution and/or desktop environment). If you want to use something else just be sure that it contains a GTK3 theme:
+          NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE). I have tested both of the following themes and they work well (each may require their own configuration depending on your distribution and/or desktop environment). If you want to use something else just be sure that it contains a GTK3 theme:
           - adw-gtk3 (https://github.com/lassekongo83/adw-gtk3)
           - Yaru (https://github.com/ubuntu/yaru)
           
           GNOME
-          After installing adw-gtk3 open gnome-tweaks, goto Appearance, for Legacy Applications select either adw-gtk3 (light theme)/adw-gtk3-dark (dark theme).
+          Using gnome-tweaks, goto Appearance, for Legacy Applications select a GTK3 compatible theme.
 
           KDE
-          Install adw-gtk3, System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose adw-gtk3/adw-gtk3-dark and click Apply.
-
+          System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose a GTK3 compatible theme and then apply.
+          
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
