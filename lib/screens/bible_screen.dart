@@ -644,10 +644,10 @@ class _BibleScreenState extends State<BibleScreen> {
       context: context,
       useSafeArea: true,
       builder: (context) => VerseChooserDialog(
-          // initialBook: _selectedBook,
-          // initialChapter: _selectedChapter,
-          // initialVerse: _selectedVerse,
-          ),
+        currentBook: _selectedBook,
+        currentChapter: _selectedChapter,
+        currentVerse: _selectedVerse,
+      ),
     );
     if (result != null) {
       final String book = result['book'] as String;

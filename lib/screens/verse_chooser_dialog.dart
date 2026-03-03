@@ -4,6 +4,7 @@ import 'dart:math';
 import '../database/bible_database.dart';
 import '../main.dart';
 import '../utils/book_name_converter.dart';
+import '../utils/highlight_text_color_adjustments.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/preferences_constants.dart';
 import '../utils/verse_reference_detector.dart';
@@ -15,7 +16,14 @@ enum NavigationMode { grid, list }
 class VerseChooserDialog extends StatefulWidget {
   const VerseChooserDialog({
     super.key,
+    this.currentBook,
+    this.currentChapter,
+    this.currentVerse,
   });
+
+  final String? currentBook;
+  final int? currentChapter;
+  final int? currentVerse;
 
   @override
   State<VerseChooserDialog> createState() => _VerseChooserDialogState();
@@ -160,6 +168,42 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
   // Convert a DB code to the canonical display key.
   String _toDisplayKey(String dbName) => dbName.trim();
 
+  bool _isCurrentScreenBook(String book) {
+    final currentBook = widget.currentBook?.trim();
+    return currentBook != null && _toDisplayKey(book) == currentBook;
+  }
+
+  Color _dialogSurfaceColor(BuildContext context) {
+    return Theme.of(context).dialogTheme.backgroundColor ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? darkBackgroundColor.value
+            : lightBackgroundColor.value);
+  }
+
+  Color _adjustSurfaceLightness(Color color, double delta) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withLightness((hsl.lightness + delta).clamp(0.0, 1.0).toDouble())
+        .toColor();
+  }
+
+  Color _currentBookTileBackground(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = _dialogSurfaceColor(context);
+    final preferredCandidate =
+        _adjustSurfaceLightness(baseColor, isDark ? 0.045 : -0.1);
+    final fallbackCandidate =
+        _adjustSurfaceLightness(baseColor, isDark ? 0.07 : -0.1);
+    final preferredContrast =
+        calculateContrastRatio(baseColor, preferredCandidate);
+
+    if (preferredContrast >= 1.08) {
+      return preferredCandidate;
+    }
+
+    return fallbackCandidate;
+  }
+
   double _measureTextWidth(
     BuildContext context,
     String text,
@@ -231,33 +275,47 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     if (_navigationMode == NavigationMode.list && books.isNotEmpty) {
       // For list mode, pre-load everything before setting state
 
-      String firstBook = books.first;
-      //debugPrint('firstBook: $firstBook');
-      List<int> chapters = await BibleDatabase.getChapters(firstBook);
+      final preferredBook = widget.currentBook?.trim();
+      final initialBook = preferredBook != null && books.contains(preferredBook)
+          ? preferredBook
+          : books.first;
+      List<int> chapters = await BibleDatabase.getChapters(initialBook);
       chapters.sort();
 
       if (chapters.isNotEmpty) {
-        int firstChapter = chapters.first;
-        final verses = await BibleDatabase.getVerses(firstBook, firstChapter);
+        final initialChapter = widget.currentBook?.trim() == initialBook &&
+                widget.currentChapter != null &&
+                chapters.contains(widget.currentChapter)
+            ? widget.currentChapter!
+            : chapters.first;
+        final verses =
+            await BibleDatabase.getVerses(initialBook, initialChapter);
         final verseNums = verses.map((v) {
           final val = v['verse'];
           return val is int ? val : int.tryParse(val.toString()) ?? 0;
         }).toList()
           ..sort();
 
+        final initialVerse = widget.currentBook?.trim() == initialBook &&
+                widget.currentChapter == initialChapter &&
+                widget.currentVerse != null &&
+                verseNums.contains(widget.currentVerse)
+            ? widget.currentVerse
+            : (verseNums.isNotEmpty ? verseNums.first : null);
+
         setState(() {
           _books = books;
-          _selectedBook = firstBook;
+          _selectedBook = initialBook;
           _chapters = chapters;
-          _selectedChapter = firstChapter;
+          _selectedChapter = initialChapter;
           _verses = verseNums;
-          _selectedVerse = verseNums.isNotEmpty ? verseNums.first : null;
+          _selectedVerse = initialVerse;
           _loading = false;
         });
       } else {
         setState(() {
           _books = books;
-          _selectedBook = firstBook;
+          _selectedBook = initialBook;
           _chapters = chapters;
           _selectedChapter = chapters.isNotEmpty ? chapters.first : null;
           _verses = [];
@@ -562,6 +620,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     _selectedVerse ??= 1;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentBookBackground = _currentBookTileBackground(context);
 
     final dropdownTextStyle =
         TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
@@ -637,12 +696,23 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     selectedItemBuilder: (context) {
                       return _books.map((b) {
+                        final isCurrentScreenBook = _isCurrentScreenBook(b);
                         return Center(
-                          child: Text(
-                            BookNameConverter.shortNameToLongName(b),
-                            style: dropdownTextStyle,
-                            textAlign: TextAlign.center,
-                            softWrap: true,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isCurrentScreenBook
+                                  ? currentBookBackground
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            child: Text(
+                              BookNameConverter.shortNameToLongName(b),
+                              style: dropdownTextStyle,
+                              textAlign: TextAlign.center,
+                              softWrap: true,
+                            ),
                           ),
                         );
                       }).toList();
@@ -651,11 +721,21 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       ..._books.map((b) => DropdownMenuItem(
                             value: b,
                             child: Center(
-                              child: Text(
-                                BookNameConverter.shortNameToLongName(b),
-                                style: dropdownTextStyle,
-                                textAlign: TextAlign.center,
-                                softWrap: true,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: _isCurrentScreenBook(b)
+                                      ? currentBookBackground
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                child: Text(
+                                  BookNameConverter.shortNameToLongName(b),
+                                  style: dropdownTextStyle,
+                                  textAlign: TextAlign.center,
+                                  softWrap: true,
+                                ),
                               ),
                             ),
                           )),
@@ -866,7 +946,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                        'Navigate books using\ndrop-down lists\nor a coloured grid.',
+                        'Navigate books using\ndrop-down lists\nor a colored grid.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -894,9 +974,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                             _selectedVerse = null;
                           } else {
                             // List Mode
-                            _selectedBook = 'Gen';
-                            _selectedChapter = 1;
-                            _selectedVerse = 1;
+                            _selectedBook = widget.currentBook ?? 'Gen';
+                            _selectedChapter = widget.currentChapter ?? 1;
+                            _selectedVerse = widget.currentVerse ?? 1;
                           }
                           localNavigationMode =
                               value ? NavigationMode.grid : NavigationMode.list;
@@ -986,6 +1066,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final txtColor = isDark ? darkTextColor.value : lightTextColor.value;
     final bookColors = isDark ? _bookColorsDark : _bookColorsLight;
+    final currentBookBackground = _currentBookTileBackground(context);
     final bookTileStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: uiFontSize + 6,
@@ -1099,6 +1180,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                       runSpacing: 8,
                                       children: list.map((b) {
                                         final disp = _toDisplayKey(b);
+                                        final isCurrentScreenBook =
+                                            _isCurrentScreenBook(b);
                                         final textStyle = TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: bookColors[disp] ?? txtColor,
@@ -1112,7 +1195,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             height: bookChipSize.height,
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
-                                              color: Colors.transparent,
+                                              color: isCurrentScreenBook
+                                                  ? currentBookBackground
+                                                  : Colors.transparent,
                                               borderRadius:
                                                   BorderRadius.circular(6),
                                               border: Border.all(

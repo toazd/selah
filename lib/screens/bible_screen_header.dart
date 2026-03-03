@@ -35,7 +35,7 @@ class BibleScreenHeader extends StatelessWidget {
         context);
 
     return Container(
-      height: 48, // Fixed height for consistent sizing
+      height: 55, // Fixed height for consistent sizing
       color: barColor,
       child: Row(
         children: [
