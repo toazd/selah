@@ -298,6 +298,13 @@ jobs:
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
 
           ### 🐧 Linux
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
+          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm) NOTE: rpms are not signed
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
+          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
+          
           NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE). I have tested both of the following themes and they work well (each may require their own configuration depending on your distribution and/or desktop environment). If you want to use something else just be sure that it contains a GTK3 theme:
           - adw-gtk3 (https://github.com/lassekongo83/adw-gtk3)
           - Yaru (https://github.com/ubuntu/yaru)
@@ -307,13 +314,6 @@ jobs:
 
           KDE
           System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose a GTK3 compatible theme and then apply.
-          
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation)
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.pkg.tar.zst` - Arch Linux (sudo pacman -U ./selah-X.X.X.pkg.tar.zst)
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.deb` - Debian/Ubuntu (sudo dpkg -i ./Selah-X.X.X.deb)
-          - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm) NOTE: rpms are not signed
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
-          - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
           
           ### 🤖 Android & ChromeOS (armeabi-v7a/32-bit, arm64-v8a/64-bit, x86_64/64-bit)
           NOTE: If you get the "Unsafe App Blocked" dialog simply tap "more details" and then "Install anyway"
