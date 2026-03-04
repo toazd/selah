@@ -287,8 +287,13 @@ class ErrorHandler {
     };
   }
 
-  // Internal error logging
+  // Error/exception catch logging
   static void _logError(AppError error) {
+    // Only when in debug mode
+    // Works in vs code for both
+    // "Start debugging" and "Run without debugging"
+    if (!kDebugMode) return;
+
     // Enhanced console logging with full error details
     final buffer = StringBuffer();
     buffer.writeln('=== ErrorHandler._logError ===');
@@ -314,10 +319,10 @@ class ErrorHandler {
 
     buffer.writeln('=================');
 
-    if (kDebugMode) debugPrint(buffer.toString());
+    debugPrint(buffer.toString());
 
-    // Windows-only temporary debug log: write to user's Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
-    // remove for production builds
+    // For Windows only, save console output to file at
+    // Documents\SelahLogs\selah_debug_YYYY-MM-DD.log
     if (Platform.isWindows) {
       try {
         final userProfile = Platform.environment['USERPROFILE'] ?? '.';

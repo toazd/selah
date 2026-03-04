@@ -659,9 +659,7 @@ class _SearchScreenState extends State<SearchScreen>
     // Add a listener to the focus node to show/hide the on-screen keyboard.
     //_searchFocusNode.addListener(_onFocusChange);
 
-    _loadSearchOptions();
-    _loadLastSearch();
-    _loadScrollOffset();
+    _restoreSearchState();
     _resultsScrollController.addListener(_saveScrollOffset);
 
     // Debug: dump semantics tree after TextField gets focus
@@ -689,6 +687,12 @@ class _SearchScreenState extends State<SearchScreen>
     //_keyboardChannel.setMethodCallHandler(null);
     _onSearchDebounce?.cancel();
     super.dispose();
+  }
+
+  Future<void> _restoreSearchState() async {
+    await _loadSearchOptions();
+    await _loadLastSearch();
+    await _loadScrollOffset();
   }
 
   /// Calls the native method channel to show/hide the keyboard on Windows.
@@ -749,8 +753,10 @@ class _SearchScreenState extends State<SearchScreen>
     }
   }
 
-  Future<void> _saveSearchOptions() async {
+  Future<void> _persistSearchState({String? searchTerm}) async {
     final prefs = await SharedPreferences.getInstance();
+    final currentSearchTerm = searchTerm ?? _controller.text;
+
     await prefs.setBool(_regexKey, _useRegex);
     await prefs.setBool(_nearbyKey, _useNearby);
     await prefs.setBool(_wholeWordKey, _useWholeWord);
@@ -758,6 +764,19 @@ class _SearchScreenState extends State<SearchScreen>
     await prefs.setBool(_caseSensitiveKey, _caseSensitive);
     await prefs.setString(_bookFilterTypeKey, _bookFilterType);
     await prefs.setString(_bookFilterCustomKey, _customBookFilter);
+
+    await prefs.setString('lastSearchTerm', currentSearchTerm);
+    await prefs.setBool('lastSearchUseRegex', _useRegex);
+    await prefs.setBool('lastSearchUseNearby', _useNearby);
+    await prefs.setBool('lastSearchUseWholeWord', _useWholeWord);
+    await prefs.setBool('lastSearchRedOnly', _useRedLetter);
+    await prefs.setBool('lastSearchCaseSensitive', _caseSensitive);
+    await prefs.setString('lastSearchBookFilterType', _bookFilterType);
+    await prefs.setString('lastSearchCustomBookFilter', _customBookFilter);
+  }
+
+  Future<void> _saveSearchOptions() async {
+    await _persistSearchState();
   }
 
   // Update the parsed book filter state based on current filter type and custom input
@@ -788,13 +807,14 @@ class _SearchScreenState extends State<SearchScreen>
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastSearch = prefs.getString('lastSearchTerm');
-      final lastSearchWasNearby = prefs.getBool('lastSearchUseNearby') ?? false;
 
       if (lastSearch == null || lastSearch.trim().isEmpty || lastSearch == '') {
         await prefs.setDouble('searchScrollOffset', 0.0);
         setState(() {
           _controller.text = '';
           _searchResults = [];
+          _currentRegex = null;
+          _isNearbySearchActive = false;
         });
         // Only focus the text field when there's no saved search term
         //WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -804,18 +824,29 @@ class _SearchScreenState extends State<SearchScreen>
       }
 
       // Load last search options and override the UI state with them
-      final lastSearchUseRegex = prefs.getBool('lastSearchUseRegex') ?? false;
-      final lastSearchUseNearby = prefs.getBool('lastSearchUseNearby') ?? false;
-      final lastSearchUseWholeWord =
-          prefs.getBool('lastSearchUseWholeWord') ?? false;
-      final lastSearchUseRedLetter =
-          prefs.getBool('lastSearchRedOnly') ?? false;
-      final lastSearchCaseSensitive =
-          prefs.getBool('lastSearchCaseSensitive') ?? false;
-      final lastSearchBookFilterType =
-          prefs.getString('lastSearchBookFilterType');
-      final lastSearchCustomBookFilter =
-          prefs.getString('lastSearchCustomBookFilter');
+      final lastSearchUseRegex = prefs.containsKey(_regexKey)
+          ? _useRegex
+          : (prefs.getBool('lastSearchUseRegex') ?? false);
+      final lastSearchUseNearby = prefs.containsKey(_nearbyKey)
+          ? _useNearby
+          : (prefs.getBool('lastSearchUseNearby') ?? false);
+      final lastSearchUseWholeWord = prefs.containsKey(_wholeWordKey)
+          ? _useWholeWord
+          : (prefs.getBool('lastSearchUseWholeWord') ?? false);
+      final lastSearchUseRedLetter = prefs.containsKey(_redLetterKey)
+          ? _useRedLetter
+          : (prefs.getBool('lastSearchRedOnly') ?? false);
+      final lastSearchCaseSensitive = prefs.containsKey(_caseSensitiveKey)
+          ? _caseSensitive
+          : (prefs.getBool('lastSearchCaseSensitive') ?? false);
+      final lastSearchBookFilterType = prefs.containsKey(_bookFilterTypeKey)
+          ? _bookFilterType
+          : (prefs.getString('lastSearchBookFilterType') ?? 'All Books');
+      final lastSearchCustomBookFilter = prefs.containsKey(_bookFilterCustomKey)
+          ? _customBookFilter
+          : (prefs.getString('lastSearchCustomBookFilter') ?? '');
+      final restoredSearchText =
+          lastSearchUseRegex ? lastSearch : lastSearch.trim();
 
       setState(() {
         // Override search options with last search's options
@@ -824,19 +855,13 @@ class _SearchScreenState extends State<SearchScreen>
         _useWholeWord = lastSearchUseWholeWord;
         _useRedLetter = lastSearchUseRedLetter;
         _caseSensitive = lastSearchCaseSensitive;
-        if (lastSearchBookFilterType != null) {
-          _bookFilterType = lastSearchBookFilterType;
-        }
-        if (lastSearchCustomBookFilter != null) {
-          _customBookFilter = lastSearchCustomBookFilter;
-        }
+        _bookFilterType = lastSearchBookFilterType;
+        _customBookFilter = lastSearchCustomBookFilter;
         _controller.text = lastSearch;
         _isSearching =
             true; // Set searching state immediately to show "Searching..." during load
-        // Use the overridden search options
-        final patternData =
-            _buildSearchPattern(_useRegex, lastSearch, _useWholeWord);
-        _currentRegex = patternData['regex'] as RegExp;
+        _isNearbySearchActive = false;
+        _currentRegex = null;
       });
 
       // Update book filter controller and parsed state
@@ -849,22 +874,35 @@ class _SearchScreenState extends State<SearchScreen>
         setState(() {
           _searchResults = [];
           _setTotals(0, 0);
+          _currentRegex = null;
           _isSearching = false;
+          _isNearbySearchActive = false;
+        });
+        return;
+      }
+
+      if (_useNearby && !_isValidNearbyInput(restoredSearchText)) {
+        setState(() {
+          _searchResults = [];
+          _setTotals(0, 0);
+          _currentRegex = null;
+          _isSearching = false;
+          _isNearbySearchActive = false;
         });
         return;
       }
 
       // Load the last search results - use appropriate method based on search type
       List<Map<String, dynamic>> results;
-      if (lastSearchWasNearby && _isValidNearbyInput(lastSearch)) {
+      if (_useNearby) {
         // Perform nearby search
-        results = await _searchVersesNearby(lastSearch);
+        results = await _searchVersesNearby(restoredSearchText);
         _isNearbySearchActive = true;
 
         // For nearby search, calculate totals differently
         int matchCount = 0;
         int verseCount = 0;
-        final keywords = _getKeywordsFromInput(lastSearch);
+        final keywords = _getKeywordsFromInput(restoredSearchText);
         final escapedKeywords = keywords
             .map((k) =>
                 _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k))
@@ -896,13 +934,13 @@ class _SearchScreenState extends State<SearchScreen>
       } else {
         // Perform regular search
         final patternData =
-            _buildSearchPattern(_useRegex, lastSearch, _useWholeWord);
+            _buildSearchPattern(_useRegex, restoredSearchText, _useWholeWord);
         final keywords = patternData['keywords'] as List<String>;
         final searchRegex = patternData['regex'] as RegExp;
 
         // Get all results at once
-        results = await _searchVersesOrdered(
-            keywords, searchRegex, patternData['escapedTerms'], lastSearch);
+        results = await _searchVersesOrdered(keywords, searchRegex,
+            patternData['escapedTerms'], restoredSearchText);
 
         // Calculate match and verse counts
         int verseCount = results.length;
@@ -925,36 +963,20 @@ class _SearchScreenState extends State<SearchScreen>
       setState(() {
         _controller.text = '';
         _searchResults = [];
+        _currentRegex = null;
+        _isNearbySearchActive = false;
         _isSearching = false;
       });
     }
   }
 
-  Future<void> _saveLastSearch(String term, bool useRegex) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lastSearchTerm', term);
-    await prefs.setBool('lastSearchUseRegex', useRegex);
-    await prefs.setBool('lastSearchUseNearby', _isNearbySearchActive);
-    await prefs.setBool('lastSearchUseWholeWord', _useWholeWord);
-    await prefs.setBool('lastSearchRedOnly', _useRedLetter);
-    await prefs.setBool('lastSearchCaseSensitive', _caseSensitive);
+  Future<void> _saveLastSearch() async {
+    await _persistSearchState();
   }
 
   Future<void> _saveLastSearchOnExit() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final currentSearchTerm =
-          _useRegex ? _controller.text : _controller.text.trim();
-
-      // Only update if the current search term is different from the saved one
-      await prefs.setString('lastSearchTerm', currentSearchTerm);
-      await prefs.setBool('lastSearchUseRegex', _useRegex);
-      await prefs.setBool('lastSearchUseNearby', _isNearbySearchActive);
-      await prefs.setBool('lastSearchUseWholeWord', _useWholeWord);
-      await prefs.setBool('lastSearchRedOnly', _useRedLetter);
-      await prefs.setBool('lastSearchCaseSensitive', _caseSensitive);
-      await prefs.setString('lastSearchBookFilterType', _bookFilterType);
-      await prefs.setString('lastSearchCustomBookFilter', _customBookFilter);
+      await _persistSearchState();
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -1064,28 +1086,29 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Future<void> _onSearch() async {
-    // Check for custom range errors first
+    // Check for invalid custom range
     if (_bookFilterType == 'Custom Range' && _customRangeError != null) {
-      ErrorHandler.logError(
-        'Invalid Custom Range',
-        context: {
-          'class': 'SearchScreen',
-          'method': '_onSearch',
-          'error': 'Invalid custom range'
-        },
-      );
+      // ErrorHandler.logError(
+      //   'Invalid Custom Range',
+      //   context: {
+      //     'class': 'SearchScreen',
+      //     'method': '_onSearch',
+      //     'error': 'Invalid custom range'
+      //   },
+      // );
       return;
     }
 
+    // Check for empty custom range
     if (_bookFilterType == 'Custom Range' && _customBookFilter.isEmpty) {
-      ErrorHandler.logError(
-        'Custom range is empty',
-        context: {
-          'class': 'SearchScreen',
-          'method': '_onSearch',
-          'error': 'Custom range is empty'
-        },
-      );
+      // ErrorHandler.logError(
+      //   'Custom range is empty',
+      //   context: {
+      //     'class': 'SearchScreen',
+      //     'method': '_onSearch',
+      //     'error': 'Custom range is empty'
+      //   },
+      // );
       return;
     }
 
@@ -1204,7 +1227,7 @@ class _SearchScreenState extends State<SearchScreen>
         }
       }
 
-      await _saveLastSearch(searchText, _useRegex);
+      await _saveLastSearch();
 
       // TODO: update this if web builds on windows have the OSK bug
       // Don't bother to use this bug-workaround if we aren't on windows
@@ -1821,6 +1844,7 @@ class _SearchScreenState extends State<SearchScreen>
                       _customRangeController.text = _customBookFilter;
                     });
                     _updateBookFilter();
+                    unawaited(_saveSearchOptions());
                     _clearHighlightCache();
                     if (_controller.text.trim().isNotEmpty) {
                       _onSearch();
@@ -2028,7 +2052,6 @@ class _SearchScreenState extends State<SearchScreen>
                     await _saveSearchOptions();
                     if (_controller.text.trim().isNotEmpty) {
                       _onSearch();
-                      _onSearch();
                     }
                   }
                 },
@@ -2070,6 +2093,7 @@ class _SearchScreenState extends State<SearchScreen>
                               _customRangeError =
                                   null; // Clear any lingering error
                             });
+                            await _updateBookFilter();
                             await _saveSearchOptions();
                           },
                           iconSize: 32,
@@ -2089,6 +2113,7 @@ class _SearchScreenState extends State<SearchScreen>
                       onChanged: (value) {
                         _customBookFilter = value;
                         _updateBookFilter();
+                        unawaited(_saveSearchOptions());
                       },
                       onSubmitted: (_) async {
                         await _saveSearchOptions();
@@ -2221,13 +2246,17 @@ class _SearchScreenState extends State<SearchScreen>
                               : lightPrimaryColor.value,
                           semanticLabel: 'Clear Search Query',
                         ),
-                        onPressed: () => _controller.clear(),
+                        onPressed: () async {
+                          _controller.clear();
+                          await _saveSearchOptions();
+                        },
                         iconSize: 32,
                       ),
                     ),
                     // Live update the search results
                     onChanged: (_) {
                       _lastInputTime = DateTime.now();
+                      unawaited(_saveSearchOptions());
                       if (_onSearchDebounce?.isActive ?? false) {
                         _onSearchDebounce?.cancel();
                       }
