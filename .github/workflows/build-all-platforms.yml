@@ -316,7 +316,6 @@ jobs:
           System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose a GTK3 compatible theme and then apply.
           
           ### 🤖 Android & ChromeOS (armeabi-v7a/32-bit, arm64-v8a/64-bit, x86_64/64-bit)
-          NOTE: If you get the "Unsafe App Blocked" dialog simply tap "more details" and then "Install anyway"
           - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
           
           ### 🍎 iOS
