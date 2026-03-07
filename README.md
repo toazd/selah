@@ -50,7 +50,7 @@ Note also that Selah has built-in data export and import functionality so you do
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| Android  | ✅ Stable | Minimum API 22 (5.1 untested; 8.1.1 & 11 tested) |
+| Android  | ✅ Stable | Minimum API 27 (8.1.1 & 12 tested) |
 | iOS      | ✅ Stable | iOS 11+ (18 tested) |
 | Web      | ✅ Stable | Modern browsers (Chrome & Firefox on Apache tested; electron-forge (Windows) tested) |
 | Windows  | ✅ Stable | Windows 10+ (10 untested; 11 tested) |
