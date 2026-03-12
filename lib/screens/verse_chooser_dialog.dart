@@ -173,6 +173,30 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     return currentBook != null && _toDisplayKey(book) == currentBook;
   }
 
+  bool _isCurrentScreenChapter(int chapter) {
+    final currentBook = widget.currentBook?.trim();
+    final currentChapter = widget.currentChapter;
+    return currentBook != null &&
+        currentChapter != null &&
+        _selectedBook != null &&
+        _toDisplayKey(_selectedBook!) == currentBook &&
+        chapter == currentChapter;
+  }
+
+  bool _isCurrentScreenVerse(int verse) {
+    final currentBook = widget.currentBook?.trim();
+    final currentChapter = widget.currentChapter;
+    final currentVerse = widget.currentVerse;
+    return currentBook != null &&
+        currentChapter != null &&
+        currentVerse != null &&
+        _selectedBook != null &&
+        _selectedChapter != null &&
+        _toDisplayKey(_selectedBook!) == currentBook &&
+        _selectedChapter == currentChapter &&
+        verse == currentVerse;
+  }
+
   Color _dialogSurfaceColor(BuildContext context) {
     return Theme.of(context).dialogTheme.backgroundColor ??
         (Theme.of(context).brightness == Brightness.dark
@@ -202,6 +226,28 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     }
 
     return fallbackCandidate;
+  }
+
+  Widget _buildHighlightedSelectorLabel(
+    String label, {
+    required TextStyle style,
+    required bool highlighted,
+  }) {
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          color: highlighted ? _currentBookTileBackground(context) : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          label,
+          style: style,
+          textAlign: TextAlign.center,
+          softWrap: true,
+        ),
+      ),
+    );
   }
 
   double _measureTextWidth(
@@ -620,8 +666,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     _selectedVerse ??= 1;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentBookBackground = _currentBookTileBackground(context);
-
     final dropdownTextStyle =
         TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
     final bookLabels = _books.map(BookNameConverter.shortNameToLongName);
@@ -696,47 +740,20 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     selectedItemBuilder: (context) {
                       return _books.map((b) {
-                        final isCurrentScreenBook = _isCurrentScreenBook(b);
-                        return Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isCurrentScreenBook
-                                  ? currentBookBackground
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            child: Text(
-                              BookNameConverter.shortNameToLongName(b),
-                              style: dropdownTextStyle,
-                              textAlign: TextAlign.center,
-                              softWrap: true,
-                            ),
-                          ),
+                        return _buildHighlightedSelectorLabel(
+                          BookNameConverter.shortNameToLongName(b),
+                          style: dropdownTextStyle,
+                          highlighted: _isCurrentScreenBook(b),
                         );
                       }).toList();
                     },
                     items: [
                       ..._books.map((b) => DropdownMenuItem(
                             value: b,
-                            child: Center(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: _isCurrentScreenBook(b)
-                                      ? currentBookBackground
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                child: Text(
-                                  BookNameConverter.shortNameToLongName(b),
-                                  style: dropdownTextStyle,
-                                  textAlign: TextAlign.center,
-                                  softWrap: true,
-                                ),
-                              ),
+                            child: _buildHighlightedSelectorLabel(
+                              BookNameConverter.shortNameToLongName(b),
+                              style: dropdownTextStyle,
+                              highlighted: _isCurrentScreenBook(b),
                             ),
                           )),
                     ],
@@ -765,12 +782,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     selectedItemBuilder: (context) {
                       return _chapters.map((c) {
-                        return Center(
-                          child: Text(
-                            '$c',
-                            style: dropdownTextStyle,
-                            textAlign: TextAlign.center,
-                          ),
+                        return _buildHighlightedSelectorLabel(
+                          '$c',
+                          style: dropdownTextStyle,
+                          highlighted: _isCurrentScreenChapter(c),
                         );
                       }).toList();
                     },
@@ -779,12 +794,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                         : _chapters
                             .map((c) => DropdownMenuItem(
                                   value: c,
-                                  child: Center(
-                                    child: Text(
-                                      '$c',
-                                      style: dropdownTextStyle,
-                                      textAlign: TextAlign.center,
-                                    ),
+                                  child: _buildHighlightedSelectorLabel(
+                                    '$c',
+                                    style: dropdownTextStyle,
+                                    highlighted: _isCurrentScreenChapter(c),
                                   ),
                                 ))
                             .toList(),
@@ -813,12 +826,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     selectedItemBuilder: (context) {
                       return _verses.map((v) {
-                        return Center(
-                          child: Text(
-                            '$v',
-                            style: dropdownTextStyle,
-                            textAlign: TextAlign.center,
-                          ),
+                        return _buildHighlightedSelectorLabel(
+                          '$v',
+                          style: dropdownTextStyle,
+                          highlighted: _isCurrentScreenVerse(v),
                         );
                       }).toList();
                     },
@@ -827,12 +838,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                         : _verses
                             .map((v) => DropdownMenuItem(
                                   value: v,
-                                  child: Center(
-                                    child: Text(
-                                      '$v',
-                                      style: dropdownTextStyle,
-                                      textAlign: TextAlign.center,
-                                    ),
+                                  child: _buildHighlightedSelectorLabel(
+                                    '$v',
+                                    style: dropdownTextStyle,
+                                    highlighted: _isCurrentScreenVerse(v),
                                   ),
                                 ))
                             .toList(),
@@ -1289,6 +1298,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           runSpacing: 8,
                                           children: _chapters
                                               .map((c) => GestureDetector(
+                                                    onTap: () =>
+                                                        _onChapterSelected(c),
                                                     child: Container(
                                                       width:
                                                           chapterChipSize.width,
@@ -1297,8 +1308,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Colors.transparent,
+                                                        color: _isCurrentScreenChapter(
+                                                                c)
+                                                            ? currentBookBackground
+                                                            : Colors
+                                                                .transparent,
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(6),
@@ -1325,8 +1339,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                         ),
                                                       ),
                                                     ),
-                                                    onTap: () =>
-                                                        _onChapterSelected(c),
                                                   ))
                                               .toList(),
                                         ),
@@ -1387,6 +1399,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                           runSpacing: 8,
                                           children: _verses
                                               .map((v) => GestureDetector(
+                                                    onTap: () =>
+                                                        _onVerseSelected(v),
                                                     child: Container(
                                                       width:
                                                           verseChipSize.width,
@@ -1395,8 +1409,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                       alignment:
                                                           Alignment.center,
                                                       decoration: BoxDecoration(
-                                                        color:
-                                                            Colors.transparent,
+                                                        color: _isCurrentScreenVerse(
+                                                                v)
+                                                            ? currentBookBackground
+                                                            : Colors
+                                                                .transparent,
                                                         borderRadius:
                                                             BorderRadius
                                                                 .circular(6),
@@ -1421,8 +1438,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                                         ),
                                                       ),
                                                     ),
-                                                    onTap: () =>
-                                                        _onVerseSelected(v),
                                                   ))
                                               .toList(),
                                         ),
