@@ -11,8 +11,6 @@ import '../utils/verse_reference_detector.dart';
 
 enum TapMode { threeTap, twoTap }
 
-enum NavigationMode { grid, list }
-
 class VerseChooserDialog extends StatefulWidget {
   const VerseChooserDialog({
     super.key,
@@ -39,7 +37,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
   bool _loading = true;
   final _scrollController = ScrollController();
   TapMode _tapMode = TapMode.threeTap;
-  NavigationMode _navigationMode = NavigationMode.grid;
   bool _showQuickJump = false;
   final TextEditingController _quickJumpController = TextEditingController();
 
@@ -228,28 +225,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     return fallbackCandidate;
   }
 
-  Widget _buildHighlightedSelectorLabel(
-    String label, {
-    required TextStyle style,
-    required bool highlighted,
-  }) {
-    return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          color: highlighted ? _currentBookTileBackground(context) : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(
-          label,
-          style: style,
-          textAlign: TextAlign.center,
-          softWrap: true,
-        ),
-      ),
-    );
-  }
-
   double _measureTextWidth(
     BuildContext context,
     String text,
@@ -318,59 +293,17 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     List<String> books = await BibleDatabase.getBooks();
     books = books.map((b) => b.trim()).toList();
 
-    if (_navigationMode == NavigationMode.list && books.isNotEmpty) {
-      // For list mode, pre-load everything before setting state
-
-      final preferredBook = widget.currentBook?.trim();
-      final initialBook = preferredBook != null && books.contains(preferredBook)
-          ? preferredBook
-          : books.first;
-      List<int> chapters = await BibleDatabase.getChapters(initialBook);
-      chapters.sort();
-
-      if (chapters.isNotEmpty) {
-        final initialChapter = widget.currentBook?.trim() == initialBook &&
-                widget.currentChapter != null &&
-                chapters.contains(widget.currentChapter)
-            ? widget.currentChapter!
-            : chapters.first;
-        final verses =
-            await BibleDatabase.getVerses(initialBook, initialChapter);
-        final verseNums = verses.map((v) {
-          final val = v['verse'];
-          return val is int ? val : int.tryParse(val.toString()) ?? 0;
-        }).toList()
-          ..sort();
-
-        final initialVerse = widget.currentBook?.trim() == initialBook &&
-                widget.currentChapter == initialChapter &&
-                widget.currentVerse != null &&
-                verseNums.contains(widget.currentVerse)
-            ? widget.currentVerse
-            : (verseNums.isNotEmpty ? verseNums.first : null);
-
-        setState(() {
-          _books = books;
-          _selectedBook = initialBook;
-          _chapters = chapters;
-          _selectedChapter = initialChapter;
-          _verses = verseNums;
-          _selectedVerse = initialVerse;
-          _loading = false;
-        });
-      } else {
-        setState(() {
-          _books = books;
-          _selectedBook = initialBook;
-          _chapters = chapters;
-          _selectedChapter = chapters.isNotEmpty ? chapters.first : null;
-          _verses = [];
-          _selectedVerse = null;
-          _loading = false;
-        });
-      }
+    if (books.isNotEmpty) {
+      setState(() {
+        _books = books;
+        _selectedBook = null;
+        _chapters = [];
+        _selectedChapter = null;
+        _verses = [];
+        _selectedVerse = null;
+        _loading = false;
+      });
     } else {
-      // For grid mode
       setState(() {
         _books = books;
         _selectedBook = null;
@@ -417,67 +350,40 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
   void _onBookSelected(String book) async {
     setState(() {
       _selectedBook = book;
-      // For list mode, don't auto-select chapter - let user choose
-      if (_navigationMode != NavigationMode.list) {
-        _selectedChapter = null;
-        _selectedVerse = null;
-        _chapters = [];
-        _verses = [];
-      }
+      _selectedChapter = null;
+      _selectedVerse = null;
+      _chapters = [];
+      _verses = [];
     });
     await _loadChapters();
     _scrollController.jumpTo(0.0);
-    if (_navigationMode == NavigationMode.list && _chapters.isNotEmpty) {
-      // For list mode, pre-select first chapter but don't auto-navigate
-      setState(() {
-        _selectedChapter = _chapters.first;
-      });
-      await _loadVerses();
-      if (_verses.isNotEmpty) {
-        setState(() {
-          _selectedVerse = _verses.first;
-        });
-      }
-    }
   }
 
   void _onChapterSelected(int chapter) async {
     setState(() {
       _selectedChapter = chapter;
-      // For list mode, don't auto-navigate - let user choose verse
-      if (_navigationMode != NavigationMode.list) {
-        if (_tapMode == TapMode.twoTap) {
-          // For two tap in grid mode, immediately navigate with verse null
-          // to scroll to top of chapter (showing any titles)
-          _selectedVerse = null;
-          Navigator.pop(context, {
-            'book': _selectedBook,
-            'chapter': _selectedChapter,
-            'verse': null,
-          });
-          return;
-        }
+      if (_tapMode == TapMode.twoTap) {
+        // Navigate to the top of the chapter so titles are visible.
         _selectedVerse = null;
-        _verses = [];
+        Navigator.pop(context, {
+          'book': _selectedBook,
+          'chapter': _selectedChapter,
+          'verse': null,
+        });
+        return;
       }
+      _selectedVerse = null;
+      _verses = [];
     });
     await _loadVerses();
     _scrollController.jumpTo(0.0);
-    if (_navigationMode == NavigationMode.list && _verses.isNotEmpty) {
-      // For list mode, pre-select first verse but don't auto-navigate
-      setState(() {
-        _selectedVerse = _verses.first;
-      });
-    }
   }
 
   void _onVerseSelected(int verse) {
     setState(() {
       _selectedVerse = verse;
     });
-    // For list mode, don't auto-navigate - only navigate when Go is pressed
-    if (_navigationMode != NavigationMode.list &&
-        _selectedBook != null &&
+    if (_selectedBook != null &&
         _selectedChapter != null &&
         _selectedVerse != null) {
       Navigator.pop(context, {
@@ -514,7 +420,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
 
   // Preferences keys
   static const String _prefsKeyTapMode = 'verseChooserTapMode';
-  static const String _prefsKeyNavigationMode = 'verseChooserNavigationMode';
   static const String _prefsKeyShowQuickJump = 'verseChooserShowQuickJump';
 
   // Load saved settings
@@ -522,15 +427,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final tapModeIdx = prefs.getInt(_prefsKeyTapMode);
-      final navigationModeIdx = prefs.getInt(_prefsKeyNavigationMode);
       final showQuickJump = prefs.getBool(_prefsKeyShowQuickJump);
       if (mounted) {
         setState(() {
           _tapMode =
               tapModeIdx != null ? TapMode.values[tapModeIdx] : TapMode.twoTap;
-          _navigationMode = navigationModeIdx != null
-              ? NavigationMode.values[navigationModeIdx]
-              : NavigationMode.grid;
           _showQuickJump = showQuickJump ?? true;
         });
       }
@@ -538,7 +439,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       if (mounted) {
         setState(() {
           _tapMode = TapMode.twoTap;
-          _navigationMode = NavigationMode.grid;
           _showQuickJump = true;
         });
       }
@@ -549,18 +449,15 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefsKeyTapMode, _tapMode.index);
-    await prefs.setInt(_prefsKeyNavigationMode, _navigationMode.index);
     await prefs.setBool(_prefsKeyShowQuickJump, _showQuickJump);
   }
 
   void _onSettingsChanged({
     TapMode? tapMode,
-    NavigationMode? navigationMode,
     bool? showQuickJump,
   }) {
     setState(() {
       if (tapMode != null) _tapMode = tapMode;
-      if (navigationMode != null) _navigationMode = navigationMode;
       if (showQuickJump != null) _showQuickJump = showQuickJump;
     });
     _saveSettings();
@@ -637,252 +534,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     );
   }
 
-  Widget _buildDropdownSelector() {
-    if (_books.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'No books found! This is a critical error.\nUninstalling and reinstalling this app might fix this problem.',
-              style: TextStyle(
-                  color: Colors.red,
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily),
-            ),
-          ],
-        ),
-      );
-    }
-
-    //debugPrint('Books: $_books');
-    //debugPrint('Chapters: $_chapters');
-    //debugPrint('Verses: $_verses');
-
-    // When switching from Grid mode (which uses _selectedBook == null to determine when
-    // the settings icon should be shown and when it shouldn't) reset to default values
-    _selectedBook ??= 'Gen';
-    _selectedChapter ??= 1;
-    _selectedVerse ??= 1;
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dropdownTextStyle =
-        TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
-    final bookLabels = _books.map(BookNameConverter.shortNameToLongName);
-    final chapterLabels =
-        _chapters.isEmpty ? <String>['119'] : _chapters.map((c) => '$c');
-    final verseLabels =
-        _verses.isEmpty ? <String>['176'] : _verses.map((v) => '$v');
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : MediaQuery.of(context).size.width - 64;
-
-          final bookWidth = _scaledTileSize(
-            context,
-            labels: bookLabels,
-            style: dropdownTextStyle,
-            horizontalPadding: 92,
-            verticalPadding: 0,
-            minWidth: 180,
-            minHeight: 0,
-          ).width;
-          final chapterWidth = _scaledTileSize(
-            context,
-            labels: chapterLabels,
-            style: dropdownTextStyle,
-            horizontalPadding: 92,
-            verticalPadding: 0,
-            minWidth: 180,
-            minHeight: 0,
-          ).width;
-          final verseWidth = _scaledTileSize(
-            context,
-            labels: verseLabels,
-            style: dropdownTextStyle,
-            horizontalPadding: 92,
-            verticalPadding: 0,
-            minWidth: 180,
-            minHeight: 0,
-          ).width;
-
-          final dropdownWidth =
-              min(maxWidth, max(bookWidth, max(chapterWidth, verseWidth)));
-
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: dropdownWidth,
-                  child: DropdownButton<String>(
-                    value: _selectedBook,
-                    isExpanded: true,
-                    alignment: Alignment.center,
-                    underline: Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    icon: Icon(
-                      Icons.menu_book_rounded,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    selectedItemBuilder: (context) {
-                      return _books.map((b) {
-                        return _buildHighlightedSelectorLabel(
-                          BookNameConverter.shortNameToLongName(b),
-                          style: dropdownTextStyle,
-                          highlighted: _isCurrentScreenBook(b),
-                        );
-                      }).toList();
-                    },
-                    items: [
-                      ..._books.map((b) => DropdownMenuItem(
-                            value: b,
-                            child: _buildHighlightedSelectorLabel(
-                              BookNameConverter.shortNameToLongName(b),
-                              style: dropdownTextStyle,
-                              highlighted: _isCurrentScreenBook(b),
-                            ),
-                          )),
-                    ],
-                    onChanged: (book) => _onBookSelected(book!),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: dropdownWidth,
-                  child: DropdownButton<int>(
-                    value: _selectedChapter,
-                    isExpanded: true,
-                    alignment: Alignment.center,
-                    underline: Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    icon: Icon(
-                      Icons.library_books_rounded,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    selectedItemBuilder: (context) {
-                      return _chapters.map((c) {
-                        return _buildHighlightedSelectorLabel(
-                          '$c',
-                          style: dropdownTextStyle,
-                          highlighted: _isCurrentScreenChapter(c),
-                        );
-                      }).toList();
-                    },
-                    items: _chapters.isEmpty
-                        ? []
-                        : _chapters
-                            .map((c) => DropdownMenuItem(
-                                  value: c,
-                                  child: _buildHighlightedSelectorLabel(
-                                    '$c',
-                                    style: dropdownTextStyle,
-                                    highlighted: _isCurrentScreenChapter(c),
-                                  ),
-                                ))
-                            .toList(),
-                    onChanged: (chapter) => _onChapterSelected(chapter!),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: dropdownWidth,
-                  child: DropdownButton<int>(
-                    value: _selectedVerse,
-                    isExpanded: true,
-                    alignment: Alignment.center,
-                    underline: Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    icon: Icon(
-                      Icons.pageview_rounded,
-                      color: isDark
-                          ? darkPrimaryColor.value
-                          : lightPrimaryColor.value,
-                    ),
-                    selectedItemBuilder: (context) {
-                      return _verses.map((v) {
-                        return _buildHighlightedSelectorLabel(
-                          '$v',
-                          style: dropdownTextStyle,
-                          highlighted: _isCurrentScreenVerse(v),
-                        );
-                      }).toList();
-                    },
-                    items: _verses.isEmpty
-                        ? []
-                        : _verses
-                            .map((v) => DropdownMenuItem(
-                                  value: v,
-                                  child: _buildHighlightedSelectorLabel(
-                                    '$v',
-                                    style: dropdownTextStyle,
-                                    highlighted: _isCurrentScreenVerse(v),
-                                  ),
-                                ))
-                            .toList(),
-                    onChanged: (verse) => _onVerseSelected(verse!),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _selectedBook != null &&
-                          _selectedChapter != null &&
-                          _selectedVerse != null
-                      ? () {
-                          Navigator.pop(context, {
-                            'book': _selectedBook,
-                            'chapter': _selectedChapter,
-                            'verse': _selectedVerse,
-                          });
-                        }
-                      : null,
-                  child: Text(
-                    'Go',
-                    style: TextStyle(
-                      fontFamily: uiFontFamily,
-                      fontSize: uiFontSize,
-                      color:
-                          getAdaptiveTextColor(context, usePrimaryColor: true),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   void _showSettingsDialog() {
     // Local copies for the dialog - moved outside StatefulBuilder to persist across rebuilds
     TapMode localTapMode = _tapMode;
-    NavigationMode localNavigationMode = _navigationMode;
     bool localShowQuickJump = _showQuickJump;
 
     showDialog(
@@ -923,7 +577,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                        'When in grid mode\n3-Tap requires choosing\na verse number and\n2-Tap does not.',
+                        '3-Tap requires choosing\na verse number and\n2-Tap does not.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -954,44 +608,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                       color: getAdaptiveTextColor(context),
                     ),
                     SizedBox(height: 8),
-                    Text(
-                        'Navigate books using\ndrop-down lists\nor a colored grid.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: uiFontFamily,
-                            fontSize: uiFontSize,
-                            color: getAdaptiveTextColor(context))),
-                    SizedBox(height: 16),
-                    SwitchListTile(
-                      title: Text(
-                          localNavigationMode == NavigationMode.grid
-                              ? 'Grid'
-                              : 'List',
-                          style: TextStyle(
-                              fontFamily: uiFontFamily,
-                              fontSize: uiFontSize,
-                              color: getAdaptiveTextColor(context))),
-                      value: localNavigationMode == NavigationMode.grid,
-                      onChanged: (bool value) {
-                        setStateDialog(() {
-                          // Reset values when switching modes
-                          if (value) {
-                            // Grid Mode
-                            _selectedBook = null;
-                            _selectedChapter = null;
-                            _selectedVerse = null;
-                          } else {
-                            // List Mode
-                            _selectedBook = widget.currentBook ?? 'Gen';
-                            _selectedChapter = widget.currentChapter ?? 1;
-                            _selectedVerse = widget.currentVerse ?? 1;
-                          }
-                          localNavigationMode =
-                              value ? NavigationMode.grid : NavigationMode.list;
-                        });
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -1000,12 +616,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                   onPressed: () {
                     setStateDialog(() {
                       localTapMode = TapMode.threeTap;
-                      localNavigationMode = NavigationMode.grid;
                       localShowQuickJump = false;
-                      // Reset selections when switching to grid mode
-                      _selectedBook = null;
-                      _selectedChapter = null;
-                      _selectedVerse = null;
                     });
                   },
                   child: Text('Reset',
@@ -1026,17 +637,9 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                   onPressed: () {
                     _onSettingsChanged(
                       tapMode: localTapMode,
-                      navigationMode: localNavigationMode,
                       showQuickJump: localShowQuickJump,
                     );
-                    // Close both dialogs when settings are saved to avoid weird
-                    // UI issues when switching from grid to list mode (the list mode
-                    // doesn't looks like it builds correctly until it is closed and then
-                    // reopened)
-                    int count = 0;
-                    Navigator.popUntil(context, (route) {
-                      return count++ == 2;
-                    });
+                    Navigator.pop(context);
                   },
                   child: Text('Save',
                       style: TextStyle(
@@ -1086,9 +689,6 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       fontSize: uiFontSize + 7,
       fontFamily: fontFamilyNotifier.value,
     );
-    final dropdownStyle =
-        TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize);
-
     final bookChipSize = _scaledTileSize(
       context,
       labels: _books.map(_toDisplayKey),
@@ -1122,28 +722,8 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final gridContentWidth = (bookChipSize.width * gridColumns) +
         (gridSpacing * (gridColumns - 1)) +
         24;
-    final listBookWidth = _measureTextWidth(
-          context,
-          _books
-              .map(BookNameConverter.shortNameToLongName)
-              .fold('', (a, b) => b.length > a.length ? b : a),
-          dropdownStyle,
-        ) +
-        120;
-    final longestChapterLabel =
-        _chapters.isEmpty ? '119' : _chapters.fold<int>(0, max).toString();
-    final longestVerseLabel =
-        _verses.isEmpty ? '176' : _verses.fold<int>(0, max).toString();
-    final listNumberWidth = max(
-          _measureTextWidth(context, longestChapterLabel, dropdownStyle),
-          _measureTextWidth(context, longestVerseLabel, dropdownStyle),
-        ) +
-        120;
-    final listContentWidth = max(285.0, max(listBookWidth, listNumberWidth));
     final maxDialogWidth = max(280.0, MediaQuery.of(context).size.width - 32);
-    final targetDialogWidth = _navigationMode == NavigationMode.grid
-        ? max(480.0, gridContentWidth)
-        : listContentWidth;
+    final targetDialogWidth = max(480.0, gridContentWidth);
     final dialogWidth =
         targetDialogWidth.clamp(280.0, maxDialogWidth).toDouble();
 
@@ -1173,288 +753,276 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _buildQuickJumpField(),
-                          if (_navigationMode == NavigationMode.list)
-                            _buildDropdownSelector()
-                          else
-                            Builder(
-                              builder: (context) {
-                                // Book selection (grid mode)
-                                if (_selectedBook == null) {
-                                  final otList = _books.take(39).toList();
-                                  final ntList = _books.skip(39).toList();
+                          Builder(
+                            builder: (context) {
+                              // Book selection
+                              if (_selectedBook == null) {
+                                final otList = _books.take(39).toList();
+                                final ntList = _books.skip(39).toList();
 
-                                  Widget buildBookWrap(List<String> list) {
-                                    return Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: list.map((b) {
-                                        final disp = _toDisplayKey(b);
-                                        final isCurrentScreenBook =
-                                            _isCurrentScreenBook(b);
-                                        final textStyle = TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: bookColors[disp] ?? txtColor,
-                                          fontSize: uiFontSize + 6,
-                                          fontFamily: fontFamilyNotifier.value,
-                                        );
-                                        return GestureDetector(
-                                          onTap: () => _onBookSelected(b),
-                                          child: Container(
-                                            width: bookChipSize.width,
-                                            height: bookChipSize.height,
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: isCurrentScreenBook
-                                                  ? currentBookBackground
-                                                  : Colors.transparent,
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: Colors.transparent,
-                                                width: 0.5,
-                                              ),
-                                            ),
-                                            child: Text(
-                                              disp,
-                                              textAlign: TextAlign.center,
-                                              style: textStyle,
-                                              overflow: TextOverflow.clip,
-                                              softWrap: false,
+                                Widget buildBookWrap(List<String> list) {
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: list.map((b) {
+                                      final disp = _toDisplayKey(b);
+                                      final isCurrentScreenBook =
+                                          _isCurrentScreenBook(b);
+                                      final textStyle = TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: bookColors[disp] ?? txtColor,
+                                        fontSize: uiFontSize + 6,
+                                        fontFamily: fontFamilyNotifier.value,
+                                      );
+                                      return GestureDetector(
+                                        onTap: () => _onBookSelected(b),
+                                        child: Container(
+                                          width: bookChipSize.width,
+                                          height: bookChipSize.height,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isCurrentScreenBook
+                                                ? currentBookBackground
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            border: Border.all(
+                                              color: Colors.transparent,
+                                              width: 0.5,
                                             ),
                                           ),
-                                        );
-                                      }).toList(),
-                                    );
-                                  }
-
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Center(child: buildBookWrap(otList)),
-                                      Divider(
-                                        thickness: 1,
-                                        height: 16,
-                                        indent:
-                                            MediaQuery.of(context).size.width *
-                                                0.01,
-                                        endIndent:
-                                            MediaQuery.of(context).size.width *
-                                                0.01,
-                                        color: const Color.fromARGB(
-                                            47, 158, 158, 158),
-                                      ),
-                                      Center(child: buildBookWrap(ntList)),
-                                    ],
+                                          child: Text(
+                                            disp,
+                                            textAlign: TextAlign.center,
+                                            style: textStyle,
+                                            overflow: TextOverflow.clip,
+                                            softWrap: false,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
                                   );
                                 }
 
-                                // Chapter selection (grid mode)
-                                if (_selectedBook != null &&
-                                    _selectedChapter == null) {
-                                  final disp = _toDisplayKey(_selectedBook!);
-                                  final wide =
-                                      MediaQuery.of(context).size.width >= 360;
-                                  final title = wide
-                                      ? BookNameConverter.shortNameToLongName(
-                                          _selectedBook!)
-                                      : disp;
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.arrow_back,
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Center(child: buildBookWrap(otList)),
+                                    Divider(
+                                      thickness: 1,
+                                      height: 16,
+                                      indent:
+                                          MediaQuery.of(context).size.width *
+                                              0.01,
+                                      endIndent:
+                                          MediaQuery.of(context).size.width *
+                                              0.01,
+                                      color: const Color.fromARGB(
+                                          47, 158, 158, 158),
+                                    ),
+                                    Center(child: buildBookWrap(ntList)),
+                                  ],
+                                );
+                              }
+
+                              // Chapter selection
+                              if (_selectedBook != null &&
+                                  _selectedChapter == null) {
+                                final disp = _toDisplayKey(_selectedBook!);
+                                final wide =
+                                    MediaQuery.of(context).size.width >= 360;
+                                final title = wide
+                                    ? BookNameConverter.shortNameToLongName(
+                                        _selectedBook!)
+                                    : disp;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.arrow_back,
+                                            color:
+                                                selectedBookColor ?? txtColor,
+                                            size: 32,
+                                            semanticLabel: 'Back',
+                                          ),
+                                          tooltip: 'Back to books',
+                                          onPressed: _backToBookChoice,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            title,
+                                            textAlign: TextAlign.center,
+                                            softWrap: true,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: uiFontSize + 7,
                                               color:
                                                   selectedBookColor ?? txtColor,
-                                              size: 32,
-                                              semanticLabel: 'Back',
-                                            ),
-                                            tooltip: 'Back to books',
-                                            onPressed: _backToBookChoice,
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              title,
-                                              textAlign: TextAlign.center,
-                                              softWrap: true,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: uiFontSize + 7,
-                                                color: selectedBookColor ??
-                                                    txtColor,
-                                              ),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Center(
-                                        child: Wrap(
-                                          spacing: 8,
-                                          runSpacing: 8,
-                                          children: _chapters
-                                              .map((c) => GestureDetector(
-                                                    onTap: () =>
-                                                        _onChapterSelected(c),
-                                                    child: Container(
-                                                      width:
-                                                          chapterChipSize.width,
-                                                      height: chapterChipSize
-                                                          .height,
-                                                      alignment:
-                                                          Alignment.center,
-                                                      decoration: BoxDecoration(
-                                                        color: _isCurrentScreenChapter(
-                                                                c)
-                                                            ? currentBookBackground
-                                                            : Colors
-                                                                .transparent,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(6),
-                                                        border: Border.all(
-                                                          color: Colors
-                                                              .transparent,
-                                                          width: 0.5,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        '$c',
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        softWrap: false,
-                                                        style: TextStyle(
-                                                          color: txtColor,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontSize:
-                                                              uiFontSize + 7,
-                                                          fontFamily:
-                                                              fontFamilyNotifier
-                                                                  .value,
-                                                        ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Center(
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: _chapters
+                                            .map((c) => GestureDetector(
+                                                  onTap: () =>
+                                                      _onChapterSelected(c),
+                                                  child: Container(
+                                                    width:
+                                                        chapterChipSize.width,
+                                                    height:
+                                                        chapterChipSize.height,
+                                                    alignment: Alignment.center,
+                                                    decoration: BoxDecoration(
+                                                      color: _isCurrentScreenChapter(
+                                                              c)
+                                                          ? currentBookBackground
+                                                          : Colors.transparent,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      border: Border.all(
+                                                        color:
+                                                            Colors.transparent,
+                                                        width: 0.5,
                                                       ),
                                                     ),
-                                                  ))
-                                              .toList(),
-                                        ),
+                                                    child: Text(
+                                                      '$c',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      softWrap: false,
+                                                      style: TextStyle(
+                                                        color: txtColor,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                        fontSize:
+                                                            uiFontSize + 7,
+                                                        fontFamily:
+                                                            fontFamilyNotifier
+                                                                .value,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
+                                            .toList(),
                                       ),
-                                      const SizedBox(height: 16),
-                                    ],
-                                  );
-                                }
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                );
+                              }
 
-                                // Verse selection (grid mode)
-                                if (_selectedBook != null &&
-                                    _selectedChapter != null) {
-                                  final disp = _toDisplayKey(_selectedBook!);
-                                  final wide =
-                                      MediaQuery.of(context).size.width >= 360;
-                                  final bookLabel = wide
-                                      ? BookNameConverter.shortNameToLongName(
-                                          _selectedBook!)
-                                      : disp;
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.arrow_back,
+                              // Verse selection
+                              if (_selectedBook != null &&
+                                  _selectedChapter != null) {
+                                final disp = _toDisplayKey(_selectedBook!);
+                                final wide =
+                                    MediaQuery.of(context).size.width >= 360;
+                                final bookLabel = wide
+                                    ? BookNameConverter.shortNameToLongName(
+                                        _selectedBook!)
+                                    : disp;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.arrow_back,
+                                            color:
+                                                selectedBookColor ?? txtColor,
+                                            size: 32,
+                                            semanticLabel: 'Back',
+                                          ),
+                                          tooltip: 'Back to chapters',
+                                          onPressed: _backToChapterChoice,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            '$bookLabel ${_selectedChapter!}',
+                                            textAlign: TextAlign.center,
+                                            softWrap: true,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: uiFontSize + 7,
                                               color:
                                                   selectedBookColor ?? txtColor,
-                                              size: 32,
-                                              semanticLabel: 'Back',
-                                            ),
-                                            tooltip: 'Back to chapters',
-                                            onPressed: _backToChapterChoice,
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              '$bookLabel ${_selectedChapter!}',
-                                              textAlign: TextAlign.center,
-                                              softWrap: true,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: uiFontSize + 7,
-                                                color: selectedBookColor ??
-                                                    txtColor,
-                                                fontFamily:
-                                                    fontFamilyNotifier.value,
-                                              ),
+                                              fontFamily:
+                                                  fontFamilyNotifier.value,
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Center(
-                                        child: Wrap(
-                                          spacing: 8,
-                                          runSpacing: 8,
-                                          children: _verses
-                                              .map((v) => GestureDetector(
-                                                    onTap: () =>
-                                                        _onVerseSelected(v),
-                                                    child: Container(
-                                                      width:
-                                                          verseChipSize.width,
-                                                      height:
-                                                          verseChipSize.height,
-                                                      alignment:
-                                                          Alignment.center,
-                                                      decoration: BoxDecoration(
-                                                        color: _isCurrentScreenVerse(
-                                                                v)
-                                                            ? currentBookBackground
-                                                            : Colors
-                                                                .transparent,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(6),
-                                                        border: Border.all(
-                                                          color: Colors
-                                                              .transparent,
-                                                          width: 0.5,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        '$v',
-                                                        softWrap: false,
-                                                        style: TextStyle(
-                                                          color: txtColor,
-                                                          fontSize:
-                                                              uiFontSize + 7,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                          fontFamily:
-                                                              fontFamilyNotifier
-                                                                  .value,
-                                                        ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Center(
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: _verses
+                                            .map((v) => GestureDetector(
+                                                  onTap: () =>
+                                                      _onVerseSelected(v),
+                                                  child: Container(
+                                                    width: verseChipSize.width,
+                                                    height:
+                                                        verseChipSize.height,
+                                                    alignment: Alignment.center,
+                                                    decoration: BoxDecoration(
+                                                      color: _isCurrentScreenVerse(
+                                                              v)
+                                                          ? currentBookBackground
+                                                          : Colors.transparent,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      border: Border.all(
+                                                        color:
+                                                            Colors.transparent,
+                                                        width: 0.5,
                                                       ),
                                                     ),
-                                                  ))
-                                              .toList(),
-                                        ),
+                                                    child: Text(
+                                                      '$v',
+                                                      softWrap: false,
+                                                      style: TextStyle(
+                                                        color: txtColor,
+                                                        fontSize:
+                                                            uiFontSize + 7,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                        fontFamily:
+                                                            fontFamilyNotifier
+                                                                .value,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
+                                            .toList(),
                                       ),
-                                      const SizedBox(height: 16),
-                                    ],
-                                  );
-                                }
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                );
+                              }
 
-                                return SizedBox.shrink();
-                              },
-                            ),
+                              return SizedBox.shrink();
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    if (_selectedBook == null ||
-                        _navigationMode == NavigationMode.list)
+                    if (_selectedBook == null)
                       Positioned(
                         bottom: 0.0, // Keep it always at the bottom right
                         right: 0.0,
