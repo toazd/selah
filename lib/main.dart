@@ -4882,7 +4882,9 @@ class _MultiBibleViewState extends State<MultiBibleView>
         final zipFile = File(path.join(selectedDirectory, fileName));
         final encoder = ZipEncoder();
         final archive = Archive();
-        final jsonBytes = utf8.encode(jsonEncode(exportData));
+        //final jsonBytes = utf8.encode(jsonEncode(exportData));
+        final jsonBytes =
+            utf8.encode(JsonEncoder.withIndent('\t').convert(exportData));
 
         archive.addFile(
           ArchiveFile('selah_data.json', jsonBytes.length, jsonBytes),
