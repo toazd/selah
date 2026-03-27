@@ -1437,6 +1437,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
   bool _wasMaximizedBeforeFullscreen =
       false; // Track maximized state before fullscreen
   final FocusNode _invisibleElevatedButtonNode = FocusNode();
+  String _drawerUsername = 'Unknown';
+  int _drawerUsernameLoadGeneration = 0;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -1509,6 +1511,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
     WidgetsBinding.instance.addObserver(this);
     _initWindowManager();
     _loadScreensFromPrefs();
+    currentUser.addListener(_handleCurrentUserChanged);
+    _handleCurrentUserChanged();
     themeModeNotifier.addListener(_saveThemeMode);
     fullscreenNotifier.addListener(_applyFullscreen);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1521,6 +1525,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
   @override
   void dispose() {
     // Remove listeners to prevent memory leaks
+    currentUser.removeListener(_handleCurrentUserChanged);
     themeModeNotifier.removeListener(_saveThemeMode);
     fullscreenNotifier.removeListener(_applyFullscreen);
 
@@ -1537,6 +1542,64 @@ class _MultiBibleViewState extends State<MultiBibleView>
     _invisibleElevatedButtonNode.dispose();
 
     super.dispose();
+  }
+
+  void _handleCurrentUserChanged() {
+    unawaited(_primeDrawerUsername());
+  }
+
+  Future<void> _primeDrawerUsername() async {
+    final user = currentUser.value;
+    final generation = ++_drawerUsernameLoadGeneration;
+
+    if (user == null) {
+      if (_drawerUsername != 'Unknown') {
+        if (mounted) {
+          setState(() {
+            _drawerUsername = 'Unknown';
+          });
+        } else {
+          _drawerUsername = 'Unknown';
+        }
+      }
+      return;
+    }
+
+    final cachedUsername = await SupabaseSyncService.getCachedUsername();
+    if (!mounted || generation != _drawerUsernameLoadGeneration) return;
+    if (currentUser.value?.id != user.id) return;
+
+    final normalizedCachedUsername =
+        (cachedUsername == null || cachedUsername.isEmpty)
+            ? 'Unknown'
+            : cachedUsername;
+
+    if (_drawerUsername != normalizedCachedUsername) {
+      setState(() {
+        _drawerUsername = normalizedCachedUsername;
+      });
+    }
+
+    if (normalizedCachedUsername == 'Unknown') {
+      unawaited(_refreshDrawerUsername(user, generation));
+    }
+  }
+
+  Future<void> _refreshDrawerUsername(User user, int generation) async {
+    final freshUsername = await _getUsername(user);
+    if (!mounted || generation != _drawerUsernameLoadGeneration) return;
+    if (currentUser.value?.id != user.id) return;
+
+    final normalizedFreshUsername =
+        (freshUsername == null || freshUsername.isEmpty)
+            ? 'Unknown'
+            : freshUsername;
+
+    if (_drawerUsername != normalizedFreshUsername) {
+      setState(() {
+        _drawerUsername = normalizedFreshUsername;
+      });
+    }
   }
 
   void _initWindowManager() async {
@@ -2085,6 +2148,306 @@ class _MultiBibleViewState extends State<MultiBibleView>
     );
   }
 
+  void _showCustomizeFontsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => Dialog(
+        child: Container(
+          width: 300,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: Center(
+                    child: Text(
+                      'Customize fonts',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        fontWeight: FontWeight.bold,
+                        color: getAdaptiveTextColor(context),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ValueListenableBuilder<String>(
+                  valueListenable: fontFamilyNotifier,
+                  builder: (context, fontFamily, _) {
+                    return _buildFontSelectionTile(
+                      context: context,
+                      title: 'Bible Font',
+                      selectedFont: fontFamily,
+                      onTap: () => _showFontPickerDialog(
+                        context: context,
+                        title: 'Bible Font',
+                        currentFont: fontFamily,
+                        onSelected: (selectedFont) {
+                          fontFamilyNotifier.value = selectedFont;
+                          _saveFontPrefs();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    'Bible Font Size',
+                    style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ValueListenableBuilder<double>(
+                  valueListenable: fontSizeNotifier,
+                  builder: (context, fontSize, _) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            fontSizeNotifier.value =
+                                (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
+                            _saveFontPrefs();
+                          },
+                          child: Icon(
+                            Icons.remove,
+                            color: getAdaptiveTextColor(
+                              context,
+                              usePrimaryColor: true,
+                            ),
+                            semanticLabel: 'Decrease Font Size',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '${fontSize.toInt()}',
+                          style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: getAdaptiveTextColor(context),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            fontSizeNotifier.value =
+                                (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
+                            _saveFontPrefs();
+                          },
+                          child: Icon(
+                            Icons.add,
+                            color: getAdaptiveTextColor(
+                              context,
+                              usePrimaryColor: true,
+                            ),
+                            semanticLabel: 'Increase Font Size',
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                ValueListenableBuilder<String>(
+                  valueListenable: noteFontFamilyNotifier,
+                  builder: (context, noteFontFamily, _) {
+                    return _buildFontSelectionTile(
+                      context: context,
+                      title: 'Note Font',
+                      selectedFont: noteFontFamily,
+                      onTap: () => _showFontPickerDialog(
+                        context: context,
+                        title: 'Note Font',
+                        currentFont: noteFontFamily,
+                        onSelected: (selectedFont) {
+                          noteFontFamilyNotifier.value = selectedFont;
+                          _saveFontPrefs();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: Text(
+                        'Reset',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: Colors.red,
+                        ),
+                      ),
+                      onPressed: () {
+                        fontFamilyNotifier.value = defaultFontFamily;
+                        noteFontFamilyNotifier.value = defaultNoteFontFamily;
+                        fontSizeNotifier.value = defaultFontSize;
+                        _saveFontPrefs();
+                      },
+                    ),
+                    TextButton(
+                      child: Text(
+                        'Close',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFontSelectionTile({
+    required BuildContext context,
+    required String title,
+    required String selectedFont,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: uiFontSize,
+          fontFamily: uiFontFamily,
+          color: getAdaptiveTextColor(context),
+        ),
+      ),
+      subtitle: Text(
+        selectedFont,
+        style: TextStyle(
+          fontSize: uiFontSize - 2,
+          fontFamily: selectedFont,
+          color: getAdaptiveTextColor(context),
+        ),
+      ),
+      trailing: Icon(
+        Icons.arrow_drop_down,
+        color: getAdaptiveTextColor(context),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _showFontPickerDialog({
+    required BuildContext context,
+    required String title,
+    required String currentFont,
+    required ValueChanged<String> onSelected,
+  }) async {
+    final selectedFont = await showDialog<String>(
+      context: context,
+      useSafeArea: true,
+      builder: (dialogContext) => Dialog(
+        child: Container(
+          width: 420,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Center(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      fontWeight: FontWeight.bold,
+                      color: getAdaptiveTextColor(dialogContext),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Current: $currentFont',
+                style: TextStyle(
+                  fontSize: uiFontSize - 2,
+                  fontFamily: currentFont,
+                  color: getAdaptiveTextColor(dialogContext),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 360,
+                width: double.infinity,
+                child: ListView.builder(
+                  itemCount: availableFonts.length,
+                  itemBuilder: (context, index) {
+                    final fontPreview = availableFonts[index];
+                    final isSelected = fontPreview == currentFont;
+                    return ListTile(
+                      dense: true,
+                      title: Text(
+                        fontPreview,
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: fontPreview,
+                          color: getAdaptiveTextColor(dialogContext),
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color:
+                                  Theme.of(dialogContext).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () => Navigator.pop(dialogContext, fontPreview),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    child: Text(
+                      'Close',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(dialogContext),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(dialogContext),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (selectedFont != null) {
+      onSelected(selectedFont);
+    }
+  }
+
   void _showCustomizeColorsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -2604,140 +2967,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
               const SizedBox(height: 16),
               Divider(),
               Text(
-                'Bible Font',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: getAdaptiveTextColor(context),
-                ),
-              ),
-              ValueListenableBuilder<String>(
-                valueListenable: fontFamilyNotifier,
-                builder: (context, fontFamily, _) {
-                  return FractionallySizedBox(
-                    widthFactor: 0.85,
-                    child: DropdownButton<String>(
-                      value: fontFamily,
-                      items: availableFonts
-                          .map(
-                            (fontPreview) => DropdownMenuItem(
-                              value: fontPreview,
-                              child: Text(
-                                fontPreview,
-                                style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: fontPreview,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          fontFamilyNotifier.value = val;
-                          _saveFontPrefs();
-                        }
-                      },
-                      isExpanded: true,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      fontSizeNotifier.value =
-                          (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
-                      _saveFontPrefs();
-                    },
-                    //child: Text('-', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-                    child: Icon(
-                      Icons.remove,
-                      color: getAdaptiveTextColor(
-                        context,
-                        usePrimaryColor: true,
-                      ),
-                      semanticLabel: 'Decrease Font Size',
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '${fontSizeNotifier.value.toInt()}',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      fontSizeNotifier.value =
-                          (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
-                      _saveFontPrefs();
-                    },
-                    child: Icon(
-                      Icons.add,
-                      color: getAdaptiveTextColor(
-                        context,
-                        usePrimaryColor: true,
-                      ),
-                      semanticLabel: 'Increase Font Size',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Note Font',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: getAdaptiveTextColor(context),
-                ),
-              ),
-              ValueListenableBuilder<String>(
-                valueListenable: noteFontFamilyNotifier,
-                builder: (context, noteFontFamily, _) {
-                  return FractionallySizedBox(
-                    widthFactor: 0.85,
-                    child: DropdownButton<String>(
-                      value: noteFontFamily,
-                      items: availableFonts
-                          .map(
-                            (fontPreview) => DropdownMenuItem(
-                              value: fontPreview,
-                              child: Text(
-                                fontPreview,
-                                style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: fontPreview,
-                                  color: getAdaptiveTextColor(context),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          noteFontFamilyNotifier.value = val;
-                          _saveFontPrefs();
-                        }
-                      },
-                      isExpanded: true,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              Divider(),
-              Text(
                 'Theme',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -2962,6 +3191,30 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 ),
                 onTap: () => _showCustomizeColorsDialog(context),
               ),
+              ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.text_fields,
+                      color: isDark
+                          ? darkPrimaryColor.value
+                          : lightPrimaryColor.value,
+                      semanticLabel: 'Customize Fonts',
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Customize Fonts',
+                      style: TextStyle(
+                        fontSize: uiFontSize,
+                        fontFamily: uiFontFamily,
+                        color: getAdaptiveTextColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () => _showCustomizeFontsDialog(context),
+              ),
 
               Divider(),
               // Authentication UI
@@ -2969,7 +3222,27 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 valueListenable: isSignedIn,
                 builder: (context, signedIn, _) {
                   if (signedIn) {
-                    return ValueListenableBuilder<User?>(
+                    return ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '✅ Signed in as $_drawerUsername',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: uiFontSize,
+                                fontFamily: uiFontFamily,
+                                color: getAdaptiveTextColor(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => _showAccountOptionsDialog(context),
+                    );
+                    /* return ValueListenableBuilder<User?>(
                       valueListenable: currentUser,
                       builder: (context, user, _) {
                         return FutureBuilder<String?>(
@@ -3003,6 +3276,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                         );
                       },
                     );
+                    */
                   } else {
                     return ListTile(
                       title: Row(
