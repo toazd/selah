@@ -2197,7 +2197,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
-                    'Bible Font Size',
+                    'Font Size',
                     style: TextStyle(
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,
