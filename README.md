@@ -2,9 +2,22 @@
 ![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
-<img width="960" height="600" alt="Screenshot 2026-04-21 125234" src="https://github.com/user-attachments/assets/2b8b5bca-f51d-41e2-99ec-2b56c604e4dd" />
+<br>Simple and intuitive by default<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 125234" src="https://github.com/user-attachments/assets/2b8b5bca-f51d-41e2-99ec-2b56c604e4dd" />
+<br>Supports many formatting options in notes<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 125541" src="https://github.com/user-attachments/assets/357b3b7b-1bf8-4a8e-920e-70e1224b5b37" />
+<br>Customizable UI colors<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 125738" src="https://github.com/user-attachments/assets/65f6d905-bf91-48f8-93c0-8c00c80ba9b8" />
+<br>Customizable highlight colors<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 125732" src="https://github.com/user-attachments/assets/6a5cfb78-5d66-4883-bdb4-ceb2fbec9b13" />
+<br>Customizable fonts<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 125743" src="https://github.com/user-attachments/assets/33e6058d-4369-49ea-900d-8b63a36f3f01" />
+<br>Multiple screens side by side<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 130946" src="https://github.com/user-attachments/assets/51c87da5-6804-4a38-8c4d-59b4e70cc835" />
+<br>Multiple screens stacked<br>
+<img width="480" height="300" alt="Screenshot 2026-04-21 130959" src="https://github.com/user-attachments/assets/e88fb8cf-a659-4dcc-958e-f72bb62e4a58" />
 
-A cross-platform Bible study application built with Flutter with no strings attached (no ads, no analytics, no gated features).
+Selah is a cross-platform Bible study application built with Flutter with no strings attached (no ads, no analytics, no gated features) and many features built in to support efficient, distraction-free Bible study.
 
 Supports completely offline install and functionality and also offers free online sync services (for as long as the service can be supported: currently using the free tier on Supabase: https://supabase.com/pricing).
 
