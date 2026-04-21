@@ -184,6 +184,7 @@ class OliveTreeImportService {
         final noteCount = noteResults['notes'] as int;
         if (noteCount > 1) {
           try {
+            await SupabaseSyncService().recoverNoteSyncState();
             await SupabaseSyncService().syncNotes();
           } catch (e) {
             //

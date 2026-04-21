@@ -417,6 +417,7 @@ class SelahImportService {
         final noteCount = (data['notes'] as List<dynamic>).length;
         if (noteCount > 0) {
           try {
+            await syncService.recoverNoteSyncState();
             await syncService.syncNotes();
           } catch (e) {
             // Sync failed, will retry automatically

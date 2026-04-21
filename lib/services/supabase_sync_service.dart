@@ -105,6 +105,16 @@ class SyncReconciliationAction {
   });
 }
 
+class _SyncReconciliationSnapshot {
+  final List<Map<String, dynamic>> localRecords;
+  final List<SyncReconciliationAction> actions;
+
+  const _SyncReconciliationSnapshot({
+    required this.localRecords,
+    required this.actions,
+  });
+}
+
 class SupabaseSyncService {
   /// Simple, fault-tolerant sync service for multi-device Bible study app.
   /// Uploads local changes immediately, downloads remote changes incrementally.
@@ -153,6 +163,8 @@ class SupabaseSyncService {
   // Retry queue for failed sync operations
   final List<SyncOperation> _retryQueue = [];
   Timer? _retryTimer;
+  final Map<String, Future<List<SyncReconciliationAction>>>
+      _recoveryOperationsByType = {};
 
   // Get current user ID
   String? get _currentUserId => _supabase.auth.currentUser?.id;
@@ -193,12 +205,23 @@ class SupabaseSyncService {
         actions.add(SyncReconciliationAction(
           localId: localId,
           naturalKey: naturalKey,
-          operation: 'delete_local',
+          operation: hasLocalUuid ? 'delete_local' : 'upload_local',
         ));
       }
     }
 
     return actions;
+  }
+
+  @visibleForTesting
+  static bool shouldAdvanceSyncTimestamp({
+    required Iterable<SyncReconciliationAction> failedRecoveryActions,
+    required Set<int> failedUploadNaturalKeys,
+    required Set<int> pendingNaturalKeys,
+  }) {
+    return failedRecoveryActions.isEmpty &&
+        failedUploadNaturalKeys.isEmpty &&
+        pendingNaturalKeys.isEmpty;
   }
 
   Future<List<Map<String, dynamic>>> _fetchRemoteRows({
@@ -2562,59 +2585,179 @@ class SupabaseSyncService {
   }
 
   // Detect remote deletions by comparing local UUIDs with remote UUIDs
+  Future<_SyncReconciliationSnapshot> _buildReconciliationSnapshot(
+      String type) async {
+    final naturalKeyColumn = _getNaturalKeyColumn(type);
+
+    final remoteResponse = await _fetchRemoteRows(
+      table: _getTableName(type),
+      columns: 'id, $naturalKeyColumn',
+      orderColumn: naturalKeyColumn,
+    );
+    final remoteUuidByNaturalKey = <int, String>{};
+    for (final record in remoteResponse) {
+      final naturalKey = record[naturalKeyColumn] as int?;
+      final uuid = record['id'] as String?;
+      if (naturalKey != null && uuid != null && uuid.isNotEmpty) {
+        remoteUuidByNaturalKey[naturalKey] = uuid;
+      }
+    }
+
+    final localRecords = await _getLocalRecords(type);
+    final pendingNaturalKeys = _getPendingNaturalKeys(type);
+    final actions = buildReconciliationActions(
+      localRecords: localRecords,
+      remoteUuidByNaturalKey: remoteUuidByNaturalKey,
+      pendingNaturalKeys: pendingNaturalKeys,
+      naturalKeyColumn: naturalKeyColumn,
+    );
+
+    return _SyncReconciliationSnapshot(
+      localRecords: localRecords,
+      actions: actions,
+    );
+  }
+
+  Future<List<SyncReconciliationAction>> _recoverMissingOrStaleRecords(
+      String type) async {
+    final inFlight = _recoveryOperationsByType[type];
+    if (inFlight != null) {
+      return await inFlight;
+    }
+
+    final future = _recoverMissingOrStaleRecordsInternal(type);
+    _recoveryOperationsByType[type] = future;
+
+    try {
+      return await future;
+    } finally {
+      if (identical(_recoveryOperationsByType[type], future)) {
+        _recoveryOperationsByType.remove(type);
+      }
+    }
+  }
+
+  Future<List<SyncReconciliationAction>> _recoverMissingOrStaleRecordsInternal(
+      String type) async {
+    if (_currentUserId == null) return const <SyncReconciliationAction>[];
+
+    final failedActions = <SyncReconciliationAction>[];
+
+    try {
+      final snapshot = await _buildReconciliationSnapshot(type);
+      final recoveryActions = snapshot.actions
+          .where((action) =>
+              action.operation == 'repair_uuid' ||
+              action.operation == 'upload_local')
+          .toList();
+
+      if (recoveryActions.isEmpty) {
+        return failedActions;
+      }
+
+      bool hasChanges = false;
+
+      for (final action in recoveryActions) {
+        final snapshotLocalRecord = snapshot.localRecords.firstWhere(
+            (record) => record['id'] == action.localId,
+            orElse: () => <String, dynamic>{});
+        if (snapshotLocalRecord.isEmpty) {
+          continue;
+        }
+
+        final currentLocalRecord =
+            await _getLocalRecordById(type, action.localId) ??
+                snapshotLocalRecord;
+
+        try {
+          if (action.operation == 'repair_uuid' &&
+              action.uuid != null &&
+              action.uuid!.isNotEmpty) {
+            final currentUuid = currentLocalRecord['uuid'] as String?;
+            if (currentUuid == action.uuid) {
+              continue;
+            }
+
+            await _repairLocalRecordUuid(type, currentLocalRecord, action.uuid!);
+            hasChanges = true;
+            if (kDebugMode) {
+              debugPrint(
+                  'Reconciled missing/stale UUID for $type naturalKey=${action.naturalKey}');
+            }
+          } else if (action.operation == 'upload_local') {
+            final currentUuid = currentLocalRecord['uuid'] as String?;
+            if (currentUuid != null && currentUuid.isNotEmpty) {
+              continue;
+            }
+
+            await _uploadLocalRecord(type, currentLocalRecord);
+            hasChanges = true;
+            if (kDebugMode) {
+              debugPrint(
+                  'Recovered unsynced local $type record during reconciliation naturalKey=${action.naturalKey}');
+            }
+          }
+        } catch (e) {
+          failedActions.add(action);
+          if (action.operation == 'upload_local') {
+            await _queuePersistentOperation(
+              '${type}_${action.naturalKey}',
+              type,
+              'create',
+              currentLocalRecord,
+              userId: _currentUserId,
+            );
+          }
+          ErrorHandler.logError(
+            e,
+            customMessage:
+                '_recoverMissingOrStaleRecords failed for $type naturalKey=${action.naturalKey}',
+            context: {'type': type, 'operation': action.operation},
+          );
+        }
+      }
+
+      if (hasChanges) {
+        _notifyChange(type);
+      }
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage: '_recoverMissingOrStaleRecords exception for $type',
+        context: {'type': type},
+      );
+    }
+
+    return failedActions;
+  }
+
+  Future<Map<String, dynamic>?> _getLocalRecordById(String type, int id) async {
+    final localRecords = await _getLocalRecords(type);
+    return localRecords.where((record) => record['id'] == id).firstOrNull;
+  }
+
   Future<void> _detectRemoteDeletions(String type) async {
     if (_currentUserId == null) return;
 
     try {
-      final naturalKeyColumn = _getNaturalKeyColumn(type);
+      final snapshot = await _buildReconciliationSnapshot(type);
+      final deleteActions = snapshot.actions
+          .where((action) => action.operation == 'delete_local')
+          .toList();
 
-      // Get all remote UUIDs plus the natural sync key for reconciliation.
-      final remoteResponse = await _fetchRemoteRows(
-        table: _getTableName(type),
-        columns: 'id, $naturalKeyColumn',
-        orderColumn: naturalKeyColumn,
-      );
-      final remoteUuidByNaturalKey = <int, String>{};
-      for (final record in remoteResponse) {
-        final naturalKey = record[naturalKeyColumn] as int?;
-        final uuid = record['id'] as String?;
-        if (naturalKey != null && uuid != null && uuid.isNotEmpty) {
-          remoteUuidByNaturalKey[naturalKey] = uuid;
-        }
-      }
-
-      final localRecords = await _getLocalRecords(type);
-      final pendingNaturalKeys = _getPendingNaturalKeys(type);
-      final actions = buildReconciliationActions(
-        localRecords: localRecords,
-        remoteUuidByNaturalKey: remoteUuidByNaturalKey,
-        pendingNaturalKeys: pendingNaturalKeys,
-        naturalKeyColumn: naturalKeyColumn,
-      );
-
-      if (actions.isNotEmpty) {
-        for (final action in actions) {
-          final localRecord = localRecords.firstWhere(
+      if (deleteActions.isNotEmpty) {
+        for (final action in deleteActions) {
+          final localRecord = snapshot.localRecords.firstWhere(
               (record) => record['id'] == action.localId,
               orElse: () => <String, dynamic>{});
           if (localRecord.isEmpty) {
             continue;
           }
 
-          if (action.operation == 'repair_uuid' &&
-              action.uuid != null &&
-              action.uuid!.isNotEmpty) {
-            await _repairLocalRecordUuid(type, localRecord, action.uuid!);
-            if (kDebugMode) {
-              debugPrint(
-                  'Reconciled missing/stale UUID for $type naturalKey=${action.naturalKey}');
-            }
-          } else if (action.operation == 'delete_local') {
-            await _deleteLocalRecord(type, action.localId);
-            if (kDebugMode) {
-              debugPrint(
-                  'Deleted stale local $type record during reconciliation naturalKey=${action.naturalKey}');
-            }
+          await _deleteLocalRecord(type, action.localId);
+          if (kDebugMode) {
+            debugPrint(
+                'Deleted stale local $type record during reconciliation naturalKey=${action.naturalKey}');
           }
         }
 
@@ -2625,6 +2768,53 @@ class SupabaseSyncService {
         e,
         customMessage: '_detectRemoteDeletions exception for $type',
         context: {'type': type},
+      );
+    }
+  }
+
+  Future<void> _uploadLocalRecord(
+      String type, Map<String, dynamic> localRecord) async {
+    switch (type) {
+      case 'highlight':
+        await _uploadHighlight(localRecord);
+        break;
+      case 'note':
+        await _uploadNote(localRecord);
+        break;
+      case 'history':
+        await _uploadHistoryItem(localRecord);
+        break;
+      case 'search_history':
+        await _uploadSearchHistoryItem(localRecord);
+        break;
+      default:
+        throw ArgumentError('Unknown type: $type');
+    }
+  }
+
+  Future<void> _queueMissingUuidRecordsForLaterSync(String type) async {
+    if (_currentUserId == null) return;
+
+    final localRecords = await _getLocalRecords(type);
+    final pendingNaturalKeys = _getPendingNaturalKeys(type);
+    final naturalKeyColumn = _getNaturalKeyColumn(type);
+
+    for (final localRecord in localRecords) {
+      final naturalKey = localRecord[naturalKeyColumn] as int?;
+      final uuid = localRecord['uuid'] as String?;
+      final hasLocalUuid = uuid != null && uuid.isNotEmpty;
+      if (naturalKey == null ||
+          hasLocalUuid ||
+          pendingNaturalKeys.contains(naturalKey)) {
+        continue;
+      }
+
+      await _queuePersistentOperation(
+        '${type}_$naturalKey',
+        type,
+        'create',
+        localRecord,
+        userId: _currentUserId,
       );
     }
   }
@@ -3002,6 +3192,9 @@ class SupabaseSyncService {
     }
 
     try {
+      final failedRecoveryActions = await _recoverMissingOrStaleRecords('note');
+      final failedUploadNaturalKeys = <int>{};
+
       // Get local notes - all for deletion checks
       final localNotes = await NotesDatabase.getNotes();
 
@@ -3049,26 +3242,22 @@ class SupabaseSyncService {
 
         // Upload notes
         if (notesToUpload.isNotEmpty) {
-          try {
-            await _batchUploadNotes(notesToUpload);
-          } catch (e) {
-            ErrorHandler.logError(
-              e,
-              customMessage: '_batchUploadNotes exception',
-            );
+          final failedUploads = await _batchUploadNotes(notesToUpload);
+          failedUploadNaturalKeys.addAll(failedUploads);
 
-            // If batch upload fails, queue each operation individually for retry
-            for (final note in notesToUpload) {
-              _enqueueFailedOperation(SyncOperation(
-                id: note['created_at'],
-                type: 'note',
-                operation: 'create',
-                data: note,
-                timestamp: DateTime.fromMillisecondsSinceEpoch(
-                    note['created_at'] as int),
-                userId: _currentUserId,
-              ));
-            }
+          for (final note in notesToUpload
+              .where((note) => failedUploads.contains(note['created_at']))) {
+            _enqueueFailedOperation(SyncOperation(
+              id: note['created_at'].toString(),
+              type: 'note',
+              operation: ((note['uuid'] as String?)?.isNotEmpty ?? false)
+                  ? 'update'
+                  : 'create',
+              data: note,
+              timestamp:
+                  DateTime.fromMillisecondsSinceEpoch(note['created_at'] as int),
+              userId: _currentUserId,
+            ));
           }
         }
       }
@@ -3089,11 +3278,18 @@ class SupabaseSyncService {
       // Detect remote deletions
       await _detectRemoteDeletions('note');
 
-      // Always update the sync timestamp after sync operations (both upload and download)
-      _lastNotesSync = DateTime.now();
+      final shouldAdvanceTimestamp = shouldAdvanceSyncTimestamp(
+        failedRecoveryActions: failedRecoveryActions,
+        failedUploadNaturalKeys: failedUploadNaturalKeys,
+        pendingNaturalKeys: _getPendingNaturalKeys('note'),
+      );
 
-      // Save timestamps to preferences - only for notes
-      await _saveLastSyncTimestamps('notes');
+      if (shouldAdvanceTimestamp) {
+        _lastNotesSync = DateTime.now();
+
+        // Save timestamps to preferences - only for notes
+        await _saveLastSyncTimestamps('notes');
+      }
     } catch (e) {
       // For critical failures, don't retry - just log
     }
@@ -3165,9 +3361,23 @@ class SupabaseSyncService {
         .eq('created_at', createdAt);
   }
 
+  Future<void> recoverNoteSyncState() async {
+    if (_currentUserId == null) return;
+
+    final notesEnabled = await _getSyncEnabled('syncNotes');
+    if (!notesEnabled) return;
+
+    if (!isOnline) {
+      await _queueMissingUuidRecordsForLaterSync('note');
+      return;
+    }
+
+    await _recoverMissingOrStaleRecords('note');
+  }
+
   // Batch upload multiple notes to Supabase
-  Future<void> _batchUploadNotes(List<Map<String, dynamic>> notes) async {
-    if (_currentUserId == null || notes.isEmpty) return;
+  Future<Set<int>> _batchUploadNotes(List<Map<String, dynamic>> notes) async {
+    if (_currentUserId == null || notes.isEmpty) return <int>{};
 
     // Validate all notes first
     final validNotes = <Map<String, dynamic>>[];
@@ -3178,7 +3388,9 @@ class SupabaseSyncService {
       }
     }
 
-    if (validNotes.isEmpty) return;
+    if (validNotes.isEmpty) return <int>{};
+
+    final failedCreatedAt = <int>{};
 
     // Separate notes into two groups:
     // 1. Notes WITH UUIDs (already synced to Supabase before) - can be upserted
@@ -3213,6 +3425,8 @@ class SupabaseSyncService {
             .upsert(dataToUpsert, onConflict: 'created_at')
             .select('id, created_at');
       } catch (e) {
+        failedCreatedAt
+            .addAll(notesWithUuids.map((note) => note['created_at'] as int));
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadNotes exception (upsert with UUIDs)',
@@ -3243,10 +3457,13 @@ class SupabaseSyncService {
             .upsert(dataToUpsert, onConflict: 'created_at')
             .select('id, created_at');
 
+        final createdAtWithResponse = <int>{};
+
         // Update local notes with UUIDs from Supabase
         for (final uploadedRecord in response) {
           final supabaseUuid = uploadedRecord['id'] as String?;
           final createdAt = uploadedRecord['created_at'] as int;
+          createdAtWithResponse.add(createdAt);
 
           // Find the corresponding local note
           final localNote = notesWithoutUuids.firstWhere(
@@ -3265,13 +3482,22 @@ class SupabaseSyncService {
             );
           }
         }
+
+        failedCreatedAt.addAll(notesWithoutUuids
+            .where(
+                (note) => !createdAtWithResponse.contains(note['created_at']))
+            .map((note) => note['created_at'] as int));
       } catch (e) {
+        failedCreatedAt.addAll(
+            notesWithoutUuids.map((note) => note['created_at'] as int));
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadNotes exception (insert new notes)',
         );
       }
     }
+
+    return failedCreatedAt;
   }
 
   // Sync search history to Supabase
@@ -3845,6 +4071,7 @@ class SupabaseSyncService {
 
       // Query and download notes updated since last sync
       if (notesEnabled) {
+        final failedRecoveryActions = await _recoverMissingOrStaleRecords('note');
         final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
         final snapshot = await _fetchRemoteRows(
           table: 'notes',
@@ -3856,11 +4083,19 @@ class SupabaseSyncService {
 
         if (snapshot.isNotEmpty) {
           await _downloadNotes(snapshot);
-          _lastNotesSync = DateTime.now();
-          await _saveLastSyncTimestamps('notes');
         }
         // Detect remote deletions
         await _detectRemoteDeletions('note');
+
+        if (snapshot.isNotEmpty &&
+            shouldAdvanceSyncTimestamp(
+              failedRecoveryActions: failedRecoveryActions,
+              failedUploadNaturalKeys: const <int>{},
+              pendingNaturalKeys: _getPendingNaturalKeys('note'),
+            )) {
+          _lastNotesSync = DateTime.now();
+          await _saveLastSyncTimestamps('notes');
+        }
       }
 
       // Query and download history items since last sync
@@ -4786,6 +5021,7 @@ class SupabaseSyncService {
     }
 
     _retryTimer?.cancel();
+    _recoveryOperationsByType.clear();
 
     // Cancel Supabase listeners
     _highlightsChannel?.unsubscribe();
@@ -4823,6 +5059,7 @@ class SupabaseSyncService {
     _searchHistoryChannel?.unsubscribe();
 
     _retryTimer?.cancel();
+    _recoveryOperationsByType.clear();
     stopConnectionMonitoring();
 
     // Reset flags
