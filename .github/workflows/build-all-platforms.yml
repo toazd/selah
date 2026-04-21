@@ -517,13 +517,13 @@ jobs:
       run: |
         if grep -q "platform :ios" ios/Podfile; then
           CURRENT_VERSION=$(grep "platform :ios" ios/Podfile | sed -n "s/.*'\([0-9.]*\)'.*/\1/p")
-          if [[ "$(printf '%s\n' "13.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "13.0" ]]; then
-            echo "platform :ios, '13.0'" > ios/Podfile.tmp
+          if [[ "$(printf '%s\n' "15.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "15.0" ]]; then
+            echo "platform :ios, '15.0'" > ios/Podfile.tmp
             grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
             mv ios/Podfile.tmp ios/Podfile
           fi
         else
-          sed -i '' '1i platform :ios, '\''13.0'\''' ios/Podfile
+          sed -i '' '1i platform :ios, '\''15.0'\''' ios/Podfile
         fi
         
     - name: Get iOS dependencies
@@ -578,7 +578,7 @@ jobs:
   build-macos:
     name: Build macOS Desktop App
     needs: extract-version
-    runs-on: macos-latest
+    runs-on: macos-26
     permissions:
       contents: write
 
