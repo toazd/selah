@@ -2160,41 +2160,21 @@ class _MultiBibleViewState extends State<MultiBibleView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: Center(
-                    child: Text(
-                      'Customize fonts',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        fontWeight: FontWeight.bold,
-                        color: getAdaptiveTextColor(context),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ValueListenableBuilder<String>(
-                  valueListenable: fontFamilyNotifier,
-                  builder: (context, fontFamily, _) {
-                    return _buildFontSelectionTile(
-                      context: context,
-                      title: 'Bible Font',
-                      selectedFont: fontFamily,
-                      onTap: () => _showFontPickerDialog(
-                        context: context,
-                        title: 'Bible Font',
-                        currentFont: fontFamily,
-                        onSelected: (selectedFont) {
-                          fontFamilyNotifier.value = selectedFont;
-                          _saveFontPrefs();
-                        },
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
+                // SizedBox(
+                //   width: double.infinity,
+                //   child: Center(
+                //     child: Text(
+                //       'Customize fonts',
+                //       style: TextStyle(
+                //         fontSize: uiFontSize,
+                //         fontFamily: uiFontFamily,
+                //         fontWeight: FontWeight.bold,
+                //         color: getAdaptiveTextColor(context),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 16),
                 Center(
                   child: Text(
                     'Font Size',
@@ -2257,6 +2237,26 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   },
                 ),
                 const SizedBox(height: 24),
+                ValueListenableBuilder<String>(
+                  valueListenable: fontFamilyNotifier,
+                  builder: (context, fontFamily, _) {
+                    return _buildFontSelectionTile(
+                      context: context,
+                      title: 'Bible Font',
+                      selectedFont: fontFamily,
+                      onTap: () => _showFontPickerDialog(
+                        context: context,
+                        title: 'Bible Font',
+                        currentFont: fontFamily,
+                        onSelected: (selectedFont) {
+                          fontFamilyNotifier.value = selectedFont;
+                          _saveFontPrefs();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
                 ValueListenableBuilder<String>(
                   valueListenable: noteFontFamilyNotifier,
                   builder: (context, noteFontFamily, _) {

@@ -25989,7 +25989,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       30: '<r>And say, If we had been in the days of our fathers, we would not have been partakers with them in the blood of the prophets.</r>',
       31: '<r>Wherefore ye be witnesses unto yourselves, that ye are the children of them which killed the prophets.</r>',
       32: '<r>Fill ye up then the measure of your fathers.</r>',
-      33: 'Ye <r>serpents, ye generation of vipers, how can ye escape the damnation of hell?</r>',
+      33: '<r>Ye serpents, ye generation of vipers, how can ye escape the damnation of hell?</r>',
       34: '¶ <r>Wherefore, behold, I send unto you prophets, and wise men, and scribes: and some of them ye shall kill and crucify; and some of them shall ye scourge in your synagogues, and persecute them from city to city:</r>',
       35: '<r>That upon you may come all the righteous blood shed upon the earth, from the blood of righteous Abel unto the blood of Zacharias son of Barachias, whom ye slew between the temple and the altar.</r>',
       36: '<r>Verily I say unto you, All these things shall come upon this generation.</r>',
