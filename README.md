@@ -1,5 +1,7 @@
 # Selah - Cross-Platform Bible Study App
 
+<img width="960" height="570" alt="Screenshot 2026-04-21 124935" src="https://github.com/user-attachments/assets/9061c772-b20b-4848-936d-a52a476b342f" />
+
 A cross-platform Bible study application built with Flutter with no strings attached (no ads, no analytics, no gated features).
 
 Supports completely offline install and functionality and also offers free online sync services (for as long as the service can be supported: currently using the free tier on Supabase: https://supabase.com/pricing).
