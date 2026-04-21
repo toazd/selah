@@ -1,5 +1,7 @@
 # Selah - Cross-Platform Bible Study App
-
+![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
+![License](https://img.shields.io/badge/license-Unlicense-green)
 <img width="960" height="600" alt="Screenshot 2026-04-21 125234" src="https://github.com/user-attachments/assets/2b8b5bca-f51d-41e2-99ec-2b56c604e4dd" />
 
 A cross-platform Bible study application built with Flutter with no strings attached (no ads, no analytics, no gated features).
@@ -13,10 +15,6 @@ Note also that Selah has built-in data export and import functionality so you do
 - Selah currently does not have self-installing or self-updating features.
   -  Fixes and features are being added regularily so check for new releases periodically.
 - Use the "Issues" tab to report any problem you may have with the app or even if you need assitance installing, running, or using the app.
-
-![Platform Support](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
-![License](https://img.shields.io/badge/license-Unlicense-green)
 
 ## 📖 Features
 
