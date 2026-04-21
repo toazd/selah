@@ -75,7 +75,8 @@ class OliveTreeImportService {
 
   /// Let user select and read CSV file
   static Future<String?> _selectAndReadCsvFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
+      //FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
       dialogTitle: 'Select Olive Tree CSV Export File',

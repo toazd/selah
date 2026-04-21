@@ -5130,7 +5130,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
         final fileName = 'Selah_$timestamp.zip';
 
         // This is an awaitable user interaction that keeps the dialog on screen
-        String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+        String? selectedDirectory = await FilePicker.getDirectoryPath(
+          //FilePicker.platform.getDirectoryPath(
           dialogTitle: 'Choose Export Location',
         );
 

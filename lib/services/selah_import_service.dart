@@ -58,7 +58,8 @@ class SelahImportService {
       }
 
       // Let user choose zip file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
+        //FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip'],
         dialogTitle: 'Select Selah Backup File',

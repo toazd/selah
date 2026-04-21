@@ -15,7 +15,7 @@ dependencies:
   window_manager: ^0.5.1
   screen_retriever: ^0.2.0
   path_provider: ^2.0.0
-  file_picker: ^10.3.3
+  file_picker: ^11.0.2
   archive: ^4.0.7
   supabase_flutter: ^2.12.0
   connectivity_plus: ^7.0.0
