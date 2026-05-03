@@ -306,16 +306,6 @@ jobs:
           - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage)
           - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
           
-          NOTE: If the titlebar of the app appears larger than normal and/or doesn't respect the system theme it's likely because you don't have a GTK3 theme installed (GNOME) or it is not configured (KDE). I have tested both of the following themes and they work well (each may require their own configuration depending on your distribution and/or desktop environment). If you want to use something else just be sure that it contains a GTK3 theme:
-          - adw-gtk3 (https://github.com/lassekongo83/adw-gtk3)
-          - Yaru (https://github.com/ubuntu/yaru)
-          
-          GNOME
-          Using gnome-tweaks, goto Appearance, for Legacy Applications select a GTK3 compatible theme.
-
-          KDE
-          System settings -> Colors & Themes -> Application Style -> "Configure GNOME/GTK Application Style" -> Choose a GTK3 compatible theme and then apply.
-          
           ### 🤖 Android & ChromeOS (armeabi-v7a/32-bit, arm64-v8a/64-bit, x86_64/64-bit)
           - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
           
