@@ -120,7 +120,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
         
         fpm -s dir -t deb \
           -n "$APP_NAME" \
@@ -157,7 +157,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=/usr/share/icons/hicolor/256x256/apps/selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
         
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
@@ -257,7 +257,7 @@ jobs:
                 "cp -r opt/selah/lib /app/bin/",
                 "cp -r opt/selah/data /app/bin/",
                 "install -D -m644 usr/share/applications/com.selah.Selah.desktop /app/share/applications/com.selah.Selah.desktop",
-                "install -D -m644 usr/share/icons/hicolor/256x256/apps/selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+                "install -D -m644 usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
               ],
               "sources": [
                 { "type": "dir", "path": "flatpak-build" }
