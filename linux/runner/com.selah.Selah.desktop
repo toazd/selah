@@ -2,7 +2,7 @@
 Name=Selah
 Comment=Holy Bible Study App
 Exec=selah
-Icon=selah
+Icon=com.selah.Selah
 Terminal=false
 Type=Application
 Categories=Education;Utility;
