@@ -110,7 +110,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
         
-        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
           mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
@@ -147,7 +147,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
         
-        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/selah.png"
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
           mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
@@ -224,7 +224,7 @@ jobs:
         if [ -f "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" ]; then
           cp "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" "$FLATPAK_BUILD/usr/share/applications/"
         fi
-        cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/selah.png"
+        cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
 
         MANIFEST="$TEMP_DIR3/manifest.json"
         cat > "$MANIFEST" <<JSON
