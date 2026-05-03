@@ -185,13 +185,14 @@ jobs:
 
         # Copy icon to root
         cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/com.selah.Selah.png"
+        ln -s com.selah.Selah.png "$APPDIR/selah.png"
         
         # Create AppRun
         printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
         chmod +x "$APPDIR/AppRun"
 
         # Create .desktop
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=selah\nType=Application\nCategories=Education\nStartupNotify=true\n' > "$APPDIR/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$APPDIR/com.selah.Selah.desktop"
 
         # download appimagetool
         wget -q -O appimagetool.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
@@ -215,7 +216,7 @@ jobs:
 
         # Create desktop file for Flatpak
         mkdir -p "$TEMP_DIR3/usr/share/applications"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\n' > "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop"
 
         # Prepare minimal flatpak manifest and build tree
         FLATPAK_BUILD="$TEMP_DIR3/flatpak-build"
