@@ -6,4 +6,4 @@ Icon=selah
 Terminal=false
 Type=Application
 Categories=Education;Utility;
-StartupWMClass=selah
+StartupWMClass=com.selah.Selah
