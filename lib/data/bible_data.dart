@@ -28847,7 +28847,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       14: '<r>If ye shall ask any thing in my name, I will do it.</r>',
       15: '¶ <r>If ye love me, keep my commandments.</r>',
       16: '<r>And I will pray the Father, and he shall give you another Comforter, that he may abide with you for ever;</r>',
-      17: 'Even <r>the Spirit of truth; whom the world cannot receive, because it seeth him not, neither knoweth him: but ye know him; for he dwelleth with you, and shall be in you.</r>',
+      17: '<r>Even the Spirit of truth; whom the world cannot receive, because it seeth him not, neither knoweth him: but ye know him; for he dwelleth with you, and shall be in you.</r>',
       18: '¶ <r>I will not leave you comfortless: I will come to you.</r>',
       19: '<r>Yet a little while, and the world seeth me no more; but ye see me: because I live, ye shall live also.</r>',
       20: '<r>At that day ye shall know that I am in my Father, and ye in me, and I in you.</r>',
