@@ -1045,7 +1045,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       17: 'And Jacob journeyed to Succoth, and built him an house, and made booths for his cattle: therefore the name of the place is called Succoth.',
       18: 'And Jacob came to Shalem, a city of Shechem, which is in the land of Canaan, when he came from Padanaram; and pitched his tent before the city.',
       19: 'And he bought a parcel of a field, where he had spread his tent, at the hand of the children of Hamor, Shechem\'s father, for an hundred pieces of money.',
-      20: 'And he erected there an altar, and called it Elelohe-Israel.',
+      20: 'And he erected there an altar, and called it El-elohe-Israel.',
     },
     34: {
       1: '¶ And Dinah the daughter of Leah, which she bare unto Jacob, went out to see the daughters of the land.',
