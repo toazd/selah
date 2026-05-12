@@ -625,6 +625,9 @@ jobs:
         mkdir -p "$DMG_DIR"
         cp -R "$BUILD_DIR" "$DMG_DIR/"
 
+        # Ensure file operations are complete before creating DMG
+        sync
+
         echo "📦 Creating DMG..."
         hdiutil create -volname "Selah $VERSION" \
           -srcfolder "$DMG_DIR" \
