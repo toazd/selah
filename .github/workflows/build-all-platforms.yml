@@ -290,13 +290,11 @@ jobs:
         body: |
           # Selah Release v${{ needs.extract-version.outputs.app_version }}
           ## Build #${{ github.run_number }}
-          
-          This unified release contains builds for all supported platforms. Selah is currently in open beta and requires manual installation and updating.
-          
+
           ## 📦 Installation files by Platform
           
           ### 🪟 Windows
-          - `Selah-${{ needs.extract-version.outputs.app_version }}.exe` - Windows installer (recommended; includes Start Menu and Desktop shortcuts, easy uninstall)
+          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.exe` - Windows installer (recommended; includes Start Menu and Desktop shortcuts, easy uninstall)
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows portable archive (x64 Release) - (unzip anywhere and run selah.exe; no installation required)
 
           ### 🐧 Linux
