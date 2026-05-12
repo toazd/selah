@@ -296,7 +296,8 @@ jobs:
           ## 📦 Installation files by Platform
           
           ### 🪟 Windows
-          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows build archive (x64 Release) - (unzip anywhere and run selah.exe; pin to task bar or manually create a shortcut)
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.exe` - Windows installer (recommended; includes Start Menu and Desktop shortcuts, easy uninstall)
+          - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.zip` - Windows portable archive (x64 Release) - (unzip anywhere and run selah.exe; no installation required)
 
           ### 🐧 Linux
           - `Selah-${{ needs.extract-version.outputs.app_version }}.tar.gz` - Generic Linux (all distributions) - (requires manually unzipping and shortcut creation)
@@ -670,6 +671,9 @@ jobs:
     - name: Get flutter dependencies
       run: flutter pub get
 
+    - name: Install Inno Setup
+      run: choco install innosetup -y
+
     - name: Build Windows release
       run: flutter build windows --release --target lib/main.dart --dart-define=BUILD_NUMBER=${{ github.run_number }}
 
@@ -692,6 +696,13 @@ jobs:
           exit 1
         }
         Get-ChildItem build\artifacts | Format-Table
+
+    - name: Create Inno Setup installer
+      shell: cmd
+      run: |
+        set PATH=%PATH%;C:\Program Files (x86)\Inno Setup 6
+        iscc.exe /DMyAppVersion="${{ needs.extract-version.outputs.app_version }}" selah.iss
+        if errorlevel 1 exit /b 1
 
     - name: Upload Windows to Release
       uses: softprops/action-gh-release@v1
