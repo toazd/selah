@@ -27,7 +27,6 @@ DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 OutputBaseFilename=Selah-{#MyAppVersion}
 OutputDir=build\artifacts
-SetupIconFile=assets\icon.png
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
