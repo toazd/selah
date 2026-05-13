@@ -1,0 +1,104 @@
+name: Build macOS
+env:
+  FLUTTER_VERSION: '3.41.9'
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  extract-version:
+    name: Extract App Version
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.extract.outputs.app_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract app version
+        id: extract
+        run: |
+          APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "📋 App version: $APP_VERSION"
+
+  build-macos:
+    name: Build macOS Desktop App
+    needs: extract-version
+    runs-on: macos-26
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build macOS release
+      run: |
+        flutter build macos \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create DMG package
+      run: |
+        VERSION="${{ needs.extract-version.outputs.app_version }}"
+        BUILD_DIR="build/macos/Build/Products/Release/Selah.app"
+        OUTPUT_DIR="build/packages"
+        DMG_NAME="Selah-${VERSION}.dmg"
+
+        mkdir -p $OUTPUT_DIR
+
+        if [ ! -d "$BUILD_DIR" ]; then
+          echo "❌ Selah.app not found"
+          exit 1
+        fi
+
+        DMG_DIR="$OUTPUT_DIR/dmg"
+        mkdir -p "$DMG_DIR"
+        cp -R "$BUILD_DIR" "$DMG_DIR/"
+
+        # Ensure file operations are complete before creating DMG
+        sync
+
+        echo "📦 Creating DMG..."
+        hdiutil create -volname "Selah $VERSION" \
+          -srcfolder "$DMG_DIR" \
+          -ov \
+          -format UDZO \
+          "$OUTPUT_DIR/$DMG_NAME"
+
+        cp -R "$BUILD_DIR" "$OUTPUT_DIR/"
+        ls -lah "$OUTPUT_DIR"
+
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: selah-macos-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}
+        path: build/packages/*
+        if-no-files-found: error

@@ -1,0 +1,284 @@
+name: Build Linux
+env:
+  FLUTTER_VERSION: '3.41.9'
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  extract-version:
+    name: Extract App Version
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.extract.outputs.app_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract app version
+        id: extract
+        run: |
+          APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "📋 App version: $APP_VERSION"
+
+  build-linux:
+    name: Build Linux App
+    needs: extract-version
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Install Linux build dependencies & packaging tools
+      run: |
+        sudo apt-get update
+        sudo apt-get full-upgrade -y
+        sudo apt-get install -y \
+          clang \
+          cmake \
+          ninja-build \
+          pkg-config \
+          libgtk-3-dev \
+          libblkid-dev \
+          liblzma-dev \
+          ruby \
+          ruby-dev \
+          build-essential \
+          rpm \
+          flatpak \
+          flatpak-builder \
+          libfuse2 \
+          wget
+        sudo snap refresh
+        sudo gem install fpm
+
+    - name: Build Linux release
+      run: |
+        flutter build linux \
+          --release \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create packages
+      run: |
+        APP_NAME="selah"
+        VERSION="${{ needs.extract-version.outputs.app_version }}"
+        BUILD_DIR="build/linux/x64/release/bundle"
+        OUTPUT_DIR="$(pwd)/build/packages"
+
+        mkdir -p "$OUTPUT_DIR"
+
+        echo "📦 Creating .tar.gz package..."
+        tar -czf "$OUTPUT_DIR/Selah-${VERSION}.tar.gz" -C "$BUILD_DIR" .
+
+        echo "📦 Creating .deb package..."
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/opt/selah"
+
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
+        fi
+
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+
+        fpm -s dir -t deb \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
+          --deb-priority optional \
+          --category utils \
+          --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
+          --url "https://github.com/toazd/selah" \
+          --maintainer "Selah Team" \
+          --license "Unlicense" \
+          -p "$OUTPUT_DIR" \
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/com.selah.Selah.desktop \
+          usr/share/icons/ \
+          opt/selah/
+        rm -rf "$TEMP_DIR"
+
+        echo "📦 Creating .rpm package..."
+        TEMP_DIR=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR/"
+        mkdir -p "$TEMP_DIR/usr/bin"
+        mkdir -p "$TEMP_DIR/usr/share/applications"
+        mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "$TEMP_DIR/opt/selah"
+
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
+        if [ -d "$TEMP_DIR/data" ]; then
+          mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
+        fi
+        if [ -d "$TEMP_DIR/lib" ]; then
+          mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
+        fi
+
+        ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+
+        fpm -s dir -t rpm \
+          -n "$APP_NAME" \
+          -v "$VERSION" \
+          --iteration "${{ github.run_number }}" \
+          --rpm-os linux \
+          --description "A cross-platform Bible study app using Flutter and the 1769 King James Version" \
+          --url "https://github.com/toazd/selah" \
+          --maintainer "Selah Team" \
+          --license "Unlicense" \
+          -p "$OUTPUT_DIR" \
+          -C "$TEMP_DIR" \
+          usr/bin/selah \
+          usr/share/applications/com.selah.Selah.desktop \
+          usr/share/icons/ \
+          opt/selah/
+        rm -rf "$TEMP_DIR"
+
+        echo "📦 Creating AppImage package..."
+        TEMP_DIR2=$(mktemp -d)
+        APPDIR=$(mktemp -d)/Selah.AppDir
+        mkdir -p "$APPDIR"
+
+        cp -r "$BUILD_DIR"/* "$APPDIR/"
+
+        # Copy icon to root
+        cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/com.selah.Selah.png"
+        ln -s com.selah.Selah.png "$APPDIR/selah.png"
+
+        # Create AppRun
+        printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
+        chmod +x "$APPDIR/AppRun"
+
+        # Create .desktop
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$APPDIR/com.selah.Selah.desktop"
+
+        # download appimagetool
+        wget -q -O appimagetool.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+        chmod +x appimagetool.AppImage
+        ./appimagetool.AppImage "$APPDIR" "$OUTPUT_DIR/Selah-${VERSION}.AppImage"
+        rm -f appimagetool.AppImage
+        rm -rf "$TEMP_DIR2" "$APPDIR"
+
+        echo "📦 Creating Flatpak package..."
+        TEMP_DIR3=$(mktemp -d)
+        cp -r "$BUILD_DIR"/* "$TEMP_DIR3/"
+        mkdir -p "$TEMP_DIR3/opt/selah" "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps" "$TEMP_DIR3/usr/share/applications"
+        cp "$TEMP_DIR3/data/flutter_assets/assets/icon.png" "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png"
+        mv "$TEMP_DIR3/selah" "$TEMP_DIR3/opt/selah/"
+        if [ -d "$TEMP_DIR3/data" ]; then
+          mv "$TEMP_DIR3/data" "$TEMP_DIR3/opt/selah/"
+        fi
+        if [ -d "$TEMP_DIR3/lib" ]; then
+          mv "$TEMP_DIR3/lib" "$TEMP_DIR3/opt/selah/"
+        fi
+
+        # Create desktop file for Flatpak
+        mkdir -p "$TEMP_DIR3/usr/share/applications"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop"
+
+        # Prepare minimal flatpak manifest and build tree
+        FLATPAK_BUILD="$TEMP_DIR3/flatpak-build"
+        mkdir -p "$FLATPAK_BUILD/opt/selah" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps" "$FLATPAK_BUILD/usr/share/applications"
+        cp -r "$TEMP_DIR3/opt/selah/"* "$FLATPAK_BUILD/opt/selah/"
+        if [ -f "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" ]; then
+          cp "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" "$FLATPAK_BUILD/usr/share/applications/"
+        fi
+        cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+
+        MANIFEST="$TEMP_DIR3/manifest.json"
+        cat > "$MANIFEST" <<JSON
+        {
+          "app-id": "com.selah.Selah",
+          "runtime": "org.freedesktop.Platform",
+          "runtime-version": "25.08",
+          "sdk": "org.freedesktop.Sdk",
+          "command": "selah",
+          "branch": "$VERSION",
+          "finish-args": [
+              "--socket=wayland",
+              "--socket=fallback-x11",
+              "--device=dri",
+              "--share=ipc",
+              "--share=network",
+              "--talk-name=org.freedesktop.secrets",
+              "--filesystem=xdg-config/selah:create",
+              "--socket=system-bus",
+              "--talk-name=org.freedesktop.NetworkManager"
+            ],
+          "modules": [
+            {
+              "name": "selah-bundle",
+              "buildsystem": "simple",
+              "build-commands": [
+                "install -d /app/bin",
+                "install -D -m755 opt/selah/selah /app/bin/selah",
+                "cp -r opt/selah/lib /app/bin/",
+                "cp -r opt/selah/data /app/bin/",
+                "install -D -m644 usr/share/applications/com.selah.Selah.desktop /app/share/applications/com.selah.Selah.desktop",
+                "install -D -m644 usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+              ],
+              "sources": [
+                { "type": "dir", "path": "flatpak-build" }
+              ]
+            }
+          ]
+        }
+        JSON
+
+        cd "$TEMP_DIR3"
+        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        flatpak-builder --user --force-clean --arch=x86_64 --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
+        flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
+        sync
+        cd - || true
+        rm -rf "$TEMP_DIR3" || true
+
+        ls -lah build/packages/
+        ls -lah "$OUTPUT_DIR"
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: selah-linux-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}
+        path: build/packages/*
+        if-no-files-found: error

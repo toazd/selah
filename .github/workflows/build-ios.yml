@@ -1,0 +1,122 @@
+name: Build iOS
+env:
+  FLUTTER_VERSION: '3.41.9'
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (optional)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  extract-version:
+    name: Extract App Version
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.extract.outputs.app_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract app version
+        id: extract
+        run: |
+          APP_VERSION=$(grep "final appVersion" lib/main.dart | sed 's/.*= "\(.*\)".*/\1/')
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "📋 App version: $APP_VERSION"
+
+  build-ios:
+    name: Build iOS App
+    needs: extract-version
+    runs-on: macos-26
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.flutter-cache
+          ~/.pub-cache
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+
+    - name: Setup iOS platform
+      run: |
+        if [ ! -f "ios/Podfile" ]; then
+          echo "⚠️ Podfile not found. Regenerating iOS platform files..."
+          flutter precache --ios
+          flutter create --platforms ios .
+        else
+          echo "✅ Podfile found"
+        fi
+
+    - name: Set iOS platform version
+      run: |
+        if grep -q "platform :ios" ios/Podfile; then
+          CURRENT_VERSION=$(grep "platform :ios" ios/Podfile | sed -n "s/.*'\([0-9.]*\)'.*/\1/p")
+          if [[ "$(printf '%s\n' "15.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "15.0" ]]; then
+            echo "platform :ios, '15.0'" > ios/Podfile.tmp
+            grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
+            mv ios/Podfile.tmp ios/Podfile
+          fi
+        else
+          sed -i '' '1i platform :ios, '\''15.0'\''' ios/Podfile
+        fi
+
+    - name: Get iOS dependencies
+      run: |
+        cd ios
+        pod repo update
+        pod install
+        cd ..
+
+    - name: Clean build
+      run: flutter clean
+
+    - name: Get flutter dependencies
+      run: flutter pub get
+
+    - name: Build iOS release
+      run: |
+        flutter build ios \
+          --release \
+          --no-codesign \
+          --target lib/main.dart \
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+    - name: Create IPA file
+      run: |
+        mkdir -p build/ios-ipa
+        BUILD_DIR=$(find build/ -name "Runner.app" -type d | head -1)
+
+        if [ -z "$BUILD_DIR" ]; then
+          echo "❌ Could not find Runner.app"
+          exit 1
+        fi
+
+        cp -R "$BUILD_DIR" build/ios-ipa/
+        mkdir -p build/ios-ipa/Payload
+        mv build/ios-ipa/Runner.app build/ios-ipa/Payload/Selah.app
+
+        cd build/ios-ipa
+        zip -r "../../build/Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa" Payload
+        cd ../..
+
+    - name: Upload iOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: selah-ios-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}
+        path: build/Selah-*.ipa
+        if-no-files-found: error
