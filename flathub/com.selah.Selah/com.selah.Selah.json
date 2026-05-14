@@ -38,15 +38,23 @@
         },
         {
           "type": "file",
-          "path": "com.selah.Selah.desktop"
+          "url": "https://raw.githubusercontent.com/toazd/selah/refs/heads/main/flathub/com.selah.Selah/com.selah.Selah.desktop",
+          "sha256":"366b18e39f5fcada8a06a9c3d9c5a1e0ca4393c45028de224594086a9af626f5"
         },
         {
           "type": "file",
-          "path": "com.selah.Selah.png"
+          "url":"",
+          "sha256":"366b18e39f5fcada8a06a9c3d9c5a1e0ca4393c45028de224594086a9af626f5"
         },
         {
           "type": "file",
           "path": "com.selah.Selah.metainfo.xml"
+        },
+        {
+          "type":"file",
+          "url": "https://raw.githubusercontent.com/toazd/selah/refs/heads/main/LICENSE",
+          "sha256": "6b0382b16279f26ff69014300541967a356a666eb0b91b422f6862f6b7dad17e",
+          "dest-filename": "LICENSE"
         }
       ]
     }
