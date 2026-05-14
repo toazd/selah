@@ -26,6 +26,8 @@
         "cp -r lib /app/bin/",
         "cp -r data /app/bin/",
         "install -Dm0644 com.selah.Selah.desktop /app/share/applications/com.selah.Selah.desktop",
+        "install -Dm0644 com.selah.Selah.svg /app/share/icons/hicolor/scalable/apps/com.selah.Selah.svg",
+        "install -Dm0644 com.selah.Selah.svg /app/share/icons/hicolor/symbolic/apps/com.selah.Selah.svg",
         "install -Dm0644 com.selah.Selah.png /app/share/icons/hicolor/512x512/apps/com.selah.Selah.png",
         "ln -s /app/share/icons/hicolor/512x512/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png",
         "ln -s /app/share/icons/hicolor/512x512/apps/com.selah.Selah.png /app/share/icons/hicolor/128x128/apps/com.selah.Selah.png",
@@ -62,8 +64,8 @@
         },
         {
           "type": "file",
-          "url":"",
-          "sha256":"",
+          "url":"https://raw.githubusercontent.com/toazd/selah/b5e271fcd9ca8c72bdc136c74196cf7dd8c88fa2/flathub/com.selah.Selah/com.selah.Selah.svg",
+          "sha256":"4b1a0124e941897e08d67adbdf517c9a4a5c041f0516fcef47d4a12065994b89",
           "dest-filename": "com.selah.Selah.svg"
         },
         {
