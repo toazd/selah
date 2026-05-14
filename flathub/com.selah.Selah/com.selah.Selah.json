@@ -1,10 +1,9 @@
 {
-  "app-id": "com.selah.Selah",
+  "app-id": "io.github.toazd.selah",
   "runtime": "org.freedesktop.Platform",
   "runtime-version": "25.08",
   "sdk": "org.freedesktop.Sdk",
   "command": "selah",
-  "branch": "$VERSION",
   "finish-args": [
     "--socket=wayland",
     "--socket=fallback-x11",
@@ -42,33 +41,33 @@
       "sources": [
         {
           "type": "archive",
-          "only-arches": "x86_64",
+          "only-arches": "[ \"x86_64\" ]",
           "url": "https://github.com/toazd/selah/releases/download/v0.7.5-build.85/Selah-0.7.5.tar.gz",
           "sha256": "675f2092f6a9b18cefde844e20dc13a1ed3164781076588e5820e3b478ed4ecb"
         },
         {
           "type": "file",
-          "url": "https://raw.githubusercontent.com/toazd/selah/refs/heads/main/flathub/com.selah.Selah/com.selah.Selah.desktop",
+          "url": "https://raw.githubusercontent.com/toazd/selah/refs/heads/main/flathub/io.github.toazd.selah/io.github.toazd.selah.desktop",
           "sha256":"366b18e39f5fcada8a06a9c3d9c5a1e0ca4393c45028de224594086a9af626f5",
-          "dest-filename": "com.selah.Selah.desktop"
+          "dest-filename": "io.github.toazd.selah.desktop"
         },
         {
           "type": "file",
-          "url":"https://github.com/toazd/selah/blob/ae68649c2aae3a1d197bf486e1d909e0ca4e5a95/flathub/com.selah.Selah/com.selah.Selah.png?raw=true",
+          "url":"https://github.com/toazd/selah/blob/ae68649c2aae3a1d197bf486e1d909e0ca4e5a95/flathub/io.github.toazd.selah/io.github.toazd.selah.png?raw=true",
           "sha256":"366b18e39f5fcada8a06a9c3d9c5a1e0ca4393c45028de224594086a9af626f5",
-          "dest-filename": "com.selah.Selah.png"
+          "dest-filename": "io.github.toazd.selah.png"
         },
         {
           "type": "file",
-          "url":"https://raw.githubusercontent.com/toazd/selah/refs/heads/main/flathub/com.selah.Selah/com.selah.Selah.metainfo.xml",
+          "url":"https://raw.githubusercontent.com/toazd/selah/refs/heads/main/flathub/io.github.toazd.selah/io.github.toazd.selah.metainfo.xml",
           "sha256":"7a61ffb7bc91611bf755eef72b3c881d6db4114f289b91341c031077835e4b91",
-          "dest-filename": "com.selah.Selah.metainfo.xml"
+          "dest-filename": "io.github.toazd.selah.metainfo.xml"
         },
         {
           "type": "file",
-          "url":"https://raw.githubusercontent.com/toazd/selah/b5e271fcd9ca8c72bdc136c74196cf7dd8c88fa2/flathub/com.selah.Selah/com.selah.Selah.svg",
+          "url":"https://raw.githubusercontent.com/toazd/selah/b5e271fcd9ca8c72bdc136c74196cf7dd8c88fa2/flathub/io.github.toazd.selah/io.github.toazd.selah.svg",
           "sha256":"4b1a0124e941897e08d67adbdf517c9a4a5c041f0516fcef47d4a12065994b89",
-          "dest-filename": "com.selah.Selah.svg"
+          "dest-filename": "io.github.toazd.selah.svg"
         },
         {
           "type":"file",

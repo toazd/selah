@@ -110,7 +110,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
         
-        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
           mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
@@ -120,7 +120,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=io.github.toazd.selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$TEMP_DIR/usr/share/applications/io.github.toazd.selah.desktop"
         
         fpm -s dir -t deb \
           -n "$APP_NAME" \
@@ -134,7 +134,7 @@ jobs:
           -p "$OUTPUT_DIR" \
           -C "$TEMP_DIR" \
           usr/bin/selah \
-          usr/share/applications/com.selah.Selah.desktop \
+          usr/share/applications/io.github.toazd.selah.desktop \
           usr/share/icons/ \
           opt/selah/
         rm -rf "$TEMP_DIR"
@@ -147,7 +147,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
         
-        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
           mv "$TEMP_DIR/data" "$TEMP_DIR/opt/selah/"
@@ -157,7 +157,7 @@ jobs:
         fi
         
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=com.selah.Selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=io.github.toazd.selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$TEMP_DIR/usr/share/applications/io.github.toazd.selah.desktop"
         
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
@@ -171,7 +171,7 @@ jobs:
           -p "$OUTPUT_DIR" \
           -C "$TEMP_DIR" \
           usr/bin/selah \
-          usr/share/applications/com.selah.Selah.desktop \
+          usr/share/applications/io.github.toazd.selah.desktop \
           usr/share/icons/ \
           opt/selah/
         rm -rf "$TEMP_DIR"
@@ -184,15 +184,15 @@ jobs:
         cp -r "$BUILD_DIR"/* "$APPDIR/"
 
         # Copy icon to root
-        cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/com.selah.Selah.png"
-        ln -s com.selah.Selah.png "$APPDIR/selah.png"
+        cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/io.github.toazd.selah.png"
+        ln -s io.github.toazd.selah.png "$APPDIR/selah.png"
         
         # Create AppRun
         printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
         chmod +x "$APPDIR/AppRun"
 
         # Create .desktop
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$APPDIR/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=io.github.toazd.selah\nType=Application\nCategories=Education\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$APPDIR/io.github.toazd.selah.desktop"
 
         # download appimagetool
         wget -q -O appimagetool.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
@@ -216,23 +216,23 @@ jobs:
 
         # Create desktop file for Flatpak
         mkdir -p "$TEMP_DIR3/usr/share/applications"
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=com.selah.Selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=com.selah.Selah\n' > "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=io.github.toazd.selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$TEMP_DIR3/usr/share/applications/io.github.toazd.selah.desktop"
 
         # Prepare minimal flatpak manifest and build tree
         FLATPAK_BUILD="$TEMP_DIR3/flatpak-build"
         mkdir -p "$FLATPAK_BUILD/opt/selah" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps" "$FLATPAK_BUILD/usr/share/applications"
         cp -r "$TEMP_DIR3/opt/selah/"* "$FLATPAK_BUILD/opt/selah/"
-        if [ -f "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" ]; then
-          cp "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" "$FLATPAK_BUILD/usr/share/applications/"
+        if [ -f "$TEMP_DIR3/usr/share/applications/io.github.toazd.selah.desktop" ]; then
+          cp "$TEMP_DIR3/usr/share/applications/io.github.toazd.selah.desktop" "$FLATPAK_BUILD/usr/share/applications/"
         fi
-        cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png"
         # Copy LICENSE file for Flathub compliance
         cp LICENSE "$FLATPAK_BUILD/" || true
 
-        MANIFEST="$TEMP_DIR3/com.selah.Selah.json"
+        MANIFEST="$TEMP_DIR3/io.github.toazd.selah.json"
         cat > "$MANIFEST" <<JSON
         {
-          "app-id": "com.selah.Selah",
+          "app-id": "io.github.toazd.selah",
           "runtime": "org.freedesktop.Platform",
           "runtime-version": "25.08",
           "sdk": "org.freedesktop.Sdk",
@@ -258,8 +258,8 @@ jobs:
                 "install -D -m755 opt/selah/selah /app/bin/selah",
                 "cp -r opt/selah/lib /app/bin/",
                 "cp -r opt/selah/data /app/bin/",
-                "install -D -m644 usr/share/applications/com.selah.Selah.desktop /app/share/applications/com.selah.Selah.desktop",
-                "install -D -m644 usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png",
+                "install -D -m644 usr/share/applications/io.github.toazd.selah.desktop /app/share/applications/io.github.toazd.selah.desktop",
+                "install -D -m644 usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png /app/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png",
                 "install -Dm0644 LICENSE $FLATPAK_DEST/share/licenses/$FLATPAK_ID/selah-bundle/LICENSE"
               ],
               "sources": [
@@ -276,7 +276,7 @@ jobs:
         cd "$TEMP_DIR3"
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         flatpak-builder --user --force-clean --arch=x86_64 --repo=repo --install-deps-from=flathub build-dir "$MANIFEST"
-        flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" com.selah.Selah "$VERSION"
+        flatpak build-bundle repo "$OUTPUT_DIR/selah-${VERSION}.flatpak" io.github.toazd.selah "$VERSION"
         sync
         cd - || true
         rm -rf "$TEMP_DIR3" || true

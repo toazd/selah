@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-    <id>com.selah.Selah</id>
+    <id>io.github.toazd.selah</id>
 
     <name>Selah</name>
     <summary>A cross-platform Bible study app using Flutter and the 1769 King James Version</summary>
@@ -76,7 +76,7 @@
     <url type="donation">https://github.com/toazd/selah/issues</url>
     <url type="vcs-browser">https://github.com/toazd/selah</url>
 
-    <launchable type="desktop-id">com.selah.Selah.desktop</launchable>
+    <launchable type="desktop-id">io.github.toazd.selah.desktop</launchable>
 
     <screenshots>
         <screenshot type="default">

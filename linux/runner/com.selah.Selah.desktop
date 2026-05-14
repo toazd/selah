@@ -2,8 +2,8 @@
 Name=Selah
 Comment=Holy Bible Study App
 Exec=selah
-Icon=com.selah.Selah
+Icon=io.github.toazd.selah
 Terminal=false
 Type=Application
 Categories=Education;Utility;
-StartupWMClass=com.selah.Selah
+StartupWMClass=io.github.toazd.selah
