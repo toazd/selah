@@ -105,7 +105,7 @@
     </provides>
 
     <releases>
-        <release version="0.7.5" date="2026-05-12" />
+        <release version="0.7.5" date="2026-05-12">
             <url type="details">https://github.com/toazd/selah/commits/main/</url>
             <description>
                 <p>Release description</p>
