@@ -430,15 +430,16 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       final showQuickJump = prefs.getBool(_prefsKeyShowQuickJump);
       if (mounted) {
         setState(() {
-          _tapMode =
-              tapModeIdx != null ? TapMode.values[tapModeIdx] : TapMode.twoTap;
+          _tapMode = tapModeIdx != null
+              ? TapMode.values[tapModeIdx]
+              : TapMode.threeTap;
           _showQuickJump = showQuickJump ?? true;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _tapMode = TapMode.twoTap;
+          _tapMode = TapMode.threeTap;
           _showQuickJump = true;
         });
       }

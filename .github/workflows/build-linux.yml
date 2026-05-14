@@ -224,8 +224,10 @@ jobs:
           cp "$TEMP_DIR3/usr/share/applications/com.selah.Selah.desktop" "$FLATPAK_BUILD/usr/share/applications/"
         fi
         cp "$TEMP_DIR3/usr/share/icons/hicolor/256x256/apps/selah.png" "$FLATPAK_BUILD/usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+        # Copy LICENSE file for Flathub compliance
+        cp LICENSE "$FLATPAK_BUILD/" || true
 
-        MANIFEST="$TEMP_DIR3/manifest.json"
+        MANIFEST="$TEMP_DIR3/com.selah.Selah.json"
         cat > "$MANIFEST" <<JSON
         {
           "app-id": "com.selah.Selah",
@@ -255,10 +257,14 @@ jobs:
                 "cp -r opt/selah/lib /app/bin/",
                 "cp -r opt/selah/data /app/bin/",
                 "install -D -m644 usr/share/applications/com.selah.Selah.desktop /app/share/applications/com.selah.Selah.desktop",
-                "install -D -m644 usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png"
+                "install -D -m644 usr/share/icons/hicolor/256x256/apps/com.selah.Selah.png /app/share/icons/hicolor/256x256/apps/com.selah.Selah.png",
+                "install -Dm0644 LICENSE $FLATPAK_DEST/share/licenses/$FLATPAK_ID/selah-bundle/LICENSE"
               ],
               "sources": [
-                { "type": "dir", "path": "flatpak-build" }
+                {
+                  "type": "dir",
+                  "path": "flatpak-build"
+                }
               ]
             }
           ]

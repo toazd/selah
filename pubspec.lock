@@ -237,10 +237,10 @@ packages:
     dependency: transitive
     description:
       name: dev_build
-      sha256: fab11ef55932f5805c405a7597ae5c7e0908e33c0120bd7a9dfda44bdf86c35f
+      sha256: "6262a63d07eaa9a348cf787d6ebab023244409124a03dd96c1ff51bce217cdf1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.5+3"
+    version: "1.1.7"
   diff_match_patch:
     dependency: transitive
     description:
@@ -913,10 +913,10 @@ packages:
     dependency: transitive
     description:
       name: process_run
-      sha256: "8bdbe7ec335391ad32e5119cdcecaa7f679bc924fc5a5d7e8bc7a8fbd22592a1"
+      sha256: ceff9c426ad0a08927e1b36b4ef6fa3a12270eb8c134917278865bcf1fc02805
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.3"
   pub_semver:
     dependency: transitive
     description:
