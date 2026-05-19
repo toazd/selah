@@ -461,7 +461,7 @@ jobs:
     - name: Build Snap package
       run: |
         cd build/snap-build
-        snapcraft snap --output ../packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap
+        sudo snapcraft pack --destructive-mode --output ../packages
         cd -
         ls -lah build/packages
 
