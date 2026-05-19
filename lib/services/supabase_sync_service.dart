@@ -4184,52 +4184,62 @@ class SupabaseSyncService {
     if (_connectivitySubscription != null) return;
 
     // Listen to connectivity changes instead of polling
-    _connectivitySubscription = _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> result) async {
-      try {
-        // Debounce rapid connectivity changes (network fluctuations)
-        await Future.delayed(const Duration(seconds: 1));
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      (List<ConnectivityResult> result) async {
+        try {
+          // Debounce rapid connectivity changes (network fluctuations)
+          await Future.delayed(const Duration(seconds: 1));
 
-        final hasConnection = await InternetAccessChecker.hasInternetAccess();
+          final hasConnection = await InternetAccessChecker.hasInternetAccess();
 
-        if (hasConnection) {
-          if (_syncStatus != SyncStatus.online) {
-            // Connection restored - test and setup
-            try {
-              await _checkConnectionAndSetup();
-            } catch (e) {
-              // Handle connection setup errors gracefully
-              ErrorHandler.logError(
-                e,
-                customMessage:
-                    'Connection setup failed during connectivity change',
-              );
-              _syncStatus = SyncStatus.offline;
-              syncStatusNotifier.value = _syncStatus;
-              await ErrorHandler.handleNetworkError(e);
+          if (hasConnection) {
+            if (_syncStatus != SyncStatus.online) {
+              // Connection restored - test and setup
+              try {
+                await _checkConnectionAndSetup();
+              } catch (e) {
+                // Handle connection setup errors gracefully
+                ErrorHandler.logError(
+                  e,
+                  customMessage:
+                      'Connection setup failed during connectivity change',
+                );
+                _syncStatus = SyncStatus.offline;
+                syncStatusNotifier.value = _syncStatus;
+                await ErrorHandler.handleNetworkError(e);
+              }
+            } else {
+              // Status may be stale "online" after transient drops. Flush queued work anyway.
+              await _flushQueuedOperations();
             }
-          } else {
-            // Status may be stale "online" after transient drops. Flush queued work anyway.
-            await _flushQueuedOperations();
+          } else if (_syncStatus != SyncStatus.offline) {
+            // Connection lost
+            _syncStatus = SyncStatus.offline;
+            syncStatusNotifier.value = _syncStatus;
+            await ErrorHandler.handle('No network connection',
+                type: ErrorType.network, severity: ErrorSeverity.medium);
           }
-        } else if (_syncStatus != SyncStatus.offline) {
-          // Connection lost
+        } catch (e) {
+          // Handle connectivity monitoring errors gracefully
+          ErrorHandler.logError(
+            e,
+            customMessage: 'Connectivity monitoring error',
+          );
+          await ErrorHandler.handleNetworkError(e);
           _syncStatus = SyncStatus.offline;
           syncStatusNotifier.value = _syncStatus;
-          await ErrorHandler.handle('No network connection',
-              type: ErrorType.network, severity: ErrorSeverity.medium);
         }
-      } catch (e) {
-        // Handle connectivity monitoring errors gracefully
+      },
+      onError: (Object error, StackTrace stackTrace) async {
         ErrorHandler.logError(
-          e,
-          customMessage: 'Connectivity monitoring error',
+          error,
+          customMessage:
+              'Connectivity change stream unavailable; using Supabase probe',
+          context: {'stackTrace': stackTrace.toString()},
         );
-        await ErrorHandler.handleNetworkError(e);
-        _syncStatus = SyncStatus.offline;
-        syncStatusNotifier.value = _syncStatus;
-      }
-    });
+        await _checkConnectionAndSetup();
+      },
+    );
 
     // Also perform initial connectivity check
     _connectivity.checkConnectivity().then((result) async {
