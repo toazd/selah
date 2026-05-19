@@ -286,6 +286,22 @@ jobs:
         cd build/snap-build
         sudo snapcraft pack --destructive-mode --output ../packages
         cd -
+        SNAP_FILE=""
+        for file in build/packages/*.snap; do
+          if [ -f "$file" ]; then
+            SNAP_FILE="$file"
+            break
+          fi
+        done
+        if [ -z "$SNAP_FILE" ]; then
+          echo "❌ Snap package not found"
+          ls -lah build/packages
+          exit 1
+        fi
+        SNAP_TARGET="build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap"
+        if [ "$SNAP_FILE" != "$SNAP_TARGET" ]; then
+          mv "$SNAP_FILE" "$SNAP_TARGET"
+        fi
         ls -lah build/packages
 
     - name: Upload Snap artifact
