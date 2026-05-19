@@ -439,7 +439,7 @@ jobs:
               - libfontconfig1
               - libfreetype6
               - libopus0
-              - libjsoncpp3
+              - libjsoncpp25
               - libasound2
               - libatk1.0-0
               - libc6
