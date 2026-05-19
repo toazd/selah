@@ -1166,10 +1166,7 @@ class SupabaseSyncService {
   Future<void> _checkConnectionAndSetup() async {
     try {
       final wasOnline = _syncStatus == SyncStatus.online;
-      final connectivityResult = await _connectivity.checkConnectivity();
-      //final hasConnection = connectivityResult != ConnectivityResult.none;
-      final hasConnection =
-          !connectivityResult.contains(ConnectivityResult.none);
+      final hasConnection = await InternetAccessChecker.hasInternetAccess();
 
       if (hasConnection) {
         try {

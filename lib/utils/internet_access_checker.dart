@@ -15,30 +15,38 @@ class InternetAccessChecker {
   static Future<bool> hasInternetAccess(
       {Duration timeout = const Duration(seconds: 5)}) async {
     try {
-      // Step 1: Quick basic connectivity check - required hardware level
+      // Step 1: Quick basic connectivity check.
+      //
+      // In strict snaps this can report "none" when NetworkManager observation
+      // is not connected, even though normal outbound sockets are allowed by
+      // the network plug. Treat it as a hint, not authoritative proof.
       final connectivity = Connectivity();
-      final result = await connectivity.checkConnectivity();
-      if (result.contains(ConnectivityResult.none)) {
-        return false; // No radio/ethernet - impossible to have internet
-      }
+      await connectivity.checkConnectivity();
+    } catch (_) {
+      // If status observation itself fails, still allow the real network probe
+      // or login request to decide.
+    }
 
-      // Step 2: Validate actual internet access with a lightweight Supabase probe
-      // This tests for cases where connectivity status shows connected but
-      // internet access is blocked (captive portals, authentication required, etc.)
+    // Step 2: Validate actual internet access with a lightweight Supabase probe
+    // This tests for cases where connectivity status shows connected but
+    // internet access is blocked (captive portals, authentication required, etc.)
 
-      // Use a minimal test query to validate connection
-      // Timeout prevents hanging on problematic networks
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId != null) {
-        await Supabase.instance.client
-            .from('profiles')
-            .select('id')
-            .eq('id', userId)
-            .single()
-            .timeout(const Duration(seconds: 3));
-        return true;
-      }
+    // Use a minimal test query to validate connection
+    // Timeout prevents hanging on problematic networks
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      // Login/signup is about to perform the real network request. Do not block
+      // it on connectivity_plus alone.
+      return true;
+    }
 
+    try {
+      await Supabase.instance.client
+          .from('profiles')
+          .select('id')
+          .eq('id', userId)
+          .single()
+          .timeout(const Duration(seconds: 3));
       return true;
     } catch (e) {
       // Connectivity exists at hardware level but actual internet access failed

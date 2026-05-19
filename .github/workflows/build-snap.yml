@@ -200,6 +200,7 @@ jobs:
               - home
               - network
               - network-bind
+              - network-manager-observe
               - network-observe
               - pulseaudio
               - audio-playback
@@ -223,6 +224,7 @@ jobs:
             organize:
               snap/gui/io.github.toazd.selah.svg: snap/gui/io.github.toazd.selah.svg
             stage-packages:
+              - ca-certificates
               - libgtk-3-0
               - libglib2.0-0
               - libpango-1.0-0
