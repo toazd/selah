@@ -304,6 +304,7 @@ jobs:
           ## Build #${{ github.run_number }}
 
           ## 📦 Installation files by Platform
+          Selah is not currently available in any app stores so some platforms require manual installation.
           
           ### 🪟 Windows
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.exe` - Windows installer (recommended; includes Start Menu and Desktop shortcuts, easy uninstall)
@@ -328,7 +329,7 @@ jobs:
           - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg` - Disk image installer (untested builds; need feedback!)
           
           ### 🌐 Web
-          - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive (requires a real web server; may or may not require manual tweaking)
+          - `Selah-Web-0.7.5.zip` - Web build archive (requires a real web server; https://toazd.github.io/bible/)
           
   build-snap:
     name: Build Snap Package
