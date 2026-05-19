@@ -170,89 +170,82 @@ jobs:
     - name: Create Snapcraft manifest
       run: |
         VERSION="${{ needs.extract-version.outputs.app_version }}"
-        python3 - <<'PY'
-          import textwrap
-          from pathlib import Path
-
-          version = "${VERSION}"
-          content = textwrap.dedent(f"""
-              name: selah
-              title: Selah Bible study app
-              version: {version}
-              summary: Cross platform Bible study app
-              license: Unlicense
-              contact: wmcdannell@gmail.com
-              issues: https://github.com/toazd/selah/issues
-              website: https://toazd.github.io/
-              icon: snap/gui/io.github.toazd.selah.svg
-              type: app
-              description: |
-                A cross-platform Bible study app using Flutter and the 1769 King James Version.
-              base: core22
-              confinement: strict
-              grade: stable
-              apps:
-                selah:
-                  command: usr/bin/selah
-                  desktop: io.github.toazd.selah.desktop
-                  plugs:
-                    - personal-files
-                    - home
-                    - network
-                    - network-bind
-                    - network-observe
-                    - pulseaudio
-                    - audio-playback
-                    - removable-media
-                    - x11
-                    - wayland
-                    - desktop
-                    - desktop-legacy
-                    - browser-support
-                    - opengl
-              plugs:
-                personal-files:
-                  read:
-                    - $HOME/.config/selah
-                  write:
-                    - $HOME/.config/selah
-              parts:
-                selah:
-                  plugin: dump
-                  source: prime
-                  organize:
-                    snap/gui/io.github.toazd.selah.svg: snap/gui/io.github.toazd.selah.svg
-                  stage-packages:
-                    - libgtk-3-0
-                    - libglib2.0-0
-                    - libpango-1.0-0
-                    - libpangocairo-1.0-0
-                    - libgdk-pixbuf2.0-0
-                    - libx11-6
-                    - libxkbcommon0
-                    - libfontconfig1
-                    - libfreetype6
-                    - libopus0
-                    - libjsoncpp3
-                    - libasound2
-                    - libatk1.0-0
-                    - libc6
-                    - libxcb1
-                    - libxrender1
-                    - libxrandr2
-                    - libxss1
-                    - libxcursor1
-                    - libxcomposite1
-                    - libxdamage1
-                    - libxfixes3
-                    - libxext6
-                    - libxinerama1
-                    - libxshmfence1
-                    - libxtst6
-                    - libgdk-pixbuf2.0-0
-              """)
-          Path('build/snap-build/snapcraft.yaml').write_text(content)
-        PY
+        cat > build/snap-build/snapcraft.yaml <<EOF
+        name: selah
+        title: Selah Bible study app
+        version: $VERSION
+        summary: Cross platform Bible study app
+        license: Unlicense
+        contact: wmcdannell@gmail.com
+        issues: https://github.com/toazd/selah/issues
+        website: https://toazd.github.io/
+        icon: snap/gui/io.github.toazd.selah.svg
+        type: app
+        description: |
+          A cross-platform Bible study app using Flutter and the 1769 King James Version.
+        base: core22
+        confinement: strict
+        grade: stable
+        apps:
+          selah:
+            command: usr/bin/selah
+            desktop: io.github.toazd.selah.desktop
+            plugs:
+              - personal-files
+              - home
+              - network
+              - network-bind
+              - network-observe
+              - pulseaudio
+              - audio-playback
+              - removable-media
+              - x11
+              - wayland
+              - desktop
+              - desktop-legacy
+              - browser-support
+              - opengl
+        plugs:
+          personal-files:
+            read:
+              - \$HOME/.config/selah
+            write:
+              - \$HOME/.config/selah
+        parts:
+          selah:
+            plugin: dump
+            source: prime
+            organize:
+              snap/gui/io.github.toazd.selah.svg: snap/gui/io.github.toazd.selah.svg
+            stage-packages:
+              - libgtk-3-0
+              - libglib2.0-0
+              - libpango-1.0-0
+              - libpangocairo-1.0-0
+              - libgdk-pixbuf2.0-0
+              - libx11-6
+              - libxkbcommon0
+              - libfontconfig1
+              - libfreetype6
+              - libopus0
+              - libjsoncpp3
+              - libasound2
+              - libatk1.0-0
+              - libc6
+              - libxcb1
+              - libxrender1
+              - libxrandr2
+              - libxss1
+              - libxcursor1
+              - libxcomposite1
+              - libxdamage1
+              - libxfixes3
+              - libxext6
+              - libxinerama1
+              - libxshmfence1
+              - libxtst6
+              - libgdk-pixbuf2.0-0
+        EOF
 
     - name: Build Snap package
       run: |
