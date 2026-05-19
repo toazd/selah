@@ -437,8 +437,11 @@ jobs:
               - libgdk-pixbuf2.0-0
               - libx11-6
               - libxkbcommon0
+              - libegl1
               - libfontconfig1
               - libfreetype6
+              - libcanberra-gtk-module
+              - libcanberra-gtk3-module
               - libopus0
               - libjsoncpp25
               - libasound2
