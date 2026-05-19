@@ -377,6 +377,7 @@ jobs:
         mkdir -p build/snap-build/prime/usr/share/icons/hicolor/256x256/apps
         # Copy icon to snap/gui directory for snapcraft
         cp build/snap-build/io.github.toazd.selah.svg build/snap-build/snap/gui/
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=${SNAP}/meta/gui/io.github.toazd.selah.svg\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > build/snap-build/snap/gui/io.github.toazd.selah.desktop
 
     - name: Create Snapcraft manifest
       run: |
@@ -399,8 +400,8 @@ jobs:
         grade: stable
         apps:
           selah:
-            command: usr/bin/selah
-            desktop: io.github.toazd.selah.desktop
+            command: opt/selah/selah
+            desktop: snap/gui/io.github.toazd.selah.desktop
             plugs:
               - personal-files
               - home
