@@ -284,6 +284,12 @@ jobs:
         ls -lah build/packages/
         ls -lah "$OUTPUT_DIR"
 
+    - name: Upload Linux packages artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-packages
+        path: build/packages
+
     - name: Upload Linux to Release
       uses: softprops/action-gh-release@v1
       with:
@@ -310,6 +316,7 @@ jobs:
           - `selah-${{ needs.extract-version.outputs.app_version }}-*.rpm` - Red Hat/Fedora (sudo dnf install ./Selah-X.X.X.rpm) NOTE: rpms are not signed
           - `Selah-${{ needs.extract-version.outputs.app_version }}.AppImage` - AppImage (chmod +x Selah-X.X.X.AppImage; ./Selah-X.X.X.AppImage) (NOTE: you may need to install fuse2 for this to run)
           - `selah-${{ needs.extract-version.outputs.app_version }}.flatpak` - Flatpak bundle (flatpak install ./Selah-X.X.X.flatpak)
+          - `Selah-${{ needs.extract-version.outputs.app_version }}.snap` - Snap package (install locally with `snap install --dangerous ./Selah-X.X.X.snap`)
           
           ### 🤖 Android & ChromeOS (armeabi-v7a/32-bit, arm64-v8a/64-bit, x86_64/64-bit)
           - `Selah-${{ needs.extract-version.outputs.app_version }}.apk` - Universal Android app (adb install ./Selah-X.X.X.apk OR transfer to device, enable install from other sources, and install it)
@@ -323,6 +330,158 @@ jobs:
           ### 🌐 Web
           - `Selah-Web-${{ needs.extract-version.outputs.app_version }}.zip` - Web build archive (requires a real web server; may or may not require manual tweaking)
           
+  build-snap:
+    name: Build Snap Package
+    needs:
+      - extract-version
+      - build-linux
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download Linux package artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: linux-packages
+        path: build/packages
+
+    - name: Prepare Snap build directory and copy icon
+      run: |
+        mkdir -p build/snap-build
+        cp snapcraft/io.github.toazd.selah.svg build/snap-build/
+
+    - name: Install snapcraft dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y snapd squashfs-tools dpkg-dev
+        sudo snap install core22
+        sudo snap install snapcraft --classic
+
+    - name: Extract Debian package for Snap build
+      run: |
+        set -e
+        mkdir -p build/snap-build/prime
+        mkdir -p build/snap-build/snap/gui
+        DEB_FILE=$(ls build/packages/selah_*.deb | head -n1)
+        if [ -z "$DEB_FILE" ]; then
+          echo "❌ Debian package not found"
+          ls -lah build/packages
+          exit 1
+        fi
+        dpkg-deb -x "$DEB_FILE" build/snap-build/prime
+        mkdir -p build/snap-build/prime/usr/share/applications
+        mkdir -p build/snap-build/prime/usr/share/icons/hicolor/256x256/apps
+        # Copy icon to snap/gui directory for snapcraft
+        cp build/snap-build/io.github.toazd.selah.svg build/snap-build/snap/gui/
+
+    - name: Create Snapcraft manifest
+      run: |
+        VERSION="${{ needs.extract-version.outputs.app_version }}"
+        python3 - <<'PY'
+          import textwrap
+          from pathlib import Path
+
+          version = "${VERSION}"
+          content = textwrap.dedent(f"""
+              name: selah
+              title: Selah Bible study app
+              version: {version}
+              summary: Cross platform Bible study app
+              license: Unlicense
+              contact: wmcdannell@gmail.com
+              issues: https://github.com/toazd/selah/issues
+              website: https://toazd.github.io/
+              icon: snap/gui/io.github.toazd.selah.svg
+              type: app
+              description: |
+                A cross-platform Bible study app using Flutter and the 1769 King James Version.
+              base: core22
+              confinement: strict
+              grade: stable
+              apps:
+                selah:
+                  command: usr/bin/selah
+                  desktop: io.github.toazd.selah.desktop
+                  plugs:
+                    - personal-files
+                    - home
+                    - network
+                    - network-bind
+                    - network-observe
+                    - pulseaudio
+                    - audio-playback
+                    - removable-media
+                    - x11
+                    - wayland
+                    - desktop
+                    - desktop-legacy
+                    - browser-support
+                    - opengl
+              plugs:
+                personal-files:
+                  read:
+                    - $HOME/.config/selah
+                  write:
+                    - $HOME/.config/selah
+              parts:
+                selah:
+                  plugin: dump
+                  source: prime
+                  organize:
+                    snap/gui/io.github.toazd.selah.svg: snap/gui/io.github.toazd.selah.svg
+                  stage-packages:
+                    - libgtk-3-0
+                    - libglib2.0-0
+                    - libpango-1.0-0
+                    - libpangocairo-1.0-0
+                    - libgdk-pixbuf2.0-0
+                    - libx11-6
+                    - libxkbcommon0
+                    - libfontconfig1
+                    - libfreetype6
+                    - libopus0
+                    - libjsoncpp3
+                    - libasound2
+                    - libatk1.0-0
+                    - libc6
+                    - libxcb1
+                    - libxrender1
+                    - libxrandr2
+                    - libxss1
+                    - libxcursor1
+                    - libxcomposite1
+                    - libxdamage1
+                    - libxfixes3
+                    - libxext6
+                    - libxinerama1
+                    - libxshmfence1
+                    - libxtst6
+                    - libgdk-pixbuf2.0-0
+              """)
+          Path('build/snap-build/snapcraft.yaml').write_text(content)
+        PY
+
+    - name: Build Snap package
+      run: |
+        cd build/snap-build
+        snapcraft snap --output ../packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap
+        cd -
+        ls -lah build/packages
+
+    - name: Upload Snap to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
+        name: Selah v${{ needs.extract-version.outputs.app_version }} - Build ${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: build/packages/Selah-*.snap
+
   build-web:
     name: Build Web App
     needs: extract-version
