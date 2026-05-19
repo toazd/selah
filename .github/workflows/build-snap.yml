@@ -229,20 +229,38 @@ jobs:
               - libpangocairo-1.0-0
               - libgdk-pixbuf2.0-0
               - libx11-6
+              - libx11-xcb1
               - libxkbcommon0
+              - libdrm2
               - libegl1
               - libegl-mesa0
+              - libgbm1
+              - libgl1
               - libgl1-mesa-dri
+              - libgles2
+              - libglvnd0
+              - libglx0
+              - libglx-mesa0
+              - libopengl0
               - libfontconfig1
               - libfreetype6
               - libcanberra-gtk-module
               - libcanberra-gtk3-module
+              - libsecret-1-0
+              - libsqlite3-0
               - libopus0
               - libjsoncpp25
               - libasound2
               - libatk1.0-0
               - libc6
               - libxcb1
+              - libxcb-dri2-0
+              - libxcb-dri3-0
+              - libxcb-glx0
+              - libxcb-present0
+              - libxcb-randr0
+              - libxcb-sync1
+              - libxcb-xfixes0
               - libxrender1
               - libxrandr2
               - libxss1
@@ -254,7 +272,11 @@ jobs:
               - libxinerama1
               - libxshmfence1
               - libxtst6
+              - libwayland-client0
+              - libwayland-cursor0
+              - libwayland-egl1
               - libgdk-pixbuf2.0-0
+              - xdg-utils
         EOF
 
     - name: Build Snap package
