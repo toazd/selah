@@ -86,16 +86,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   // Tracking when the user last input any character
   DateTime _lastInputTime = DateTime.now();
 
-  // Cache for highlighted text spans to improve performance
-  final Map<String, TextSpan> _highlightedSpansCache = {};
-
   @override
   bool get wantKeepAlive => true;
-
-  // Clear cache when search options change
-  void _clearHighlightCache() {
-    _highlightedSpansCache.clear();
-  }
 
   // Get highlight color based on theme (same as search_screen.dart)
   Color _getHighlightColor(BuildContext context) {
@@ -105,75 +97,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         : lightHighlightColor.value;
   }
 
-  // Highlight matches in a parsed TextSpan (same logic as search_screen.dart)
-  TextSpan _highlightParsedSpan(
-      TextSpan span, RegExp regex, BuildContext context) {
-    final color = _getHighlightColor(context);
-
-    // Performance optimization: if no children and no text, return as-is
-    if (span.children == null && (span.text == null || span.text!.isEmpty)) {
-      return span;
-    }
-
-    // Handle spans with children (from VerseTextParser)
-    if (span.children != null && span.children!.isNotEmpty) {
-      return TextSpan(
-        style: span.style,
-        children: span.children!.map((child) {
-          if (child is TextSpan) {
-            return _highlightParsedSpan(child, regex, context);
-          }
-          return child;
-        }).toList(),
-      );
-    }
-
-    // Handle simple text spans (most common case after optimization)
-    if (span.text != null && span.text!.isNotEmpty) {
-      final text = span.text!;
-      final spans = <InlineSpan>[];
-      int start = 0;
-
-      // Performance optimization: early exit if no matches
-      if (!regex.hasMatch(text)) {
-        return span;
-      }
-
-      for (final match in regex.allMatches(text)) {
-        if (match.start > start) {
-          spans.add(TextSpan(
-              text: text.substring(start, match.start), style: span.style));
-        }
-        spans.add(
-          TextSpan(
-            text: text.substring(match.start, match.end),
-            style: (span.style ?? TextStyle())
-                .copyWith(backgroundColor: color, fontWeight: FontWeight.bold),
-          ),
-        );
-        start = match.end;
-      }
-      if (start < text.length) {
-        spans.add(TextSpan(text: text.substring(start), style: span.style));
-      }
-      return TextSpan(style: span.style, children: spans);
-    }
-
-    return span;
-  }
-
-  // Get highlighted span for verse text in search results
-  TextSpan _getHighlightedVerseSpan(
-      String verseText, TextStyle baseStyle, BuildContext context) {
-    if (_currentRegex == null) {
-      return VerseTextParser.parseVerseText(verseText, baseStyle);
-    }
-
-    // Parse the verse text first (handles red letters, etc.)
-    final parsedSpan = VerseTextParser.parseVerseText(verseText, baseStyle);
-
-    // Then apply highlighting
-    return _highlightParsedSpan(parsedSpan, _currentRegex!, context);
+  // Get the display span for verse text in note search results.
+  // Note search highlighting only belongs in the note body, not the verse text.
+  TextSpan _getVerseSpan(String verseText, TextStyle baseStyle) {
+    return VerseTextParser.parseVerseText(verseText, baseStyle);
   }
 
   // Create RegExp with conditional unicode flag based on pattern content
@@ -605,9 +532,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         matchCount += _currentRegex!.allMatches(text).length;
       }
 
-      // Clear cache when new search results are loaded
-      _clearHighlightCache();
-
       setState(() {
         _searchResults = results;
         _setTotals(matchCount, verseCount);
@@ -885,7 +809,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                   }
                 });
                 await _saveSearchOptions();
-                _clearHighlightCache();
                 if (_controller.text.trim().isNotEmpty) {
                   _onSearch();
                 }
@@ -904,7 +827,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                   if (_useWholeWord) _useRegex = false;
                 });
                 await _saveSearchOptions();
-                _clearHighlightCache();
                 if (_controller.text.trim().isNotEmpty) {
                   _onSearch();
                 }
@@ -922,7 +844,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                   _caseSensitive = val;
                 });
                 await _saveSearchOptions();
-                _clearHighlightCache();
                 if (_controller.text.trim().isNotEmpty) {
                   _onSearch();
                 }
@@ -1212,7 +1133,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                               _totalMatches = null;
                               _totalVerses = null;
                             });
-                            _clearHighlightCache();
                             await _saveSearchOptions();
 
                             // Clear saved search preferences so they don't restore on screen return
@@ -1428,7 +1348,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                         .shrink();
                                                                   }
 
-                                                                  // Display verse text with search highlighting
+                                                                  // Display verse text without note-search highlighting
                                                                   final verseTextStyle =
                                                                       TextStyle(
                                                                     fontSize: FontSizeAdjustments.getAdjustedSize(
@@ -1447,18 +1367,18 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                             .value,
                                                                   );
 
-                                                                  // Get verse text and apply highlighting
+                                                                  // Parse verse text for normal verse styling only
                                                                   final rawVerseText =
                                                                       verseData[
                                                                               'text']
                                                                           as String;
-                                                                  final highlightedVerseSpan = _getHighlightedVerseSpan(
-                                                                      rawVerseText,
-                                                                      verseTextStyle,
-                                                                      context);
+                                                                  final verseSpan =
+                                                                      _getVerseSpan(
+                                                                          rawVerseText,
+                                                                          verseTextStyle);
 
                                                                   return Text.rich(
-                                                                      highlightedVerseSpan);
+                                                                      verseSpan);
                                                                 },
                                                               ),
                                                               const SizedBox(
