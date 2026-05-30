@@ -702,6 +702,12 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
 
+    - name: Clean build
+      run: flutter clean
+      
+    - name: Get flutter dependencies
+      run: flutter pub get
+
     - name: Setup iOS platform
       run: |
         if [ ! -f "ios/Podfile" ]; then
@@ -714,15 +720,61 @@ jobs:
         
     - name: Set iOS platform version
       run: |
-        if grep -q "platform :ios" ios/Podfile; then
-          CURRENT_VERSION=$(grep "platform :ios" ios/Podfile | sed -n "s/.*'\([0-9.]*\)'.*/\1/p")
-          if [[ "$(printf '%s\n' "15.0" "$CURRENT_VERSION" | sort -V | head -n1)" != "15.0" ]]; then
-            echo "platform :ios, '15.0'" > ios/Podfile.tmp
-            grep -v "platform :ios" ios/Podfile >> ios/Podfile.tmp
-            mv ios/Podfile.tmp ios/Podfile
-          fi
+        if [ ! -f "ios/Podfile" ]; then
+          echo "⚠️ Podfile still missing. Creating Flutter iOS Podfile..."
+          cat > ios/Podfile <<'RUBY'
+        platform :ios, '15.0'
+
+        ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+        project 'Runner', {
+          'Debug' => :debug,
+          'Profile' => :release,
+          'Release' => :release,
+        }
+
+        def flutter_root
+          generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+          unless File.exist?(generated_xcode_build_settings_path)
+            raise "#{generated_xcode_build_settings_path} must exist. Run flutter pub get first."
+          end
+
+          File.foreach(generated_xcode_build_settings_path) do |line|
+            matches = line.match(/FLUTTER_ROOT\=(.*)/)
+            return matches[1].strip if matches
+          end
+          raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}."
+        end
+
+        require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+        flutter_ios_podfile_setup
+
+        target 'Runner' do
+          use_frameworks!
+
+          flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+          target 'RunnerTests' do
+            inherit! :search_paths
+          end
+        end
+
+        post_install do |installer|
+          installer.pods_project.targets.each do |target|
+            flutter_additional_ios_build_settings(target)
+            target.build_configurations.each do |config|
+              config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+            end
+          end
+        end
+        RUBY
+        elif grep -q "^[[:space:]]*#*[[:space:]]*platform :ios" ios/Podfile; then
+          ruby -0pi -e "gsub(/^[[:space:]]*#*[[:space:]]*platform :ios, *['\"][0-9.]+['\"]/, \"platform :ios, '15.0'\")" ios/Podfile
         else
-          sed -i '' '1i platform :ios, '\''15.0'\''' ios/Podfile
+          tmpfile=$(mktemp)
+          printf "platform :ios, '15.0'\n" > "$tmpfile"
+          cat ios/Podfile >> "$tmpfile"
+          mv "$tmpfile" ios/Podfile
         fi
         
     - name: Get iOS dependencies
@@ -731,12 +783,6 @@ jobs:
         pod repo update
         pod install
         cd ..
-
-    - name: Clean build
-      run: flutter clean
-      
-    - name: Get flutter dependencies
-      run: flutter pub get
 
     - name: Build iOS release
       run: |
