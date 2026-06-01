@@ -102,3 +102,7 @@ const double fontSizeAdjustmentMobile = 2.0;
 //
 //const Color uiLightColor = Colors.black;
 //const Color uiDarkColor = Colors.white;
+
+// Toggle to enable/disable Bible screen restrictions (vertical and horizontal limits)
+// Set to false to allow unlimited screens
+const bool enableScreenLimitations = false;

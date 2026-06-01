@@ -1718,7 +1718,9 @@ class _MultiBibleViewState extends State<MultiBibleView>
     final isVertical = isVerticalTile.value;
     final maxScreens =
         isVertical ? maxVerticalScreens.value : maxHorizontalScreens.value;
-    if (_screenLocations.length >= maxScreens) return;
+    if (enableScreenLimitations && _screenLocations.length >= maxScreens) {
+      return;
+    }
     setState(() {
       _screenLocations.add({'book': null, 'chapter': null, 'verse': null});
     });
@@ -1763,7 +1765,9 @@ class _MultiBibleViewState extends State<MultiBibleView>
       return;
     }
 
-    if (newVertical && _screenLocations.length > maxVerticalScreens.value) {
+    if (enableScreenLimitations &&
+        newVertical &&
+        _screenLocations.length > maxVerticalScreens.value) {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
@@ -1817,7 +1821,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
         }
       });
       _saveScreensToPrefs();
-    } else if (!newVertical &&
+    } else if (enableScreenLimitations &&
+        !newVertical &&
         _screenLocations.length > maxHorizontalScreens.value) {
       final confirm = await showDialog<bool>(
         context: context,

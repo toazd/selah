@@ -14,6 +14,7 @@ migrate_working_dir/
 zz_history_events.json
 bible_export_av1769.txt
 bible_export_av1769s.txt
+tsk_import/
 
 # IntelliJ related
 *.iml
