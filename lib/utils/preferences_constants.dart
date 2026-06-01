@@ -49,8 +49,7 @@ Color hexToColor(String hexString) {
 const bool defaultFullscreen = false;
 
 // Only user-configurable through the advanced -> edit preferences dialog
-const int defaultMaxVerticalScreens = 4;
-const int defaultMaxHorizontalScreens = 3;
+const int defaultMaxScreens = 8;
 
 const List<Color> defaultHighlightColors = [
   Colors.yellow,
@@ -102,7 +101,3 @@ const double fontSizeAdjustmentMobile = 2.0;
 //
 //const Color uiLightColor = Colors.black;
 //const Color uiDarkColor = Colors.white;
-
-// Toggle to enable/disable Bible screen restrictions (vertical and horizontal limits)
-// Set to false to allow unlimited screens
-const bool enableScreenLimitations = false;

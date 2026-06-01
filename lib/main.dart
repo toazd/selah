@@ -112,10 +112,7 @@ final ValueNotifier<Color> darkBackgroundColor =
     ValueNotifier(const Color(0xFF000010));
 final ValueNotifier<Color> darkTextColor = ValueNotifier(Colors.white);
 final ValueNotifier<bool> fullscreenNotifier = ValueNotifier(false);
-final ValueNotifier<int> maxVerticalScreens =
-    ValueNotifier(defaultMaxVerticalScreens);
-final ValueNotifier<int> maxHorizontalScreens =
-    ValueNotifier(defaultMaxHorizontalScreens);
+final ValueNotifier<int> maxScreens = ValueNotifier(defaultMaxScreens);
 final ValueNotifier<List<Color>> highlightColorsNotifier =
     ValueNotifier<List<Color>>(defaultHighlightColors);
 final ValueNotifier<Color> lightHighlightColor =
@@ -555,14 +552,8 @@ void main() async {
 
   await _loadAllPrefs();
   final prefs = await SharedPreferences.getInstance();
-  // Only save max screens prefs if not mobile
-  if (!(!kIsWeb && (Platform.isAndroid || Platform.isIOS))) {
-    if (!prefs.containsKey('maxVerticalScreens')) {
-      await prefs.setInt('maxVerticalScreens', maxVerticalScreens.value);
-    }
-    if (!prefs.containsKey('maxHorizontalScreens')) {
-      await prefs.setInt('maxHorizontalScreens', maxHorizontalScreens.value);
-    }
+  if (!prefs.containsKey('maxScreens')) {
+    await prefs.setInt('maxScreens', maxScreens.value);
   }
 
   // Initialize time-based theme switching if needed
@@ -707,22 +698,11 @@ Future<void> _loadAllPrefs() async {
     fullscreenNotifier.value = prefs.getBool('fullscreen') ?? defaultFullscreen;
 
     // Max screens
-    final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-    final int defaultVertical = isMobile ? 1 : defaultMaxVerticalScreens;
-    final int defaultHorizontal = isMobile ? 3 : defaultMaxHorizontalScreens;
-
-    // Load and validate max screens with range checking
-    int maxVertical = prefs.getInt('maxVerticalScreens') ?? defaultVertical;
-    if (maxVertical < 1 || maxVertical > 10) maxVertical = defaultVertical;
-
-    int maxHorizontal =
-        prefs.getInt('maxHorizontalScreens') ?? defaultHorizontal;
-    if (maxHorizontal < 1 || maxHorizontal > 10) {
-      maxHorizontal = defaultHorizontal;
+    int maxScreensValue = prefs.getInt('maxScreens') ?? defaultMaxScreens;
+    if (maxScreensValue < 1 || maxScreensValue > 10) {
+      maxScreensValue = defaultMaxScreens;
     }
-
-    maxVerticalScreens.value = maxVertical;
-    maxHorizontalScreens.value = maxHorizontal;
+    maxScreens.value = maxScreensValue;
 
     // Highlight colors (list of int color values)
     final highlightColorsRaw = prefs.getStringList('highlightColors');
@@ -898,8 +878,7 @@ Future<void> _saveAllCurrentPrefs() async {
       prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
       prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
-      prefs.setInt('maxVerticalScreens', maxVerticalScreens.value),
-      prefs.setInt('maxHorizontalScreens', maxHorizontalScreens.value),
+      prefs.setInt('maxScreens', maxScreens.value),
       prefs.setStringList(
         'highlightColors',
         highlightColorsNotifier.value
@@ -1652,13 +1631,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
     }
   }
 
-  bool _shouldForceHorizontal() {
-    if (_screenLocations.length <= 1) return false;
-    if (!mounted) return true; // assume narrow if not mounted
-    final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth <= 800.0;
-  }
-
   Future<void> _loadScreensFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final screensJson = prefs.getString('screens');
@@ -1681,13 +1653,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
       _screenLocations = [
         {'book': null, 'chapter': null, 'verse': null},
       ];
-    }
-    // Enforce horizontal mode if screen is narrow and more than one screen is present
-    if (_shouldForceHorizontal()) {
-      if (isVerticalTile.value) {
-        isVerticalTile.value = false;
-        _saveTileState();
-      }
     }
     if (mounted) {
       setState(() {}); // only call setState if mounted
@@ -1715,23 +1680,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
   }
 
   void _addView() {
-    final isVertical = isVerticalTile.value;
-    final maxScreens =
-        isVertical ? maxVerticalScreens.value : maxHorizontalScreens.value;
-    if (enableScreenLimitations && _screenLocations.length >= maxScreens) {
-      return;
-    }
+    if (_screenLocations.length >= maxScreens.value) return;
     setState(() {
       _screenLocations.add({'book': null, 'chapter': null, 'verse': null});
     });
     _saveScreensToPrefs();
-    // If narrow screen and more than one screen, switch to horizontal
-    if (_shouldForceHorizontal() && isVerticalTile.value) {
-      isVerticalTile.value = false;
-      _saveTileState();
-      // Optional feedback
-      showStyledSnackBar(context, 'Vertical mode requires a wider screen');
-    }
   }
 
   void _removeView(int index) {
@@ -1759,125 +1712,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
     final wasVertical = isVerticalTile.value;
     final newVertical = !wasVertical;
 
-    // Block switching to vertical if narrow screen and more than one screen exists
-    if (newVertical && _shouldForceHorizontal()) {
-      showStyledSnackBar(context, 'Vertical mode requires a wider screen');
-      return;
-    }
-
-    if (enableScreenLimitations &&
-        newVertical &&
-        _screenLocations.length > maxVerticalScreens.value) {
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          constraints: const BoxConstraints(maxWidth: 400),
-          title: Text(
-            'Warning',
-            style: TextStyle(
-              fontSize: uiFontSize,
-              fontFamily: uiFontFamily,
-              color: Colors.red,
-            ),
-          ),
-          content: Text(
-            'Switching to vertical mode will remove the last Bible screen to enforce the maximum of ${maxVerticalScreens.value}. Are you sure?',
-            style: TextStyle(
-              fontSize: uiFontSize,
-              fontFamily: uiFontFamily,
-              color: getAdaptiveTextColor(context),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'No',
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: getAdaptiveTextColor(context),
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            TextButton(
-              child: Text(
-                'Yes',
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: Colors.red,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        ),
-      );
-      if (confirm != true) return;
-      setState(() {
-        while (_screenLocations.length > maxVerticalScreens.value) {
-          _screenLocations.removeLast();
-        }
-      });
-      _saveScreensToPrefs();
-    } else if (enableScreenLimitations &&
-        !newVertical &&
-        _screenLocations.length > maxHorizontalScreens.value) {
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          constraints: const BoxConstraints(maxWidth: 400),
-          title: Text(
-            'Warning',
-            style: TextStyle(
-              fontSize: uiFontSize,
-              fontFamily: uiFontFamily,
-              color: Colors.red,
-            ),
-          ),
-          content: Text(
-            'Switching to horizontal mode will remove the last Bible screen to enforce the maximum of ${maxHorizontalScreens.value}. Are you sure?',
-            style: TextStyle(
-              fontSize: uiFontSize,
-              fontFamily: uiFontFamily,
-              color: getAdaptiveTextColor(context),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'No',
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: getAdaptiveTextColor(context),
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            TextButton(
-              child: Text(
-                'Yes',
-                style: TextStyle(
-                  fontSize: uiFontSize,
-                  fontFamily: uiFontFamily,
-                  color: Colors.red,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-          ],
-        ),
-      );
-      if (confirm != true) return;
-      setState(() {
-        while (_screenLocations.length > maxHorizontalScreens.value) {
-          _screenLocations.removeLast();
-        }
-      });
-      _saveScreensToPrefs();
-    }
     isVerticalTile.value = newVertical;
     _saveTileState();
   }
@@ -4913,12 +4747,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
             }
           }
         }
-        // Reload max screens after saving (platform-specific defaults)
-        final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-        maxVerticalScreens.value =
-            prefs.getInt('maxVerticalScreens') ?? (isMobile ? 1 : 4);
-        maxHorizontalScreens.value =
-            prefs.getInt('maxHorizontalScreens') ?? (isMobile ? 3 : 4);
+        // Reload max screens after saving
+        maxScreens.value = prefs.getInt('maxScreens') ?? defaultMaxScreens;
       } catch (e) {
         // Guard: use context.mounted for the provided BuildContext
         if (!context.mounted) return;
