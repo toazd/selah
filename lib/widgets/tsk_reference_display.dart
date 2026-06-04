@@ -27,8 +27,10 @@ class TskReferenceDisplay extends StatefulWidget {
 
 class _TskReferenceDisplayState extends State<TskReferenceDisplay> {
   static const int _maxCachedEntries = 256;
+  static const int _maxRecognizerPoolSize = 1000;
   static final LinkedHashMap<String, List<_TskSpecToken>> _tokenCache =
       LinkedHashMap<String, List<_TskSpecToken>>();
+  static final List<TapGestureRecognizer> _recognizerPool = [];
 
   late List<_TskSpecToken> _tokens;
   final List<TapGestureRecognizer> _recognizers = [];
@@ -59,16 +61,26 @@ class _TskReferenceDisplayState extends State<TskReferenceDisplay> {
     _tokens = _getCachedTokens(widget.noteText);
 
     for (final token in _tokens) {
-      _recognizers.add(
-        TapGestureRecognizer()
-          ..onTap = () => widget.onLinkTap?.call(token.link, token.displayText),
-      );
+      // Reuse recognizer from pool if available, otherwise create new
+      final recognizer = _recognizerPool.isNotEmpty
+          ? _recognizerPool.removeLast()
+          : TapGestureRecognizer();
+
+      recognizer.onTap =
+          () => widget.onLinkTap?.call(token.link, token.displayText);
+      _recognizers.add(recognizer);
     }
   }
 
   void _disposeRecognizers() {
     for (final recognizer in _recognizers) {
-      recognizer.dispose();
+      recognizer.onTap = null;
+      // Return recognizer to pool instead of disposing
+      if (_recognizerPool.length < _maxRecognizerPoolSize) {
+        _recognizerPool.add(recognizer);
+      } else {
+        recognizer.dispose();
+      }
     }
     _recognizers.clear();
   }
@@ -148,14 +160,11 @@ class _TskReferenceDisplayState extends State<TskReferenceDisplay> {
 
   @override
   Widget build(BuildContext context) {
+    // Outer AnimatedBuilder for layout-affecting changes (font size, family)
     return AnimatedBuilder(
       animation: Listenable.merge([
         noteFontFamilyNotifier,
         fontSizeNotifier,
-        lightTextColor,
-        darkTextColor,
-        lightVerseReferenceColor,
-        darkVerseReferenceColor,
       ]),
       builder: (context, child) {
         if (_tokens.isEmpty) {
@@ -164,43 +173,55 @@ class _TskReferenceDisplayState extends State<TskReferenceDisplay> {
 
         final fontFamily = noteFontFamilyNotifier.value;
         final baseStyle = _effectiveTskStyle(fontFamily);
-        final linkStyle = baseStyle.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? darkVerseReferenceColor.value
-              : lightVerseReferenceColor.value,
-          decoration: TextDecoration.none,
-        );
         final strutStyle = StrutStyle.fromTextStyle(
           baseStyle,
           forceStrutHeight: true,
         );
 
-        int linkIndex = 0;
-        final children = <InlineSpan>[];
+        // Inner AnimatedBuilder for color-only changes
+        return AnimatedBuilder(
+          animation: Listenable.merge([
+            lightTextColor,
+            darkTextColor,
+            lightVerseReferenceColor,
+            darkVerseReferenceColor,
+          ]),
+          builder: (context, child) {
+            final linkStyle = baseStyle.copyWith(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? darkVerseReferenceColor.value
+                  : lightVerseReferenceColor.value,
+              decoration: TextDecoration.none,
+            );
 
-        for (int i = 0; i < _tokens.length; i++) {
-          final token = _tokens[i];
-          final recognizer = _recognizers[linkIndex++];
+            int linkIndex = 0;
+            final children = <InlineSpan>[];
 
-          children.add(
-            TextSpan(
-              text: token.displayText,
-              style: linkStyle,
-              recognizer: recognizer,
-              mouseCursor: SystemMouseCursors.click,
-            ),
-          );
+            for (int i = 0; i < _tokens.length; i++) {
+              final token = _tokens[i];
+              final recognizer = _recognizers[linkIndex++];
 
-          if (i < _tokens.length - 1) {
-            children.add(TextSpan(text: ', ', style: baseStyle));
-          }
-        }
+              children.add(
+                TextSpan(
+                  text: token.displayText,
+                  style: linkStyle,
+                  recognizer: recognizer,
+                  mouseCursor: SystemMouseCursors.click,
+                ),
+              );
 
-        return RichText(
-          textScaler: MediaQuery.textScalerOf(context),
-          softWrap: true,
-          strutStyle: strutStyle,
-          text: TextSpan(style: baseStyle, children: children),
+              if (i < _tokens.length - 1) {
+                children.add(TextSpan(text: ', ', style: baseStyle));
+              }
+            }
+
+            return RichText(
+              textScaler: MediaQuery.textScalerOf(context),
+              softWrap: true,
+              strutStyle: strutStyle,
+              text: TextSpan(style: baseStyle, children: children),
+            );
+          },
         );
       },
     );

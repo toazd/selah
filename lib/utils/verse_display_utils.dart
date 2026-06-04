@@ -8,6 +8,7 @@ import '../widgets/quill_note_display.dart';
 import '../widgets/tsk_reference_display.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
+import '../models/verse_display_data.dart';
 
 // const _verseTextHeightBehavior = TextHeightBehavior(
 //   applyHeightToFirstAscent: true, //false,
@@ -494,6 +495,191 @@ double _calculateSingleVerseNumberWidth(
     //textHeightBehavior: _verseTextHeightBehavior,
   )..layout();
   return textPainter.size.width; // + 10.0;
+}
+
+/// Builds a single verse widget from VerseDisplayData
+/// Used by ListView.builder to lazily render verses
+Widget buildVerseWidgetFromData(
+  BuildContext context,
+  VerseDisplayData data,
+  Function(int)? onVerseTap,
+  Function(int)? onVerseLongPress,
+  Function(String, String?)? onLinkTap,
+  Function(int, String?)? onNoteIconTap,
+  Function(int, String?)? onNoteEditTap,
+  Color lightHighlightTextColor,
+  Color darkHighlightTextColor,
+) {
+  final widgets = <Widget>[];
+
+  // Add paragraph break if needed
+  if (data.addParagraphBreak) {
+    widgets.add(const SizedBox(height: 16));
+  }
+
+  // Build the verse display widget
+  final verseWidget = buildVerseDisplayWidget(
+    context: context,
+    verseNumber: data.verseNumber,
+    rawVerseText: data.rawVerseText,
+    baseTextStyle: data.textStyle,
+    backgroundColor: data.backgroundColor,
+    noteForVerse: data.noteForVerse,
+    highlightsForVerse: data.highlightsForVerse,
+    showNotesInline: data.showNotesInline,
+    fontFamily: data.fontFamily,
+    lightModeTextColor: lightHighlightTextColor,
+    darkModeTextColor: darkHighlightTextColor,
+    onVerseTap: onVerseTap,
+    onVerseLongPress: onVerseLongPress,
+    onLinkTap: onLinkTap,
+    verseKey: data.verseKey,
+    onNoteIconTap: onNoteIconTap,
+    verseNumberWidth: data.verseNumberWidth,
+    customBackgroundColor: data.customBackgroundColor,
+  );
+
+  widgets.add(
+    Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        verseWidget,
+      ],
+    ),
+  );
+
+  // If enabled, display TSK references below the verse and above notes.
+  if (data.showTskReferences && data.tskText.isNotEmpty) {
+    widgets.add(
+      Container(
+        margin: EdgeInsets.all(0.0),
+        padding:
+            EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
+        child: TskReferenceDisplay(
+          noteText: data.tskText,
+          onLinkTap: onLinkTap,
+        ),
+      ),
+    );
+  }
+
+  // If showNotesInline, display note content below the verse
+  if (data.showNotesInline && data.noteText.isNotEmpty) {
+    widgets.add(
+      Container(
+        margin: EdgeInsets.all(0.0),
+        padding:
+            EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
+        child: QuillNoteDisplay(
+          noteText: data.noteText,
+          onLinkTap: onLinkTap,
+          onTap: onNoteEditTap != null
+              ? () => onNoteEditTap(data.verseNumber, data.noteText)
+              : null,
+        ),
+      ),
+    );
+  }
+
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: widgets,
+  );
+}
+
+/// Builds a list of verse data with common display logic
+/// Returns data instead of widgets, allowing ListView.builder to lazily render verses
+List<VerseDisplayData> buildVerseDataList({
+  required BuildContext context,
+  required List<Map<String, dynamic>> verses,
+  required Map<int, GlobalKey> verseKeys,
+  required Map<int, Map<String, dynamic>> notes,
+  required Map<int, List<Map<String, dynamic>>> highlights,
+  required Color textColor,
+  required Color verseNumberColor,
+  required Color backgroundColor,
+  required double lineHeight,
+  required bool showNotesInline,
+  bool showTskReferences = false,
+  Map<int, String> tskReferences = const {},
+  required String fontFamily,
+  required Color lightHighlightTextColor,
+  required Color darkHighlightTextColor,
+  List<int> highlightedVerses = const [],
+  Color highlightedVerseBackgroundColor = Colors.transparent,
+}) {
+  final dataList = <VerseDisplayData>[];
+  bool pilcrowSeen = false;
+
+  // Different styles whether it is the verse number or the text itself
+  final numStyle = TextStyle(
+    fontSize:
+        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+    fontFamily: fontFamily,
+    color: verseNumberColor,
+    fontWeight: FontWeight.normal,
+    height: lineHeight,
+  );
+  final textStyle = TextStyle(
+    fontSize:
+        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+    fontFamily: fontFamily,
+    color: textColor,
+    height: lineHeight,
+  );
+
+  // Calculate dynamic width for verse number column based on current chapter's verses
+  final verseNumberWidth = calculateVerseNumberWidth(context, verses, numStyle);
+
+  for (final verse in verses) {
+    final vn = toInt(verse['verse'], orElse: 0);
+    if (vn <= 0) continue;
+
+    String rawVerseText = verse['text'];
+    final hasPilcrow = rawVerseText.contains('¶');
+
+    // Add paragraph break before verse if it's a new section (has a pilcrow)
+    final addParagraphBreak = (pilcrowSeen && hasPilcrow);
+    if (hasPilcrow && !pilcrowSeen) {
+      pilcrowSeen = true;
+    }
+
+    // Get note text if available
+    final noteText = (showNotesInline && notes.containsKey(vn))
+        ? (notes[vn]!['note_text'] as String? ?? '')
+        : '';
+
+    // Get TSK text if available
+    final rawTskText = (tskReferences[vn] ?? '').trim();
+
+    final customBgColor =
+        highlightedVerses.contains(vn) ? highlightedVerseBackgroundColor : null;
+
+    dataList.add(
+      VerseDisplayData(
+        verseNumber: vn,
+        rawVerseText: rawVerseText,
+        noteForVerse: notes[vn] ?? {},
+        highlightsForVerse: highlights[vn] ?? [],
+        fontFamily: fontFamily,
+        textStyle: textStyle,
+        numStyle: numStyle,
+        verseNumberWidth: verseNumberWidth,
+        backgroundColor: backgroundColor,
+        showNotesInline: showNotesInline,
+        showTskReferences: showTskReferences,
+        tskText: rawTskText,
+        noteText: noteText,
+        addParagraphBreak: addParagraphBreak,
+        customBgColor: customBgColor != null,
+        customBackgroundColor: customBgColor,
+        verseKey: verseKeys[vn],
+      ),
+    );
+  }
+
+  return dataList;
 }
 
 /// Builds a list of verse widgets with common display logic

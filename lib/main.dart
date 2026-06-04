@@ -511,7 +511,8 @@ void main() async {
   try {
     await Supabase.initialize(
       url: SupabaseConfig.supabaseUrl,
-      anonKey: SupabaseConfig.supabaseAnonKey,
+      //anonKey: SupabaseConfig.supabaseAnonKey,
+      publishableKey: SupabaseConfig.supabaseAnonKey,
     );
   } catch (e) {
     ErrorHandler.logError(

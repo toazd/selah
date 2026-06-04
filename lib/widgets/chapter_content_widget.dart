@@ -132,6 +132,25 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final tskReferencesForChapter = tskData[widget.book]?[widget.chapter];
 
+    // Build verse data list (light-weight data, not widgets)
+    final verseDataList = buildVerseDataList(
+      context: context,
+      verses: widget.verses,
+      verseKeys: _verseKeys,
+      notes: widget.notes,
+      highlights: widget.highlights,
+      textColor: widget.textColor,
+      verseNumberColor: widget.verseNumberColor,
+      backgroundColor: widget.backgroundColor,
+      lineHeight: lineHeightNotifier.value,
+      showNotesInline: widget.showNotesInline,
+      showTskReferences: widget.showTskReferences,
+      tskReferences: tskReferencesForChapter ?? const {},
+      fontFamily: fontFamilyNotifier.value,
+      lightHighlightTextColor: lightTextColor.value,
+      darkHighlightTextColor: darkTextColor.value,
+    );
+
     return RawScrollbar(
       thumbColor: isDark
           ? darkPrimaryColor.value.withValues(alpha: 0.3)
@@ -143,89 +162,116 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
       controller: _scrollController,
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: SingleChildScrollView(
+        child: CustomScrollView(
           controller: _scrollController,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 0.0,
-              top: 8.0,
-              bottom:
-                  300.0, // Large gap at bottom for reading while laying down
-              right: 16.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Show book title on Chapter 1, or for Psalms (superscriptions)
-                if (widget.bookTitle != null &&
-                    (widget.chapter == 1 || widget.book == 'Psa'))
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Center(
-                      child: Text(
-                        widget.bookTitle!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: FontSizeAdjustments.getAdjustedSize(
-                            fontFamilyNotifier.value,
-                            fontSizeNotifier.value + 1,
+          slivers: [
+            // Title sliver
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Show book title on Chapter 1, or for Psalms (superscriptions)
+                  if (widget.bookTitle != null &&
+                      (widget.chapter == 1 || widget.book == 'Psa'))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Center(
+                        child: Text(
+                          widget.bookTitle!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: FontSizeAdjustments.getAdjustedSize(
+                              fontFamilyNotifier.value,
+                              fontSizeNotifier.value + 1,
+                            ),
+                            color: isDark
+                                ? darkTextColor.value
+                                : lightTextColor.value,
                           ),
-                          color: isDark
-                              ? darkTextColor.value
-                              : lightTextColor.value,
                         ),
                       ),
                     ),
-                  ),
-                // Verse list
-                ...buildVerseListWidget(
-                  context: context,
-                  verses: widget.verses,
-                  verseKeys: _verseKeys,
-                  notes: widget.notes,
-                  highlights: widget.highlights,
-                  textColor: widget.textColor,
-                  verseNumberColor: widget.verseNumberColor,
-                  backgroundColor: widget.backgroundColor,
-                  lineHeight: lineHeightNotifier.value,
-                  showNotesInline: widget.showNotesInline,
-                  showTskReferences: widget.showTskReferences,
-                  tskReferences: tskReferencesForChapter ?? const {},
-                  fontFamily: fontFamilyNotifier.value,
-                  lightHighlightTextColor: lightTextColor.value,
-                  darkHighlightTextColor: darkTextColor.value,
-                  onVerseTap: widget.onVerseTap,
-                  onVerseLongPress: widget.onVerseLongPress,
-                  onLinkTap: widget.onLinkTap,
-                  lightVerseReferenceColor: lightVerseReferenceColor,
-                  darkVerseReferenceColor: darkVerseReferenceColor,
-                  onNoteIconTap: widget.onNoteIconTap,
-                  onNoteEditTap: widget.onNoteEditTap,
-                ),
-                // Show colophon only on the last chapter
-                if (widget.bookColophon != null &&
-                    widget.bookColophon!.isNotEmpty &&
-                    widget.isLastChapter)
                   Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      widget.bookColophon!,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: FontSizeAdjustments.getAdjustedSize(
-                          fontFamilyNotifier.value,
-                          fontSizeNotifier.value - 1,
-                        ),
-                        color:
-                            isDark ? darkTextColor.value : lightTextColor.value,
-                      ),
+                    padding: EdgeInsets.only(
+                      left: 0.0,
+                      top: 8.0,
+                      right: 16.0,
                     ),
+                    child: SizedBox.shrink(),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
+            // Verses sliver with ListView.builder for lazy loading
+            SliverPadding(
+              padding: EdgeInsets.only(
+                left: 0.0,
+                right: 16.0,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final verseData = verseDataList[index];
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        top: 0.0,
+                        bottom: 0.0,
+                      ),
+                      child: buildVerseWidgetFromData(
+                        context,
+                        verseData,
+                        widget.onVerseTap,
+                        widget.onVerseLongPress,
+                        widget.onLinkTap,
+                        widget.onNoteIconTap,
+                        widget.onNoteEditTap,
+                        lightTextColor.value,
+                        darkTextColor.value,
+                      ),
+                    );
+                  },
+                  childCount: verseDataList.length,
+                ),
+              ),
+            ),
+            // Footer sliver for colophon
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 0.0,
+                  top: 8.0,
+                  bottom: 300.0,
+                  right: 16.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.bookColophon != null &&
+                        widget.bookColophon!.isNotEmpty &&
+                        widget.isLastChapter)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Text(
+                          widget.bookColophon!,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontSize: FontSizeAdjustments.getAdjustedSize(
+                              fontFamilyNotifier.value,
+                              fontSizeNotifier.value - 1,
+                            ),
+                            color: isDark
+                                ? darkTextColor.value
+                                : lightTextColor.value,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
