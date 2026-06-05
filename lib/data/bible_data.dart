@@ -2635,7 +2635,7 @@ const Map<String, Map<int, Map<int, String>>> bibleData = {
       29: 'For Moses had said, Consecrate yourselves to day to the LORD, even every man upon his son, and upon his brother; that he may bestow upon you a blessing this day.',
       30: '¶ And it came to pass on the morrow, that Moses said unto the people, Ye have sinned a great sin: and now I will go up unto the LORD; peradventure I shall make an atonement for your sin.',
       31: 'And Moses returned unto the LORD, and said, Oh, this people have sinned a great sin, and have made them gods of gold.',
-      32: 'Yet now, if thou wilt forgive their sin--; and if not, blot me, I pray thee, out of thy book which thou hast written.',
+      32: 'Yet now, if thou wilt forgive their sin—; and if not, blot me, I pray thee, out of thy book which thou hast written.',
       33: 'And the LORD said unto Moses, Whosoever hath sinned against me, him will I blot out of my book.',
       34: 'Therefore now go, lead the people unto the place of which I have spoken unto thee: behold, mine Angel shall go before thee: nevertheless in the day when I visit I will visit their sin upon them.',
       35: 'And the LORD plagued the people, because they made the calf, which Aaron made.',
