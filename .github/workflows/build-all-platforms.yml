@@ -1,6 +1,7 @@
 name: Build All Platforms
 env:
   FLUTTER_VERSION: '3.44.1'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 on:
   workflow_dispatch:
     inputs:
@@ -18,7 +19,7 @@ jobs:
       app_version: ${{ steps.extract.outputs.app_version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       
       - name: Extract app version
         id: extract
@@ -36,10 +37,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.flutter-cache
@@ -285,13 +286,13 @@ jobs:
         ls -lah "$OUTPUT_DIR"
 
     - name: Upload Linux packages artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: linux-packages
         path: build/packages
 
     - name: Upload Linux to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -342,7 +343,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Download Linux package artifacts
       uses: actions/download-artifact@v4
@@ -517,7 +518,7 @@ jobs:
         ls -lah build/packages
 
     - name: Upload Snap to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -535,10 +536,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.flutter-cache
@@ -580,7 +581,7 @@ jobs:
         ls -lah build/artifacts/
 
     - name: Upload Web to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -598,10 +599,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.flutter-cache
@@ -666,7 +667,7 @@ jobs:
         ls -lah build/artifacts/
 
     - name: Upload Android to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -684,10 +685,10 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.flutter-cache
@@ -811,7 +812,7 @@ jobs:
         cd ../..
 
     - name: Upload iOS to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -829,10 +830,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.flutter-cache
@@ -892,7 +893,7 @@ jobs:
         ls -lah "$OUTPUT_DIR"
 
     - name: Upload macOS to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
@@ -910,7 +911,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -961,7 +962,7 @@ jobs:
         if errorlevel 1 exit /b 1
 
     - name: Upload Windows to Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v${{ needs.extract-version.outputs.app_version }}-build.${{ github.run_number }}
