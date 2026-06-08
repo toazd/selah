@@ -11,7 +11,8 @@ const double defaultHighlightAlpha = 0.90; // Not user-configurable
 
 // Color defaults in hex
 const String defaultLightPrimaryColorHex = '#FF607D8B';
-const String defaultLightBackgroundColorHex = '#FFFFF7CB';
+const String defaultLightBackgroundColorHex =
+    '#FFFFFFE3'; //'#FFFCFAEB'; //'#FFFFF7CB';
 const String defaultLightTextColorHex = '#FF000000';
 const String defaultDarkPrimaryColorHex = '#FF607D8B';
 const String defaultDarkBackgroundColorHex = '#FF242424'; //'#FF000010';

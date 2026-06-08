@@ -1214,10 +1214,10 @@ packages:
     dependency: transitive
     description:
       name: storage_client
-      sha256: c108351e9811f4c47afce1147ed3daef7f7647d095884101af16ad79bb2a8e9f
+      sha256: "6e3ba029fd6321541434a00ed0f1ae78af29ee0788bcca577d467f93a2578d68"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "2.5.5"
   stream_channel:
     dependency: transitive
     description:
@@ -1238,18 +1238,18 @@ packages:
     dependency: transitive
     description:
       name: supabase
-      sha256: "3eeddc8fd654360aa4105e6d28ef5d027687bb40bfcffd9b1f2814640862bc91"
+      sha256: c18ecf2663bd5269c4097353690e286568d1083ca910a394ef308c74879a52e4
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.0"
+    version: "2.12.1"
   supabase_flutter:
     dependency: "direct main"
     description:
       name: supabase_flutter
-      sha256: cc1646a1be4c2c204ec078141e44b352228b72a7074124b756a712b0762398ec
+      sha256: de3e8c1e9e47de9c28e371f7c5306709e0110eb9910281649760fc9d6992587d
       url: "https://pub.dev"
     source: hosted
-    version: "2.14.0"
+    version: "2.14.1"
   synchronized:
     dependency: transitive
     description:
