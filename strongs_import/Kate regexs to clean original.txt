@@ -1,0 +1,14 @@
+\r\n
+(<br>|<p>)<i>Other Resources:.*?(<br>|</p>) (remove other resources sections)
+
+
+
+find: <a href=\\"stng\/[GH]\d{1,4}\\">([GH]\d{1,4}<\/a>)
+replace: \1
+
+
+<a href=\\"stng\/[GH]\d{1,4}\\">
+<a href=\\"dict\/.*?</a> (not needed if other resources section is removed)
+
+</a>
+replace </p><p> with <br>

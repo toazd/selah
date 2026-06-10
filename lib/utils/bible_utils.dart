@@ -45,11 +45,11 @@ Future<void> handleVerseLink(
 
   // Debug mode only prints to diagnose problems with migration from
   // the old verse: to the new v: link format
-  if (kDebugMode) {
-    debugPrint(link);
-    debugPrint("scheme: ${uri.scheme}");
-    debugPrint("host: ${uri.host}");
-  }
+  // if (kDebugMode) {
+  //   debugPrint(link);
+  //   debugPrint("scheme: ${uri.scheme}");
+  //   debugPrint("host: ${uri.host}");
+  // }
   if (uri.scheme == 'v' || uri.host.isNotEmpty) {
     final parts = uri.pathSegments;
     if (parts.length >= 2) {

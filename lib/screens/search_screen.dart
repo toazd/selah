@@ -23,6 +23,7 @@ import 'dart:async';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/error_handler.dart';
+import 'strongs_search_screen.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -1814,6 +1815,7 @@ class _SearchScreenState extends State<SearchScreen>
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               semanticLabel: 'Show Help Dialog',
             ),
+            tooltip: 'Help',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: _showHelpDialog,
           ),
@@ -1824,6 +1826,7 @@ class _SearchScreenState extends State<SearchScreen>
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               semanticLabel: 'Show Search History Dialog',
             ),
+            tooltip: 'Search History',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: () {
               showDialog(
@@ -1856,11 +1859,38 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           IconButton(
             icon: Icon(
+              Icons.manage_search,
+              size: 32,
+              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              semanticLabel: 'Open Strongs Search',
+            ),
+            tooltip: 'Strongs Search',
+            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+            onPressed: () async {
+              final strongsResult = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StrongsSearchScreen(
+                    sourceScreenIndex: widget.sourceScreenIndex,
+                  ),
+                ),
+              );
+
+              if (strongsResult != null &&
+                  strongsResult.containsKey('verseLocation') &&
+                  context.mounted) {
+                Navigator.pop(context, strongsResult);
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(
               Icons.menu,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               semanticLabel: 'Show Search Options Menu',
             ),
+            tooltip: 'Search Options',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
           ),

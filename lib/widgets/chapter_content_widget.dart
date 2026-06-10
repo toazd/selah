@@ -203,16 +203,18 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                 ],
               ),
             ),
-            // Verses sliver with ListView.builder for lazy loading
+            // Keep the chapter's verse widgets mounted so key-based verse
+            // navigation can scroll to off-screen verses reliably.
             SliverPadding(
               padding: EdgeInsets.only(
                 left: 0.0,
                 right: 16.0,
               ),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final verseData = verseDataList[index];
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: verseDataList.map((verseData) {
                     return Padding(
                       padding: EdgeInsets.only(
                         top: 0.0,
@@ -230,8 +232,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                         darkTextColor.value,
                       ),
                     );
-                  },
-                  childCount: verseDataList.length,
+                  }).toList(),
                 ),
               ),
             ),

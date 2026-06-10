@@ -1,8 +1,1 @@
 # files that cline will not have access to
-
-# the bible data is excluded because everytime the LLM
-# tries to access this file it tries to read the entire
-# contents and because it is a large file it causes
-# an API request error after a long delay.
-lib/data/bible_data.dart
-bible_data.dart

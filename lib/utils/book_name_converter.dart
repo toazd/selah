@@ -173,6 +173,29 @@ class BookNameConverter {
     return returnValue ?? shortName;
   }
 
+  /// Normalizes any book name (short or long) to the short name key used in the database.
+  /// Supports both short names (e.g., 'deu', '1co') and long names (e.g., 'deuteronomy', '1 corinthians').
+  static String normalizeBookName(String bookName) {
+    if (bookName.isEmpty) return bookName;
+
+    // Try normalizing as short name first
+    final normalizedShort = normalizeShortName(bookName);
+    if (_shortToLong.containsKey(normalizedShort)) {
+      return normalizedShort;
+    }
+
+    // Try normalizing as long name
+    final normalizedLong = normalizeLongName(bookName);
+    final shortFromLong = _longToShort[normalizedLong];
+    if (shortFromLong != null) {
+      return shortFromLong;
+    }
+
+    // If neither worked, return the short normalization attempt
+    // This will still fail validation but gives the best effort
+    return normalizedShort;
+  }
+
   /// Converts a full book name (e.g., 'Genesis', '1 Corinthians') back to its short name.
   static String longNameToShortName(String longName) {
     // final stackTrace = StackTrace.current;
