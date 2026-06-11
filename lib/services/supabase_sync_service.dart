@@ -2675,7 +2675,8 @@ class SupabaseSyncService {
               continue;
             }
 
-            await _repairLocalRecordUuid(type, currentLocalRecord, action.uuid!);
+            await _repairLocalRecordUuid(
+                type, currentLocalRecord, action.uuid!);
             hasChanges = true;
             if (kDebugMode) {
               debugPrint(
@@ -3251,8 +3252,8 @@ class SupabaseSyncService {
                   ? 'update'
                   : 'create',
               data: note,
-              timestamp:
-                  DateTime.fromMillisecondsSinceEpoch(note['created_at'] as int),
+              timestamp: DateTime.fromMillisecondsSinceEpoch(
+                  note['created_at'] as int),
               userId: _currentUserId,
             ));
           }
@@ -3485,8 +3486,8 @@ class SupabaseSyncService {
                 (note) => !createdAtWithResponse.contains(note['created_at']))
             .map((note) => note['created_at'] as int));
       } catch (e) {
-        failedCreatedAt.addAll(
-            notesWithoutUuids.map((note) => note['created_at'] as int));
+        failedCreatedAt
+            .addAll(notesWithoutUuids.map((note) => note['created_at'] as int));
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadNotes exception (insert new notes)',
@@ -4068,7 +4069,8 @@ class SupabaseSyncService {
 
       // Query and download notes updated since last sync
       if (notesEnabled) {
-        final failedRecoveryActions = await _recoverMissingOrStaleRecords('note');
+        final failedRecoveryActions =
+            await _recoverMissingOrStaleRecords('note');
         final lastSyncMs = _lastNotesSyncSaved?.millisecondsSinceEpoch ?? 0;
         final snapshot = await _fetchRemoteRows(
           table: 'notes',

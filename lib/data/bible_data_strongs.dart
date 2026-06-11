@@ -17227,83 +17227,160 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       97: 'MEM. O how love I{H157} thy law{H8451}! it is my meditation{H7881} all the day{H3117}.',
       98: 'Thou through thy commandments{H4687} hast made me wiser{H2449} than mine enemies{H341}: for they are ever{H5769} with me.',
       99: 'I have more understanding{H7919} than all my teachers{H3925}: for thy testimonies{H5715} are my meditation{H7881}.',
-      100: 'I understand{H995} more than the ancients{H2205}, because I keep{H5341} thy precepts{H6490}.',
-      101: 'I have refrained{H3607} my feet{H7272} from every evil{H7451} way{H734}, that I might keep{H8104} thy word{H1697}.',
-      102: 'I have not departed{H5493} from thy judgments{H4941}: for thou hast taught{H3384} me.',
-      103: 'How sweet{H4452} are thy words{H565} unto my taste{H2441}! yea, sweeter than honey{H1706} to my mouth{H6310}!',
-      104: 'Through thy precepts{H6490} I get understanding{H995}: therefore I hate{H8130} every false{H8267} way{H734}.',
-      105: 'NUN. Thy word{H1697} is a lamp{H5216} unto my feet{H7272}, and a light{H216} unto my path{H5410}.',
-      106: 'I have sworn{H7650}, and I will perform{H6965} it, that I will keep{H8104} thy righteous{H6664} judgments{H4941}.',
-      107: 'I am afflicted{H6031} very much{H3966}: quicken{H2421} me, O LORD{H3068}, according unto thy word{H1697}.',
-      108: 'Accept{H7521}, I beseech thee, the freewill offerings{H5071} of my mouth{H6310}, O LORD{H3068}, and teach{H3925} me thy judgments{H4941}.',
-      109: 'My soul{H5315} is continually{H8548} in my hand{H3709}: yet do I not forget{H7911} thy law{H8451}.',
-      110: 'The wicked{H7563} have laid{H5414} a snare{H6341} for me: yet I erred{H8582} not from thy precepts{H6490}.',
-      111: 'Thy testimonies{H5715} have I taken as an heritage{H5157} for ever{H5769}: for they are the rejoicing{H8342} of my heart{H3820}.',
-      112: 'I have inclined{H5186} mine heart{H3820} to perform{H6213} thy statutes{H2706} alway{H5769}, even unto the end{H6118}.',
-      113: 'SAMECH. I hate{H8130} vain thoughts{H5588}: but thy law{H8451} do I love{H157}.',
-      114: 'Thou art my hiding place{H5643} and my shield{H4043}: I hope{H3176} in thy word{H1697}.',
-      115: 'Depart{H5493} from me, ye evildoers{H7489}: for I will keep{H5341} the commandments{H4687} of my God{H430}.',
-      116: 'Uphold{H5564} me according unto thy word{H565}, that I may live{H2421}: and let me not be ashamed{H954} of my hope{H7664}.',
-      117: 'Hold thou me up{H5582}, and I shall be safe{H3467}: and I will have respect{H8159} unto thy statutes{H2706} continually{H8548}.',
-      118: 'Thou hast trodden down{H5541} all them that err{H7686} from thy statutes{H2706}: for their deceit{H8649} is falsehood{H8267}.',
-      119: 'Thou puttest away{H7673} all the wicked{H7563} of the earth{H776} like dross{H5509}: therefore I love{H157} thy testimonies{H5713}.',
-      120: 'My flesh{H1320} trembleth{H5568} for fear{H6343} of thee; and I am afraid{H3372} of thy judgments{H4941}.',
-      121: 'AIN. I have done{H6213} judgment{H4941} and justice{H6664}: leave{H3240} me not to mine oppressors{H6231}.',
-      122: 'Be surety{H6148} for thy servant{H5650} for good{H2896}: let not the proud{H2086} oppress{H6231} me.',
-      123: 'Mine eyes{H5869} fail{H3615} for thy salvation{H3444}, and for the word{H565} of thy righteousness{H6664}.',
-      124: 'Deal{H6213} with thy servant{H5650} according unto thy mercy{H2617}, and teach{H3925} me thy statutes{H2706}.',
-      125: 'I am thy servant{H5650}; give me understanding{H995}, that I may know{H3045} thy testimonies{H5713}.',
-      126: 'It is time{H6256} for thee, LORD{H3068}, to work{H6213}: for they have made void{H6565} thy law{H8451}.',
-      127: 'Therefore I love{H157} thy commandments{H4687} above gold{H2091}; yea, above fine gold{H6337}.',
-      128: 'Therefore I esteem all thy precepts{H6490} concerning all things to be right{H3474}; and I hate{H8130} every false{H8267} way{H734}.',
-      129: 'PE. Thy testimonies{H5715} are wonderful{H6382}: therefore doth my soul{H5315} keep{H5341} them.',
-      130: 'The entrance{H6608} of thy words{H1697} giveth light{H215}; it giveth understanding{H995} unto the simple{H6612}.',
-      131: 'I opened{H6473} my mouth{H6310}, and panted{H7602}: for I longed{H2968} for thy commandments{H4687}.',
-      132: 'Look{H6437} thou upon me, and be merciful{H2603} unto me, as thou usest{H4941} to do unto those that love{H157} thy name{H8034}.',
-      133: 'Order{H3559} my steps{H6471} in thy word{H565}: and let not any iniquity{H205} have dominion{H7980} over me.',
-      134: 'Deliver{H6299} me from the oppression{H6233} of man{H120}: so will I keep{H8104} thy precepts{H6490}.',
-      135: 'Make thy face{H6440} to shine{H215} upon thy servant{H5650}; and teach{H3925} me thy statutes{H2706}.',
-      136: 'Rivers{H6388} of waters{H4325} run down{H3381} mine eyes{H5869}, because they keep{H8104} not thy law{H8451}.',
-      137: 'TZADDI. Righteous{H6662} art thou, O LORD{H3068}, and upright{H3477} are thy judgments{H4941}.',
-      138: 'Thy testimonies{H5713} that thou hast commanded{H6680} are righteous{H6664} and very{H3966} faithful{H530}.',
-      139: 'My zeal{H7068} hath consumed{H6789} me, because mine enemies{H6862} have forgotten{H7911} thy words{H1697}.',
-      140: 'Thy word{H565} is very{H3966} pure{H6884}: therefore thy servant{H5650} loveth{H157} it.',
-      141: 'I am small{H6810} and despised{H959}: yet do not I forget{H7911} thy precepts{H6490}.',
-      142: 'Thy righteousness{H6666} is an everlasting{H5769} righteousness{H6664}, and thy law{H8451} is the truth{H571}.',
-      143: 'Trouble{H6862} and anguish{H4689} have taken hold{H4672} on me: yet thy commandments{H4687} are my delights{H8191}.',
-      144: 'The righteousness{H6664} of thy testimonies{H5715} is everlasting{H5769}: give me understanding{H995}, and I shall live{H2421}.',
-      145: 'KOPH. I cried{H7121} with my whole heart{H3820}; hear{H6030} me, O LORD{H3068}: I will keep{H5341} thy statutes{H2706}.',
-      146: 'I cried{H7121} unto thee; save{H3467} me, and I shall keep{H8104} thy testimonies{H5713}.',
-      147: 'I prevented{H6923} the dawning of the morning{H5399}, and cried{H7768}: I hoped{H3176} in thy word{H1697}.',
-      148: 'Mine eyes{H5869} prevent{H6923} the night watches{H821}, that I might meditate{H7878} in thy word{H565}.',
-      149: 'Hear{H8085} my voice{H6963} according unto thy lovingkindness{H2617}: O LORD{H3068}, quicken{H2421} me according to thy judgment{H4941}.',
-      150: 'They draw nigh{H7126} that follow{H7291} after mischief{H2154}: they are far{H7368} from thy law{H8451}.',
-      151: 'Thou art near{H7138}, O LORD{H3068}; and all thy commandments{H4687} are truth{H571}.',
-      152: 'Concerning thy testimonies{H5713}, I have known{H3045} of old{H6924} that thou hast founded{H3245} them for ever{H5769}.',
-      153: 'RESH. Consider{H7200} mine affliction{H6040}, and deliver{H2502} me: for I do not forget{H7911} thy law{H8451}.',
-      154: 'Plead{H7378} my cause{H7379}, and deliver{H1350} me: quicken{H2421} me according to thy word{H565}.',
-      155: 'Salvation{H3444} is far{H7350} from the wicked{H7563}: for they seek{H1875} not thy statutes{H2706}.',
-      156: 'Great{H7227} are thy tender mercies{H7356}, O LORD{H3068}: quicken{H2421} me according to thy judgments{H4941}.',
-      157: 'Many{H7227} are my persecutors{H7291} and mine enemies{H6862}; yet do I not decline{H5186} from thy testimonies{H5715}.',
-      158: 'I beheld{H7200} the transgressors{H898}, and was grieved{H6962}; because they kept{H8104} not thy word{H565}.',
-      159: 'Consider{H7200} how I love{H157} thy precepts{H6490}: quicken{H2421} me, O LORD{H3068}, according to thy lovingkindness{H2617}.',
-      160: 'Thy word{H1697} is true{H571} from the beginning{H7218}: and every one of thy righteous{H6664} judgments{H4941} endureth for ever{H5769}.',
-      161: 'SCHIN. Princes{H8269} have persecuted{H7291} me without a cause{H2600}: but my heart{H3820} standeth in awe{H6342} of thy word{H1697}.',
-      162: 'I rejoice{H7797} at thy word{H565}, as one that findeth{H4672} great{H7227} spoil{H7998}.',
-      163: 'I hate{H8130} and abhor{H8581} lying{H8267}: but thy law{H8451} do I love{H157}.',
-      164: 'Seven times{H7651} a day{H3117} do I praise{H1984} thee because of thy righteous{H6664} judgments{H4941}.',
-      165: 'Great{H7227} peace{H7965} have they which love{H157} thy law{H8451}: and nothing shall offend{H4383} them.',
-      166: 'LORD{H3068}, I have hoped{H7663} for thy salvation{H3444}, and done{H6213} thy commandments{H4687}.',
-      167: 'My soul{H5315} hath kept{H8104} thy testimonies{H5713}; and I love{H157} them exceedingly{H3966}.',
-      168: 'I have kept{H8104} thy precepts{H6490} and thy testimonies{H5713}: for all my ways{H1870} are before thee.',
-      169: 'TAU. Let my cry{H7440} come near{H7126} before{H6440} thee, O LORD{H3068}: give me understanding{H995} according to thy word{H1697}.',
-      170: 'Let my supplication{H8467} come{H935} before{H6440} thee: deliver{H5337} me according to thy word{H565}.',
-      171: 'My lips{H8193} shall utter{H5042} praise{H8416}, when thou hast taught{H3925} me thy statutes{H2706}.',
-      172: 'My tongue{H3956} shall speak{H6030} of thy word{H565}: for all thy commandments{H4687} are righteousness{H6664}.',
-      173: 'Let thine hand{H3027} help{H5826} me; for I have chosen{H977} thy precepts{H6490}.',
-      174: 'I have longed{H8373} for thy salvation{H3444}, O LORD{H3068}; and thy law{H8451} is my delight{H8191}.',
-      175: 'Let my soul{H5315} live{H2421}, and it shall praise{H1984} thee; and let thy judgments{H4941} help{H5826} me.',
-      176: 'I have gone astray{H8582} like a lost{H6} sheep{H7716}; seek{H1245} thy servant{H5650}; for I do not forget{H7911} thy commandments{H4687}.',
+      100:
+          'I understand{H995} more than the ancients{H2205}, because I keep{H5341} thy precepts{H6490}.',
+      101:
+          'I have refrained{H3607} my feet{H7272} from every evil{H7451} way{H734}, that I might keep{H8104} thy word{H1697}.',
+      102:
+          'I have not departed{H5493} from thy judgments{H4941}: for thou hast taught{H3384} me.',
+      103:
+          'How sweet{H4452} are thy words{H565} unto my taste{H2441}! yea, sweeter than honey{H1706} to my mouth{H6310}!',
+      104:
+          'Through thy precepts{H6490} I get understanding{H995}: therefore I hate{H8130} every false{H8267} way{H734}.',
+      105:
+          'NUN. Thy word{H1697} is a lamp{H5216} unto my feet{H7272}, and a light{H216} unto my path{H5410}.',
+      106:
+          'I have sworn{H7650}, and I will perform{H6965} it, that I will keep{H8104} thy righteous{H6664} judgments{H4941}.',
+      107:
+          'I am afflicted{H6031} very much{H3966}: quicken{H2421} me, O LORD{H3068}, according unto thy word{H1697}.',
+      108:
+          'Accept{H7521}, I beseech thee, the freewill offerings{H5071} of my mouth{H6310}, O LORD{H3068}, and teach{H3925} me thy judgments{H4941}.',
+      109:
+          'My soul{H5315} is continually{H8548} in my hand{H3709}: yet do I not forget{H7911} thy law{H8451}.',
+      110:
+          'The wicked{H7563} have laid{H5414} a snare{H6341} for me: yet I erred{H8582} not from thy precepts{H6490}.',
+      111:
+          'Thy testimonies{H5715} have I taken as an heritage{H5157} for ever{H5769}: for they are the rejoicing{H8342} of my heart{H3820}.',
+      112:
+          'I have inclined{H5186} mine heart{H3820} to perform{H6213} thy statutes{H2706} alway{H5769}, even unto the end{H6118}.',
+      113:
+          'SAMECH. I hate{H8130} vain thoughts{H5588}: but thy law{H8451} do I love{H157}.',
+      114:
+          'Thou art my hiding place{H5643} and my shield{H4043}: I hope{H3176} in thy word{H1697}.',
+      115:
+          'Depart{H5493} from me, ye evildoers{H7489}: for I will keep{H5341} the commandments{H4687} of my God{H430}.',
+      116:
+          'Uphold{H5564} me according unto thy word{H565}, that I may live{H2421}: and let me not be ashamed{H954} of my hope{H7664}.',
+      117:
+          'Hold thou me up{H5582}, and I shall be safe{H3467}: and I will have respect{H8159} unto thy statutes{H2706} continually{H8548}.',
+      118:
+          'Thou hast trodden down{H5541} all them that err{H7686} from thy statutes{H2706}: for their deceit{H8649} is falsehood{H8267}.',
+      119:
+          'Thou puttest away{H7673} all the wicked{H7563} of the earth{H776} like dross{H5509}: therefore I love{H157} thy testimonies{H5713}.',
+      120:
+          'My flesh{H1320} trembleth{H5568} for fear{H6343} of thee; and I am afraid{H3372} of thy judgments{H4941}.',
+      121:
+          'AIN. I have done{H6213} judgment{H4941} and justice{H6664}: leave{H3240} me not to mine oppressors{H6231}.',
+      122:
+          'Be surety{H6148} for thy servant{H5650} for good{H2896}: let not the proud{H2086} oppress{H6231} me.',
+      123:
+          'Mine eyes{H5869} fail{H3615} for thy salvation{H3444}, and for the word{H565} of thy righteousness{H6664}.',
+      124:
+          'Deal{H6213} with thy servant{H5650} according unto thy mercy{H2617}, and teach{H3925} me thy statutes{H2706}.',
+      125:
+          'I am thy servant{H5650}; give me understanding{H995}, that I may know{H3045} thy testimonies{H5713}.',
+      126:
+          'It is time{H6256} for thee, LORD{H3068}, to work{H6213}: for they have made void{H6565} thy law{H8451}.',
+      127:
+          'Therefore I love{H157} thy commandments{H4687} above gold{H2091}; yea, above fine gold{H6337}.',
+      128:
+          'Therefore I esteem all thy precepts{H6490} concerning all things to be right{H3474}; and I hate{H8130} every false{H8267} way{H734}.',
+      129:
+          'PE. Thy testimonies{H5715} are wonderful{H6382}: therefore doth my soul{H5315} keep{H5341} them.',
+      130:
+          'The entrance{H6608} of thy words{H1697} giveth light{H215}; it giveth understanding{H995} unto the simple{H6612}.',
+      131:
+          'I opened{H6473} my mouth{H6310}, and panted{H7602}: for I longed{H2968} for thy commandments{H4687}.',
+      132:
+          'Look{H6437} thou upon me, and be merciful{H2603} unto me, as thou usest{H4941} to do unto those that love{H157} thy name{H8034}.',
+      133:
+          'Order{H3559} my steps{H6471} in thy word{H565}: and let not any iniquity{H205} have dominion{H7980} over me.',
+      134:
+          'Deliver{H6299} me from the oppression{H6233} of man{H120}: so will I keep{H8104} thy precepts{H6490}.',
+      135:
+          'Make thy face{H6440} to shine{H215} upon thy servant{H5650}; and teach{H3925} me thy statutes{H2706}.',
+      136:
+          'Rivers{H6388} of waters{H4325} run down{H3381} mine eyes{H5869}, because they keep{H8104} not thy law{H8451}.',
+      137:
+          'TZADDI. Righteous{H6662} art thou, O LORD{H3068}, and upright{H3477} are thy judgments{H4941}.',
+      138:
+          'Thy testimonies{H5713} that thou hast commanded{H6680} are righteous{H6664} and very{H3966} faithful{H530}.',
+      139:
+          'My zeal{H7068} hath consumed{H6789} me, because mine enemies{H6862} have forgotten{H7911} thy words{H1697}.',
+      140:
+          'Thy word{H565} is very{H3966} pure{H6884}: therefore thy servant{H5650} loveth{H157} it.',
+      141:
+          'I am small{H6810} and despised{H959}: yet do not I forget{H7911} thy precepts{H6490}.',
+      142:
+          'Thy righteousness{H6666} is an everlasting{H5769} righteousness{H6664}, and thy law{H8451} is the truth{H571}.',
+      143:
+          'Trouble{H6862} and anguish{H4689} have taken hold{H4672} on me: yet thy commandments{H4687} are my delights{H8191}.',
+      144:
+          'The righteousness{H6664} of thy testimonies{H5715} is everlasting{H5769}: give me understanding{H995}, and I shall live{H2421}.',
+      145:
+          'KOPH. I cried{H7121} with my whole heart{H3820}; hear{H6030} me, O LORD{H3068}: I will keep{H5341} thy statutes{H2706}.',
+      146:
+          'I cried{H7121} unto thee; save{H3467} me, and I shall keep{H8104} thy testimonies{H5713}.',
+      147:
+          'I prevented{H6923} the dawning of the morning{H5399}, and cried{H7768}: I hoped{H3176} in thy word{H1697}.',
+      148:
+          'Mine eyes{H5869} prevent{H6923} the night watches{H821}, that I might meditate{H7878} in thy word{H565}.',
+      149:
+          'Hear{H8085} my voice{H6963} according unto thy lovingkindness{H2617}: O LORD{H3068}, quicken{H2421} me according to thy judgment{H4941}.',
+      150:
+          'They draw nigh{H7126} that follow{H7291} after mischief{H2154}: they are far{H7368} from thy law{H8451}.',
+      151:
+          'Thou art near{H7138}, O LORD{H3068}; and all thy commandments{H4687} are truth{H571}.',
+      152:
+          'Concerning thy testimonies{H5713}, I have known{H3045} of old{H6924} that thou hast founded{H3245} them for ever{H5769}.',
+      153:
+          'RESH. Consider{H7200} mine affliction{H6040}, and deliver{H2502} me: for I do not forget{H7911} thy law{H8451}.',
+      154:
+          'Plead{H7378} my cause{H7379}, and deliver{H1350} me: quicken{H2421} me according to thy word{H565}.',
+      155:
+          'Salvation{H3444} is far{H7350} from the wicked{H7563}: for they seek{H1875} not thy statutes{H2706}.',
+      156:
+          'Great{H7227} are thy tender mercies{H7356}, O LORD{H3068}: quicken{H2421} me according to thy judgments{H4941}.',
+      157:
+          'Many{H7227} are my persecutors{H7291} and mine enemies{H6862}; yet do I not decline{H5186} from thy testimonies{H5715}.',
+      158:
+          'I beheld{H7200} the transgressors{H898}, and was grieved{H6962}; because they kept{H8104} not thy word{H565}.',
+      159:
+          'Consider{H7200} how I love{H157} thy precepts{H6490}: quicken{H2421} me, O LORD{H3068}, according to thy lovingkindness{H2617}.',
+      160:
+          'Thy word{H1697} is true{H571} from the beginning{H7218}: and every one of thy righteous{H6664} judgments{H4941} endureth for ever{H5769}.',
+      161:
+          'SCHIN. Princes{H8269} have persecuted{H7291} me without a cause{H2600}: but my heart{H3820} standeth in awe{H6342} of thy word{H1697}.',
+      162:
+          'I rejoice{H7797} at thy word{H565}, as one that findeth{H4672} great{H7227} spoil{H7998}.',
+      163:
+          'I hate{H8130} and abhor{H8581} lying{H8267}: but thy law{H8451} do I love{H157}.',
+      164:
+          'Seven times{H7651} a day{H3117} do I praise{H1984} thee because of thy righteous{H6664} judgments{H4941}.',
+      165:
+          'Great{H7227} peace{H7965} have they which love{H157} thy law{H8451}: and nothing shall offend{H4383} them.',
+      166:
+          'LORD{H3068}, I have hoped{H7663} for thy salvation{H3444}, and done{H6213} thy commandments{H4687}.',
+      167:
+          'My soul{H5315} hath kept{H8104} thy testimonies{H5713}; and I love{H157} them exceedingly{H3966}.',
+      168:
+          'I have kept{H8104} thy precepts{H6490} and thy testimonies{H5713}: for all my ways{H1870} are before thee.',
+      169:
+          'TAU. Let my cry{H7440} come near{H7126} before{H6440} thee, O LORD{H3068}: give me understanding{H995} according to thy word{H1697}.',
+      170:
+          'Let my supplication{H8467} come{H935} before{H6440} thee: deliver{H5337} me according to thy word{H565}.',
+      171:
+          'My lips{H8193} shall utter{H5042} praise{H8416}, when thou hast taught{H3925} me thy statutes{H2706}.',
+      172:
+          'My tongue{H3956} shall speak{H6030} of thy word{H565}: for all thy commandments{H4687} are righteousness{H6664}.',
+      173:
+          'Let thine hand{H3027} help{H5826} me; for I have chosen{H977} thy precepts{H6490}.',
+      174:
+          'I have longed{H8373} for thy salvation{H3444}, O LORD{H3068}; and thy law{H8451} is my delight{H8191}.',
+      175:
+          'Let my soul{H5315} live{H2421}, and it shall praise{H1984} thee; and let thy judgments{H4941} help{H5826} me.',
+      176:
+          'I have gone astray{H8582} like a lost{H6} sheep{H7716}; seek{H1245} thy servant{H5650}; for I do not forget{H7911} thy commandments{H4687}.',
     },
     120: {
       1: 'A Song{H7892} of degrees{H4609}. In my distress{H6869} I cried{H7121} unto the LORD{H3068}, and he heard{H6030} me.',

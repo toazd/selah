@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart'; // For global notifiers and colors
-import '../data/tsk_data_specs.dart';
+import '../data/tsk_data.dart';
 import '../utils/verse_display_utils.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';

@@ -5,14 +5,16 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '1Co': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO THE CORINTHIANS.',
-    'colophon': 'The first epistle to the Corinthians was written from Philippi by Stephanas, and Fortunatus, and Achaicus, and Timotheus.',
+    'colophon':
+        'The first epistle to the Corinthians was written from Philippi by Stephanas, and Fortunatus, and Achaicus, and Timotheus.',
   },
   '1Jo': {
     'title': 'THE FIRST EPISTLE GENERAL OF JOHN.',
     'colophon': '',
   },
   '1Ki': {
-    'title': 'THE FIRST BOOK OF THE KINGS, COMMONLY CALLED, THE THIRD BOOK OF THE KINGS.',
+    'title':
+        'THE FIRST BOOK OF THE KINGS, COMMONLY CALLED, THE THIRD BOOK OF THE KINGS.',
     'colophon': '',
   },
   '1Pe': {
@@ -20,16 +22,19 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   '1Sa': {
-    'title': 'THE FIRST BOOK OF SAMUEL, OTHERWISE CALLED, THE FIRST BOOK OF THE KINGS.',
+    'title':
+        'THE FIRST BOOK OF SAMUEL, OTHERWISE CALLED, THE FIRST BOOK OF THE KINGS.',
     'colophon': '',
   },
   '1Th': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO THE THESSALONIANS.',
-    'colophon': 'The first epistle unto the Thessalonians was written from Athens.',
+    'colophon':
+        'The first epistle unto the Thessalonians was written from Athens.',
   },
   '1Ti': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO TIMOTHY.',
-    'colophon': 'The first to Timothy was written from Laodicea, which is the chiefest city of Phrygia Pacatiana.',
+    'colophon':
+        'The first to Timothy was written from Laodicea, which is the chiefest city of Phrygia Pacatiana.',
   },
   '2Ch': {
     'title': 'THE SECOND BOOK OF THE CHRONICLES.',
@@ -37,14 +42,16 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '2Co': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO THE CORINTHIANS.',
-    'colophon': 'The second epistle to the Corinthians was written from Philippi, a city of Macedonia, by Titus and Lucas.',
+    'colophon':
+        'The second epistle to the Corinthians was written from Philippi, a city of Macedonia, by Titus and Lucas.',
   },
   '2Jo': {
     'title': 'THE SECOND EPISTLE OF JOHN.',
     'colophon': '',
   },
   '2Ki': {
-    'title': 'THE SECOND BOOK OF THE KINGS, COMMONLY CALLED, THE FOURTH BOOK OF THE KINGS.',
+    'title':
+        'THE SECOND BOOK OF THE KINGS, COMMONLY CALLED, THE FOURTH BOOK OF THE KINGS.',
     'colophon': '',
   },
   '2Pe': {
@@ -52,12 +59,14 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   '2Sa': {
-    'title': 'THE SECOND BOOK OF SAMUEL, OTHERWISE CALLED, THE SECOND BOOK OF THE KINGS.',
+    'title':
+        'THE SECOND BOOK OF SAMUEL, OTHERWISE CALLED, THE SECOND BOOK OF THE KINGS.',
     'colophon': '',
   },
   '2Th': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO THE THESSALONIANS.',
-    'colophon': 'The second epistle to the Thessalonians was written from Athens.',
+    'colophon':
+        'The second epistle to the Thessalonians was written from Athens.',
   },
   '2Ti': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO TIMOTHY.',
@@ -245,7 +254,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 102': {
-    'title': 'A Prayer of the afflicted, when he is overwhelmed, and poureth out his complaint before the LORD.',
+    'title':
+        'A Prayer of the afflicted, when he is overwhelmed, and poureth out his complaint before the LORD.',
     'colophon': '',
   },
   'Psa 103': {
@@ -450,7 +460,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 34': {
-    'title': 'A Psalm of David, when he changed his behaviour before Abimelech; who drove him away, and he departed.',
+    'title':
+        'A Psalm of David, when he changed his behaviour before Abimelech; who drove him away, and he departed.',
     'colophon': '',
   },
   'Psa 35': {
@@ -494,11 +505,13 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 45': {
-    'title': 'To the chief Musician upon Shoshannim, for the sons of Korah, Maschil, A Song of loves.',
+    'title':
+        'To the chief Musician upon Shoshannim, for the sons of Korah, Maschil, A Song of loves.',
     'colophon': '',
   },
   'Psa 46': {
-    'title': 'To the chief Musician for the sons of Korah, A Song upon Alamoth.',
+    'title':
+        'To the chief Musician for the sons of Korah, A Song upon Alamoth.',
     'colophon': '',
   },
   'Psa 47': {
@@ -522,11 +535,13 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 51': {
-    'title': 'To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bathsheba.',
+    'title':
+        'To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bathsheba.',
     'colophon': '',
   },
   'Psa 52': {
-    'title': 'To the chief Musician, Maschil, A Psalm of David, when Doeg the Edomite came and told Saul, and said unto him, David is come to the house of Ahimelech.',
+    'title':
+        'To the chief Musician, Maschil, A Psalm of David, when Doeg the Edomite came and told Saul, and said unto him, David is come to the house of Ahimelech.',
     'colophon': '',
   },
   'Psa 53': {
@@ -534,7 +549,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 54': {
-    'title': 'To the chief Musician on Neginoth, Maschil, A Psalm of David, when the Ziphims came and said to Saul, Doth not David hide himself with us?',
+    'title':
+        'To the chief Musician on Neginoth, Maschil, A Psalm of David, when the Ziphims came and said to Saul, Doth not David hide himself with us?',
     'colophon': '',
   },
   'Psa 55': {
@@ -542,11 +558,13 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 56': {
-    'title': 'To the chief Musician upon Jonathelemrechokim, Michtam of David, when the Philistines took him in Gath.',
+    'title':
+        'To the chief Musician upon Jonathelemrechokim, Michtam of David, when the Philistines took him in Gath.',
     'colophon': '',
   },
   'Psa 57': {
-    'title': 'To the chief Musician, Altaschith, Michtam of David, when he fled from Saul in the cave.',
+    'title':
+        'To the chief Musician, Altaschith, Michtam of David, when he fled from Saul in the cave.',
     'colophon': '',
   },
   'Psa 58': {
@@ -554,11 +572,13 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 59': {
-    'title': 'To the chief Musician, Altaschith, Michtam of David; when Saul sent, and they watched the house to kill him.',
+    'title':
+        'To the chief Musician, Altaschith, Michtam of David; when Saul sent, and they watched the house to kill him.',
     'colophon': '',
   },
   'Psa 6': {
-    'title': 'To the chief Musician on Neginoth upon Sheminith, A Psalm of David.',
+    'title':
+        'To the chief Musician on Neginoth upon Sheminith, A Psalm of David.',
     'colophon': '',
   },
   'Psa 60': {
@@ -603,11 +623,13 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 7': {
-    'title': 'Shiggaion of David, which he sang unto the LORD, concerning the words of Cush the Benjamite.',
+    'title':
+        'Shiggaion of David, which he sang unto the LORD, concerning the words of Cush the Benjamite.',
     'colophon': '',
   },
   'Psa 70': {
-    'title': 'To the chief Musician, A Psalm of David, to bring to remembrance.',
+    'title':
+        'To the chief Musician, A Psalm of David, to bring to remembrance.',
     'colophon': '',
   },
   'Psa 72': {
@@ -663,7 +685,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 84': {
-    'title': 'To the chief Musician upon Gittith, A Psalm for the sons of Korah.',
+    'title':
+        'To the chief Musician upon Gittith, A Psalm for the sons of Korah.',
     'colophon': '',
   },
   'Psa 85': {
@@ -679,7 +702,8 @@ const Map<String, Map<String, String>> bookMetadata = {
     'colophon': '',
   },
   'Psa 88': {
-    'title': 'A Song or Psalm for the sons of Korah, to the chief Musician upon Mahalath Leannoth, Maschil of Heman the Ezrahite.',
+    'title':
+        'A Song or Psalm for the sons of Korah, to the chief Musician upon Mahalath Leannoth, Maschil of Heman the Ezrahite.',
     'colophon': '',
   },
   'Psa 89': {
@@ -708,7 +732,8 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Rom': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE ROMANS.',
-    'colophon': 'Written to the Romans from Corinthus, and sent by Phebe servant of the church at Cenchrea.',
+    'colophon':
+        'Written to the Romans from Corinthus, and sent by Phebe servant of the church at Cenchrea.',
   },
   'Rth': {
     'title': 'THE BOOK OF RUTH.',
@@ -720,7 +745,8 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Tit': {
     'title': 'THE EPISTLE OF PAUL TO TITUS.',
-    'colophon': 'It was written to Titus, ordained the first bishop of the church of the Cretians, from Nicopolis of Macedonia.',
+    'colophon':
+        'It was written to Titus, ordained the first bishop of the church of the Cretians, from Nicopolis of Macedonia.',
   },
   'Zec': {
     'title': 'ZECHARIAH.',

@@ -1,6 +1,4 @@
 // Utility functions shared across Bible-related screens and components
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:selah/main.dart';
 import 'package:selah/utils/preferences_constants.dart';

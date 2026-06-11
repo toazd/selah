@@ -10,6 +10,10 @@
 .history
 .svn/
 .swiftpm/
+.kilo/
+.agents/
+.codex/
+.crush/
 migrate_working_dir/
 zz_history_events.json
 bible_export_av1769.txt

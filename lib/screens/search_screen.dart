@@ -2230,44 +2230,34 @@ class _SearchScreenState extends State<SearchScreen>
                     CrossAxisAlignment.stretch, // ensure full width
                 children: [
                   TextField(
-                    //OnscreenKeyboardTextField(
                     autofocus: true,
                     maxLength: 100,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
                     controller: _controller,
-                    //focusNode: _searchFocusNode,
                     decoration: InputDecoration(
-                      counter: SizedBox.shrink(), // Hide the counter eg. 0/100
+                      counter: SizedBox.shrink(),
                       hintText: 'Search',
                       hintStyle: TextStyle(
                           fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
-                      // Define the common border style
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
-                          color: Colors.blueGrey, // The default/unfocused color
+                          color: Colors.blueGrey,
                         ),
                       ),
-
-                      // When NOT focused (enabled)
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
                           color: Colors.blueGrey,
                         ),
                       ),
-
-                      // When SELECTED (focused)
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
-                          color: Colors
-                              .blueGrey, // Override the default purple focus color
-                          width:
-                              2.0, // Optional: You can still use width to make it stand out if desired
+                          color: Colors.blueGrey,
+                          width: 2.0,
                         ),
                       ),
-
                       suffixIcon: IconButton(
                         icon: Icon(
                           Icons.clear,
@@ -2283,7 +2273,6 @@ class _SearchScreenState extends State<SearchScreen>
                         iconSize: 32,
                       ),
                     ),
-                    // Live update the search results
                     onChanged: (_) {
                       _lastInputTime = DateTime.now();
                       unawaited(_saveSearchOptions());
@@ -2295,12 +2284,13 @@ class _SearchScreenState extends State<SearchScreen>
                         if (_controller.text.isNotEmpty &&
                             _controller.text.length > 1 &&
                             (_controller.text.split('"').length - 1) % 2 == 0) {
-                          // Don't run unless zero or an even number of quotes
                           _onSearch();
                         }
                       });
                     },
-                    onSubmitted: (_) => _onSearch(),
+                    onSubmitted: (_) {
+                      _onSearch();
+                    },
                     style: TextStyle(
                         fontSize: uiFontSize + 4,
                         fontFamily: fontFamilyNotifier.value),

@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import '../database/strongs_database.dart';
 import '../database/strongs_definitions_database.dart';
+import '../data/strongs_definitions.dart';
 import '../database/history_database.dart';
 import '../utils/error_handler.dart';
 import '../main.dart';
@@ -193,6 +195,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   final List<TapGestureRecognizer> _verseReferenceRecognizers = [];
 
   bool _isResetting = false;
+  bool _isRestoring = false;
   int _verseReferenceRecognizerIndex = 0;
   int? _verseReferenceRecognizerCleanupExpectedCount;
 
@@ -218,6 +221,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
 
     showDialog(
+      animationStyle: AnimationStyle(duration: Duration(seconds: 0)),
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -226,15 +230,20 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(
+              padding: EdgeInsetsGeometry.all(0),
+              constraints: BoxConstraints.tight(Size(72, 72)),
+              strokeWidth: 7.0,
+              semanticsLabel: "Searching",
+              strokeCap: StrokeCap.round,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             Text(
-              'Working...',
+              'Searching...',
               style: TextStyle(
-                fontSize: uiFontSize,
+                fontSize: uiFontSize + 4,
                 fontFamily: uiFontFamily,
                 color: getAdaptiveTextColor(context),
               ),
@@ -436,9 +445,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _performStrongsNumberSearch(String strongsNumber) async {
+    _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
       final results = await compute(_computeStrongsNumberSearch, strongsNumber);
       if (!mounted) return;
+      if (_isResetting) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -448,6 +459,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'strongs';
+          _isRestoring = false;
         });
         _hideLoadingDialog();
         return;
@@ -467,21 +479,28 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalMatches = totalMatches;
         _totalVerses = results.length;
         _searchType = 'strongs';
+        _isRestoring = false;
       });
       _hideLoadingDialog();
     } catch (e) {
       if (mounted) {
-        setState(() {});
-        _hideLoadingDialog();
-        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        if (!_isResetting) {
+          setState(() {
+            _isRestoring = false;
+          });
+          _hideLoadingDialog();
+          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        }
       }
     }
   }
 
   void _performWordSearch(String word) async {
+    _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
       final wordVerses = await compute(_computeWordSearch, word);
       if (!mounted) return;
+      if (_isResetting) return;
 
       if (wordVerses.isEmpty) {
         setState(() {
@@ -491,6 +510,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'word';
+          _isRestoring = false;
         });
         _hideLoadingDialog();
         return;
@@ -504,6 +524,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final foundStrongs =
           await compute(_computeFindStrongsNumbers, findStrongsData);
       if (!mounted) return;
+      if (_isResetting) return;
 
       if (foundStrongs.isEmpty) {
         setState(() {
@@ -513,6 +534,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'word';
+          _isRestoring = false;
         });
         _hideLoadingDialog();
         return;
@@ -526,6 +548,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       );
       final results = await compute(_computeSearchByStrongsNumbers, searchData);
       if (!mounted) return;
+      if (_isResetting) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -535,6 +558,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'word';
+          _isRestoring = false;
         });
         _hideLoadingDialog();
         return;
@@ -547,6 +571,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final phraseSummary =
           await compute(_computeExtractPhraseSummary, summaryData);
       if (!mounted) return;
+      if (_isResetting) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -560,22 +585,29 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalMatches = totalMatches;
         _totalVerses = results.length;
         _searchType = 'word';
+        _isRestoring = false;
       });
       _hideLoadingDialog();
     } catch (e) {
       if (mounted) {
-        setState(() {});
-        _hideLoadingDialog();
-        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        if (!_isResetting) {
+          setState(() {
+            _isRestoring = false;
+          });
+          _hideLoadingDialog();
+          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        }
       }
     }
   }
 
   Future<void> _performReferenceSearch(
       ReferenceSearchTaskData refSearch) async {
+    _unfocusSearchField();
     try {
       final result = await compute(_computeReferenceSearch, refSearch);
       if (!mounted) return;
+      if (_isResetting) return;
 
       // Check for errors
       if (result.error != null) {
@@ -588,6 +620,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'reference';
+          _isRestoring = false;
         });
         return;
       }
@@ -615,6 +648,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       );
       final results = await compute(_computeSearchByStrongsNumbers, searchData);
       if (!mounted) return;
+      if (_isResetting) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -624,6 +658,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalMatches = 0;
           _totalVerses = 0;
           _searchType = 'reference';
+          _isRestoring = false;
         });
         _hideLoadingDialog();
         return;
@@ -636,6 +671,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final phraseSummary =
           await compute(_computeExtractPhraseSummary, summaryData);
       if (!mounted) return;
+      if (_isResetting) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -648,13 +684,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalMatches = totalMatches;
         _totalVerses = results.length;
         _searchType = 'reference';
+        _isRestoring = false;
       });
       _hideLoadingDialog();
     } catch (e) {
       if (mounted) {
-        setState(() {});
-        _hideLoadingDialog();
-        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        if (!_isResetting) {
+          setState(() {
+            _isRestoring = false;
+          });
+          _hideLoadingDialog();
+          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        }
       }
     }
   }
@@ -672,7 +713,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     if (!mounted || definition == null) {
       if (mounted) {
         showStyledSnackBar(context,
-            'Definition not found for $strongsNumber! This is a bug that you should report at https://github.com/toazd/selah/issues.');
+            'Definition not found for $strongsNumber!\nThis is a bug that you should report at https://github.com/toazd/selah/issues.',
+            isError: true);
       }
       return;
     }
@@ -686,31 +728,41 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(
-          strongsNumber,
-          style: _getPrimaryTextStyle(dialogContext, uiFontSize + 4),
-        ),
-        content: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: constrainedMaxWidth,
-            maxHeight: maxHeight,
+          title: Text(
+            strongsNumber,
+            style: _getPrimaryTextStyle(dialogContext, uiFontSize + 4),
           ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: definitionChildren,
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: constrainedMaxWidth,
+              maxHeight: maxHeight,
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: definitionChildren,
+              ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child:
-                Text('Close', style: _getTextStyle(dialogContext, uiFontSize)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // prepend the Strong's number (available via the strongsNumber argument)
+                final plain = '$strongsNumber\n$definition';
+                Clipboard.setData(ClipboardData(text: plain));
+                showStyledSnackBar(
+                    dialogContext, 'Definition copied to clipboard');
+              },
+              child:
+                  Text('Copy', style: _getTextStyle(dialogContext, uiFontSize)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text('Close',
+                  style: _getTextStyle(dialogContext, uiFontSize)),
+            ),
+          ]),
     );
   }
 
@@ -721,6 +773,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         buildDefinitionWidgets: _buildDefinitionWidgets,
         buildPrimaryTextStyle: _getPrimaryTextStyle,
         buildTextStyle: _getTextStyle,
+        listenToDefinitionSelected: (String strongsNumber) {
+          _showStrongsDefinitionDialog(context, strongsNumber);
+        },
       ),
     );
   }
@@ -736,101 +791,16 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       definitionChildren.add(RichText(
         text: TextSpan(
           style: baseStyle,
-          children: _buildDefinitionSpans(
+          children: _buildDefinitionPlainSpans(
             context,
             line,
-            baseStyle.copyWith(fontSize: uiFontSize + 4),
+            baseStyle,
             onStrongsTap: onStrongsTap,
           ),
         ),
       ));
     }
     return definitionChildren;
-  }
-
-  List<InlineSpan> _buildDefinitionSpans(
-    BuildContext context,
-    String line,
-    TextStyle baseStyle, {
-    void Function(String strongsNumber)? onStrongsTap,
-  }) {
-    final spans = <InlineSpan>[];
-    int index = 0;
-
-    while (index < line.length) {
-      final doubleStarIndex = line.indexOf('**', index);
-      final singleStarIndex = line.indexOf('*', index);
-
-      if (doubleStarIndex == -1 && singleStarIndex == -1) {
-        spans.addAll(_buildDefinitionPlainSpans(
-          context,
-          line.substring(index),
-          baseStyle,
-          onStrongsTap: onStrongsTap,
-        ));
-        break;
-      }
-
-      if (doubleStarIndex != -1 &&
-          (singleStarIndex == -1 || doubleStarIndex <= singleStarIndex)) {
-        if (index < doubleStarIndex) {
-          spans.addAll(_buildDefinitionPlainSpans(
-            context,
-            line.substring(index, doubleStarIndex),
-            baseStyle,
-            onStrongsTap: onStrongsTap,
-          ));
-        }
-
-        final closingIndex = line.indexOf('**', doubleStarIndex + 2);
-        if (closingIndex == -1) {
-          spans.addAll(_buildDefinitionPlainSpans(
-            context,
-            '**',
-            baseStyle,
-            onStrongsTap: onStrongsTap,
-          ));
-          index = doubleStarIndex + 2;
-          continue;
-        }
-
-        final boldStyle = baseStyle.copyWith(fontWeight: FontWeight.bold);
-        spans.addAll(_buildDefinitionPlainSpans(context,
-            line.substring(doubleStarIndex + 2, closingIndex), boldStyle,
-            onStrongsTap: onStrongsTap));
-        index = closingIndex + 2;
-        continue;
-      }
-
-      if (index < singleStarIndex) {
-        spans.addAll(_buildDefinitionPlainSpans(
-          context,
-          line.substring(index, singleStarIndex),
-          baseStyle,
-          onStrongsTap: onStrongsTap,
-        ));
-      }
-
-      final closingIndex = line.indexOf('*', singleStarIndex + 1);
-      if (closingIndex == -1) {
-        spans.addAll(_buildDefinitionPlainSpans(
-          context,
-          '*',
-          baseStyle,
-          onStrongsTap: onStrongsTap,
-        ));
-        index = singleStarIndex + 1;
-        continue;
-      }
-
-      final italicStyle = baseStyle.copyWith(fontStyle: FontStyle.italic);
-      spans.addAll(_buildDefinitionPlainSpans(context,
-          line.substring(singleStarIndex + 1, closingIndex), italicStyle,
-          onStrongsTap: onStrongsTap));
-      index = closingIndex + 1;
-    }
-
-    return spans;
   }
 
   List<InlineSpan> _buildDefinitionPlainSpans(
@@ -1338,6 +1308,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                 existingNote: existingNote)));
   }
 
+  void _unfocusSearchField() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _searchButtonFocusNode.canRequestFocus) {
+        _searchButtonFocusNode.requestFocus();
+      }
+    });
+  }
+
   void _resetVerseReferenceRecognizers() {
     _verseReferenceRecognizerIndex = 0;
   }
@@ -1410,7 +1388,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       return;
     }
 
-    setState(() => _controller.text = lastSearch);
+    setState(() {
+      _controller.text = lastSearch;
+      _isRestoring = true;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       _onSearch(showLoading: false, resetScroll: false);
@@ -1488,7 +1469,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               semanticLabel: 'Show Definitions Lookup',
             ),
-            tooltip: 'Definitions',
+            tooltip: 'Strong\'s Definitions',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: () => _showStrongsDefinitionLookupDialog(context),
           ),
@@ -1596,7 +1577,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       ),
                     ),
                     onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => _onSearch(),
+                    onSubmitted: (_) {
+                      _onSearch();
+                    },
                     style: TextStyle(
                         fontSize: uiFontSize + 4,
                         fontFamily: fontFamilyNotifier.value),
@@ -1621,6 +1604,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     _totalVerses = null;
                                     _searchType = null;
                                     _searchTerm = null;
+                                    _isRestoring = false;
                                   });
 
                                   Future.delayed(const Duration(seconds: 3),
@@ -1691,62 +1675,72 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                   fontFamily: uiFontFamily,
                                   color: getAdaptiveTextColor(context),
                                 )))
-                        : (_searchResults.isEmpty && _totalMatches == 0)
+                        : _isRestoring
                             ? Center(
-                                child: Text('No matches found 🧐',
+                                child: Text('Restoring search results...',
                                     style: TextStyle(
                                         fontSize: uiFontSize + 8,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
-                            : ValueListenableBuilder<double>(
-                                valueListenable: fontSizeNotifier,
-                                builder: (context, fontSize, child) {
-                                  return RawScrollbar(
-                                      thumbColor: isDark
-                                          ? darkPrimaryColor.value
-                                              .withValues(alpha: 0.3)
-                                          : lightPrimaryColor.value
-                                              .withValues(alpha: 0.5),
-                                      thumbVisibility: false,
-                                      trackVisibility: false,
-                                      thickness: 16.0,
-                                      controller: _resultsScrollController,
-                                      radius: Radius.circular(8.0),
-                                      child: ScrollConfiguration(
-                                          behavior:
-                                              ScrollConfiguration.of(context)
+                            : (_searchResults.isEmpty && _totalMatches == 0)
+                                ? Center(
+                                    child: Text('No matches found 🧐',
+                                        style: TextStyle(
+                                            fontSize: uiFontSize + 8,
+                                            fontFamily: uiFontFamily,
+                                            color:
+                                                getAdaptiveTextColor(context))))
+                                : ValueListenableBuilder<double>(
+                                    valueListenable: fontSizeNotifier,
+                                    builder: (context, fontSize, child) {
+                                      return RawScrollbar(
+                                          thumbColor: isDark
+                                              ? darkPrimaryColor.value
+                                                  .withValues(alpha: 0.3)
+                                              : lightPrimaryColor.value
+                                                  .withValues(alpha: 0.5),
+                                          thumbVisibility: false,
+                                          trackVisibility: false,
+                                          thickness: 16.0,
+                                          controller: _resultsScrollController,
+                                          radius: Radius.circular(8.0),
+                                          child: ScrollConfiguration(
+                                              behavior: ScrollConfiguration.of(
+                                                      context)
                                                   .copyWith(scrollbars: false),
-                                          child: CustomScrollView(
-                                            controller:
-                                                _resultsScrollController,
-                                            slivers: [
-                                              if (showStrongNumbersTable)
-                                                SliverToBoxAdapter(
-                                                  child:
-                                                      _buildStrongNumbersTableSection(
-                                                          context, fontSize),
-                                                ),
-                                              if (_phraseSummary.isNotEmpty)
-                                                SliverToBoxAdapter(
-                                                  child:
-                                                      _buildPhraseSummaryTableSection(
-                                                          context, fontSize),
-                                                ),
-                                              if (_searchResults.isNotEmpty)
-                                                SliverPadding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          bottom: 100.0),
-                                                  sliver:
-                                                      _buildVerseResultsSliver(
-                                                          context,
-                                                          fontSize,
-                                                          barColor),
-                                                ),
-                                            ],
-                                          )));
-                                },
-                              ),
+                                              child: CustomScrollView(
+                                                controller:
+                                                    _resultsScrollController,
+                                                slivers: [
+                                                  if (showStrongNumbersTable)
+                                                    SliverToBoxAdapter(
+                                                      child:
+                                                          _buildStrongNumbersTableSection(
+                                                              context,
+                                                              fontSize),
+                                                    ),
+                                                  if (_phraseSummary.isNotEmpty)
+                                                    SliverToBoxAdapter(
+                                                      child:
+                                                          _buildPhraseSummaryTableSection(
+                                                              context,
+                                                              fontSize),
+                                                    ),
+                                                  if (_searchResults.isNotEmpty)
+                                                    SliverPadding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 100.0),
+                                                      sliver:
+                                                          _buildVerseResultsSliver(
+                                                              context,
+                                                              fontSize,
+                                                              barColor),
+                                                    ),
+                                                ],
+                                              )));
+                                    },
+                                  ),
                   ),
                 ],
               ),
@@ -1999,11 +1993,13 @@ class _StrongsDefinitionLookupDialog extends StatefulWidget {
   final _DefinitionWidgetsBuilder buildDefinitionWidgets;
   final _TextStyleBuilder buildPrimaryTextStyle;
   final _TextStyleBuilder buildTextStyle;
+  final void Function(String strongsNumber)? listenToDefinitionSelected;
 
   const _StrongsDefinitionLookupDialog({
     required this.buildDefinitionWidgets,
     required this.buildPrimaryTextStyle,
     required this.buildTextStyle,
+    this.listenToDefinitionSelected,
   });
 
   @override
@@ -2014,17 +2010,148 @@ class _StrongsDefinitionLookupDialog extends StatefulWidget {
 class _StrongsDefinitionLookupDialogState
     extends State<_StrongsDefinitionLookupDialog> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode _textFieldFocusNode = FocusNode();
+  final FocusNode _listFocusNode = FocusNode();
+  final ScrollController _listScrollController = ScrollController();
+  Timer? _persistTimer;
 
   String? _currentStrongsNumber;
   String? _currentDefinition;
   String? _errorText;
 
+  /// Index in _allStrongsNumbers currently highlighted by keyboard navigation.
+  int _focusedIndex = 0;
+
+  /// Flat sorted list of all available Strong's numbers like ["G1", "G10", ..., "H8674"].
+  late final List<String> _allStrongsNumbers;
+
+  static const String _lastInputKey = 'lastStrongsLookupInput';
+  static const String _focusedIndexKey = 'lastStrongsLookupFocusedIndex';
+
+  @override
+  void initState() {
+    super.initState();
+    _allStrongsNumbers = _buildAllStrongsNumbersList();
+    //_controller.addListener(_schedulePersist);
+    _restoreState();
+  }
+
+  @override
+  void deactivate() {
+    _persistState();
+    super.deactivate();
+  }
+
   @override
   void dispose() {
-    _focusNode.dispose();
+    _persistTimer?.cancel();
+    _persistTimer = null;
+    _persistState();
+    _textFieldFocusNode.dispose();
+    _listFocusNode.dispose();
     _controller.dispose();
+    _listScrollController.dispose();
     super.dispose();
+  }
+
+  // void _schedulePersist() {
+  //   _persistTimer?.cancel();
+  //   _persistTimer = Timer(const Duration(milliseconds: 250), () {
+  //     _persistTimer = null;
+  //     _persistState();
+  //   });
+  // }
+
+  Future<void> _restoreState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastInput = prefs.getString(_lastInputKey);
+    final savedIndex = prefs.getInt(_focusedIndexKey);
+
+    bool restored = false;
+    if (lastInput != null && lastInput.isNotEmpty) {
+      final normalized = _normalizeInput(lastInput);
+      if (normalized != null) {
+        final definition = StrongsDefinitionsDatabase.getDefinition(normalized);
+        final validIndex = savedIndex != null &&
+            savedIndex >= 0 &&
+            savedIndex < _allStrongsNumbers.length &&
+            _allStrongsNumbers[savedIndex] == normalized;
+
+        if (definition != null && validIndex) {
+          setState(() {
+            _currentStrongsNumber = normalized;
+            _currentDefinition = definition;
+            _errorText = null;
+            _focusedIndex = savedIndex;
+            _controller.text = normalized;
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: normalized.length),
+            );
+          });
+          _scrollToStrongsNumber(normalized);
+          restored = true;
+        }
+      }
+    }
+
+    if (!restored) {
+      setState(() {
+        _currentStrongsNumber = null;
+        _currentDefinition = null;
+        _errorText = null;
+        _focusedIndex = 0;
+      });
+      _controller.clear();
+    }
+  }
+
+  Future<void> _persistState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastInputKey, _controller.text.trim());
+    await prefs.setInt(_focusedIndexKey, _focusedIndex);
+  }
+
+  /// Builds a flat sorted list of all Strong's numbers from the definitions map.
+  static List<String> _buildAllStrongsNumbersList() {
+    final result = <String>[];
+    for (final prefixEntry in strongsDefinitions.entries) {
+      final prefix = prefixEntry.key; // "H" or "G"
+      for (final numberEntry in prefixEntry.value.entries) {
+        result.add('$prefix${numberEntry.key}');
+      }
+    }
+    result.sort((a, b) {
+      // Sort by prefix first (G before H), then numerically by number
+      final aPrefix = a[0];
+      final bPrefix = b[0];
+      if (aPrefix != bPrefix) return aPrefix.compareTo(bPrefix);
+      final aNum = int.parse(a.substring(1));
+      final bNum = int.parse(b.substring(1));
+      return aNum.compareTo(bNum);
+    });
+    return result;
+  }
+
+  /// Scrolls the list so the given strongsNumber is visible and highlighted.
+  void _scrollToStrongsNumber(String strongsNumber) {
+    final index = _allStrongsNumbers.indexOf(strongsNumber);
+    if (index < 0) return;
+    // Use a post-frame callback to ensure the list is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_listScrollController.hasClients) {
+        final itemExtent = 36.0;
+        final visibleItems =
+            _listScrollController.position.viewportDimension / itemExtent;
+        final targetOffset =
+            (index * itemExtent) - (visibleItems / 2) * itemExtent;
+        _listScrollController.animateTo(
+          targetOffset.clamp(
+              0.0, _listScrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   String? _normalizeInput(String input) {
@@ -2047,6 +2174,7 @@ class _StrongsDefinitionLookupDialogState
         _currentDefinition = null;
         _errorText = 'Enter a Strong\'s number such as H1285 or G25.';
       });
+      _persistState();
       return;
     }
 
@@ -2061,6 +2189,9 @@ class _StrongsDefinitionLookupDialogState
         TextPosition(offset: _controller.text.length),
       );
     });
+    _focusedIndex = _allStrongsNumbers.indexOf(normalized);
+    _scrollToStrongsNumber(normalized);
+    _persistState();
   }
 
   void _clear() {
@@ -2070,39 +2201,41 @@ class _StrongsDefinitionLookupDialogState
       _currentDefinition = null;
       _errorText = null;
     });
-    _focusNode.requestFocus();
+    _textFieldFocusNode.requestFocus();
+    _persistState();
   }
 
   @override
   Widget build(BuildContext context) {
     final maxWidth = MediaQuery.of(context).size.width * 0.9;
-    final constrainedMaxWidth = maxWidth > 720.0 ? 720.0 : maxWidth;
-    final maxHeight = MediaQuery.of(context).size.height * 0.9;
-    //final resultHeight = maxHeight * 0.68;
+    final constrainedMaxWidth = maxWidth > 900.0 ? 900.0 : maxWidth;
+    final maxHeight = MediaQuery.of(context).size.height * 0.8;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor =
+        isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
 
     return AlertDialog(
-      title: Text(
-        'Strong\'s Definitions',
-        style: widget.buildPrimaryTextStyle(context, uiFontSize + 4),
-      ),
+      // title: Text(
+      //   'Strong\'s Definitions',
+      //   style: widget.buildPrimaryTextStyle(context, uiFontSize + 4),
+      // ),
+      contentPadding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
       content: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: constrainedMaxWidth,
           maxHeight: maxHeight,
+          minWidth: 200.0,
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
-              autofocus: true,
-              focusNode: _focusNode,
+              focusNode: _textFieldFocusNode,
               controller: _controller,
-              maxLength: 12,
+              maxLength: 5,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
               decoration: InputDecoration(
                 counter: const SizedBox.shrink(),
-                hintText: 'Strong\'s number',
+                hintText: 'Enter a Strong\'s number or choose one below',
                 hintStyle: TextStyle(
                   fontFamily: uiFontFamily,
                   fontSize: uiFontSize,
@@ -2123,10 +2256,8 @@ class _StrongsDefinitionLookupDialogState
                 suffixIcon: IconButton(
                   icon: Icon(
                     Icons.clear,
-                    semanticLabel: 'Clear Strong\'s Number',
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? darkPrimaryColor.value
-                        : lightPrimaryColor.value,
+                    semanticLabel: 'Reset',
+                    color: primaryColor,
                   ),
                   onPressed: _clear,
                 ),
@@ -2138,33 +2269,153 @@ class _StrongsDefinitionLookupDialogState
                 color: getAdaptiveTextColor(context),
               ),
             ),
-            const SizedBox(height: 12),
-            if (_errorText != null)
-              Text(
-                _errorText!,
-                style: widget.buildTextStyle(context, uiFontSize),
-              ),
-            if (_currentDefinition != null &&
-                _currentStrongsNumber != null) ...[
-              // Text(
-              //   _currentStrongsNumber!,
-              //   style: widget.buildPrimaryTextStyle(context, uiFontSize + 2),
-              // ),
-              const SizedBox(height: 8),
-              SizedBox(
-                //height: resultHeight,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: widget.buildDefinitionWidgets(
-                      context,
-                      _currentDefinition!,
-                      onStrongsTap: _lookup,
+            const SizedBox(height: 8),
+            // Text(
+            //   '${_allStrongsNumbers.length} definitions',
+            //   style: TextStyle(
+            //     fontSize: uiFontSize - 2,
+            //     fontFamily: uiFontFamily,
+            //     color: isDark
+            //         ? darkTextColor.value.withValues(alpha: 0.6)
+            //         : lightTextColor.value.withValues(alpha: 0.6),
+            //   ),
+            // ),
+            //const SizedBox(height: 8),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 100.0,
+                    child: Focus(
+                      focusNode: _listFocusNode,
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                          if (event.logicalKey ==
+                              LogicalKeyboardKey.arrowDown) {
+                            final nextIndex = (_focusedIndex + 1)
+                                .clamp(0, _allStrongsNumbers.length - 1);
+                            if (nextIndex != _focusedIndex) {
+                              setState(() => _focusedIndex = nextIndex);
+                              _lookup(_allStrongsNumbers[_focusedIndex]);
+                            }
+                            return KeyEventResult.handled;
+                          }
+                          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                            final prevIndex = (_focusedIndex - 1)
+                                .clamp(0, _allStrongsNumbers.length - 1);
+                            if (prevIndex != _focusedIndex) {
+                              setState(() => _focusedIndex = prevIndex);
+                              _lookup(_allStrongsNumbers[_focusedIndex]);
+                            }
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
+                      child: Scrollbar(
+                        controller: _listScrollController,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _listScrollController,
+                          itemCount: _allStrongsNumbers.length,
+                          itemExtent: 36.0,
+                          itemBuilder: (context, index) {
+                            final sn = _allStrongsNumbers[index];
+                            final isSelected = sn == _currentStrongsNumber;
+                            return Material(
+                              color: isSelected
+                                  ? primaryColor.withValues(alpha: 0.25)
+                                  : Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  _focusedIndex = index;
+                                  _lookup(sn);
+                                },
+                                child: Text(
+                                  sn,
+                                  style: TextStyle(
+                                    fontSize: uiFontSize + 4,
+                                    fontFamily: fontFamilyNotifier.value,
+                                    color: isSelected
+                                        ? primaryColor
+                                        : getAdaptiveTextColor(context),
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 1.0,
+                    color: isDark ? Colors.white24 : Colors.black12,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (_currentStrongsNumber != null)
+                          Text(
+                            _currentStrongsNumber!,
+                            style: widget.buildPrimaryTextStyle(
+                                context, uiFontSize + 2),
+                          ),
+                        if (_currentStrongsNumber != null)
+                          const SizedBox(height: 8),
+                        if (_errorText != null)
+                          Text(
+                            _errorText!,
+                            style: widget.buildTextStyle(context, uiFontSize),
+                          ),
+                        if (_currentDefinition != null &&
+                            _currentStrongsNumber != null)
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: widget.buildDefinitionWidgets(
+                                  context,
+                                  _currentDefinition!,
+                                  onStrongsTap: _lookup,
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (_currentDefinition == null &&
+                            _currentStrongsNumber == null &&
+                            _errorText == null)
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'Select or search a Strong\'s number',
+                                style: widget
+                                    .buildTextStyle(context, uiFontSize)
+                                    .copyWith(
+                                      fontStyle: FontStyle.italic,
+                                      color: isDark
+                                          ? darkTextColor.value
+                                              .withValues(alpha: 0.5)
+                                          : lightTextColor.value
+                                              .withValues(alpha: 0.5),
+                                    ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -2177,7 +2428,23 @@ class _StrongsDefinitionLookupDialogState
           ),
         ),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // prepend the Strong's number (available via _currentStrongsNumber)
+            final plain =
+                '${_currentStrongsNumber ?? ''}\n${_currentDefinition ?? ''}';
+            Clipboard.setData(ClipboardData(text: plain));
+            showStyledSnackBar(context, 'Definition copied to clipboard');
+          },
+          child: Text(
+            'Copy',
+            style: widget.buildTextStyle(context, uiFontSize),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            _persistState();
+            Navigator.of(context).pop();
+          },
           child: Text(
             'Close',
             style: widget.buildTextStyle(context, uiFontSize),
