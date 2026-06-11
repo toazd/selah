@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'dart:io';
 import '../database/strongs_database.dart';
 import '../database/strongs_definitions_database.dart';
 import '../data/strongs_definitions.dart';
@@ -721,22 +722,26 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
     final definitionChildren = _buildDefinitionWidgets(context, definition);
 
+    final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
     final maxWidth = MediaQuery.of(context).size.width * 0.9;
-    final constrainedMaxWidth = maxWidth > 720.0 ? 720.0 : maxWidth;
+    final constrainedMaxWidth = isMobile
+        ? MediaQuery.of(context).size.width
+        : (maxWidth > 720.0 ? 720.0 : maxWidth);
     final maxHeight = MediaQuery.of(context).size.height * 0.9;
 
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+          insetPadding: isMobile
+              ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
+              : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
           title: Text(
             strongsNumber,
             style: _getPrimaryTextStyle(dialogContext, uiFontSize + 4),
           ),
-          content: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: constrainedMaxWidth,
-              maxHeight: maxHeight,
-            ),
+          content: SizedBox(
+            width: constrainedMaxWidth,
+            height: maxHeight,
             child: SingleChildScrollView(
               padding: EdgeInsets.zero,
               child: Column(
@@ -1903,7 +1908,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextStyle(
       fontSize: FontSizeAdjustments.getAdjustedSize(
-          fontFamilyNotifier.value, fontSize),
+          fontFamilyNotifier.value, fontSize + 2),
       fontWeight: bold ? FontWeight.bold : null,
       color: isDark ? darkTextColor.value : lightTextColor.value,
     );
@@ -2207,9 +2212,13 @@ class _StrongsDefinitionLookupDialogState
 
   @override
   Widget build(BuildContext context) {
-    final maxWidth = MediaQuery.of(context).size.width * 0.9;
-    final constrainedMaxWidth = maxWidth > 900.0 ? 900.0 : maxWidth;
-    final maxHeight = MediaQuery.of(context).size.height * 0.8;
+    final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxWidth = screenWidth * 1;
+    final constrainedMaxWidth =
+        isMobile ? screenWidth : (maxWidth > 1000.0 ? 1000.0 : maxWidth);
+    final maxHeight = screenHeight * 1;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor =
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
@@ -2219,13 +2228,13 @@ class _StrongsDefinitionLookupDialogState
       //   'Strong\'s Definitions',
       //   style: widget.buildPrimaryTextStyle(context, uiFontSize + 4),
       // ),
+      insetPadding: isMobile
+          ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
+          : const EdgeInsets.symmetric(horizontal: 32.0, vertical: 64.0),
       contentPadding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-      content: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: constrainedMaxWidth,
-          maxHeight: maxHeight,
-          minWidth: 200.0,
-        ),
+      content: SizedBox(
+        width: constrainedMaxWidth,
+        height: maxHeight,
         child: Column(
           children: [
             TextField(
@@ -2238,7 +2247,7 @@ class _StrongsDefinitionLookupDialogState
                 hintText: 'Enter a Strong\'s number or choose one below',
                 hintStyle: TextStyle(
                   fontFamily: uiFontFamily,
-                  fontSize: uiFontSize,
+                  fontSize: uiFontSize + 2,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

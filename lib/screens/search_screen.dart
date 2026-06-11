@@ -2464,7 +2464,7 @@ class _SearchScreenState extends State<SearchScreen>
                     child: _controller.text.trim().isEmpty
                         ? Center(
                             child: Text(
-                              'Enter search terms above to find verses',
+                              'Enter search terms above',
                               style: TextStyle(
                                 fontSize: uiFontSize + 6,
                                 fontFamily: uiFontFamily,
