@@ -1055,11 +1055,10 @@ jobs:
         uses: docker://archlinux:latest
         with:
           args: >
-            bash -c "pacman -Syu --noconfirm pacman-contrib && chown -R nobody:nobody $GITHUB_WORKSPACE/aur-workspace && cd $GITHUB_WORKSPACE/aur-workspace && runuser -u nobody -- makepkg --printsrcinfo > .SRCINFO"
+            bash -c "pacman -Syu --noconfirm pacman-contrib && chown -R nobody:nobody $GITHUB_WORKSPACE/aur-workspace && cd $GITHUB_WORKSPACE/aur-workspace && runuser -u nobody -- makepkg --printsrcinfo > .SRCINFO && chown -R 1001:1001 $GITHUB_WORKSPACE/aur-workspace"
 
       - name: Commit and Push Changes directly to AUR
         run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE/aur-workspace
           cd $GITHUB_WORKSPACE/aur-workspace
           git add PKGBUILD .SRCINFO
           git commit -m "Github actions automated update for v${{ needs.extract-version.outputs.app_version }} (Build ${{ github.run_number }})"
