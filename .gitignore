@@ -1,1 +1,5 @@
 *.log
+build
+.dart_tool
+.gradle
+android/.gradle
