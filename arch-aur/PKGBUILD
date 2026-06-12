@@ -15,6 +15,5 @@ sha256sums=('57f6f8a1834dc8b62598d4847660cd7b2366870f6144a540514b4612a5f313b1')
 
 package() {
     cd "$pkgdir"
-
     ar p "${srcdir}/${pkgname}-${pkgver}.deb" data.tar.gz | bsdtar -xzf -
 }
