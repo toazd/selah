@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Extract app version
         id: extract
         run: |
@@ -110,7 +110,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/applications"
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
-        
+
         cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
@@ -119,10 +119,10 @@ jobs:
         if [ -d "$TEMP_DIR/lib" ]; then
           mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
         fi
-        
+
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=io.github.toazd.selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$TEMP_DIR/usr/share/applications/io.github.toazd.selah.desktop"
-        
+
         fpm -s dir -t deb \
           -n "$APP_NAME" \
           -v "$VERSION" \
@@ -147,7 +147,7 @@ jobs:
         mkdir -p "$TEMP_DIR/usr/share/applications"
         mkdir -p "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps"
         mkdir -p "$TEMP_DIR/opt/selah"
-        
+
         cp "$TEMP_DIR/data/flutter_assets/assets/icon.png" "$TEMP_DIR/usr/share/icons/hicolor/256x256/apps/io.github.toazd.selah.png"
         mv "$TEMP_DIR/selah" "$TEMP_DIR/opt/selah/"
         if [ -d "$TEMP_DIR/data" ]; then
@@ -156,10 +156,10 @@ jobs:
         if [ -d "$TEMP_DIR/lib" ]; then
           mv "$TEMP_DIR/lib" "$TEMP_DIR/opt/selah/"
         fi
-        
+
         ln -sf "/opt/selah/selah" "$TEMP_DIR/usr/bin/selah"
         printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=/usr/bin/selah\nIcon=io.github.toazd.selah.png\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$TEMP_DIR/usr/share/applications/io.github.toazd.selah.desktop"
-        
+
         fpm -s dir -t rpm \
           -n "$APP_NAME" \
           -v "$VERSION" \
@@ -187,7 +187,7 @@ jobs:
         # Copy icon to root
         cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/io.github.toazd.selah.png"
         ln -s io.github.toazd.selah.png "$APPDIR/selah.png"
-        
+
         # Create AppRun
         printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
         chmod +x "$APPDIR/AppRun"
@@ -306,7 +306,7 @@ jobs:
 
           ## 📦 Installation files by Platform
           Selah is not currently available in any app stores so some platforms require manual installation.
-          
+
           ### 🪟 Windows
           - `Selah-Windows-${{ needs.extract-version.outputs.app_version }}.exe`
             - Windows installer (recommended; includes Start Menu and Desktop shortcuts, easy uninstall)
@@ -340,23 +340,23 @@ jobs:
           - Universal Android app
             - `Selah-${{ needs.extract-version.outputs.app_version }}.apk`
               - `adb install ./Selah-X.X.X.apk` or install on the device.
-          
+
           ### 🍎 iOS
           - iOS app
             - Unsigned for sideloading (Sideloadly)
             - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa`
-          
+
           ### 🍎 macOS
           - Disk image installer
             - Untested builds. Need feedback!
             - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg`
-          
+
           ### 🌐 Web
           - Web build archive
             - `Selah-Web-0.7.5.zip`
             - Requires a real web server (extract to server root).
             - https://toazd.github.io/bible
-          
+
   build-snap:
     name: Build Snap Package
     needs:
@@ -708,11 +708,11 @@ jobs:
     runs-on: macos-26
     permissions:
       contents: write
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
-      
+
     - name: Cache Flutter dependencies
       uses: actions/cache@v5
       with:
@@ -722,7 +722,7 @@ jobs:
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-flutter-
-          
+
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -731,7 +731,7 @@ jobs:
 
     - name: Clean build
       run: flutter clean
-      
+
     - name: Get flutter dependencies
       run: flutter pub get
 
@@ -744,7 +744,7 @@ jobs:
         else
           echo "✅ Podfile found"
         fi
-        
+
     - name: Set iOS platform version
       run: |
         if [ ! -f "ios/Podfile" ]; then
@@ -803,7 +803,7 @@ jobs:
           cat ios/Podfile >> "$tmpfile"
           mv "$tmpfile" ios/Podfile
         fi
-        
+
     - name: Get iOS dependencies
       run: |
         cd ios
@@ -818,12 +818,12 @@ jobs:
           --no-codesign \
           --target lib/main.dart \
           --dart-define=BUILD_NUMBER=${{ github.run_number }}
-          
+
     - name: Create IPA file
       run: |
         mkdir -p build/ios-ipa
         BUILD_DIR=$(find build/ -name "Runner.app" -type d | head -1)
-        
+
         if [ -z "$BUILD_DIR" ]; then
           echo "❌ Could not find Runner.app"
           exit 1
@@ -832,7 +832,7 @@ jobs:
         cp -R "$BUILD_DIR" build/ios-ipa/
         mkdir -p build/ios-ipa/Payload
         mv build/ios-ipa/Runner.app build/ios-ipa/Payload/Selah.app
-        
+
         cd build/ios-ipa
         zip -r "../../build/Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa" Payload
         cd ../..
@@ -1026,11 +1026,11 @@ jobs:
         run: |
           VERSION="${{ needs.extract-version.outputs.app_version }}"
           RUN_NUM="${{ github.run_number }}"
-          
+
           # Match the exact naming convention generated by fpm in the build-linux step
           ASSET_NAME="selah_${VERSION}_amd64.deb"
           RELEASE_URL="https://github.com/toazd/selah/releases/download/v${VERSION}-build.${RUN_NUM}/${ASSET_NAME}"
-          
+
           # 1. Download the asset file to calculate an authentic hash signature
           echo "📥 Fetching release asset to calculate checksum profile..."
           curl -fL -O "$RELEASE_URL"
@@ -1044,11 +1044,11 @@ jobs:
 
           NEW_SHA=$(sha256sum "$ASSET_NAME" | awk '{print $1}')
           rm "$ASSET_NAME"
-          
+
           # 2. Copy your repo's template PKGBUILD over to our workspace
           cp arch-aur/PKGBUILD aur-workspace/PKGBUILD
           cd aur-workspace
-          
+
           # 3. Inject the dynamic fields safely using basic stream editing
           sed -i "s|^pkgver=.*|pkgver=${VERSION}|" PKGBUILD
           sed -i "s|^source=.*|source=(\"\${pkgname}-\${pkgver}.deb::${RELEASE_URL}\")|" PKGBUILD
