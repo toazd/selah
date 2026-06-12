@@ -1055,7 +1055,7 @@ jobs:
         uses: docker://archlinux:latest
         with:
           args: >
-            bash -c "pacman -Syu --noconfirm pacman-contrib && cd $GITHUB_WORKSPACE/aur-workspace && makepkg --printsrcinfo > .SRCINFO"
+            bash -c "pacman -Syu --noconfirm pacman-contrib && chown -R nobody:nobody $GITHUB_WORKSPACE/aur-workspace && cd $GITHUB_WORKSPACE/aur-workspace && su nobody -s /bin/bash -c 'makepkg --printsrcinfo' > .SRCINFO"
 
       - name: Commit and Push Changes directly to AUR
         run: |
