@@ -337,8 +337,9 @@ jobs:
             - `snap install --dangerous ./Selah-X.X.X.snap`
 
           ### 🤖 Android & ChromeOS
-          - Universal Android app (`adb install ./Selah-X.X.X.apk` OR transfer to device, enable install from other sources, and install it)
+          - Universal Android app
             - `Selah-${{ needs.extract-version.outputs.app_version }}.apk`
+              - `adb install ./Selah-X.X.X.apk` or install on the device.
           
           ### 🍎 iOS
           - iOS app
