@@ -352,8 +352,10 @@ jobs:
             - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg`
           
           ### 🌐 Web
-          - Web build archive (Requires a real web server. Simply extract the archive to the server root. Publicly available here: https://toazd.github.io/bible/)
+          - Web build archive
             - `Selah-Web-0.7.5.zip`
+            - Requires a real web server (extract to server root).
+            - https://toazd.github.io/bible
           
   build-snap:
     name: Build Snap Package
