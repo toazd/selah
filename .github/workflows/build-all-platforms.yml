@@ -1059,7 +1059,7 @@ jobs:
 
       - name: Commit and Push Changes directly to AUR
         run: |
-          chown -R $UID:$GID $GITHUB_WORKSPACE/aur-workspace
+          chown -R $(id -u):$(id -g) $GITHUB_WORKSPACE/aur-workspace
           cd $GITHUB_WORKSPACE/aur-workspace
           git add PKGBUILD .SRCINFO
           git commit -m "Github actions automated update for v${{ needs.extract-version.outputs.app_version }} (Build ${{ github.run_number }})"
