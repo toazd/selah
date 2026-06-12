@@ -1699,14 +1699,16 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     valueListenable: fontSizeNotifier,
                                     builder: (context, fontSize, child) {
                                       return RawScrollbar(
+                                          minThumbLength: 80.0,
+                                          interactive: true,
+                                          thumbVisibility: true,
+                                          trackVisibility: true,
+                                          thickness: 22.0,
                                           thumbColor: isDark
                                               ? darkPrimaryColor.value
                                                   .withValues(alpha: 0.3)
                                               : lightPrimaryColor.value
                                                   .withValues(alpha: 0.5),
-                                          thumbVisibility: false,
-                                          trackVisibility: false,
-                                          thickness: 16.0,
                                           controller: _resultsScrollController,
                                           radius: Radius.circular(8.0),
                                           child: ScrollConfiguration(
@@ -1714,28 +1716,42 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                                       context)
                                                   .copyWith(scrollbars: false),
                                               child: CustomScrollView(
+                                                //clipBehavior: Clip.none,
                                                 controller:
                                                     _resultsScrollController,
                                                 slivers: [
                                                   if (showStrongNumbersTable)
-                                                    SliverToBoxAdapter(
-                                                      child:
-                                                          _buildStrongNumbersTableSection(
-                                                              context,
-                                                              fontSize),
+                                                    SliverPadding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 24.0),
+                                                      sliver:
+                                                          SliverToBoxAdapter(
+                                                        child:
+                                                            _buildStrongNumbersTableSection(
+                                                                context,
+                                                                fontSize),
+                                                      ),
                                                     ),
                                                   if (_phraseSummary.isNotEmpty)
-                                                    SliverToBoxAdapter(
-                                                      child:
-                                                          _buildPhraseSummaryTableSection(
-                                                              context,
-                                                              fontSize),
+                                                    SliverPadding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 24.0),
+                                                      sliver:
+                                                          SliverToBoxAdapter(
+                                                        child:
+                                                            _buildPhraseSummaryTableSection(
+                                                                context,
+                                                                fontSize),
+                                                      ),
                                                     ),
                                                   if (_searchResults.isNotEmpty)
                                                     SliverPadding(
                                                       padding:
                                                           const EdgeInsets.only(
-                                                              bottom: 100.0),
+                                                              bottom: 100.0,
+                                                              right: 24.0),
                                                       sliver:
                                                           _buildVerseResultsSliver(
                                                               context,
@@ -2295,7 +2311,7 @@ class _StrongsDefinitionLookupDialogState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 100.0,
+                    width: 122.0,
                     child: Focus(
                       focusNode: _listFocusNode,
                       onKeyEvent: (node, event) {
@@ -2322,50 +2338,58 @@ class _StrongsDefinitionLookupDialogState
                         }
                         return KeyEventResult.ignored;
                       },
-                      child: Scrollbar(
-                        controller: _listScrollController,
-                        thumbVisibility: true,
-                        child: ListView.builder(
+                      child: ScrollbarTheme(
+                        data: ScrollbarThemeData(
+                          minThumbLength: 80.0,
+                        ),
+                        child: Scrollbar(
+                          interactive: true,
+                          thickness: 22.0,
                           controller: _listScrollController,
-                          itemCount: _allStrongsNumbers.length,
-                          itemExtent: 36.0,
-                          itemBuilder: (context, index) {
-                            final sn = _allStrongsNumbers[index];
-                            final isSelected = sn == _currentStrongsNumber;
-                            return Material(
-                              color: isSelected
-                                  ? primaryColor.withValues(alpha: 0.25)
-                                  : Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  _focusedIndex = index;
-                                  _lookup(sn);
-                                },
-                                child: Text(
-                                  sn,
-                                  style: TextStyle(
-                                    fontSize: uiFontSize + 4,
-                                    fontFamily: fontFamilyNotifier.value,
-                                    color: isSelected
-                                        ? primaryColor
-                                        : getAdaptiveTextColor(context),
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: ListView.builder(
+                            controller: _listScrollController,
+                            itemCount: _allStrongsNumbers.length,
+                            itemExtent: 36.0,
+                            itemBuilder: (context, index) {
+                              final sn = _allStrongsNumbers[index];
+                              final isSelected = sn == _currentStrongsNumber;
+                              return Material(
+                                color: isSelected
+                                    ? primaryColor.withValues(alpha: 0.25)
+                                    : Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    _focusedIndex = index;
+                                    _lookup(sn);
+                                  },
+                                  child: Text(
+                                    sn,
+                                    style: TextStyle(
+                                      fontSize: uiFontSize + 4,
+                                      fontFamily: fontFamilyNotifier.value,
+                                      color: isSelected
+                                          ? primaryColor
+                                          : getAdaptiveTextColor(context),
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 1.0,
-                    color: isDark ? Colors.white24 : Colors.black12,
-                  ),
+                  // const SizedBox(width: 16),
+                  // Container(
+                  //   width: 1.0,
+                  //   color: isDark ? Colors.white24 : Colors.black12,
+                  // ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(

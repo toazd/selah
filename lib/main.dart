@@ -980,6 +980,8 @@ class BibleStudyApp extends StatelessWidget {
                                           //   return supportedLocales.first; // e.g., default to 'en_US'
                                           // },
                                           theme: ThemeData(
+                                            scrollbarTheme: ScrollbarThemeData(
+                                                interactive: true),
                                             primaryColor: lightPrimary,
                                             scaffoldBackgroundColor: lightBg,
                                             appBarTheme: AppBarTheme(
