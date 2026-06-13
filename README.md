@@ -42,9 +42,11 @@ Note also that Selah has built-in data export and import functionality so you do
 - **Rich Text Notes** - Verse-level note support with automatic verse reference linker
 - **Highlight System** - Support for word-level highlighting with customizeable colors
 - **TSK Cross references** - Optionally show TSK (Treasury of Scripture Knowledge) references below each verse
+- **Unique Strongs search** - Search by word, reference, or Strong's numbers to reveal everywhere in the Bible those Strong's numbers appear. When doing a word search it first finds all the Strong's numbers associated with that word and then it searches the entire Bible for every verse that contains those Strong's number(s).
+- **Strong's definitions** - An extra dialog on the Strong's search screen that allows quickly browsing Strong's definitions.
 - **Verse History** - Track and revisit previously viewed verses
-- **Simple/Advanced Search** - Find verses by keywords or phrases with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother eg. graven carved)
-- **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid, list layout, or manually entering a reference
+- **Simple/Advanced Search** - Find verses by keywords or phrases, with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother)
+- **Book Navigation** - Easy browsing through all 66 books of the Bible using a visual grid or manually entering a reference. Supports having multiple Bible screens side-by-side or stacked on top of each other.
 - **Full Touch-screen support** - Built from the ground up to be both touch-screen and non-touch-screen friendly
 - **Seemless, transparent, account based online sync features** - Sign up using a free account and use that account across multiple devices (no email required)
 

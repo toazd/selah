@@ -23,26 +23,70 @@ import '../screens/note_screen.dart';
 // Top-level functions for compute() to enable off-main-thread execution
 Future<List<Map<String, dynamic>>> _computeStrongsNumberSearch(
     String strongsNumber) async {
-  return StrongsDatabase.searchByStrongsNumber(strongsNumber);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
+  }
+  final result = StrongsDatabase.searchByStrongsNumber(strongsNumber);
+  if (kDebugMode) {
+    debugPrint('[_computeStrongsNumberSearch] DONE: ${result.length} verses');
+  }
+  return result;
 }
 
 Future<List<Map<String, dynamic>>> _computeWordSearch(String word) async {
-  return StrongsDatabase.searchByWord(word);
+  if (kDebugMode) {
+    debugPrint('[_computeWordSearch] START: word="$word"');
+  }
+  final result = StrongsDatabase.searchByWord(word);
+  if (kDebugMode) {
+    debugPrint('[_computeWordSearch] DONE: ${result.length} verses');
+  }
+  return result;
 }
 
 Future<Map<String, Map<String, dynamic>>> _computeFindStrongsNumbers(
     SearchTaskData data) async {
-  return StrongsDatabase.findStrongsNumbersForWord(data.word, data.wordVerses);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeFindStrongsNumbers] START: word="${data.word}", ${data.wordVerses.length} verses');
+  }
+  final result =
+      StrongsDatabase.findStrongsNumbersForWord(data.word, data.wordVerses);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeFindStrongsNumbers] DONE: ${result.length} unique Strong\'s numbers');
+  }
+  return result;
 }
 
 Future<List<Map<String, dynamic>>> _computeSearchByStrongsNumbers(
     SearchTaskData data) async {
-  return StrongsDatabase.searchByStrongsNumbers(data.strongsList);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeSearchByStrongsNumbers] START: ${data.strongsList.length} Strong\'s numbers: $data.strongsList');
+  }
+  final result = StrongsDatabase.searchByStrongsNumbers(data.strongsList);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeSearchByStrongsNumbers] DONE: ${result.length} verses');
+  }
+  return result;
 }
 
 Future<Map<String, int>> _computeExtractPhraseSummary(
     SummaryTaskData data) async {
-  return StrongsDatabase.extractPhraseSummary(data.results, data.strongsList);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeExtractPhraseSummary] START: ${data.strongsList.length} SNs, ${data.results.length} results');
+  }
+  final result =
+      StrongsDatabase.extractPhraseSummary(data.results, data.strongsList);
+  if (kDebugMode) {
+    debugPrint(
+        '[_computeExtractPhraseSummary] DONE: ${result.length} unique phrases');
+  }
+  return result;
 }
 
 Future<ReferenceSearchResult> _computeReferenceSearch(
@@ -208,6 +252,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   String? _searchType;
   String? _searchTerm;
   bool _isLoadingDialogVisible = false;
+  bool _searchTimedOut = false;
+  Timer? _searchTimeoutTimer;
 
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
@@ -216,6 +262,28 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   bool get wantKeepAlive => true;
 
   void _showLoadingDialog() {
+    _searchTimedOut = false;
+    _searchTimeoutTimer?.cancel();
+    _searchTimeoutTimer = Timer(const Duration(seconds: 60), () {
+      if (kDebugMode) {
+        debugPrint('[_searchTimeoutTimer] 60s search timeout reached');
+      }
+      _searchTimedOut = true;
+      _hideLoadingDialog();
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+          _foundStrongsNumbers = {};
+          _phraseSummary = {};
+          _totalMatches = null;
+          _totalVerses = null;
+          _searchType = null;
+          _searchTerm = null;
+        });
+        showStyledSnackBar(context,
+            'Maximum search time exceeded. Please try a different word.');
+      }
+    });
     _isLoadingDialogVisible = true;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
@@ -256,6 +324,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _hideLoadingDialog() {
+    _searchTimeoutTimer?.cancel();
+    _searchTimeoutTimer = null;
     if (_isLoadingDialogVisible && mounted && Navigator.canPop(context)) {
       _isLoadingDialogVisible = false;
       Navigator.pop(context);
@@ -383,6 +453,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _onSearch({bool showLoading = true, bool resetScroll = true}) {
+    if (kDebugMode) {
+      debugPrint('[_onSearch] Called with input="${_controller.text.trim()}"');
+    }
     final input = _controller.text.trim();
     if (input.isEmpty) {
       setState(() {
@@ -420,6 +493,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     // Try to parse as reference search first (e.g., "Gen 2:15 garden")
     final referenceSearch = _parseReferenceSearch(input);
     if (referenceSearch != null) {
+      if (kDebugMode) {
+        debugPrint('[_onSearch] Parsed as REFERENCE search');
+      }
       _performReferenceSearch(referenceSearch);
       return;
     }
@@ -436,6 +512,15 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
     final strongsNumber = StrongsDatabase.validateStrongsNumber(searchTerm);
 
+    if (kDebugMode) {
+      if (strongsNumber != null) {
+        debugPrint(
+            '[_onSearch] Parsed as STRONGS NUMBER search: "$strongsNumber"');
+      } else {
+        debugPrint('[_onSearch] Parsed as WORD search: "$searchTerm"');
+      }
+    }
+
     Future.microtask(() {
       if (strongsNumber != null) {
         _performStrongsNumberSearch(strongsNumber);
@@ -446,11 +531,20 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _performStrongsNumberSearch(String strongsNumber) async {
+    if (kDebugMode) {
+      debugPrint(
+          '[_performStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
+    }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
       final results = await compute(_computeStrongsNumberSearch, strongsNumber);
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
+      if (kDebugMode) {
+        debugPrint(
+            '[_performStrongsNumberSearch] Got ${results.length} results from compute');
+      }
 
       if (results.isEmpty) {
         setState(() {
@@ -466,8 +560,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
+      if (_searchTimedOut) return;
+
+      if (kDebugMode) {
+        debugPrint(
+            '[_performStrongsNumberSearch] Calling extractPhraseSummary (main thread)...');
+      }
       final phraseSummary =
           StrongsDatabase.extractPhraseSummary(results, [strongsNumber]);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performStrongsNumberSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
+      }
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
         totalMatches += count;
@@ -497,11 +601,19 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _performWordSearch(String word) async {
+    if (kDebugMode) {
+      debugPrint('[_performWordSearch] ===== START: word="$word" =====');
+    }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
       final wordVerses = await compute(_computeWordSearch, word);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 1 (searchByWord) done: ${wordVerses.length} verses');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       if (wordVerses.isEmpty) {
         setState(() {
@@ -517,6 +629,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 2: finding Strong\'s numbers for "$word" across ${wordVerses.length} verses...');
+      }
       final findStrongsData = SearchTaskData(
         word: word,
         wordVerses: wordVerses,
@@ -524,8 +640,13 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       );
       final foundStrongs =
           await compute(_computeFindStrongsNumbers, findStrongsData);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 2 done: found ${foundStrongs.length} unique Strong\'s numbers');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       if (foundStrongs.isEmpty) {
         setState(() {
@@ -542,14 +663,23 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
 
       final strongsList = foundStrongs.keys.toList();
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 3: searching all verses for ${strongsList.length} Strong\'s numbers: $strongsList...');
+      }
       final searchData = SearchTaskData(
         word: word,
         wordVerses: wordVerses,
         strongsList: strongsList,
       );
       final results = await compute(_computeSearchByStrongsNumbers, searchData);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 3 done: ${results.length} verses found');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -565,14 +695,23 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 4: extracting phrase summary for ${strongsList.length} SNs across ${results.length} verses...');
+      }
       final summaryData = SummaryTaskData(
         results: results,
         strongsList: strongsList,
       );
       final phraseSummary =
           await compute(_computeExtractPhraseSummary, summaryData);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] Step 4 done: ${phraseSummary.length} unique phrases');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -589,7 +728,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _isRestoring = false;
       });
       _hideLoadingDialog();
+      if (kDebugMode) {
+        debugPrint(
+            '[_performWordSearch] ===== COMPLETE ($_totalMatches matches in $_totalVerses verses) =====');
+      }
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[_performWordSearch] ERROR: $e');
+      }
       if (mounted) {
         if (!_isResetting) {
           setState(() {
@@ -604,11 +750,20 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
   Future<void> _performReferenceSearch(
       ReferenceSearchTaskData refSearch) async {
+    if (kDebugMode) {
+      debugPrint(
+          '[_performReferenceSearch] START: "${refSearch.book} ${refSearch.chapter}:${refSearch.verse} ${refSearch.word}"');
+    }
     _unfocusSearchField();
     try {
       final result = await compute(_computeReferenceSearch, refSearch);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performReferenceSearch] Reference search done: error=${result.error}, strongsNumbers=${result.strongsNumbers}');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       // Check for errors
       if (result.error != null) {
@@ -641,15 +796,26 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _foundStrongsNumbers = foundStrongs;
       });
 
+      if (_searchTimedOut) return;
+
       // Search the entire bible for all these Strong's numbers
+      if (kDebugMode) {
+        debugPrint(
+            '[_performReferenceSearch] Searching all verses for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers');
+      }
       final searchData = SearchTaskData(
         word: result.word!,
         wordVerses: [],
         strongsList: strongsNumbers,
       );
       final results = await compute(_computeSearchByStrongsNumbers, searchData);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performReferenceSearch] searchByStrongsNumbers done: ${results.length} verses');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -665,14 +831,22 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
+      if (kDebugMode) {
+        debugPrint('[_performReferenceSearch] Extracting phrase summary...');
+      }
       final summaryData = SummaryTaskData(
         results: results,
         strongsList: strongsNumbers,
       );
       final phraseSummary =
           await compute(_computeExtractPhraseSummary, summaryData);
+      if (kDebugMode) {
+        debugPrint(
+            '[_performReferenceSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
+      }
       if (!mounted) return;
       if (_isResetting) return;
+      if (_searchTimedOut) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -688,7 +862,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _isRestoring = false;
       });
       _hideLoadingDialog();
+      if (kDebugMode) {
+        debugPrint(
+            '[_performReferenceSearch] DONE ($_totalMatches matches in $_totalVerses verses)');
+      }
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[_performReferenceSearch] ERROR: $e');
+      }
       if (mounted) {
         if (!_isResetting) {
           setState(() {
@@ -898,7 +1079,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             child: Text(
               strongsNumber,
               style: TextStyle(
-                fontSize: adjustedFontSize * 0.8,
+                fontSize: adjustedFontSize * 0.9,
                 color: color,
               ),
             ),
@@ -1347,6 +1528,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _disposeVerseReferenceRecognizers() {
+    _searchTimeoutTimer?.cancel();
+    _searchTimeoutTimer = null;
     for (final recognizer in _verseReferenceRecognizers) {
       recognizer.onTap = null;
       recognizer.dispose();

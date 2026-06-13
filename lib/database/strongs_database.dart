@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import "../data/bible_data_strongs.dart";
 import "../utils/verse_reference_detector.dart";
 
@@ -18,6 +19,10 @@ class StrongsDatabase {
   /// Returns a list of maps with 'book', 'chapter', 'verse', 'text', and 'matchedStrongs' keys.
   static List<Map<String, dynamic>> searchByStrongsNumber(
       String strongsNumber) {
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] searchByStrongsNumber: starting for "$strongsNumber"');
+    }
     final results = <Map<String, dynamic>>[];
     final normalized = strongsNumber.toUpperCase();
 
@@ -39,19 +44,34 @@ class StrongsDatabase {
         }
       }
     }
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] searchByStrongsNumber: found ${results.length} verses for "$strongsNumber"');
+    }
     return results;
   }
 
   /// Searches for a word in the Strong's data and returns all verses containing that word.
   /// Performs case-insensitive search on the text portion (excluding Strong's numbers in braces).
   static List<Map<String, dynamic>> searchByWord(String word) {
+    if (kDebugMode) {
+      debugPrint('[_StrongsDatabase] searchByWord: starting for "$word"');
+    }
     final results = <Map<String, dynamic>>[];
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) return results;
 
+    int bookCount = 0;
     for (final book in bibleDataStrongs.keys) {
+      bookCount++;
       final bookData = bibleDataStrongs[book]!;
+      if (kDebugMode) {
+        debugPrint(
+            '[_StrongsDatabase] searchByWord: scanning book #$bookCount "$book" (${bookData.length} chapters)');
+      }
+      int chapterCount = 0;
       for (final chapter in bookData.keys) {
+        chapterCount++;
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
@@ -72,6 +92,14 @@ class StrongsDatabase {
           }
         }
       }
+      if (kDebugMode) {
+        debugPrint(
+            '[_StrongsDatabase] searchByWord: book "$book" scanned ($chapterCount chapters, ${results.length} total matches so far)');
+      }
+    }
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] searchByWord: finished for "$word" — found ${results.length} verses across $bookCount books');
     }
     return results;
   }
@@ -110,6 +138,10 @@ class StrongsDatabase {
   /// Returns a map of Strong's number -> map of (book, chapter, verse) where first found.
   static Map<String, Map<String, dynamic>> findStrongsNumbersForWord(
       String word, List<Map<String, dynamic>> verses) {
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] findStrongsNumbersForWord: starting for "$word" across ${verses.length} verses');
+    }
     final result = <String, Map<String, dynamic>>{};
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) return result;
@@ -143,6 +175,10 @@ class StrongsDatabase {
         }
       }
     }
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] findStrongsNumbersForWord: found ${result.length} unique Strong\'s numbers for "$word"');
+    }
     return result;
   }
 
@@ -150,12 +186,25 @@ class StrongsDatabase {
   /// Returns a list of maps with "book", "chapter", "verse", "text", and "matchedStrongs" keys.
   static List<Map<String, dynamic>> searchByStrongsNumbers(
       List<String> strongsNumbers) {
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] searchByStrongsNumbers: starting for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers');
+    }
     final results = <Map<String, dynamic>>[];
     final normalized = strongsNumbers.map((s) => s.toUpperCase()).toSet();
 
+    int bookCount = 0;
     for (final book in bibleDataStrongs.keys) {
+      bookCount++;
       final bookData = bibleDataStrongs[book]!;
+      if (kDebugMode) {
+        debugPrint(
+            '[_StrongsDatabase] searchByStrongsNumbers: scanning book #$bookCount "$book" (${bookData.length} chapters, ${results.length} results so far)');
+      }
+      int chapterCount = 0;
+      int matchCountThisBook = 0;
       for (final chapter in bookData.keys) {
+        chapterCount++;
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
@@ -166,6 +215,7 @@ class StrongsDatabase {
             }
           }
           if (matchedStrongs.isNotEmpty) {
+            matchCountThisBook++;
             results.add({
               "book": book,
               "chapter": chapter,
@@ -176,6 +226,14 @@ class StrongsDatabase {
           }
         }
       }
+      if (kDebugMode) {
+        debugPrint(
+            '[_StrongsDatabase] searchByStrongsNumbers: book "$book" done ($chapterCount chapters, $matchCountThisBook matching verses, ${results.length} total)');
+      }
+    }
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] searchByStrongsNumbers: finished — found ${results.length} verses across $bookCount books');
     }
     return results;
   }
@@ -186,6 +244,10 @@ class StrongsDatabase {
   /// with leading/trailing punctuation and extra whitespace stripped.
   static Map<String, int> extractPhraseSummary(
       List<Map<String, dynamic>> verses, List<String> strongsNumbers) {
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] extractPhraseSummary: starting for ${strongsNumbers.length} Strong\'s numbers across ${verses.length} verses');
+    }
     final phraseCounts = <String, int>{};
     final normalizedSet = strongsNumbers.map((s) => s.toUpperCase()).toSet();
 
@@ -214,11 +276,12 @@ class StrongsDatabase {
             phraseCounts[phrase.toLowerCase()] =
                 (phraseCounts[phrase.toLowerCase()] ?? 0) + 1;
           }
-          // if (phrase.isNotEmpty) {
-          //   phraseCounts[phrase] = (phraseCounts[phrase] ?? 0) + 1;
-          // }
         }
       }
+    }
+    if (kDebugMode) {
+      debugPrint(
+          '[_StrongsDatabase] extractPhraseSummary: finished — ${phraseCounts.length} unique phrases');
     }
     return phraseCounts;
   }
