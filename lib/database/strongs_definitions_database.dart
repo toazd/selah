@@ -12,6 +12,23 @@ class StrongsDefinitionsDatabase {
     return strongsDefinitions[prefix]?[number];
   }
 
+  /// Strips HTML tags from a definition string, converting <br> to newlines.
+  static String stripHtml(String html) {
+    String result = html
+        .replaceAll(RegExp(r'<br>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'<[^>]*>'), '');
+    // result = result.replaceAll(RegExp(r'<[^>]*>'), '');
+    // result = result.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    // // Decode common HTML entities
+    // result = result.replaceAll('&', '&');
+    // result = result.replaceAll('<', '<');
+    // result = result.replaceAll('>', '>');
+    // result = result.replaceAll('"', '"');
+    // result = result.replaceAll('&#39;', "'");
+    // result = result.replaceAll('&nbsp;', ' ');
+    return result.trim();
+  }
+
   static String? _normalizeStrongNumber(String strongsNumber) {
     final trimmed = strongsNumber.trim();
     if (trimmed.length < 2) return null;

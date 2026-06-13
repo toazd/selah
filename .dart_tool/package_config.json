@@ -260,6 +260,12 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "flutter_html",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/flutter_html-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "flutter_keyboard_visibility_linux",
       "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0",
       "packageUri": "lib/",
@@ -510,6 +516,12 @@
       "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/lints-6.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.8"
+    },
+    {
+      "name": "list_counter",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/list_counter-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "logging",

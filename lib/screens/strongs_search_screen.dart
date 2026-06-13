@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:io';
@@ -207,8 +208,6 @@ Color _adjustBarColor(Color backgroundColor) {
       : (hsl.lightness + 0.03).clamp(0.0, 1.0);
   return hsl.withLightness(adjustedLightness).toColor();
 }
-
-final RegExp _definitionStrongsNumberPattern = RegExp(r'[GH]\d{1,4}');
 
 typedef _DefinitionWidgetsBuilder = List<Widget> Function(
   BuildContext context,
@@ -935,7 +934,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             TextButton(
               onPressed: () {
                 // prepend the Strong's number (available via the strongsNumber argument)
-                final plain = '$strongsNumber\n$definition';
+                final plain =
+                    '$strongsNumber\n${StrongsDefinitionsDatabase.stripHtml(definition)}';
                 Clipboard.setData(ClipboardData(text: plain));
                 showStyledSnackBar(
                     dialogContext, 'Definition copied to clipboard');
@@ -972,95 +972,50 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     void Function(String strongsNumber)? onStrongsTap,
   }) {
     final baseStyle = _getTextStyle(context, uiFontSize);
-    final definitionChildren = <Widget>[];
-    for (final line in definition.split('\n')) {
-      definitionChildren.add(RichText(
-        text: TextSpan(
-          style: baseStyle,
-          children: _buildDefinitionPlainSpans(
-            context,
-            line,
-            baseStyle,
-            onStrongsTap: onStrongsTap,
+    // Wrap Strong's numbers (e.g. H1234, G5678) in anchor tags so flutter_html
+    // makes them tappable. Uses the exact regex [GH]\d{1,4} with no boundary
+    // checking since the data is predictable.
+    final strongsRegExp = RegExp(r'[GH]\d{1,4}');
+    String html = definition.replaceAllMapped(strongsRegExp, (match) {
+      return '<a href="strongs://${match.group(0)}">${match.group(0)}</a>';
+    });
+    return [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Html(
+            data: html,
+            onLinkTap: (String? url, Map<String, String> attributes, _) {
+              if (url != null && url.startsWith('strongs://')) {
+                final sn = url.substring('strongs://'.length);
+                _showStrongsDefinitionDialog(context, sn);
+                // Using the below changes the current view instead
+                // of showing a new dialog
+                //onStrongsTap(sn);
+              }
+            },
+            style: {
+              'body': Style(
+                fontSize: FontSize(uiFontSize),
+                fontFamily: fontFamilyNotifier.value,
+                color: baseStyle.color,
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+                lineHeight: const LineHeight(1.5),
+              ),
+              'a': Style(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? darkPrimaryColor.value
+                    : lightPrimaryColor.value,
+                textDecoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+              ),
+            },
           ),
         ),
-      ));
-    }
-    return definitionChildren;
-  }
-
-  List<InlineSpan> _buildDefinitionPlainSpans(
-    BuildContext context,
-    String text,
-    TextStyle style, {
-    void Function(String strongsNumber)? onStrongsTap,
-  }) {
-    final spans = <InlineSpan>[];
-    int index = 0;
-
-    for (final match in _definitionStrongsNumberPattern.allMatches(text)) {
-      if (!_isExactDefinitionStrongsNumber(text, match)) continue;
-
-      if (match.start > index) {
-        spans.add(
-            TextSpan(text: text.substring(index, match.start), style: style));
-      }
-
-      spans.add(_buildClickableDefinitionStrongsSpan(
-        context,
-        match.group(0)!,
-        style,
-        onStrongsTap: onStrongsTap,
-      ));
-      index = match.end;
-    }
-
-    if (index < text.length) {
-      spans.add(TextSpan(text: text.substring(index), style: style));
-    }
-
-    return spans;
-  }
-
-  bool _isExactDefinitionStrongsNumber(String text, RegExpMatch match) {
-    final start = match.start;
-    final end = match.end;
-    final previousIsAlphanumeric =
-        start > 0 && RegExp(r'[A-Za-z0-9]').hasMatch(text[start - 1]);
-    final nextIsAlphanumeric =
-        end < text.length && RegExp(r'[A-Za-z0-9]').hasMatch(text[end]);
-    return !previousIsAlphanumeric && !nextIsAlphanumeric;
-  }
-
-  WidgetSpan _buildClickableDefinitionStrongsSpan(
-    BuildContext context,
-    String strongsNumber,
-    TextStyle style, {
-    void Function(String strongsNumber)? onStrongsTap,
-  }) {
-    final primaryStyle = style.copyWith(
-      color: Theme.of(context).brightness == Brightness.dark
-          ? darkPrimaryColor.value
-          : lightPrimaryColor.value,
-    );
-
-    return WidgetSpan(
-      alignment: PlaceholderAlignment.baseline,
-      baseline: TextBaseline.alphabetic,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () {
-            if (onStrongsTap != null) {
-              onStrongsTap(strongsNumber);
-            } else {
-              _showStrongsDefinitionDialog(context, strongsNumber);
-            }
-          },
-          child: Text(strongsNumber, style: primaryStyle),
-        ),
       ),
-    );
+    ];
   }
 
   WidgetSpan _buildClickableStrongsSpan(BuildContext context,
@@ -1672,19 +1627,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: _showHelpDialog,
           ),
-          // No options for Strong's search yet
-          //
-          // IconButton(
-          //   icon: Icon(
-          //     Icons.menu,
-          //     size: 32,
-          //     color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-          //     semanticLabel: 'Show Options Menu',
-          //   ),
-          //   tooltip: 'Options',
-          //   color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-          //   onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-          // ),
         ],
       ),
       endDrawer: Drawer(
@@ -1706,15 +1648,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                 : lightBackgroundColor.value,
           ),
           const SizedBox(height: 16),
-          // Padding(
-          //   padding:
-          //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-          //   child: Text('Options coming soon',
-          //       style: TextStyle(
-          //           fontSize: uiFontSize,
-          //           fontFamily: uiFontFamily,
-          //           color: getAdaptiveTextColor(context))),
-          // ),
         ])),
       ),
       backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -1899,7 +1832,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                                       context)
                                                   .copyWith(scrollbars: false),
                                               child: CustomScrollView(
-                                                //clipBehavior: Clip.none,
                                                 controller:
                                                     _resultsScrollController,
                                                 slivers: [
@@ -2258,14 +2190,6 @@ class _StrongsDefinitionLookupDialogState
     super.dispose();
   }
 
-  // void _schedulePersist() {
-  //   _persistTimer?.cancel();
-  //   _persistTimer = Timer(const Duration(milliseconds: 250), () {
-  //     _persistTimer = null;
-  //     _persistState();
-  //   });
-  // }
-
   Future<void> _restoreState() async {
     final prefs = await SharedPreferences.getInstance();
     final lastInput = prefs.getString(_lastInputKey);
@@ -2423,10 +2347,6 @@ class _StrongsDefinitionLookupDialogState
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
 
     return AlertDialog(
-      // title: Text(
-      //   'Strong\'s Definitions',
-      //   style: widget.buildPrimaryTextStyle(context, uiFontSize + 4),
-      // ),
       insetPadding: isMobile
           ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
           : const EdgeInsets.symmetric(horizontal: 32.0, vertical: 64.0),
@@ -2478,17 +2398,6 @@ class _StrongsDefinitionLookupDialogState
               ),
             ),
             const SizedBox(height: 8),
-            // Text(
-            //   '${_allStrongsNumbers.length} definitions',
-            //   style: TextStyle(
-            //     fontSize: uiFontSize - 2,
-            //     fontFamily: uiFontFamily,
-            //     color: isDark
-            //         ? darkTextColor.value.withValues(alpha: 0.6)
-            //         : lightTextColor.value.withValues(alpha: 0.6),
-            //   ),
-            // ),
-            //const SizedBox(height: 8),
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2568,11 +2477,6 @@ class _StrongsDefinitionLookupDialogState
                       ),
                     ),
                   ),
-                  // const SizedBox(width: 16),
-                  // Container(
-                  //   width: 1.0,
-                  //   color: isDark ? Colors.white24 : Colors.black12,
-                  // ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -2647,7 +2551,7 @@ class _StrongsDefinitionLookupDialogState
           onPressed: () {
             // prepend the Strong's number (available via _currentStrongsNumber)
             final plain =
-                '${_currentStrongsNumber ?? ''}\n${_currentDefinition ?? ''}';
+                '${_currentStrongsNumber ?? ''}\n${_currentDefinition != null ? StrongsDefinitionsDatabase.stripHtml(_currentDefinition!) : ''}';
             Clipboard.setData(ClipboardData(text: plain));
             showStyledSnackBar(context, 'Definition copied to clipboard');
           },
