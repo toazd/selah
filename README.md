@@ -21,16 +21,6 @@
 
 Selah is a cross-platform, touch-friendly Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a> with many features built in to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
 
-Supports completely offline install and functionality and also offers free online sync services (for as long as the service can be supported: currently using the free tier on Supabase: https://supabase.com/pricing).
-
-Note also that Selah has built-in data export and import functionality so you do not have to use the online sync service to backup/restore your saved highlights, notes, history, or saved searches (exported data uses a simple, portable JSON format).
-
-- Selah is currently in open beta and your thoughts/contributions/bug reports would be helpful and will shape the future of the app.
-  - We are especially in need of users to test the app on MacOS desktop and iOS mobile platforms!
-- Selah currently does not have self-installing or self-updating features.
-  -  Fixes and features are being added regularily so check for new releases periodically.
-- Use the "Issues" tab to report any problem you may have with the app or even if you need assitance installing, running, or using the app.
-
 ## 📖 Features
 
 ### Core Bible Study Tools
