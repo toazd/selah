@@ -2,7 +2,7 @@
 pkgname=selah-bin
 _pkgname=selah
 pkgver=0.7.6
-pkgrel=1
+pkgrel=3
 pkgdesc="A cross-platform Bible study app using Flutter and the 1769 King James Version"
 arch=('x86_64')
 url="https://github.com/toazd/selah"
