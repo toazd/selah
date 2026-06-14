@@ -7,6 +7,7 @@ import '../utils/book_name_converter.dart';
 import '../utils/verse_display_utils.dart';
 import '../services/local_data_change_notifier.dart';
 import '../services/supabase_sync_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import '../utils/snackbar_notification.dart';
@@ -14,6 +15,7 @@ import '../utils/bible_utils.dart';
 import '../utils/data_loaders.dart';
 import '../utils/dialog_utils.dart';
 import '../data/tsk_data.dart';
+import '../models/verse_display_data.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -68,6 +70,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
   final ScrollController _scrollController = ScrollController();
   final Map<int, GlobalKey> _verseKeys = {};
   Size? _dialogSize;
+
+  // Lazy-rendering: cached verse data list for ListView.builder
+  List<VerseDisplayData> _verseDataList = [];
 
   // Real-time data for notes and highlights
   Map<int, Map<String, dynamic>> _notes = {};
@@ -175,6 +180,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
     _highlightsSubscription =
         SupabaseSyncService.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
+      _rebuildVerseDataList();
       if (mounted) {
         setState(() {});
       }
@@ -183,12 +189,14 @@ class _ChapterDialogState extends State<ChapterDialog> {
     _notesSubscription =
         SupabaseSyncService.notesChangedStream.listen((_) async {
       await _loadNotes();
+      _rebuildVerseDataList();
       if (mounted) setState(() {});
     });
 
     // Listen to local data change notifier streams for immediate updates during local operations
     LocalDataChangeNotifier.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
+      _rebuildVerseDataList();
       if (mounted) {
         setState(() {});
       }
@@ -196,6 +204,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
     LocalDataChangeNotifier.notesChangedStream.listen((_) async {
       await _loadNotes();
+      _rebuildVerseDataList();
       if (mounted) setState(() {});
     });
   }
@@ -217,10 +226,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
         return;
       }
 
-      // Load book metadata
-      //final metadata = await BibleDatabase.getBookMetadata(widget.book);
-      //_bookTitle = metadata?['title'] as String?;
-
       // Create keys for verse scrolling
       _verseKeys.clear();
       for (final verse in _verses) {
@@ -231,6 +236,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
       // Load notes and highlights after verses are loaded
       await _loadNotes();
       await _loadHighlights();
+
+      // Build the verse data list for lazy rendering
+      _rebuildVerseDataList();
 
       setState(() {
         _loading = false;
@@ -252,8 +260,41 @@ class _ChapterDialogState extends State<ChapterDialog> {
       setState(() {
         _loading = false;
       });
-      // Handle error - could show a snackbar or error message
     }
+  }
+
+  /// Rebuilds the cached verse data list for lazy rendering.
+  /// Called when verses, notes, highlights, or display settings change.
+  void _rebuildVerseDataList() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final textColor = isDark ? darkTextColor.value : lightTextColor.value;
+    final normalizedBook = BookNameConverter.normalizeShortName(widget.book);
+    final tskReferences =
+        tskData[normalizedBook]?[widget.chapter] ?? const <int, String>{};
+
+    _verseDataList = buildVerseDataList(
+      context: context,
+      verses: _verses,
+      verseKeys: _verseKeys,
+      notes: _notes,
+      highlights: _highlights,
+      textColor: textColor,
+      verseNumberColor:
+          (isDark ? darkPrimaryColor.value : lightPrimaryColor.value)
+              .withValues(alpha: 0.5),
+      backgroundColor: bgColor,
+      lineHeight: lineHeightNotifier.value,
+      showNotesInline: showNotesInlineNotifier.value,
+      showTskReferences: showDialogTskNotifier.value,
+      tskReferences: tskReferences,
+      fontFamily: fontFamilyNotifier.value,
+      lightHighlightTextColor: lightTextColor.value,
+      darkHighlightTextColor: darkTextColor.value,
+      highlightedVerses: _highlightedVerses,
+      highlightedVerseBackgroundColor: _getHighlightedVerseBackgroundColor(),
+    );
   }
 
   void _scrollToVerse(int verseNumber) {
@@ -262,8 +303,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
       Scrollable.ensureVisible(
         key!.currentContext!,
         alignment: 0.4, // Center the verse in the viewport
-        duration: Duration.zero, //const Duration(milliseconds: 500),
-        //curve: Curves.easeInOut,
+        duration: Duration.zero,
       );
     }
   }
@@ -314,7 +354,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
-    final textColor = isDark ? darkTextColor.value : lightTextColor.value;
     final primaryColor =
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
 
@@ -324,7 +363,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
         height: _dialogSize?.height ?? MediaQuery.of(context).size.height * 0.5,
         child: Column(
           children: [
-            // Header with book title and close button
+            // Header with book title, TSK toggle, and close button
             Container(
               decoration: BoxDecoration(
                 color: _adjustBarColor(bgColor),
@@ -333,34 +372,63 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     topRight: Radius.circular(16.0)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Stack(
-                alignment: Alignment.center,
+              child: Row(
                 children: [
-                  Center(
-                    child: RichText(
-                      text: TextSpan(
-                        text: '$bookLongName ${widget.chapter}',
-                        style: TextStyle(
-                          fontSize: uiFontSize + 2,
-                          fontWeight: FontWeight.bold,
-                          color: getAdaptiveTextColor(context),
-                          fontFamily: uiFontFamily,
-                        ),
-                      ),
+                  // Left: TSK toggle
+                  ValueListenableBuilder<bool>(
+                    valueListenable: showDialogTskNotifier,
+                    builder: (context, showDialogTsk, _) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'TSK',
+                            style: TextStyle(
+                              fontSize: uiFontSize - 2,
+                              fontWeight: FontWeight.w400,
+                              color: getAdaptiveTextColor(context),
+                              fontFamily: uiFontFamily,
+                            ),
+                          ),
+                          Switch(
+                            value: showDialogTsk,
+                            onChanged: (val) async {
+                              showDialogTskNotifier.value = val;
+                              // Save immediately
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setBool(
+                                  'showDialogTskReferences', val);
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  // Center: title
+                  Expanded(
+                    child: Text(
+                      '$bookLongName ${widget.chapter}',
                       textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: uiFontSize + 2,
+                        fontWeight: FontWeight.bold,
+                        color: getAdaptiveTextColor(context),
+                        fontFamily: uiFontFamily,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: primaryColor,
-                        size: 32,
-                        semanticLabel: 'Close',
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
+                  // Right: close button
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: primaryColor,
+                      size: 32,
+                      semanticLabel: 'Close',
                     ),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
@@ -379,16 +447,53 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     ? Center(child: CircularProgressIndicator())
                     : ValueListenableBuilder<bool>(
                         valueListenable: showNotesInlineNotifier,
-                        builder: (context, _, __) {
+                        builder: (context, showNotesInline, _) {
                           return ValueListenableBuilder<bool>(
-                            valueListenable: showTskReferencesNotifier,
-                            builder: (context, _, __) {
-                              return SingleChildScrollView(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: _buildVerseWidgets(textColor),
+                            valueListenable: showDialogTskNotifier,
+                            builder: (context, showDialogTsk, _) {
+                              // Rebuild data list when display settings change
+                              _rebuildVerseDataList();
+                              return ScrollConfiguration(
+                                behavior: ScrollConfiguration.of(context)
+                                    .copyWith(scrollbars: false),
+                                child: RawScrollbar(
+                                  thumbColor: isDark
+                                      ? darkPrimaryColor.value
+                                          .withValues(alpha: 0.7)
+                                      : lightPrimaryColor.value
+                                          .withValues(alpha: 0.7),
+                                  thumbVisibility: false,
+                                  trackVisibility: false,
+                                  thickness: 22.0,
+                                  radius: Radius.circular(8.0),
+                                  controller: _scrollController,
+                                  child: ListView.builder(
+                                    controller: _scrollController,
+                                    padding: const EdgeInsets.only(right: 22),
+                                    itemCount: _verseDataList.length,
+                                    itemBuilder: (context, index) {
+                                      final data = _verseDataList[index];
+                                      return buildVerseWidgetFromData(
+                                        context,
+                                        data,
+                                        (verseNum) => _showChapterVerseMenu(
+                                            context, verseNum),
+                                        (verseNum) => _enterHighlightMode(
+                                            context, verseNum),
+                                        _handleVerseLink,
+                                        widget.onNoteIconTap != null
+                                            ? (vn, noteText) => widget
+                                                .onNoteIconTap!(vn, noteText)
+                                            : null,
+                                        widget.onNoteEditTap != null
+                                            ? (vn, noteText) => widget
+                                                .onNoteEditTap!(vn, noteText)
+                                            : null,
+                                        lightTextColor.value,
+                                        darkTextColor.value,
+                                      );
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -546,6 +651,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
       chapter: widget.chapter,
       onFinished: () async {
         await _loadHighlights();
+        _rebuildVerseDataList();
         if (mounted) {
           setState(() {});
         }
@@ -564,48 +670,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
     if (widget.onVerseLink != null) {
       widget.onVerseLink!(link, referenceText);
     }
-  }
-
-  List<Widget> _buildVerseWidgets(Color textColor) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor =
-        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
-    final normalizedBook = BookNameConverter.normalizeShortName(widget.book);
-    final tskReferences =
-        tskData[normalizedBook]?[widget.chapter] ?? const <int, String>{};
-
-    return buildVerseListWidget(
-      context: context,
-      verses: _verses,
-      verseKeys: _verseKeys,
-      notes: _notes,
-      highlights: _highlights,
-      textColor: textColor,
-      verseNumberColor:
-          (isDark ? darkPrimaryColor.value : lightPrimaryColor.value)
-              .withValues(alpha: 0.5),
-      backgroundColor: bgColor,
-      lineHeight: lineHeightNotifier.value,
-      showNotesInline: showNotesInlineNotifier.value,
-      showTskReferences: showTskReferencesNotifier.value,
-      tskReferences: tskReferences,
-      fontFamily: fontFamilyNotifier.value,
-      lightHighlightTextColor: lightTextColor.value,
-      darkHighlightTextColor: darkTextColor.value,
-      onVerseTap: (verseNum) => _showChapterVerseMenu(context, verseNum),
-      onVerseLongPress: (verseNum) => _enterHighlightMode(context, verseNum),
-      onLinkTap: _handleVerseLink,
-      lightVerseReferenceColor: lightVerseReferenceColor,
-      darkVerseReferenceColor: darkVerseReferenceColor,
-      onNoteIconTap: widget.onNoteIconTap != null
-          ? (vn, noteText) => widget.onNoteIconTap!(vn, noteText)
-          : null,
-      onNoteEditTap: widget.onNoteEditTap != null
-          ? (vn, noteText) => widget.onNoteEditTap!(vn, noteText)
-          : null,
-      highlightedVerses: _highlightedVerses,
-      highlightedVerseBackgroundColor: _getHighlightedVerseBackgroundColor(),
-    );
   }
 
   Future<void> _loadNotes() async {

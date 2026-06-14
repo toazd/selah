@@ -131,6 +131,11 @@ final ValueNotifier<bool> showNotesInlineNotifier =
 final ValueNotifier<bool> showTskReferencesNotifier =
     ValueNotifier(defaultShowTskReferences);
 
+// Chapter dialog-specific TSK display mode (separate from main screen).
+// Initialized to the global TSK setting, then overridden by saved pref if one exists.
+final ValueNotifier<bool> showDialogTskNotifier =
+    ValueNotifier<bool>(defaultShowTskReferences);
+
 // Add: navigation bar display mode (false = hidden, true = visible [default])
 final ValueNotifier<bool> showNavigationBarNotifier =
     ValueNotifier(defaultShowNavigationBar);
@@ -760,6 +765,13 @@ Future<void> _loadAllPrefs() async {
     showTskReferencesNotifier.value =
         prefs.getBool('showTskReferences') ?? defaultShowTskReferences;
 
+    // Chapter dialog TSK display mode: start from global value, then check saved pref
+    showDialogTskNotifier.value = showTskReferencesNotifier.value;
+    final savedDialogTsk = prefs.getBool('showDialogTskReferences');
+    if (savedDialogTsk != null) {
+      showDialogTskNotifier.value = savedDialogTsk;
+    }
+
     // Navigation bar display mode
     showNavigationBarNotifier.value =
         prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
@@ -878,6 +890,7 @@ Future<void> _saveAllCurrentPrefs() async {
       prefs.setBool('fullscreen', fullscreenNotifier.value),
       prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
       prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
+      prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
       prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
       prefs.setInt('maxScreens', maxScreens.value),
       prefs.setStringList(

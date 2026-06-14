@@ -1818,13 +1818,13 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                           minThumbLength: 80.0,
                                           interactive: true,
                                           thumbVisibility: true,
-                                          trackVisibility: true,
+                                          trackVisibility: false,
                                           thickness: 22.0,
                                           thumbColor: isDark
                                               ? darkPrimaryColor.value
-                                                  .withValues(alpha: 0.3)
+                                                  .withValues(alpha: 0.8)
                                               : lightPrimaryColor.value
-                                                  .withValues(alpha: 0.5),
+                                                  .withValues(alpha: 0.8),
                                           controller: _resultsScrollController,
                                           radius: Radius.circular(8.0),
                                           child: ScrollConfiguration(
@@ -2275,7 +2275,7 @@ class _StrongsDefinitionLookupDialogState
         _listScrollController.animateTo(
           targetOffset.clamp(
               0.0, _listScrollController.position.maxScrollExtent),
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
         );
       }
@@ -2433,45 +2433,55 @@ class _StrongsDefinitionLookupDialogState
                       child: ScrollbarTheme(
                         data: ScrollbarThemeData(
                           minThumbLength: 80.0,
+                          thumbColor: WidgetStateProperty.all(
+                            isDark
+                                ? darkPrimaryColor.value.withValues(alpha: 0.8)
+                                : lightPrimaryColor.value
+                                    .withValues(alpha: 0.8),
+                          ),
                         ),
                         child: Scrollbar(
                           interactive: true,
                           thickness: 22.0,
                           controller: _listScrollController,
                           thumbVisibility: true,
-                          trackVisibility: true,
-                          child: ListView.builder(
-                            controller: _listScrollController,
-                            itemCount: _allStrongsNumbers.length,
-                            itemExtent: 36.0,
-                            itemBuilder: (context, index) {
-                              final sn = _allStrongsNumbers[index];
-                              final isSelected = sn == _currentStrongsNumber;
-                              return Material(
-                                color: isSelected
-                                    ? primaryColor.withValues(alpha: 0.25)
-                                    : Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    _focusedIndex = index;
-                                    _lookup(sn);
-                                  },
-                                  child: Text(
-                                    sn,
-                                    style: TextStyle(
-                                      fontSize: uiFontSize + 4,
-                                      fontFamily: fontFamilyNotifier.value,
-                                      color: isSelected
-                                          ? primaryColor
-                                          : getAdaptiveTextColor(context),
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                          trackVisibility: false,
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context)
+                                .copyWith(scrollbars: false),
+                            child: ListView.builder(
+                              controller: _listScrollController,
+                              itemCount: _allStrongsNumbers.length,
+                              itemExtent: 36.0,
+                              itemBuilder: (context, index) {
+                                final sn = _allStrongsNumbers[index];
+                                final isSelected = sn == _currentStrongsNumber;
+                                return Material(
+                                  color: isSelected
+                                      ? primaryColor.withValues(alpha: 0.25)
+                                      : Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      _focusedIndex = index;
+                                      _lookup(sn);
+                                    },
+                                    child: Text(
+                                      sn,
+                                      style: TextStyle(
+                                        fontSize: uiFontSize + 4,
+                                        fontFamily: fontFamilyNotifier.value,
+                                        color: isSelected
+                                            ? primaryColor
+                                            : getAdaptiveTextColor(context),
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

@@ -2505,9 +2505,9 @@ class _SearchScreenState extends State<SearchScreen>
                                       return RawScrollbar(
                                           thumbColor: isDark
                                               ? darkPrimaryColor.value
-                                                  .withValues(alpha: 0.3)
+                                                  .withValues(alpha: 0.8)
                                               : lightPrimaryColor.value
-                                                  .withValues(alpha: 0.5),
+                                                  .withValues(alpha: 0.8),
                                           thumbVisibility: false,
                                           trackVisibility: false,
                                           thickness: 16.0,
