@@ -591,9 +591,9 @@
     },
     {
       "name": "path_provider",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider-2.1.5",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider-2.1.6",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.10"
     },
     {
       "name": "path_provider_android",
@@ -615,9 +615,9 @@
     },
     {
       "name": "path_provider_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.3",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.10"
     },
     {
       "name": "path_provider_windows",

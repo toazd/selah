@@ -4,6 +4,7 @@ import 'package:selah/utils/book_name_converter.dart';
 import 'package:selah/utils/snackbar_notification.dart';
 import '../utils/preferences_constants.dart';
 import '../main.dart';
+import '../utils/verse_text_parser.dart';
 
 class MultipleVersesDialog extends StatefulWidget {
   final String book;
@@ -66,11 +67,7 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
       final num = verse['verse'] as int;
       String verseText = verse['text'] as String;
 
-      // Clean Strong's and red letter tags
-      //verseText = verseText.replaceAll(RegExp(r'\[\(?[GH]\d{1,4}\)?\]'), '').replaceAll(RegExp(r'</?r>'), '');
-
-      // Clean red letter tags only
-      verseText = verseText.replaceAll(RegExp(r'</?r>'), '');
+      verseText = VerseTextParser.toPlainVerseText(verseText);
       text += '$num $verseText\n';
     }
 

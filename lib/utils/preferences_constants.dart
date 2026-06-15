@@ -74,6 +74,7 @@ const List<Color> defaultHighlightColors = [
 const bool defaultShowNotesInline = true;
 const bool defaultShowNavigationBar = true;
 const bool defaultShowTskReferences = false;
+const bool defaultShowStrongs = false;
 
 // Sync retry delay constants (shared by all sync retry systems)
 const int syncRetryDelay1Seconds = 1; // First retry delay

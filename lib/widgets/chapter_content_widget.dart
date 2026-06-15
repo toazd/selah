@@ -4,6 +4,7 @@ import '../data/tsk_data.dart';
 import '../utils/verse_display_utils.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
+import '../utils/verse_text_parser.dart';
 
 /// A widget that displays a single chapter's content with its own scroll state.
 /// Used by PageView in BibleScreen for smooth chapter navigation animations.
@@ -18,6 +19,7 @@ class ChapterContentWidget extends StatefulWidget {
   final bool isLastChapter;
   final bool showNotesInline;
   final bool showTskReferences;
+  final bool showStrongsNumbers;
   final Color backgroundColor;
   final Color textColor;
   final Color verseNumberColor;
@@ -26,6 +28,7 @@ class ChapterContentWidget extends StatefulWidget {
   final Function(String, String?)? onLinkTap;
   final Function(int, String?)? onNoteIconTap;
   final Function(int, String?)? onNoteEditTap;
+  final void Function(String strongsNumber)? onStrongsTap;
   final int? initialScrollToVerse;
 
   const ChapterContentWidget({
@@ -40,6 +43,7 @@ class ChapterContentWidget extends StatefulWidget {
     this.isLastChapter = false,
     required this.showNotesInline,
     required this.showTskReferences,
+    this.showStrongsNumbers = false,
     required this.backgroundColor,
     required this.textColor,
     required this.verseNumberColor,
@@ -48,6 +52,7 @@ class ChapterContentWidget extends StatefulWidget {
     this.onLinkTap,
     this.onNoteIconTap,
     this.onNoteEditTap,
+    this.onStrongsTap,
     this.initialScrollToVerse,
   });
 
@@ -145,6 +150,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
       lineHeight: lineHeightNotifier.value,
       showNotesInline: widget.showNotesInline,
       showTskReferences: widget.showTskReferences,
+      showStrongsNumbers: widget.showStrongsNumbers,
       tskReferences: tskReferencesForChapter ?? const {},
       fontFamily: fontFamilyNotifier.value,
       lightHighlightTextColor: lightTextColor.value,
@@ -176,18 +182,28 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Center(
-                        child: Text(
-                          widget.bookTitle!,
+                        child: RichText(
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: FontSizeAdjustments.getAdjustedSize(
-                              fontFamilyNotifier.value,
-                              fontSizeNotifier.value + 1,
+                          text: VerseTextParser.parseVerseText(
+                            widget.bookTitle!,
+                            TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: FontSizeAdjustments.getAdjustedSize(
+                                fontFamilyNotifier.value,
+                                fontSizeNotifier.value + 1,
+                              ),
+                              height: widget.showStrongsNumbers
+                                  ? lineHeightNotifier.value + 0.35
+                                  : lineHeightNotifier.value,
+                              color: isDark
+                                  ? darkTextColor.value
+                                  : lightTextColor.value,
                             ),
-                            color: isDark
-                                ? darkTextColor.value
-                                : lightTextColor.value,
+                            showStrongsNumbers: widget.showStrongsNumbers,
+                            strongsColor: isDark
+                                ? darkPrimaryColor.value
+                                : lightPrimaryColor.value,
+                            onStrongsTap: widget.onStrongsTap,
                           ),
                         ),
                       ),
@@ -230,6 +246,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                         widget.onNoteEditTap,
                         lightTextColor.value,
                         darkTextColor.value,
+                        widget.onStrongsTap,
                       ),
                     );
                   }).toList(),

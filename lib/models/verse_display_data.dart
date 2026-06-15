@@ -21,6 +21,7 @@ class VerseDisplayData {
   final bool customBgColor;
   final Color? customBackgroundColor;
   final GlobalKey? verseKey;
+  final bool showStrongsNumbers;
 
   VerseDisplayData({
     required this.verseNumber,
@@ -40,5 +41,6 @@ class VerseDisplayData {
     required this.customBgColor,
     this.customBackgroundColor,
     this.verseKey,
+    this.showStrongsNumbers = false,
   });
 }

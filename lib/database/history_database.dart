@@ -396,6 +396,74 @@ class HistoryDatabase {
     }
   }
 
+  static Future<List<DateTime>> getHistoryDates() async {
+    final db = await getDatabase();
+    final rows = await db.query(
+      historyTable,
+      columns: [colTimestamp],
+      orderBy: '$colTimestamp DESC',
+    );
+
+    final seenDates = <String>{};
+    final dates = <DateTime>[];
+
+    for (final row in rows) {
+      final timestamp = row[colTimestamp] as int?;
+      if (timestamp == null) continue;
+
+      final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      final dateKey = '${date.year}-${date.month}-${date.day}';
+      if (seenDates.add(dateKey)) {
+        dates.add(DateTime(date.year, date.month, date.day));
+      }
+    }
+
+    return dates;
+  }
+
+  static Future<int> countHistoryBeforeTimestamp(int timestamp) async {
+    final db = await getDatabase();
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS count FROM $historyTable WHERE $colTimestamp < ?',
+      [timestamp],
+    );
+
+    final count = result.first['count'];
+    return count is num ? count.toInt() : 0;
+  }
+
+  static Future<int> deleteHistoryBeforeTimestamp(int timestamp,
+      {bool skipSync = false}) async {
+    final db = await getDatabase();
+    final historyItems = await db.query(
+      historyTable,
+      where: '$colTimestamp < ?',
+      whereArgs: [timestamp],
+    );
+
+    if (historyItems.isEmpty) return 0;
+
+    final deletedCount = await db.delete(
+      historyTable,
+      where: '$colTimestamp < ?',
+      whereArgs: [timestamp],
+    );
+
+    if (!skipSync) {
+      for (final item in historyItems) {
+        final historyData = Map<String, dynamic>.from(item);
+        SupabaseSyncService().markOperation(
+          'history',
+          historyData[colTimestamp] as int,
+          'delete',
+          historyData,
+        );
+      }
+    }
+
+    return deletedCount;
+  }
+
   // Cache username in database
   static Future<void> setCachedUsername(String username) async {
     try {

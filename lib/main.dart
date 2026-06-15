@@ -42,7 +42,7 @@ import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.7";
+final appVersion = "0.7.8";
 
 final bool _isDesktop =
     (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
@@ -135,6 +135,15 @@ final ValueNotifier<bool> showTskReferencesNotifier =
 // Initialized to the global TSK setting, then overridden by saved pref if one exists.
 final ValueNotifier<bool> showDialogTskNotifier =
     ValueNotifier<bool>(defaultShowTskReferences);
+
+// Add: Strong's numbers display mode (false = hidden [default], true = visible inline)
+final ValueNotifier<bool> showStrongsNotifier =
+    ValueNotifier(defaultShowStrongs);
+
+// Chapter dialog-specific Strong's display mode (separate from main screen).
+// Initialized to the global Strong's setting, then overridden by saved pref if one exists.
+final ValueNotifier<bool> showDialogStrongsNotifier =
+    ValueNotifier<bool>(defaultShowStrongs);
 
 // Add: navigation bar display mode (false = hidden, true = visible [default])
 final ValueNotifier<bool> showNavigationBarNotifier =
@@ -772,6 +781,17 @@ Future<void> _loadAllPrefs() async {
       showDialogTskNotifier.value = savedDialogTsk;
     }
 
+    // Strong's numbers display mode
+    showStrongsNotifier.value =
+        prefs.getBool('showStrongs') ?? defaultShowStrongs;
+
+    // Chapter dialog Strong's display mode: start from global value, then check saved pref
+    showDialogStrongsNotifier.value = showStrongsNotifier.value;
+    final savedDialogStrongs = prefs.getBool('showDialogStrongs');
+    if (savedDialogStrongs != null) {
+      showDialogStrongsNotifier.value = savedDialogStrongs;
+    }
+
     // Navigation bar display mode
     showNavigationBarNotifier.value =
         prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
@@ -891,6 +911,8 @@ Future<void> _saveAllCurrentPrefs() async {
       prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
       prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
+      prefs.setBool('showStrongs', showStrongsNotifier.value),
+      prefs.setBool('showDialogStrongs', showDialogStrongsNotifier.value),
       prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
       prefs.setInt('maxScreens', maxScreens.value),
       prefs.setStringList(
@@ -1693,6 +1715,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _saveTskReferencesPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('showTskReferences', showTskReferencesNotifier.value);
+  }
+
+  Future<void> _saveStrongsPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('showStrongs', showStrongsNotifier.value);
   }
 
   void _addView() {
@@ -2597,7 +2624,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
             if (_wasMaximizedBeforeFullscreen) {
               //await Future.delayed(Duration(milliseconds: 150));
               await windowManager.show();
-              // TODO: this needs tested on mac desktop
               await windowManager.maximize();
               _wasMaximizedBeforeFullscreen = false;
             }
@@ -2739,6 +2765,29 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       onChanged: (val) async {
                         showTskReferencesNotifier.value = val;
                         _saveTskReferencesPrefs();
+                      },
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: showStrongsNotifier,
+                  builder: (context, showStrongs, _) {
+                    return SwitchListTile(
+                      title: Text(
+                        'Strong\'s Numbers',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context),
+                        ),
+                      ),
+                      value: showStrongs,
+                      onChanged: (val) async {
+                        showStrongsNotifier.value = val;
+                        _saveStrongsPrefs();
                       },
                     );
                   },
@@ -4416,6 +4465,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           // Add: pass notes inline mode
                           showNotesInline: showNotesInlineNotifier,
                           showTskReferences: showTskReferencesNotifier,
+                          showStrongsNumbers: showStrongsNotifier,
                           // Force focus to invisible button when the note screen closes
                           // to circumvent the Windows OSK bug
                           onNoteScreenClosed: () {
@@ -4508,6 +4558,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           // Add: pass notes inline mode
                           showNotesInline: showNotesInlineNotifier,
                           showTskReferences: showTskReferencesNotifier,
+                          showStrongsNumbers: showStrongsNotifier,
                           // Force focus to invisible button when the note screen closes
                           // to prevent the Windows OSK bug
                           onNoteScreenClosed: () {

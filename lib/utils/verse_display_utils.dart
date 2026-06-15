@@ -41,6 +41,8 @@ Widget buildVerseDisplayWidget({
   double? verseNumberWidth,
   Color? customBackgroundColor,
   bool displayVerseNumber = true,
+  bool showStrongsNumbers = false,
+  void Function(String strongsNumber)? onStrongsTap,
 }) {
   // Determine whether it's a dark theme or not
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -107,6 +109,8 @@ Widget buildVerseDisplayWidget({
     highlightsForVerse,
     lightModeTextColor,
     darkModeTextColor,
+    showStrongsNumbers: showStrongsNumbers,
+    onStrongsTap: onStrongsTap,
   );
   rightSpans.addAll(highlightedSpans);
 
@@ -191,17 +195,28 @@ List<InlineSpan> applyHighlightsToText(
   Color backgroundColor,
   List<Map<String, dynamic>> highlights,
   Color lightModeTextColor,
-  Color darkModeTextColor,
-) {
+  Color darkModeTextColor, {
+  bool showStrongsNumbers = false,
+  void Function(String strongsNumber)? onStrongsTap,
+}) {
+  final visibleVerseText = VerseTextParser.toPlainVerseText(
+    rawVerseText,
+    removePilcrow: false,
+  );
+
   // If no highlights, just parse the text normally
   if (highlights.isEmpty) {
-    return VerseTextParser.parseVerseText(cleanVerseText, baseStyle).children ??
+    return VerseTextParser.parseVerseText(rawVerseText, baseStyle,
+                showStrongsNumbers: showStrongsNumbers,
+                onStrongsTap: onStrongsTap)
+            .children ??
         [];
   }
 
-  // Parse the clean verse text to get the original spans (including <r> tags)
-  final parsedVerseText =
-      VerseTextParser.parseVerseText(cleanVerseText, baseStyle);
+  // Parse the raw verse text to get spans with markup removed from visible text.
+  final parsedVerseText = VerseTextParser.parseVerseText(
+      rawVerseText, baseStyle,
+      showStrongsNumbers: showStrongsNumbers, onStrongsTap: onStrongsTap);
   final originalSpans = parsedVerseText.children ?? [];
 
   // Convert highlight positions from raw text to clean text positions
@@ -283,9 +298,9 @@ List<InlineSpan> applyHighlightsToText(
   }
 
   // Add remaining unhighlighted spans
-  if (currentPosition < cleanVerseText.length) {
+  if (currentPosition < visibleVerseText.length) {
     final remainingSpans = extractSpansForRange(
-        originalSpans, currentPosition, cleanVerseText.length, baseStyle);
+        originalSpans, currentPosition, visibleVerseText.length, baseStyle);
     spans.addAll(remainingSpans);
   }
 
@@ -365,42 +380,15 @@ List<InlineSpan> extractSpansForRange(
 int convertCleanPositionToRaw(String rawText, int cleanPosition) {
   if (cleanPosition <= 0) return 0;
 
-  // Handle red letter and pilcrow filtering
-  final openingRedTagRegex = RegExp(r'<r>');
-  final closingRedTagRegex = RegExp(r'</r>');
-
-  if (cleanPosition >= rawText.length) {
-    return rawText.length;
-  }
-
-  // Find the character at the clean position and locate it in the raw text
   int rawPosition = 0;
   int cleanCharsFound = 0;
 
   for (int i = 0; i < rawText.length && cleanCharsFound < cleanPosition; i++) {
-    final remainingText = rawText.substring(i);
-
-    // Check if this character is part of an opening <r> tag
-    if (openingRedTagRegex.hasMatch(rawText[i])) {
-      final match = openingRedTagRegex.matchAsPrefix(remainingText);
-      if (match != null) {
-        i += match.end - 1; // -1 because loop will increment i
-        continue;
-      }
+    final markupMatch = _matchDisplayMarkupAt(rawText, i);
+    if (markupMatch != null) {
+      i += markupMatch.end - 1;
+      continue;
     }
-    // Check if this character is part of a closing </r> tag
-    else if (closingRedTagRegex.hasMatch(rawText[i])) {
-      final match = closingRedTagRegex.matchAsPrefix(remainingText);
-      if (match != null) {
-        i += match.end - 1; // -1 because loop will increment i
-        continue;
-      }
-    }
-    // Check if this is a pilcrow
-    // else if (rawText[i] == '¶' && i + 1 < rawText.length && rawText[i + 1] == ' ') {
-    //   i += 1; // skip the space
-    //   continue;
-    // }
 
     // Regular character - count it
     cleanCharsFound++;
@@ -414,49 +402,33 @@ int convertCleanPositionToRaw(String rawText, int cleanPosition) {
 int convertRawPositionToClean(String rawText, int rawPosition) {
   if (rawPosition <= 0) return 0;
 
-  // Handle red letter and pilcrow filtering
-  final openingRedTagRegex = RegExp(r'<r>');
-  final closingRedTagRegex = RegExp(r'</r>');
-
   if (rawPosition >= rawText.length) {
-    // Calculate what the clean position would be at the end of the text
-    String tempText = rawText.replaceAll(openingRedTagRegex, '');
-    tempText = tempText.replaceAll(closingRedTagRegex, '');
-    //tempText = tempText.replaceAll('¶ ', '');
-    return tempText.length;
+    return VerseTextParser.toPlainVerseText(rawText, removePilcrow: false)
+        .length;
   }
 
   // Count characters in clean text up to the raw position
   int cleanPosition = 0;
   for (int i = 0; i < rawPosition && i < rawText.length; i++) {
-    final remainingText = rawText.substring(i);
-
-    // Skip <r> tags - they don't count in clean position
-    if (openingRedTagRegex.hasMatch(rawText[i])) {
-      final match = openingRedTagRegex.matchAsPrefix(remainingText);
-      if (match != null) {
-        i += match.end - 1; // -1 because loop will increment i
-        continue;
-      }
+    final markupMatch = _matchDisplayMarkupAt(rawText, i);
+    if (markupMatch != null) {
+      i += markupMatch.end - 1;
+      continue;
     }
-    // Skip </r> tags - they don't count in clean position
-    else if (closingRedTagRegex.hasMatch(rawText[i])) {
-      final match = closingRedTagRegex.matchAsPrefix(remainingText);
-      if (match != null) {
-        i += match.end - 1; // -1 because loop will increment i
-        continue;
-      }
-    }
-    // Skip pilcrow symbols - they don't count in clean position
-    // else if (rawText[i] == '¶' && i + 1 < rawText.length && rawText[i + 1] == ' ') {
-    //   i += 1; // skip the space
-    //   continue;
-    // }
 
     cleanPosition++;
   }
 
   return cleanPosition;
+}
+
+final RegExp _displayMarkupRegex = RegExp(
+  r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
+  caseSensitive: false,
+);
+
+Match? _matchDisplayMarkupAt(String text, int index) {
+  return _displayMarkupRegex.matchAsPrefix(text.substring(index));
 }
 
 /// Calculate dynamic width for verse number column based on verses in a list
@@ -509,6 +481,7 @@ Widget buildVerseWidgetFromData(
   Function(int, String?)? onNoteEditTap,
   Color lightHighlightTextColor,
   Color darkHighlightTextColor,
+  void Function(String strongsNumber)? onStrongsTap,
 ) {
   final widgets = <Widget>[];
 
@@ -537,6 +510,8 @@ Widget buildVerseWidgetFromData(
     onNoteIconTap: onNoteIconTap,
     verseNumberWidth: data.verseNumberWidth,
     customBackgroundColor: data.customBackgroundColor,
+    showStrongsNumbers: data.showStrongsNumbers,
+    onStrongsTap: onStrongsTap,
   );
 
   widgets.add(
@@ -602,6 +577,7 @@ List<VerseDisplayData> buildVerseDataList({
   required double lineHeight,
   required bool showNotesInline,
   bool showTskReferences = false,
+  bool showStrongsNumbers = false,
   Map<int, String> tskReferences = const {},
   required String fontFamily,
   required Color lightHighlightTextColor,
@@ -611,6 +587,8 @@ List<VerseDisplayData> buildVerseDataList({
 }) {
   final dataList = <VerseDisplayData>[];
   bool pilcrowSeen = false;
+  final effectiveLineHeight =
+      showStrongsNumbers ? lineHeight + 0.35 : lineHeight;
 
   // Different styles whether it is the verse number or the text itself
   final numStyle = TextStyle(
@@ -619,14 +597,14 @@ List<VerseDisplayData> buildVerseDataList({
     fontFamily: fontFamily,
     color: verseNumberColor,
     fontWeight: FontWeight.normal,
-    height: lineHeight,
+    height: effectiveLineHeight,
   );
   final textStyle = TextStyle(
     fontSize:
         FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
     fontFamily: fontFamily,
     color: textColor,
-    height: lineHeight,
+    height: effectiveLineHeight,
   );
 
   // Calculate dynamic width for verse number column based on current chapter's verses
@@ -669,6 +647,7 @@ List<VerseDisplayData> buildVerseDataList({
         backgroundColor: backgroundColor,
         showNotesInline: showNotesInline,
         showTskReferences: showTskReferences,
+        showStrongsNumbers: showStrongsNumbers,
         tskText: rawTskText,
         noteText: noteText,
         addParagraphBreak: addParagraphBreak,

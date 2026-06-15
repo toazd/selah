@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:io';
@@ -18,8 +17,10 @@ import '../utils/snackbar_notification.dart';
 import '../utils/book_name_converter.dart';
 import '../utils/bible_utils.dart';
 import '../utils/verse_reference_detector.dart';
+import '../utils/verse_text_parser.dart';
 import '../screens/chapter_dialog.dart';
 import '../screens/note_screen.dart';
+import '../widgets/strongs_definition_dialog.dart';
 
 // Top-level functions for compute() to enable off-main-thread execution
 Future<List<Map<String, dynamic>>> _computeStrongsNumberSearch(
@@ -81,8 +82,11 @@ Future<Map<String, int>> _computeExtractPhraseSummary(
     debugPrint(
         '[_computeExtractPhraseSummary] START: ${data.strongsList.length} SNs, ${data.results.length} results');
   }
-  final result =
-      StrongsDatabase.extractPhraseSummary(data.results, data.strongsList);
+  final result = StrongsDatabase.extractPhraseSummary(
+    data.results,
+    data.strongsList,
+    includeTvm: data.includeTvmMatches,
+  );
   if (kDebugMode) {
     debugPrint(
         '[_computeExtractPhraseSummary] DONE: ${result.length} unique phrases');
@@ -159,10 +163,12 @@ class SearchTaskData {
 class SummaryTaskData {
   final List<Map<String, dynamic>> results;
   final List<String> strongsList;
+  final bool includeTvmMatches;
 
   SummaryTaskData({
     required this.results,
     required this.strongsList,
+    this.includeTvmMatches = false,
   });
 }
 
@@ -208,15 +214,6 @@ Color _adjustBarColor(Color backgroundColor) {
       : (hsl.lightness + 0.03).clamp(0.0, 1.0);
   return hsl.withLightness(adjustedLightness).toColor();
 }
-
-typedef _DefinitionWidgetsBuilder = List<Widget> Function(
-  BuildContext context,
-  String definition, {
-  void Function(String strongsNumber)? onStrongsTap,
-});
-
-typedef _TextStyleBuilder = TextStyle Function(
-    BuildContext context, double fontSize);
 
 class StrongsSearchScreen extends StatefulWidget {
   final int? sourceScreenIndex;
@@ -563,10 +560,15 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
       if (kDebugMode) {
         debugPrint(
-            '[_performStrongsNumberSearch] Calling extractPhraseSummary (main thread)...');
+            '[_performStrongsNumberSearch] Calling extractPhraseSummary...');
       }
+      final summaryData = SummaryTaskData(
+        results: results,
+        strongsList: [strongsNumber],
+        includeTvmMatches: true,
+      );
       final phraseSummary =
-          StrongsDatabase.extractPhraseSummary(results, [strongsNumber]);
+          await compute(_computeExtractPhraseSummary, summaryData);
       if (kDebugMode) {
         debugPrint(
             '[_performStrongsNumberSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
@@ -890,169 +892,16 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
   void _showStrongsDefinitionDialog(
       BuildContext context, String strongsNumber) {
-    final definition = StrongsDefinitionsDatabase.getDefinition(strongsNumber);
-    if (!mounted || definition == null) {
-      if (mounted) {
-        showStyledSnackBar(context,
-            'Definition not found for $strongsNumber!\nThis is a bug that you should report at https://github.com/toazd/selah/issues.',
-            isError: true);
-      }
-      return;
-    }
-
-    final definitionChildren = _buildDefinitionWidgets(context, definition);
-
-    final bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
-    final maxWidth = MediaQuery.of(context).size.width * 0.9;
-    final constrainedMaxWidth = isMobile
-        ? MediaQuery.of(context).size.width
-        : (maxWidth > 720.0 ? 720.0 : maxWidth);
-    final maxHeight = MediaQuery.of(context).size.height * 0.9;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-          insetPadding: isMobile
-              ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
-              : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-          title: Text(
-            strongsNumber,
-            style: _getPrimaryTextStyle(dialogContext, uiFontSize + 4),
-          ),
-          content: SizedBox(
-            width: constrainedMaxWidth,
-            height: maxHeight,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: definitionChildren,
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // prepend the Strong's number (available via the strongsNumber argument)
-                final plain =
-                    '$strongsNumber\n${StrongsDefinitionsDatabase.stripHtml(definition)}';
-                Clipboard.setData(ClipboardData(text: plain));
-                showStyledSnackBar(
-                    dialogContext, 'Definition copied to clipboard');
-              },
-              child:
-                  Text('Copy', style: _getTextStyle(dialogContext, uiFontSize)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text('Close',
-                  style: _getTextStyle(dialogContext, uiFontSize)),
-            ),
-          ]),
-    );
+    StrongsDefinitionDialog.show(context, strongsNumber);
   }
 
   void _showStrongsDefinitionLookupDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => _StrongsDefinitionLookupDialog(
-        buildDefinitionWidgets: _buildDefinitionWidgets,
-        buildPrimaryTextStyle: _getPrimaryTextStyle,
-        buildTextStyle: _getTextStyle,
-        listenToDefinitionSelected: (String strongsNumber) {
-          _showStrongsDefinitionDialog(context, strongsNumber);
-        },
-      ),
+      builder: (dialogContext) => const _StrongsDefinitionLookupDialog(),
     );
   }
 
-  List<Widget> _buildDefinitionWidgets(
-    BuildContext context,
-    String definition, {
-    void Function(String strongsNumber)? onStrongsTap,
-  }) {
-    final baseStyle = _getTextStyle(context, uiFontSize);
-    // Wrap Strong's numbers (e.g. H1234, G5678) in anchor tags so flutter_html
-    // makes them tappable. Uses the exact regex [GH]\d{1,4} with no boundary
-    // checking since the data is predictable.
-    final strongsRegExp = RegExp(r'[GH]\d{1,4}');
-    String html = definition.replaceAllMapped(strongsRegExp, (match) {
-      return '<a href="strongs://${match.group(0)}">${match.group(0)}</a>';
-    });
-    return [
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: Html(
-            data: html,
-            onLinkTap: (String? url, Map<String, String> attributes, _) {
-              if (url != null && url.startsWith('strongs://')) {
-                final sn = url.substring('strongs://'.length);
-                _showStrongsDefinitionDialog(context, sn);
-                // Using the below changes the current view instead
-                // of showing a new dialog
-                //onStrongsTap(sn);
-              }
-            },
-            style: {
-              'body': Style(
-                fontSize: FontSize(uiFontSize),
-                fontFamily: fontFamilyNotifier.value,
-                color: baseStyle.color,
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-                lineHeight: const LineHeight(1.5),
-              ),
-              'a': Style(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? darkPrimaryColor.value
-                    : lightPrimaryColor.value,
-                textDecoration: TextDecoration.none,
-                fontWeight: FontWeight.bold,
-              ),
-            },
-          ),
-        ),
-      ),
-    ];
-  }
-
-  WidgetSpan _buildClickableStrongsSpan(BuildContext context,
-      String strongsNumber, double baseFontSize, double fontSize, Color color) {
-    final adjustedFontSize =
-        FontSizeAdjustments.getAdjustedSize(fontFamilyNotifier.value, fontSize);
-    return WidgetSpan(
-      alignment: PlaceholderAlignment.baseline,
-      baseline: TextBaseline.alphabetic,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () => _showStrongsDefinitionDialog(context, strongsNumber),
-          child: Transform.translate(
-            offset: Offset(0, -baseFontSize * 0.5),
-            child: Text(
-              strongsNumber,
-              style: TextStyle(
-                fontSize: adjustedFontSize * 0.9,
-                color: color,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Build a TextSpan for a verse.
-  /// Parses text left-to-right. For each word group followed by a Strong's tag:
-  ///   - If the tag matches a searched Strong's number: words are HIGHLIGHTED,
-  ///     the Strong's number is shown as superscript.
-  ///   - If the tag doesn't match: words shown normally, tag stripped.
-  /// For standalone Strong's tags (no preceding words):
-  ///   - If the tag matches: looks BACK for the nearest preceding words
-  ///     (skipping intermediate tags/spaces) and highlights them, shows superscript.
-  ///   - If the tag doesn't match: stripped.
   TextSpan _buildVerseSpan(
       BuildContext context, Map<String, dynamic> verseData, double fontSize) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1067,165 +916,15 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final matchedStrongs =
         (verseData['matchedStrongs'] as List<dynamic>?)?.cast<String>() ?? [];
 
-    if (matchedStrongs.isEmpty) {
-      return TextSpan(
-        text: StrongsDatabase.stripAllStrongsTags(text),
-        style: baseStyle,
-      );
-    }
-
-    final matchedSet = matchedStrongs.toSet();
-    final spans = <InlineSpan>[];
-
-    // Regex to extract all tokens sequentially from the text.
-    // Three branches:
-    // 1. (words) + one or more consecutive ({STRONG})   -> groups 1 & 2
-    // 2. standalone {STRONG}                             -> matches but no groups 1/2
-    // 3. any single character (.,;: etc)
-    final tokenPattern = RegExp(
-      r"([A-Za-z'\-]+(?:\s+[A-Za-z'\-]+)*)((?:\s*\{[A-Za-z]\d+\})+)"
-      r"|"
-      r"\{[A-Za-z]\d+\}"
-      r"|"
-      r".",
-      caseSensitive: false,
+    return VerseTextParser.parseMatchedStrongsVerseText(
+      text: text,
+      baseStyle: baseStyle,
+      matchedStrongs: matchedStrongs.toSet(),
+      highlightColor: highlightColor,
+      strongsColor: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+      onStrongsTap: (strongsNumber) =>
+          _showStrongsDefinitionDialog(context, strongsNumber),
     );
-
-    // We also need to look backwards for words preceding a standalone {SN}
-    // that is in the matched set. We'll scan all matches first, collecting
-    // them into a list of "fragments".
-    final allMatches = tokenPattern.allMatches(text).toList();
-
-    int lastEnd = 0;
-    for (int i = 0; i < allMatches.length; i++) {
-      final match = allMatches[i];
-
-      // Emit any text between matches
-      if (match.start > lastEnd) {
-        final between = text.substring(lastEnd, match.start);
-        if (between.isNotEmpty) {
-          spans.add(TextSpan(text: between, style: baseStyle));
-        }
-      }
-
-      final wordsGroup = match.group(1);
-      final tagGroup = match.group(2);
-
-      if (wordsGroup != null && tagGroup != null) {
-        // Pattern 1: word/phrase + one or more consecutive {STRONG} tags
-        // Extract ALL Strong's numbers from the tag group
-        final tagSnMatches = RegExp(r'\{([A-Za-z]\d+)\}').allMatches(tagGroup);
-        final allSns =
-            tagSnMatches.map((m) => m.group(1)!.toUpperCase()).toList();
-
-        // Check if ANY of these SNs are in the matched set
-        final anyMatched = allSns.any((sn) => matchedSet.contains(sn));
-
-        if (anyMatched) {
-          // MATCHED (at least one): highlight words, show ALL SNs as superscript
-          spans.add(TextSpan(
-            text: wordsGroup,
-            style: baseStyle.copyWith(
-              backgroundColor: highlightColor,
-              //fontWeight: FontWeight.bold,
-            ),
-          ));
-          for (int si = 0; si < allSns.length; si++) {
-            final sn = allSns[si];
-            // Add a space before this SN if it's not the first one
-            if (si > 0) {
-              spans.add(TextSpan(text: " ", style: baseStyle));
-            }
-            spans.add(_buildClickableStrongsSpan(
-              context,
-              sn,
-              baseStyle.fontSize!,
-              fontSize,
-              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            ));
-          }
-        } else {
-          // NOT matched: show words normally, strip all tags
-          spans.add(TextSpan(text: wordsGroup, style: baseStyle));
-        }
-      } else if (RegExp(r'\{[A-Za-z]\d+\}').hasMatch(match.group(0)!)) {
-        // Pattern 2: standalone {STRONG} tag
-        final sn = RegExp(r'\{([A-Za-z]\d+)\}')
-            .firstMatch(match.group(0)!)
-            ?.group(1)
-            ?.toUpperCase();
-
-        if (sn != null && matchedSet.contains(sn)) {
-          // This is a matched Strong's number but appears without immediately
-          // preceding words. Look backwards through the spans to find the
-          // most recent word group and highlight it instead.
-          // Find the last text span that contains actual word characters
-          // (skip spans that are just whitespace/punctuation).
-          // Allow already-highlighted spans too — they'll keep the same color
-          // and we need them for standalone SNs that share the same word.
-          int? highlightIndex;
-          for (int j = spans.length - 1; j >= 0; j--) {
-            if (spans[j] is TextSpan) {
-              final ts = spans[j] as TextSpan;
-              // Only target spans that contain at least one word character
-              // (a-z, A-Z, 0-9), skipping pure whitespace/punctuation spans
-              if (ts.text != null &&
-                  RegExp(r'[A-Za-z0-9]').hasMatch(ts.text!)) {
-                highlightIndex = j;
-                break;
-              }
-            }
-          }
-
-          if (highlightIndex != null) {
-            // Replace that span with a highlighted version
-            final oldSpan = spans[highlightIndex] as TextSpan;
-            spans[highlightIndex] = TextSpan(
-              text: oldSpan.text,
-              style: baseStyle.copyWith(
-                backgroundColor: highlightColor,
-                //fontWeight: FontWeight.bold,
-              ),
-            );
-
-            // Remove any trailing whitespace span between the word and the
-            // superscript, so the SN appears directly after the word
-            // (consistent with pattern 1 behavior)
-            if (highlightIndex + 1 < spans.length) {
-              final nextSpan = spans[highlightIndex + 1];
-              if (nextSpan is TextSpan &&
-                  nextSpan.text != null &&
-                  nextSpan.text!.trim().isEmpty) {
-                spans.removeAt(highlightIndex + 1);
-              }
-            }
-          }
-
-          // Show the Strong's number as superscript
-          spans.add(_buildClickableStrongsSpan(
-            context,
-            sn,
-            baseStyle.fontSize!,
-            fontSize,
-            isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-          ));
-        }
-        // If NOT matched: strip it (add nothing)
-      } else {
-        // Pattern 3: any other character (punctuation, space, etc.)
-        spans.add(TextSpan(text: match.group(0), style: baseStyle));
-      }
-
-      lastEnd = match.end;
-    }
-
-    // Any text after the last match
-    if (lastEnd < text.length) {
-      final remaining = text.substring(lastEnd);
-      spans.add(TextSpan(text: remaining, style: baseStyle));
-    }
-
-    return TextSpan(children: spans);
   }
 
   String _formatNumber(int? number) {
@@ -1295,49 +994,55 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final book = result['book'] as String?;
     final chapter = result['chapter'] as int?;
     final verseNum = result['verse'] as int?;
+    final isSuperscription = result['isSuperscription'] == true;
     final rawVerseText = result['text'] as String? ?? '';
-    final cleanVerseText = StrongsDatabase.stripAllStrongsTags(rawVerseText);
+    final cleanVerseText = VerseTextParser.toPlainVerseText(rawVerseText);
     final bookName =
         book == null ? '' : BookNameConverter.shortNameToLongName(book);
-    final copyText = '$bookName $chapter:$verseNum\n$cleanVerseText';
+    final referenceText = isSuperscription
+        ? 'Psalm $chapter Superscription'
+        : '$bookName $chapter:$verseNum';
+    final copyText = '$referenceText\n$cleanVerseText';
 
     showModalBottomSheet(
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (!isSuperscription)
+            ListTile(
+              title: Center(
+                  child: Text(
+                'Goto Verse',
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 10,
+                    color: getAdaptiveTextColor(context)),
+              )),
+              onTap: () {
+                Navigator.of(context).pop();
+                _gotoVerse(book, chapter, verseNum);
+              },
+            ),
+          if (!isSuperscription)
+            ListTile(
+              title: Center(
+                  child: Text(
+                'Show Context',
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 10,
+                    color: getAdaptiveTextColor(context)),
+              )),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showContextDialog(book, chapter, verseNum);
+              },
+            ),
           ListTile(
             title: Center(
                 child: Text(
-              'Goto Verse',
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
-                  color: getAdaptiveTextColor(context)),
-            )),
-            onTap: () {
-              Navigator.of(context).pop();
-              _gotoVerse(book, chapter, verseNum);
-            },
-          ),
-          ListTile(
-            title: Center(
-                child: Text(
-              'Show Context',
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
-                  color: getAdaptiveTextColor(context)),
-            )),
-            onTap: () {
-              Navigator.of(context).pop();
-              _showContextDialog(book, chapter, verseNum);
-            },
-          ),
-          ListTile(
-            title: Center(
-                child: Text(
-              'Copy Verse $verseNum',
+              isSuperscription ? 'Copy Superscription' : 'Copy Verse $verseNum',
               style: TextStyle(
                   fontFamily: fontFamilyNotifier.value,
                   fontSize: uiFontSize + 10,
@@ -1346,7 +1051,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             onTap: () {
               Clipboard.setData(ClipboardData(text: copyText)).then((_) {
                 if (!context.mounted) return;
-                showStyledSnackBar(context, 'Verse copied to clipboard');
+                showStyledSnackBar(
+                    context,
+                    isSuperscription
+                        ? 'Superscription copied to clipboard'
+                        : 'Verse copied to clipboard');
                 Navigator.of(context).pop();
               });
             },
@@ -2069,8 +1778,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       int resultIndex, double fontSize, Color barColor) {
     final bookShort = result['book'] as String;
     final chapter = result['chapter'] as int;
-    final verse = result['verse'] as int;
+    final verse = result['verse'] as int?;
+    final isSuperscription = result['isSuperscription'] == true;
     final bookLongName = BookNameConverter.shortNameToLongName(bookShort);
+    final referenceText =
+        isSuperscription ? 'Psalm $chapter:0' : '$bookLongName $chapter:$verse';
 
     return GestureDetector(
       onTap: () => _showStrongsVerseActionMenu(context, result),
@@ -2084,7 +1796,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           children: [
             Text.rich(TextSpan(children: [
               TextSpan(
-                text: '$bookLongName $chapter:$verse\n',
+                text: '$referenceText\n',
                 style: TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
                         fontFamilyNotifier.value, fontSize),
@@ -2126,17 +1838,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 }
 
 class _StrongsDefinitionLookupDialog extends StatefulWidget {
-  final _DefinitionWidgetsBuilder buildDefinitionWidgets;
-  final _TextStyleBuilder buildPrimaryTextStyle;
-  final _TextStyleBuilder buildTextStyle;
-  final void Function(String strongsNumber)? listenToDefinitionSelected;
-
-  const _StrongsDefinitionLookupDialog({
-    required this.buildDefinitionWidgets,
-    required this.buildPrimaryTextStyle,
-    required this.buildTextStyle,
-    this.listenToDefinitionSelected,
-  });
+  const _StrongsDefinitionLookupDialog();
 
   @override
   State<_StrongsDefinitionLookupDialog> createState() =>
@@ -2495,7 +2197,7 @@ class _StrongsDefinitionLookupDialogState
                         if (_currentStrongsNumber != null)
                           Text(
                             _currentStrongsNumber!,
-                            style: widget.buildPrimaryTextStyle(
+                            style: StrongsDefinitionDialog.primaryTextStyle(
                                 context, uiFontSize + 2),
                           ),
                         if (_currentStrongsNumber != null)
@@ -2503,7 +2205,8 @@ class _StrongsDefinitionLookupDialogState
                         if (_errorText != null)
                           Text(
                             _errorText!,
-                            style: widget.buildTextStyle(context, uiFontSize),
+                            style: StrongsDefinitionDialog.textStyle(
+                                context, uiFontSize),
                           ),
                         if (_currentDefinition != null &&
                             _currentStrongsNumber != null)
@@ -2512,10 +2215,18 @@ class _StrongsDefinitionLookupDialogState
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: widget.buildDefinitionWidgets(
+                                children: StrongsDefinitionDialog
+                                    .buildDefinitionWidgets(
                                   context,
                                   _currentDefinition!,
-                                  onStrongsTap: _lookup,
+                                  // change dialog itself to the definition
+                                  //onStrongsTap: _lookup,
+                                  // preferred, open a new dialog
+                                  onStrongsTap: (strongsNumber) =>
+                                      StrongsDefinitionDialog.show(
+                                    context,
+                                    strongsNumber,
+                                  ),
                                 ),
                               ),
                             ),
@@ -2527,16 +2238,16 @@ class _StrongsDefinitionLookupDialogState
                             child: Center(
                               child: Text(
                                 'Select or search a Strong\'s number',
-                                style: widget
-                                    .buildTextStyle(context, uiFontSize)
+                                style: StrongsDefinitionDialog.textStyle(
+                                        context, uiFontSize)
                                     .copyWith(
-                                      fontStyle: FontStyle.italic,
-                                      color: isDark
-                                          ? darkTextColor.value
-                                              .withValues(alpha: 0.5)
-                                          : lightTextColor.value
-                                              .withValues(alpha: 0.5),
-                                    ),
+                                  fontStyle: FontStyle.italic,
+                                  color: isDark
+                                      ? darkTextColor.value
+                                          .withValues(alpha: 0.5)
+                                      : lightTextColor.value
+                                          .withValues(alpha: 0.5),
+                                ),
                               ),
                             ),
                           ),
@@ -2554,7 +2265,7 @@ class _StrongsDefinitionLookupDialogState
           onPressed: () => _lookup(_controller.text),
           child: Text(
             'Lookup',
-            style: widget.buildTextStyle(context, uiFontSize),
+            style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
           ),
         ),
         TextButton(
@@ -2567,7 +2278,7 @@ class _StrongsDefinitionLookupDialogState
           },
           child: Text(
             'Copy',
-            style: widget.buildTextStyle(context, uiFontSize),
+            style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
           ),
         ),
         TextButton(
@@ -2577,7 +2288,7 @@ class _StrongsDefinitionLookupDialogState
           },
           child: Text(
             'Close',
-            style: widget.buildTextStyle(context, uiFontSize),
+            style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
           ),
         ),
       ],

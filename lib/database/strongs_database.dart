@@ -1,9 +1,21 @@
 import 'package:flutter/foundation.dart';
 import "../data/bible_data_strongs.dart";
+import "../data/book_metadata.dart";
 import "../utils/verse_reference_detector.dart";
 
 /// Helper class for searching Strong's Concordance data from bible_data_strongs.dart
 class StrongsDatabase {
+  static final RegExp _strongTagRegex = RegExp(
+    r"\{\{([A-Za-z]\d+)\}\}|\{([A-Za-z]\d+)\}",
+    caseSensitive: false,
+  );
+  static final RegExp _redLetterTagRegex =
+      RegExp(r"</?r>", caseSensitive: false);
+  static final RegExp _extraSpacesRegex = RegExp(r" +");
+  static final RegExp _phraseBoundaryRegex = RegExp(r"[.,:;?!¶]+");
+  static final RegExp _wordEndingRegex = RegExp(r"[A-Za-z0-9'\-]$");
+  static final RegExp _englishWordRegex = RegExp(r"[A-Za-z0-9][A-Za-z0-9'\-]*");
+
   /// Validates if the input is a Strong's number (HXXXX or GXXXX format)
   /// Returns the normalized Strong's number (uppercase) or null
   static String? validateStrongsNumber(String input) {
@@ -13,6 +25,158 @@ class StrongsDatabase {
       return match.group(0)!.toUpperCase();
     }
     return null;
+  }
+
+  static bool _textContainsStrong(String text, String strongsNumber) {
+    final normalized = strongsNumber.toUpperCase();
+    return text.contains("{$normalized}") || text.contains("{{$normalized}}");
+  }
+
+  static RegExp _wordBoundaryRegex(String word) {
+    return RegExp(
+      '(^|[^A-Za-z0-9])${RegExp.escape(word)}([^A-Za-z0-9]|\$)',
+      caseSensitive: false,
+    );
+  }
+
+  static _ParsedStrongsTag? _parseStrongTag(RegExpMatch match) {
+    final tvmNumber = match.group(1);
+    final regularNumber = match.group(2);
+    final number = tvmNumber ?? regularNumber;
+    if (number == null) return null;
+    return _ParsedStrongsTag(
+      number: number.toUpperCase(),
+      isTvm: tvmNumber != null,
+    );
+  }
+
+  static List<String> _extractStrongsNumbers(
+    String text, {
+    bool includeTvm = true,
+  }) {
+    return _strongTagRegex
+        .allMatches(text)
+        .map(_parseStrongTag)
+        .whereType<_ParsedStrongsTag>()
+        .where((tag) => includeTvm || !tag.isTvm)
+        .map((tag) => tag.number)
+        .toList();
+  }
+
+  static String _plainSearchText(String text) {
+    var result = stripAllStrongsTags(text);
+    result = result.replaceAll(_redLetterTagRegex, "");
+    result = result.replaceAll("¶", " ");
+    result = result.replaceAll(_extraSpacesRegex, " ");
+    return result.trim();
+  }
+
+  static String _extractTrailingPhrase(String textBeforeTagGroup) {
+    var text = textBeforeTagGroup.replaceAll(_redLetterTagRegex, " ");
+    text = text.replaceAll("¶", " ¶ ");
+    text = text.replaceAll(RegExp(r"\s+"), " ");
+
+    final trimmedRight = text.trimRight();
+    if (trimmedRight.isEmpty || !_wordEndingRegex.hasMatch(trimmedRight)) {
+      return "";
+    }
+
+    final phraseSegment = trimmedRight.split(_phraseBoundaryRegex).last;
+    final words = _englishWordRegex
+        .allMatches(phraseSegment)
+        .map((match) => match.group(0)!)
+        .toList();
+    return words.join(" ").trim();
+  }
+
+  static List<_StrongsPhraseAssociation> _parsePhraseAssociations(String text) {
+    final associations = <_StrongsPhraseAssociation>[];
+    final tagMatches = _strongTagRegex.allMatches(text).toList();
+    var searchStart = 0;
+    var index = 0;
+
+    while (index < tagMatches.length) {
+      final firstTagMatch = tagMatches[index];
+      final groupMatches = <RegExpMatch>[firstTagMatch];
+      var groupEnd = firstTagMatch.end;
+      index++;
+
+      while (index < tagMatches.length) {
+        final betweenTags = text.substring(groupEnd, tagMatches[index].start);
+        if (betweenTags.trim().isNotEmpty) break;
+        groupMatches.add(tagMatches[index]);
+        groupEnd = tagMatches[index].end;
+        index++;
+      }
+
+      final phrase = _extractTrailingPhrase(
+          text.substring(searchStart, firstTagMatch.start));
+      if (phrase.isNotEmpty) {
+        final tags = groupMatches
+            .map(_parseStrongTag)
+            .whereType<_ParsedStrongsTag>()
+            .toList();
+        if (tags.isNotEmpty) {
+          associations.add(_StrongsPhraseAssociation(
+            phrase: phrase,
+            tags: tags,
+          ));
+        }
+      }
+
+      searchStart = groupEnd;
+    }
+
+    return associations;
+  }
+
+  static Set<String> _matchingStrongsInText(
+    String text,
+    Set<String> strongsNumbers, {
+    bool includeTvm = true,
+    bool associatedOnly = false,
+  }) {
+    if (strongsNumbers.isEmpty) return {};
+
+    if (associatedOnly) {
+      final matched = <String>{};
+      for (final association in _parsePhraseAssociations(text)) {
+        matched.addAll(association.matchingStrongs(
+          strongsNumbers,
+          includeTvm: includeTvm,
+        ));
+      }
+      return matched;
+    }
+
+    final textStrongs =
+        _extractStrongsNumbers(text, includeTvm: includeTvm).toSet();
+    return textStrongs.intersection(strongsNumbers);
+  }
+
+  static String? _psalmSuperscriptionForChapter(int chapter) {
+    final metadata = bookMetadata['Psa $chapter'];
+    final title = metadata?['title']?.trim();
+    if (title == null || title.isEmpty) return null;
+
+    // Psalm 1 carries the book title in metadata, not a superscription.
+    if (chapter == 1 && title == 'THE BOOK OF PSALMS.') return null;
+    return title;
+  }
+
+  static Map<String, dynamic> _psalmSuperscriptionResult(
+    int chapter,
+    String text, {
+    Iterable<String> matchedStrongs = const [],
+  }) {
+    return {
+      "book": "Psa",
+      "chapter": chapter,
+      "verse": 0,
+      "text": text,
+      "isSuperscription": true,
+      if (matchedStrongs.isNotEmpty) "matchedStrongs": matchedStrongs.toList(),
+    };
   }
 
   /// Returns all verses that contain a specific Strong's number.
@@ -29,10 +193,21 @@ class StrongsDatabase {
     for (final book in bibleDataStrongs.keys) {
       final bookData = bibleDataStrongs[book]!;
       for (final chapter in bookData.keys) {
+        if (book == 'Psa') {
+          final superscription = _psalmSuperscriptionForChapter(chapter);
+          if (superscription != null &&
+              _textContainsStrong(superscription, normalized)) {
+            results.add(_psalmSuperscriptionResult(
+              chapter,
+              superscription,
+              matchedStrongs: [normalized],
+            ));
+          }
+        }
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
-          if (text.contains("{$normalized}")) {
+          if (_textContainsStrong(text, normalized)) {
             results.add({
               "book": book,
               "chapter": chapter,
@@ -60,6 +235,7 @@ class StrongsDatabase {
     final results = <Map<String, dynamic>>[];
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) return results;
+    final wordPattern = _wordBoundaryRegex(searchWord);
 
     int bookCount = 0;
     for (final book in bibleDataStrongs.keys) {
@@ -72,17 +248,21 @@ class StrongsDatabase {
       int chapterCount = 0;
       for (final chapter in bookData.keys) {
         chapterCount++;
+        if (book == 'Psa') {
+          final superscription = _psalmSuperscriptionForChapter(chapter);
+          if (superscription != null) {
+            if (wordPattern.hasMatch(_plainSearchText(superscription))) {
+              results.add(_psalmSuperscriptionResult(
+                chapter,
+                superscription,
+              ));
+            }
+          }
+        }
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
-          // Strip Strong's numbers for word search
-          final cleanText = text.replaceAll(RegExp(r"\{[A-Za-z]\d+\}"), "");
-          // Also handle curly braces that may have leading spaces
-          final searchableText = cleanText.toLowerCase();
-
-          // Use word boundary matching for the search word
-          if (RegExp(r"\b" + RegExp.escape(searchWord) + r"\b")
-              .hasMatch(searchableText)) {
+          if (wordPattern.hasMatch(_plainSearchText(text))) {
             results.add({
               "book": book,
               "chapter": chapter,
@@ -113,23 +293,18 @@ class StrongsDatabase {
     final ref = VerseReferenceDetector.detectQuickJumpReference(verseReference);
     if (ref == null) return "";
     if (ref.verse == null) return ""; // Require a specific verse
-    final verseText =
-        StrongsDatabase.getVerseText(ref.book, ref.chapter, ref.verse!);
+    final verseText = ref.book == 'Psa' && ref.verse == 0
+        ? _psalmSuperscriptionForChapter(ref.chapter)
+        : StrongsDatabase.getVerseText(ref.book, ref.chapter, ref.verse!);
     if (verseText == null) return "";
     final normalized = strongsNumber.toUpperCase();
-    final escaped = RegExp.escape(normalized);
-    final pattern = RegExp(
-      "([A-Za-z'\\-]+(?:\\s+[A-Za-z'\\-]+)*)" // words
-      "(?:\\s*\\{[A-Za-z]\\d+\\}\\s*)*" // optional other Strong's tags
-      "\\{$escaped\\}", // the target Strong's number
-    );
-    final match = pattern.firstMatch(verseText);
-    if (match != null) {
-      var phrase = match.group(1)!.trim();
-      // Remove leading/trailing punctuation (non-alphanumeric and non-apostrophe)
-      phrase =
-          phrase.replaceAll(RegExp(r"^[^A-Za-z0-9']+|[^A-Za-z0-9']+$"), "");
-      return phrase;
+    for (final association in _parsePhraseAssociations(verseText)) {
+      if (association.containsStrongsNumber(
+        normalized,
+        includeTvm: true,
+      )) {
+        return association.phrase;
+      }
     }
     return "";
   }
@@ -145,31 +320,25 @@ class StrongsDatabase {
     final result = <String, Map<String, dynamic>>{};
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) return result;
+    final wordPattern = _wordBoundaryRegex(searchWord);
 
     for (final verseData in verses) {
       final text = verseData["text"] as String;
       final book = verseData["book"] as String;
       final chapter = verseData["chapter"] as int;
-      final verse = verseData["verse"] as int;
+      final isSuperscription = verseData["isSuperscription"] == true;
+      final verse = isSuperscription ? 0 : verseData["verse"] as int?;
 
-      // Find all instances of the word followed by one or more consecutive
-      // Strong's numbers and capture ALL of them.
-      // Pattern: word {SN} {SN} {SN}...
-      final pattern = RegExp(
-        RegExp.escape(searchWord) + r"((?:\s*\{[A-Za-z]\d+\})+)",
-        caseSensitive: false,
-      );
+      for (final association in _parsePhraseAssociations(text)) {
+        if (!association.containsWord(wordPattern)) continue;
 
-      for (final match in pattern.allMatches(text)) {
-        final tagGroup = match.group(1)!;
-        final snMatches = RegExp(r'\{([A-Za-z]\d+)\}').allMatches(tagGroup);
-        for (final snMatch in snMatches) {
-          final strongsNum = snMatch.group(1)!.toUpperCase();
+        for (final strongsNum in association.regularStrongsNumbers) {
           if (!result.containsKey(strongsNum)) {
             result[strongsNum] = {
               "book": book,
               "chapter": chapter,
               "verse": verse,
+              if (isSuperscription) "isSuperscription": true,
             };
           }
         }
@@ -185,13 +354,17 @@ class StrongsDatabase {
   /// Returns all verses that contain ANY of the given Strong's numbers.
   /// Returns a list of maps with "book", "chapter", "verse", "text", and "matchedStrongs" keys.
   static List<Map<String, dynamic>> searchByStrongsNumbers(
-      List<String> strongsNumbers) {
+    List<String> strongsNumbers, {
+    bool includeTvm = false,
+    bool associatedOnly = true,
+  }) {
     if (kDebugMode) {
       debugPrint(
-          '[_StrongsDatabase] searchByStrongsNumbers: starting for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers');
+          '[_StrongsDatabase] searchByStrongsNumbers: starting for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers (includeTvm=$includeTvm, associatedOnly=$associatedOnly)');
     }
     final results = <Map<String, dynamic>>[];
     final normalized = strongsNumbers.map((s) => s.toUpperCase()).toSet();
+    if (normalized.isEmpty) return results;
 
     int bookCount = 0;
     for (final book in bibleDataStrongs.keys) {
@@ -205,15 +378,34 @@ class StrongsDatabase {
       int matchCountThisBook = 0;
       for (final chapter in bookData.keys) {
         chapterCount++;
+        if (book == 'Psa') {
+          final superscription = _psalmSuperscriptionForChapter(chapter);
+          if (superscription != null) {
+            final matchedStrongs = _matchingStrongsInText(
+              superscription,
+              normalized,
+              includeTvm: includeTvm,
+              associatedOnly: associatedOnly,
+            );
+            if (matchedStrongs.isNotEmpty) {
+              matchCountThisBook++;
+              results.add(_psalmSuperscriptionResult(
+                chapter,
+                superscription,
+                matchedStrongs: matchedStrongs,
+              ));
+            }
+          }
+        }
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
-          final matchedStrongs = <String>{};
-          for (final sn in normalized) {
-            if (text.contains("{$sn}")) {
-              matchedStrongs.add(sn);
-            }
-          }
+          final matchedStrongs = _matchingStrongsInText(
+            text,
+            normalized,
+            includeTvm: includeTvm,
+            associatedOnly: associatedOnly,
+          );
           if (matchedStrongs.isNotEmpty) {
             matchCountThisBook++;
             results.add({
@@ -243,39 +435,29 @@ class StrongsDatabase {
   /// Phrases are the word(s) immediately preceding a Strong's number tag,
   /// with leading/trailing punctuation and extra whitespace stripped.
   static Map<String, int> extractPhraseSummary(
-      List<Map<String, dynamic>> verses, List<String> strongsNumbers) {
+    List<Map<String, dynamic>> verses,
+    List<String> strongsNumbers, {
+    bool includeTvm = false,
+  }) {
     if (kDebugMode) {
       debugPrint(
-          '[_StrongsDatabase] extractPhraseSummary: starting for ${strongsNumbers.length} Strong\'s numbers across ${verses.length} verses');
+          '[_StrongsDatabase] extractPhraseSummary: starting for ${strongsNumbers.length} Strong\'s numbers across ${verses.length} verses (includeTvm=$includeTvm)');
     }
     final phraseCounts = <String, int>{};
     final normalizedSet = strongsNumbers.map((s) => s.toUpperCase()).toSet();
 
     for (final verseData in verses) {
       final text = verseData["text"] as String;
-      for (final sn in normalizedSet) {
-        final escaped = RegExp.escape(sn);
-        // This pattern captures words before a Strong's number, allowing other
-        // Strong's number tags (e.g., {H1167}) between the words and the target.
-        // It matches: (words) followed by optional {OTHER_STRONG}* followed by {TARGET}
-        final pattern = RegExp(
-          "([A-Za-z'\\-]+(?:\\s+[A-Za-z'\\-]+)*)" // words
-          "(?:\\s*\\{[A-Za-z]\\d+\\}\\s*)*" // optional other Strong's tags
-          "\\{$escaped\\}", // the target Strong's number
+      for (final association in _parsePhraseAssociations(text)) {
+        final matchCount = association.matchingCount(
+          normalizedSet,
+          includeTvm: includeTvm,
         );
-        for (final match in pattern.allMatches(text)) {
-          String phrase = match.group(1)!.trim();
-          //debugPrint(phrase);
-          // remove common words to help collapse large lists
-          //phrase = phrase.replaceAll(RegExp(r"\bAnd\b"), "");
-          //phrase = phrase.replaceAll(RegExp(r"\bA\b"), "");
-          // Strip leading/trailing punctuation, commas, hyphens
-          phrase =
-              phrase.replaceAll(RegExp(r"^[^A-Za-z0-9]+|[^A-Za-z0-9]+$"), "");
-          if (phrase.isNotEmpty) {
-            phraseCounts[phrase.toLowerCase()] =
-                (phraseCounts[phrase.toLowerCase()] ?? 0) + 1;
-          }
+        if (matchCount == 0) continue;
+
+        final phrase = association.phrase.toLowerCase();
+        if (phrase.isNotEmpty) {
+          phraseCounts[phrase] = (phraseCounts[phrase] ?? 0) + matchCount;
         }
       }
     }
@@ -289,9 +471,9 @@ class StrongsDatabase {
   /// Strips ALL Strong's number tags from verse text (e.g., {H1285} -> "").
   /// Also collapses multiple spaces left behind from adjacent strongs tags.
   static String stripAllStrongsTags(String text) {
-    String result = text.replaceAll(RegExp(r"\{[A-Za-z]\d+\}"), "");
+    String result = text.replaceAll(_strongTagRegex, "");
     // Remove extra spaces from adjacent removed tags (e.g., "{H1916} {H7272}" -> "  " -> " ")
-    result = result.replaceAll(RegExp(r" +"), " ");
+    result = result.replaceAll(_extraSpacesRegex, " ");
     return result.trim();
   }
 
@@ -339,19 +521,12 @@ class StrongsDatabase {
     if (searchWord.isEmpty) return [];
 
     final result = <String>{};
+    final wordPattern = _wordBoundaryRegex(searchWord);
 
-    // Find all instances of the word followed by one or more consecutive
-    // Strong's numbers and capture ALL of them.
-    final pattern = RegExp(
-      RegExp.escape(searchWord) + r"((?:\s*\{[A-Za-z]\d+\})+)",
-      caseSensitive: false,
-    );
+    for (final association in _parsePhraseAssociations(verseText)) {
+      if (!association.containsWord(wordPattern)) continue;
 
-    for (final match in pattern.allMatches(verseText)) {
-      final tagGroup = match.group(1)!;
-      final snMatches = RegExp(r'\{([A-Za-z]\d+)\}').allMatches(tagGroup);
-      for (final snMatch in snMatches) {
-        final strongsNum = snMatch.group(1)!.toUpperCase();
+      for (final strongsNum in association.regularStrongsNumbers) {
         result.add(strongsNum);
       }
     }
@@ -367,13 +542,67 @@ class StrongsDatabase {
 
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) return false;
+    return _wordBoundaryRegex(searchWord).hasMatch(_plainSearchText(verseText));
+  }
+}
 
-    // Strip Strong's numbers for word search
-    final cleanText = verseText.replaceAll(RegExp(r"\{[A-Za-z]\d+\}"), "");
-    final searchableText = cleanText.toLowerCase();
+class _ParsedStrongsTag {
+  final String number;
+  final bool isTvm;
 
-    // Use word boundary matching
-    return RegExp(r"\b" + RegExp.escape(searchWord) + r"\b")
-        .hasMatch(searchableText);
+  const _ParsedStrongsTag({
+    required this.number,
+    required this.isTvm,
+  });
+}
+
+class _StrongsPhraseAssociation {
+  final String phrase;
+  final List<_ParsedStrongsTag> tags;
+
+  const _StrongsPhraseAssociation({
+    required this.phrase,
+    required this.tags,
+  });
+
+  Iterable<String> get regularStrongsNumbers =>
+      tags.where((tag) => !tag.isTvm).map((tag) => tag.number);
+
+  bool containsWord(RegExp wordPattern) => wordPattern.hasMatch(phrase);
+
+  bool containsStrongsNumber(
+    String strongsNumber, {
+    required bool includeTvm,
+  }) {
+    return tags.any(
+        (tag) => tag.number == strongsNumber && (includeTvm || !tag.isTvm));
+  }
+
+  Set<String> matchingStrongs(
+    Set<String> strongsNumbers, {
+    required bool includeTvm,
+  }) {
+    final matched = <String>{};
+    for (final tag in tags) {
+      if (!includeTvm && tag.isTvm) continue;
+      if (strongsNumbers.contains(tag.number)) {
+        matched.add(tag.number);
+      }
+    }
+    return matched;
+  }
+
+  int matchingCount(
+    Set<String> strongsNumbers, {
+    required bool includeTvm,
+  }) {
+    var count = 0;
+    for (final tag in tags) {
+      if (!includeTvm && tag.isTvm) continue;
+      if (strongsNumbers.contains(tag.number)) {
+        count++;
+      }
+    }
+    return count;
   }
 }

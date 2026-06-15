@@ -6,7 +6,7 @@ import '../models/olive_tree_data.dart';
 import '../utils/color_mapper.dart';
 import '../database/highlights_database.dart';
 import '../database/notes_database.dart';
-import '../data/bible_data.dart';
+import '../data/bible_data_strongs.dart';
 import '../widgets/olive_tree_import_dialogs.dart';
 import '../utils/note_storage_format.dart';
 import '../services/local_data_change_notifier.dart';
@@ -487,7 +487,7 @@ class OliveTreeImportService {
     if (highlight.verseReference == null) return null;
 
     // Get the full verse text
-    final bookData = bibleData[highlight.verseReference!.book];
+    final bookData = bibleDataStrongs[highlight.verseReference!.book];
     if (bookData == null) return null;
 
     final chapterData = bookData[highlight.verseReference!.chapter];
@@ -531,7 +531,7 @@ class OliveTreeImportService {
 
   /// Check if a verse exists in the Bible data
   static bool _verseExists(String book, int chapter, int verse) {
-    final bookData = bibleData[book];
+    final bookData = bibleDataStrongs[book];
     if (bookData == null) return false;
 
     final chapterData = bookData[chapter];

@@ -1,4 +1,4 @@
-import '../data/bible_data.dart';
+import '../data/bible_data_strongs.dart';
 
 class VerseReference {
   final String book;
@@ -20,8 +20,8 @@ class VerseReference {
   });
 
   bool get isValid {
-    // Validate existence using bibleData (book -> chapter -> verse)
-    final bookData = bibleData[book];
+    // Validate existence using bibleDataStrongs (book -> chapter -> verse)
+    final bookData = bibleDataStrongs[book];
     if (bookData == null || !bookData.containsKey(chapter)) {
       return false;
     }
@@ -31,8 +31,13 @@ class VerseReference {
       return false;
     }
 
-    // If verse is specified, check if it exists
-    if (verse != null && !chapterData.containsKey(verse)) {
+    final isPsalmSuperscription = book == 'Psa' && verse == 0;
+
+    // If verse is specified, check if it exists. Psalm superscriptions are
+    // represented by verse 0 for navigation/search references only.
+    if (verse != null &&
+        !isPsalmSuperscription &&
+        !chapterData.containsKey(verse)) {
       return false;
     }
 
@@ -282,7 +287,7 @@ class VerseReferenceDetector {
       }
 
       // Validate all verses exist in chapter
-      final bookData = bibleData[normalizedBook];
+      final bookData = bibleDataStrongs[normalizedBook];
       if (bookData == null || !bookData.containsKey(chapter)) {
         return null;
       }
@@ -478,14 +483,19 @@ class VerseReferenceDetector {
     if (normalizedBook == null) return null;
 
     // Validate book and chapter exist
-    final bookData = bibleData[normalizedBook];
+    final bookData = bibleDataStrongs[normalizedBook];
     if (bookData == null || !bookData.containsKey(chapter)) return null;
 
     // Validate verse if provided
     final chapterData = bookData[chapter];
     if (chapterData == null) return null;
 
-    if (verse != null && !chapterData.containsKey(verse)) return null;
+    final isPsalmSuperscription = normalizedBook == 'Psa' && verse == 0;
+    if (verse != null &&
+        !isPsalmSuperscription &&
+        !chapterData.containsKey(verse)) {
+      return null;
+    }
 
     return VerseReference(
       book: normalizedBook,

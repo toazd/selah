@@ -209,11 +209,13 @@ class _SearchScreenState extends State<SearchScreen>
 
   String _extractRedLetterText(String text) {
     final matches = RegExp(r'<r>(.*?)</r>', dotAll: true).allMatches(text);
-    return matches.map((m) => m.group(1)!).join(' ');
+    return matches
+        .map((m) => VerseTextParser.toPlainVerseText(m.group(1)!))
+        .join(' ');
   }
 
   String _stripRedLetterTags(String text) {
-    return text.replaceAll(RegExp(r'</?r>'), '');
+    return VerseTextParser.toPlainVerseText(text, removePilcrow: false);
   }
 
   String _getSearchText(String verseText, bool useRedLetter) {
@@ -1230,7 +1232,6 @@ class _SearchScreenState extends State<SearchScreen>
 
       await _saveLastSearch();
 
-      // TODO: update this if web builds on windows have the OSK bug
       // Don't bother to use this bug-workaround if we aren't on windows
       // and we aren't in tablet mode because it can be frustrating having
       // the focus removed when we aren't done typing. when in tablet mode
@@ -1239,8 +1240,8 @@ class _SearchScreenState extends State<SearchScreen>
       //
       // Check that the device is touch capable and has a physical keyboard to attempt
       // to avoid triggering this when a 2-in-1 is in laptop mode (keyboard attached)
-      // TODO: .isKeyboardAttached might not work as expected
       //
+      // .isKeyboardAttached might not work as expected
       if (!kIsWeb &&
           (Platform.isWindows &&
               TabletModeService().isTablet &&
@@ -1590,10 +1591,7 @@ class _SearchScreenState extends State<SearchScreen>
     final endVerseNum = isNearbyResult ? result['endVerse'] as int? : null;
     final rawVerseText = result['text'] as String? ?? '';
 
-    // Filter out red letter tags <r> and </r>
-    final redLetterRegex = RegExp(r'</?r>');
-    final cleanVerseText =
-        rawVerseText.replaceAll(redLetterRegex, '').replaceAll('¶ ', '');
+    final cleanVerseText = VerseTextParser.toPlainVerseText(rawVerseText);
 
     // Format for clipboard (same format as bible screen)
     final bookName = result['bookLongName'] as String;
@@ -1810,14 +1808,29 @@ class _SearchScreenState extends State<SearchScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.help_outline,
+              Icons.manage_search,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Show Help Dialog',
+              semanticLabel: 'Open Strongs Search',
             ),
-            tooltip: 'Help',
+            tooltip: 'Strongs Search',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: _showHelpDialog,
+            onPressed: () async {
+              final strongsResult = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StrongsSearchScreen(
+                    sourceScreenIndex: widget.sourceScreenIndex,
+                  ),
+                ),
+              );
+
+              if (strongsResult != null &&
+                  strongsResult.containsKey('verseLocation') &&
+                  context.mounted) {
+                Navigator.pop(context, strongsResult);
+              }
+            },
           ),
           IconButton(
             icon: Icon(
@@ -1859,29 +1872,14 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           IconButton(
             icon: Icon(
-              Icons.manage_search,
+              Icons.help_outline,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Open Strongs Search',
+              semanticLabel: 'Show Help Dialog',
             ),
-            tooltip: 'Strongs Search',
+            tooltip: 'Help',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: () async {
-              final strongsResult = await Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StrongsSearchScreen(
-                    sourceScreenIndex: widget.sourceScreenIndex,
-                  ),
-                ),
-              );
-
-              if (strongsResult != null &&
-                  strongsResult.containsKey('verseLocation') &&
-                  context.mounted) {
-                Navigator.pop(context, strongsResult);
-              }
-            },
+            onPressed: _showHelpDialog,
           ),
           IconButton(
             icon: Icon(

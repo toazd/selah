@@ -81,7 +81,7 @@ class BibleScreenHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // TODO: Uncomment if bookmark functionality is added
+              // Uncomment if bookmark functionality is added
               // IconButton(
               //   icon: Icon(
               //     Icons.bookmark_border_rounded,

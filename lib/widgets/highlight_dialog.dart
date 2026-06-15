@@ -9,6 +9,7 @@ import '../utils/preferences_constants.dart';
 import '../services/local_data_change_notifier.dart';
 import '../utils/error_handler.dart';
 import '../utils/font_size_adjustments.dart';
+import '../utils/verse_text_parser.dart';
 
 /// Highlight dialog widget for selecting and applying text highlights
 class HighlightDialog extends StatefulWidget {
@@ -37,8 +38,10 @@ class _HighlightDialogState extends State<HighlightDialog> {
   ValueNotifier<int?> selectedColorIndexNotifier = ValueNotifier(null);
   ValueNotifier<int?> pressedColorIndexNotifier = ValueNotifier(null);
 
-  String get _fullyCleanedVerseText => widget.rawVerseText
-      .replaceAll(RegExp(r'</?r>'), ''); //.replaceAll('¶ ', '');
+  String get _fullyCleanedVerseText => VerseTextParser.toPlainVerseText(
+        widget.rawVerseText,
+        removePilcrow: false,
+      );
 
   @override
   void initState() {

@@ -1,15 +1,15 @@
-import '../data/bible_data.dart';
+import '../data/bible_data_strongs.dart';
 import '../data/book_metadata.dart';
 
 class BibleDatabase {
   // Get all book names in canonical order
   static Future<List<String>> getBooks() async {
-    return bibleData.keys.toList();
+    return bibleDataStrongs.keys.toList();
   }
 
   // Get all chapters for a book
   static Future<List<int>> getChapters(String bookShortName) async {
-    final bookData = bibleData[bookShortName];
+    final bookData = bibleDataStrongs[bookShortName];
     if (bookData == null) return [];
     return bookData.keys.toList();
   }
@@ -17,7 +17,7 @@ class BibleDatabase {
   // Get all verses for a book/chapter
   static Future<List<Map<String, dynamic>>> getVerses(
       String bookShortName, int chapter) async {
-    final bookData = bibleData[bookShortName];
+    final bookData = bibleDataStrongs[bookShortName];
     if (bookData == null) return [];
 
     final chapterData = bookData[chapter];
@@ -43,8 +43,8 @@ class BibleDatabase {
 
     final results = <Map<String, dynamic>>[];
 
-    for (final book in bibleData.keys) {
-      final bookData = bibleData[book]!;
+    for (final book in bibleDataStrongs.keys) {
+      final bookData = bibleDataStrongs[book]!;
       for (final chapter in bookData.keys) {
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
@@ -104,8 +104,8 @@ class BibleDatabase {
   static Future<List<Map<String, dynamic>>> getAllVerses() async {
     final results = <Map<String, dynamic>>[];
 
-    for (final book in bibleData.keys) {
-      final bookData = bibleData[book]!;
+    for (final book in bibleDataStrongs.keys) {
+      final bookData = bibleDataStrongs[book]!;
       for (final chapter in bookData.keys) {
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {

@@ -540,7 +540,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
 
       await _saveLastSearch(searchText, _useRegex);
 
-      // TODO: update this if web builds on windows have the OSK bug
       // Don't bother to use this bug-workaround if we aren't on windows
       // and we aren't in tablet mode because it can be frustrating having
       // the focus removed when we aren't done typing. when in tablet mode

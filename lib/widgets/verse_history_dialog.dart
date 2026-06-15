@@ -28,7 +28,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
   bool _isLoading = false;
   bool _hasMoreData = true;
   int _currentOffset = 0;
-  static const int _pageSize = 50;
+  static const int _pageSize = 25;
 
   // Selection mode state
   bool _isSelectMode = false;
@@ -147,6 +147,163 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
   void _updateLocation(String? book, int? chapter, int? verse) {
     Navigator.pop(context);
     widget.onUpdateLocation(book, chapter, verse);
+  }
+
+  String _formatHistoryDate(DateTime date) {
+    return DateFormat('EEEE MMM d, y').format(date);
+  }
+
+  Future<DateTime?> _showTrimDateDialog() async {
+    final historyDates = await HistoryDatabase.getHistoryDates();
+
+    if (!mounted) return null;
+
+    if (historyDates.isEmpty) {
+      showStyledSnackBar(context, 'No history to trim.');
+      return null;
+    }
+
+    DateTime selectedDate = historyDates.first;
+
+    return showDialog<DateTime>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          constraints: const BoxConstraints(maxWidth: 400),
+          content: SizedBox(
+            width: 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Choose the oldest date you want to keep. History before that date will be removed after you confirm.',
+                  style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButton<DateTime>(
+                  value: selectedDate,
+                  isExpanded: true,
+                  dropdownColor: Theme.of(context).dialogTheme.backgroundColor,
+                  style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context),
+                  ),
+                  items: historyDates
+                      .map(
+                        (date) => DropdownMenuItem<DateTime>(
+                          value: date,
+                          child: Text(
+                            _formatHistoryDate(date),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setDialogState(() => selectedDate = value);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel',
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text('Trim',
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: Colors.red)),
+              onPressed: () => Navigator.pop(context, selectedDate),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _trimHistory() async {
+    final selectedDate = await _showTrimDateDialog();
+    if (selectedDate == null || !mounted) return;
+
+    final cutoff = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    ).millisecondsSinceEpoch;
+
+    final itemCount = await HistoryDatabase.countHistoryBeforeTimestamp(cutoff);
+    if (!mounted) return;
+
+    if (itemCount == 0) {
+      showStyledSnackBar(context, 'No older history to trim.');
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        constraints: const BoxConstraints(maxWidth: 400),
+        content: Text(
+            'Trim $itemCount history ${itemCount == 1 ? 'item' : 'items'} before ${_formatHistoryDate(selectedDate)}? This action cannot be undone.',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
+        actions: [
+          TextButton(
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            child: Text('Trim',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final deletedCount =
+          await HistoryDatabase.deleteHistoryBeforeTimestamp(cutoff);
+      if (!mounted) return;
+
+      await _loadInitialHistory();
+      if (!mounted) return;
+
+      LocalDataChangeNotifier.notifyHistoryChanged();
+      showStyledSnackBar(context,
+          'Trimmed $deletedCount history ${deletedCount == 1 ? 'item' : 'items'}.');
+    } catch (e) {
+      if (mounted) {
+        showStyledSnackBar(context, 'Failed to trim history: $e',
+            isError: true);
+      }
+    }
   }
 
   Future<void> _clearHistory() async {
@@ -511,6 +668,14 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                   TextButton(
                     onPressed: _clearHistory,
                     child: Text('Clear',
+                        style: TextStyle(
+                            fontSize: uiFontSize,
+                            fontFamily: uiFontFamily,
+                            color: Colors.red)),
+                  ),
+                  TextButton(
+                    onPressed: _trimHistory,
+                    child: Text('Trim',
                         style: TextStyle(
                             fontSize: uiFontSize,
                             fontFamily: uiFontFamily,
