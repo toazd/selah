@@ -199,11 +199,6 @@ List<InlineSpan> applyHighlightsToText(
   bool showStrongsNumbers = false,
   void Function(String strongsNumber)? onStrongsTap,
 }) {
-  final visibleVerseText = VerseTextParser.toPlainVerseText(
-    rawVerseText,
-    removePilcrow: false,
-  );
-
   // If no highlights, just parse the text normally
   if (highlights.isEmpty) {
     return VerseTextParser.parseVerseText(rawVerseText, baseStyle,
@@ -242,138 +237,154 @@ List<InlineSpan> applyHighlightsToText(
   adjustedHighlights
       .sort((a, b) => (a['start'] as int).compareTo(b['start'] as int));
 
+  return _applyHighlightsToParsedSpans(
+    originalSpans: originalSpans,
+    adjustedHighlights: adjustedHighlights,
+    baseStyle: baseStyle,
+    lightModeTextColor: lightModeTextColor,
+    darkModeTextColor: darkModeTextColor,
+  );
+}
+
+/// Applies highlights while preserving parsed display-only spans, such as
+/// Strong's number widgets and the visual spaces inserted between them.
+List<InlineSpan> _applyHighlightsToParsedSpans({
+  required List<InlineSpan> originalSpans,
+  required List<Map<String, dynamic>> adjustedHighlights,
+  required TextStyle baseStyle,
+  required Color lightModeTextColor,
+  required Color darkModeTextColor,
+}) {
   final spans = <InlineSpan>[];
-  int currentPosition = 0;
+  var cleanPosition = 0;
+  var highlightIndex = 0;
 
-  for (final highlight in adjustedHighlights) {
-    final start = highlight['start'] as int;
-    final end = highlight['end'] as int;
-    final color = Color(highlight['color'] as int);
+  for (var spanIndex = 0; spanIndex < originalSpans.length; spanIndex++) {
+    final span = originalSpans[spanIndex];
 
-    // Add unhighlighted spans before this highlight
-    if (start > currentPosition) {
-      final beforeSpans = extractSpansForRange(
-          originalSpans, currentPosition, start, baseStyle);
-      spans.addAll(beforeSpans);
+    if (span is! TextSpan) {
+      spans.add(span);
+      continue;
     }
 
-    // Calculate the effective highlight background
-    final effectiveHighlightBackground =
-        color.withValues(alpha: defaultHighlightAlpha);
+    final spanText = span.text ?? '';
+    if (spanText.isEmpty) {
+      spans.add(span);
+      continue;
+    }
 
-    // Add highlighted spans
-    final highlightSpans =
-        extractSpansForRange(originalSpans, start, end, baseStyle);
-    for (final span in highlightSpans) {
-      if (span is TextSpan) {
-        // Get the original text color from the span or base style
-        final originalTextColor =
-            span.style?.color ?? baseStyle.color ?? Colors.black;
+    if (_isDisplayOnlyStrongsSeparator(originalSpans, spanIndex)) {
+      spans.add(span);
+      continue;
+    }
 
-        // Check if we need to adjust the text color for contrast using the passed parameters
-        final adjustedTextColor = adjustTextColorForHighlight(
-          originalTextColor,
-          effectiveHighlightBackground,
-          darkModeTextColor,
-          lightModeTextColor,
-        );
+    final spanStart = cleanPosition;
+    final spanEnd = spanStart + spanText.length;
+    var localPosition = 0;
 
-        spans.add(TextSpan(
-          text: span.text,
-          style: span.style?.copyWith(
-                backgroundColor: color.withValues(alpha: defaultHighlightAlpha),
-                color: adjustedTextColor,
-              ) ??
-              baseStyle.copyWith(
-                backgroundColor: color.withValues(alpha: defaultHighlightAlpha),
-                color: adjustedTextColor,
-              ),
-        ));
-      } else {
-        spans.add(span);
+    while (highlightIndex < adjustedHighlights.length &&
+        (adjustedHighlights[highlightIndex]['end'] as int) <= spanStart) {
+      highlightIndex++;
+    }
+
+    var scanIndex = highlightIndex;
+    while (scanIndex < adjustedHighlights.length) {
+      final highlight = adjustedHighlights[scanIndex];
+      final highlightStart = highlight['start'] as int;
+      final highlightEnd = highlight['end'] as int;
+
+      if (highlightStart >= spanEnd) {
+        break;
       }
+
+      if (highlightEnd <= spanStart) {
+        scanIndex++;
+        continue;
+      }
+
+      final beforeEnd =
+          (highlightStart - spanStart).clamp(0, spanText.length).toInt();
+      if (beforeEnd > localPosition) {
+        spans.add(TextSpan(
+          text: spanText.substring(localPosition, beforeEnd),
+          style: span.style,
+        ));
+      }
+
+      final highlightedStart = max(
+        localPosition,
+        (highlightStart - spanStart).clamp(0, spanText.length).toInt(),
+      );
+      final highlightedEnd =
+          (highlightEnd - spanStart).clamp(0, spanText.length).toInt();
+      if (highlightedEnd > highlightedStart) {
+        spans.add(_buildHighlightedTextSpan(
+          text: spanText.substring(highlightedStart, highlightedEnd),
+          sourceStyle: span.style,
+          baseStyle: baseStyle,
+          highlightColor: Color(highlight['color'] as int),
+          lightModeTextColor: lightModeTextColor,
+          darkModeTextColor: darkModeTextColor,
+        ));
+      }
+
+      localPosition = max(localPosition, highlightedEnd);
+
+      if (highlightEnd > spanEnd) {
+        break;
+      }
+      scanIndex++;
     }
 
-    currentPosition = end;
-  }
+    if (localPosition < spanText.length) {
+      spans.add(TextSpan(
+        text: spanText.substring(localPosition),
+        style: span.style,
+      ));
+    }
 
-  // Add remaining unhighlighted spans
-  if (currentPosition < visibleVerseText.length) {
-    final remainingSpans = extractSpansForRange(
-        originalSpans, currentPosition, visibleVerseText.length, baseStyle);
-    spans.addAll(remainingSpans);
+    cleanPosition = spanEnd;
   }
 
   return spans;
 }
 
-/// Helper method to extract spans for a specific character range from parsed text
-List<InlineSpan> extractSpansForRange(
-    List<InlineSpan> originalSpans, int start, int end, TextStyle baseStyle) {
-  final extractedSpans = <InlineSpan>[];
-  int currentPosition = 0;
+TextSpan _buildHighlightedTextSpan({
+  required String text,
+  required TextStyle? sourceStyle,
+  required TextStyle baseStyle,
+  required Color highlightColor,
+  required Color lightModeTextColor,
+  required Color darkModeTextColor,
+}) {
+  final effectiveHighlightBackground =
+      highlightColor.withValues(alpha: defaultHighlightAlpha);
+  final originalTextColor =
+      sourceStyle?.color ?? baseStyle.color ?? Colors.black;
+  final adjustedTextColor = adjustTextColorForHighlight(
+    originalTextColor,
+    effectiveHighlightBackground,
+    darkModeTextColor,
+    lightModeTextColor,
+  );
 
-  for (final span in originalSpans) {
-    if (span is TextSpan) {
-      final spanText = span.text ?? '';
-      final spanLength = spanText.length;
+  return TextSpan(
+    text: text,
+    style: (sourceStyle ?? baseStyle).copyWith(
+      backgroundColor: effectiveHighlightBackground,
+      color: adjustedTextColor,
+    ),
+  );
+}
 
-      // Check if this span overlaps with our desired range
-      final spanStart = currentPosition;
-      final spanEnd = currentPosition + spanLength;
-
-      // If span is completely before our range, skip it
-      if (spanEnd <= start) {
-        currentPosition += spanLength;
-        continue;
-      }
-
-      // If span is completely after our range, we're done
-      if (spanStart >= end) {
-        break;
-      }
-
-      // Calculate the overlap
-      final overlapStart = max(start, spanStart);
-      final overlapEnd = min(end, spanEnd);
-
-      if (overlapStart < overlapEnd) {
-        // Extract the overlapping portion of this span
-        final extractedText = spanText.substring(
-            overlapStart - spanStart, overlapEnd - spanStart);
-
-        // If extracted text contains <r> tags, re-parse it to handle them correctly
-        if (extractedText.contains('<r>') || extractedText.contains('</r>')) {
-          final reParsed =
-              VerseTextParser.parseVerseText(extractedText, baseStyle);
-          if (reParsed.children != null) {
-            extractedSpans.addAll(reParsed.children!);
-          }
-        } else {
-          // No <r> tags, use the original span style
-          extractedSpans.add(TextSpan(
-            text: extractedText,
-            style: span.style,
-          ));
-        }
-      }
-
-      currentPosition += spanLength;
-
-      // If we've reached the end of our range, we're done
-      if (currentPosition >= end) {
-        break;
-      }
-    } else {
-      // For non-TextSpan widgets, include them if they're in range
-      if (currentPosition >= start && currentPosition < end) {
-        extractedSpans.add(span);
-      }
-      // WidgetSpans don't contribute to character position
-    }
-  }
-
-  return extractedSpans;
+bool _isDisplayOnlyStrongsSeparator(List<InlineSpan> spans, int index) {
+  final span = spans[index];
+  return span is TextSpan &&
+      span.text == ' ' &&
+      index > 0 &&
+      index < spans.length - 1 &&
+      spans[index - 1] is WidgetSpan &&
+      spans[index + 1] is WidgetSpan;
 }
 
 /// Convert a position in clean text to raw text position
