@@ -3,7 +3,7 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
 
-Selah is a cross-platform, touch-friendly Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a> with many features built in to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
+Selah is a cross-platform, touch-friendly Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a>. It is intuitive and simple by default but also has unique and advanced features tucked away to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
 
 ## 📖 Features
 
