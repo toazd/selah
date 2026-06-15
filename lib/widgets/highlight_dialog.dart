@@ -40,7 +40,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
 
   String get _fullyCleanedVerseText => VerseTextParser.toPlainVerseText(
         widget.rawVerseText,
-        removePilcrow: false,
+        removePilcrow: true,
       );
 
   @override
@@ -72,7 +72,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
         setState(() {
           _currentHighlights.clear();
           if (highlightsList.isNotEmpty) {
-            // Store raw positions directly - applyHighlightsToText will handle conversion
+            // Highlight ranges are stored against the cleaned visible verse text.
             _currentHighlights[widget.verseNumber] = highlightsList;
           }
         });
@@ -154,14 +154,12 @@ class _HighlightDialogState extends State<HighlightDialog> {
       if (colorIndex >= 0 && colorIndex < colors.length) {
         final selectedColor = colors[colorIndex];
 
-        // Convert clean text positions to raw text positions
-        final actualStart =
-            convertCleanPositionToRaw(widget.rawVerseText, start);
-        final actualEnd = convertCleanPositionToRaw(widget.rawVerseText, end);
+        final actualStart = start;
+        final actualEnd = end;
 
         if (actualStart >= 0 &&
             actualEnd > actualStart &&
-            actualEnd <= widget.rawVerseText.length) {
+            actualEnd <= _fullyCleanedVerseText.length) {
           // Check for overlap with existing highlights
           final existingHighlights =
               await HighlightsDatabase.getHighlightsForVerse(
@@ -448,16 +446,17 @@ class _HighlightDialogState extends State<HighlightDialog> {
                       // Get the actual highlighted text instead of character ranges
                       String highlightedText;
                       try {
-                        // Convert raw positions to clean positions for substring
-                        final cleanStart = convertRawPositionToClean(
-                            widget.rawVerseText, start);
-                        final cleanEnd =
-                            convertRawPositionToClean(widget.rawVerseText, end);
-                        if (cleanStart >= 0 &&
-                            cleanEnd > cleanStart &&
-                            cleanEnd <= _fullyCleanedVerseText.length) {
+                        final cleanRange = resolveHighlightCleanTextRange(
+                          rawVerseText: widget.rawVerseText,
+                          savedStart: start,
+                          savedEnd: end,
+                        );
+                        if (cleanRange != null &&
+                            cleanRange.start >= 0 &&
+                            cleanRange.end > cleanRange.start &&
+                            cleanRange.end <= _fullyCleanedVerseText.length) {
                           highlightedText = _fullyCleanedVerseText.substring(
-                              cleanStart, cleanEnd);
+                              cleanRange.start, cleanRange.end);
                           // Truncate very long highlights for display
                           if (highlightedText.length > 20) {
                             highlightedText =

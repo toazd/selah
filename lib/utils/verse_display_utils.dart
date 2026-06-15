@@ -199,9 +199,11 @@ List<InlineSpan> applyHighlightsToText(
   bool showStrongsNumbers = false,
   void Function(String strongsNumber)? onStrongsTap,
 }) {
+  final displayVerseText = _removePilcrowMarkup(rawVerseText);
+
   // If no highlights, just parse the text normally
   if (highlights.isEmpty) {
-    return VerseTextParser.parseVerseText(rawVerseText, baseStyle,
+    return VerseTextParser.parseVerseText(displayVerseText, baseStyle,
                 showStrongsNumbers: showStrongsNumbers,
                 onStrongsTap: onStrongsTap)
             .children ??
@@ -210,27 +212,27 @@ List<InlineSpan> applyHighlightsToText(
 
   // Parse the raw verse text to get spans with markup removed from visible text.
   final parsedVerseText = VerseTextParser.parseVerseText(
-      rawVerseText, baseStyle,
+      displayVerseText, baseStyle,
       showStrongsNumbers: showStrongsNumbers, onStrongsTap: onStrongsTap);
   final originalSpans = parsedVerseText.children ?? [];
 
-  // Convert highlight positions from raw text to clean text positions
   final adjustedHighlights = <Map<String, dynamic>>[];
   for (final highlight in highlights) {
     final rawStart = highlight['start'] as int;
     final rawEnd = highlight['end'] as int;
 
-    // Convert raw positions to clean positions
-    final cleanStart = convertRawPositionToClean(rawVerseText, rawStart);
-    final cleanEnd = convertRawPositionToClean(rawVerseText, rawEnd);
+    final cleanRange = resolveHighlightCleanTextRange(
+      rawVerseText: displayVerseText,
+      savedStart: rawStart,
+      savedEnd: rawEnd,
+    );
+    if (cleanRange == null) continue;
 
-    if (cleanStart >= 0 && cleanEnd > cleanStart) {
-      adjustedHighlights.add({
-        'start': cleanStart,
-        'end': cleanEnd,
-        'color': highlight['color'],
-      });
-    }
+    adjustedHighlights.add({
+      'start': cleanRange.start,
+      'end': cleanRange.end,
+      'color': highlight['color'],
+    });
   }
 
   // Sort highlights by start position
@@ -244,6 +246,25 @@ List<InlineSpan> applyHighlightsToText(
     lightModeTextColor: lightModeTextColor,
     darkModeTextColor: darkModeTextColor,
   );
+}
+
+TextRange? resolveHighlightCleanTextRange({
+  required String rawVerseText,
+  required int savedStart,
+  required int savedEnd,
+}) {
+  if (savedStart < 0 || savedEnd <= savedStart) return null;
+
+  final visibleVerseText = VerseTextParser.toPlainVerseText(
+    rawVerseText,
+    removePilcrow: true,
+  );
+
+  if (savedEnd <= visibleVerseText.length) {
+    return TextRange(start: savedStart, end: savedEnd);
+  }
+
+  return null;
 }
 
 /// Applies highlights while preserving parsed display-only spans, such as
@@ -437,6 +458,10 @@ final RegExp _displayMarkupRegex = RegExp(
   r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
   caseSensitive: false,
 );
+
+String _removePilcrowMarkup(String text) {
+  return text.replaceAll('¶ ', '').replaceAll('¶', '');
+}
 
 Match? _matchDisplayMarkupAt(String text, int index) {
   return _displayMarkupRegex.matchAsPrefix(text.substring(index));
