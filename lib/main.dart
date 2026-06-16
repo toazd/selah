@@ -42,7 +42,7 @@ import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.8";
+final appVersion = "0.7.9";
 
 final bool _isDesktop =
     (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
@@ -264,10 +264,15 @@ class TabletModeService {
   ValueNotifier<bool>? _tabletModeNotifier;
 
   void initializeNotifier() {
-    if (!kIsWeb && Platform.isWindows) {
+    if (_tabletModeNotifier == null && !kIsWeb && Platform.isWindows) {
       _tabletModeNotifier = TabletModeDetector.createTabletModeNotifier();
-      _tabletModeNotifier!.addListener(() {});
     }
+  }
+
+  void dispose() {
+    _tabletModeNotifier?.dispose();
+    _tabletModeNotifier = null;
+    TabletModeDetector.dispose();
   }
 
   ValueNotifier<bool>? get notifier => _tabletModeNotifier;
@@ -1485,6 +1490,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
         }
       }
       // Handle app returning to foreground - re-establish realtime listeners
+      // and sync recent changes
       else if (state == AppLifecycleState.resumed) {
         // App is coming back to foreground - restart sync service for realtime listeners
         if (Supabase.instance.client.auth.currentUser != null) {
@@ -1555,6 +1561,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
     // Remove binding observer
     WidgetsBinding.instance.removeObserver(this);
+
+    TabletModeService().dispose();
 
     _invisibleElevatedButtonNode.dispose();
 
@@ -6015,18 +6023,18 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
   // tablet detection mode testing
   // Add this to any widget's initState() or call from main()
-  Future<void> testTabletMode() async {
-    final isTablet = await TabletModeDetector.isTabletMode();
-    final hasKeyboard = await TabletModeDetector.isKeyboardAttached();
-    final hasTouch = await TabletModeDetector.hasTouchScreen();
-    final maxTouchPoints = await TabletModeDetector.getMaximumTouchPoints();
-    final deviceInfo = await TabletModeDetector.getDeviceInfo();
+  // Future<void> testTabletMode() async {
+  //   final isTablet = await TabletModeDetector.isTabletMode();
+  //   final hasKeyboard = await TabletModeDetector.isKeyboardAttached();
+  //   final hasTouch = await TabletModeDetector.hasTouchScreen();
+  //   final maxTouchPoints = await TabletModeDetector.getMaximumTouchPoints();
+  //   final deviceInfo = await TabletModeDetector.getDeviceInfo();
 
-    if (kDebugMode) debugPrint('=== Tablet Mode Detection ===');
-    if (kDebugMode) debugPrint('Tablet Mode: $isTablet');
-    if (kDebugMode) debugPrint('Keyboard Attached: $hasKeyboard');
-    if (kDebugMode) debugPrint('Touch Screen: $hasTouch');
-    if (kDebugMode) debugPrint('Max Touch Points: $maxTouchPoints');
-    if (kDebugMode) debugPrint('Device Info: $deviceInfo');
-  }
+  //   if (kDebugMode) debugPrint('=== Tablet Mode Detection ===');
+  //   if (kDebugMode) debugPrint('Tablet Mode: $isTablet');
+  //   if (kDebugMode) debugPrint('Keyboard Attached: $hasKeyboard');
+  //   if (kDebugMode) debugPrint('Touch Screen: $hasTouch');
+  //   if (kDebugMode) debugPrint('Max Touch Points: $maxTouchPoints');
+  //   if (kDebugMode) debugPrint('Device Info: $deviceInfo');
+  // }
 }

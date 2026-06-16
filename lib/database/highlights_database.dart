@@ -301,78 +301,78 @@ class HighlightsDatabase {
     return await db.insert('user_highlights', highlightData);
   }
 
-  static Future<void> updateHighlight({
-    required int id,
-    required int start,
-    required int end,
-    required int color,
-    int? updateAt,
-    String? uuid,
-    bool skipSync = false,
-  }) async {
-    final timestamp = updateAt ?? DateTime.now().millisecondsSinceEpoch;
+  // static Future<void> updateHighlight({
+  //   required int id,
+  //   required int start,
+  //   required int end,
+  //   required int color,
+  //   int? updateAt,
+  //   String? uuid,
+  //   bool skipSync = false,
+  // }) async {
+  //   final timestamp = updateAt ?? DateTime.now().millisecondsSinceEpoch;
 
-    // Get existing record first for validation
-    final db = await getDatabase();
-    final existing =
-        await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
-    if (existing.isEmpty) {
-      throw Exception('Highlight with id "$id" not found');
-    }
+  //   // Get existing record first for validation
+  //   final db = await getDatabase();
+  //   final existing =
+  //       await db.query('user_highlights', where: 'id = ?', whereArgs: [id]);
+  //   if (existing.isEmpty) {
+  //     throw Exception('Highlight with id "$id" not found');
+  //   }
 
-    // Validate data before updating (merge with existing data for complete validation)
-    final existingData = existing.first;
-    final updateData = {
-      'book': existingData['book'],
-      'chapter': existingData['chapter'],
-      'verse': existingData['verse'],
-      'start': start,
-      'end': end,
-      'color': color,
-      'created_at': existingData['created_at'],
-      'updated_at': timestamp,
-    };
+  //   // Validate data before updating (merge with existing data for complete validation)
+  //   final existingData = existing.first;
+  //   final updateData = {
+  //     'book': existingData['book'],
+  //     'chapter': existingData['chapter'],
+  //     'verse': existingData['verse'],
+  //     'start': start,
+  //     'end': end,
+  //     'color': color,
+  //     'created_at': existingData['created_at'],
+  //     'updated_at': timestamp,
+  //   };
 
-    final isValid = await DataValidation.validateBeforeDatabaseWrite(
-        updateData, 'highlight');
-    if (!isValid) {
-      throw Exception(
-          'Invalid highlight data - failed validation. Update rejected.');
-    }
+  //   final isValid = await DataValidation.validateBeforeDatabaseWrite(
+  //       updateData, 'highlight');
+  //   if (!isValid) {
+  //     throw Exception(
+  //         'Invalid highlight data - failed validation. Update rejected.');
+  //   }
 
-    final updatedData = {
-      'start': start,
-      'end': end,
-      'color': color,
-      'updated_at': timestamp,
-      'uuid': uuid ?? existingData['uuid'],
-    };
+  //   final updatedData = {
+  //     'start': start,
+  //     'end': end,
+  //     'color': color,
+  //     'updated_at': timestamp,
+  //     'uuid': uuid ?? existingData['uuid'],
+  //   };
 
-    await db.update(
-      'user_highlights',
-      updatedData,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+  //   await db.update(
+  //     'user_highlights',
+  //     updatedData,
+  //     where: 'id = ?',
+  //     whereArgs: [id],
+  //   );
 
-    // Add a 1ms delay to ensure no two records have the same created_at or timestamp
-    await Future.delayed(Duration(milliseconds: 1));
+  //   // Add a 1ms delay to ensure no two records have the same created_at or timestamp
+  //   await Future.delayed(Duration(milliseconds: 1));
 
-    // Queue update operation for sync service
-    final highlightData = {
-      'id': id,
-      'start': start,
-      'end': end,
-      'color': color,
-      'updated_at': timestamp,
-      'created_at': existingData['created_at'],
-      'uuid': uuid ?? existingData['uuid'],
-    };
-    if (!skipSync) {
-      SupabaseSyncService().markOperation('highlight',
-          existingData['created_at'] as int, 'update', highlightData);
-    }
-  }
+  //   // Queue update operation for sync service
+  //   final highlightData = {
+  //     'id': id,
+  //     'start': start,
+  //     'end': end,
+  //     'color': color,
+  //     'updated_at': timestamp,
+  //     'created_at': existingData['created_at'],
+  //     'uuid': uuid ?? existingData['uuid'],
+  //   };
+  //   if (!skipSync) {
+  //     SupabaseSyncService().markOperation('highlight',
+  //         existingData['created_at'] as int, 'update', highlightData);
+  //   }
+  // }
 
   static Future<void> deleteHighlight(int id,
       {bool skipSync = false, String? uuid}) async {
@@ -395,5 +395,43 @@ class HighlightsDatabase {
     }
 
     // Note: Remote deletion happens when queued operations are processed
+  }
+
+  static Future<int> deleteHighlightsForVerse({
+    required String book,
+    required int chapter,
+    required int verse,
+    bool skipSync = false,
+  }) async {
+    final db = await getDatabase();
+    final highlightsToDelete = await db.query(
+      'user_highlights',
+      where: 'book = ? AND chapter = ? AND verse = ?',
+      whereArgs: [book, chapter, verse],
+    );
+
+    if (highlightsToDelete.isEmpty) {
+      return 0;
+    }
+
+    await db.delete(
+      'user_highlights',
+      where: 'book = ? AND chapter = ? AND verse = ?',
+      whereArgs: [book, chapter, verse],
+    );
+
+    if (!skipSync) {
+      for (final highlight in highlightsToDelete) {
+        final highlightData = Map<String, dynamic>.from(highlight);
+        SupabaseSyncService().markOperation(
+          'highlight',
+          highlightData['created_at'] as int,
+          'delete',
+          highlightData,
+        );
+      }
+    }
+
+    return highlightsToDelete.length;
   }
 }

@@ -214,14 +214,14 @@ class _SearchScreenState extends State<SearchScreen>
         .join(' ');
   }
 
-  String _stripRedLetterTags(String text) {
+  String _cleanVerseTextForSearch(String text) {
     return VerseTextParser.toPlainVerseText(text, removePilcrow: false);
   }
 
   String _getSearchText(String verseText, bool useRedLetter) {
     String processedText = useRedLetter
         ? _extractRedLetterText(verseText)
-        : _stripRedLetterTags(verseText);
+        : _cleanVerseTextForSearch(verseText);
     // Remove pilcrow symbol if present to exclude from regex processing
     if (processedText.contains('¶ ')) {
       processedText = processedText.replaceAll('¶ ', '');
@@ -1808,29 +1808,14 @@ class _SearchScreenState extends State<SearchScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.manage_search,
+              Icons.help_outline,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Open Strongs Search',
+              semanticLabel: 'Show Help Dialog',
             ),
-            tooltip: 'Strongs Search',
+            tooltip: 'Help',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: () async {
-              final strongsResult = await Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StrongsSearchScreen(
-                    sourceScreenIndex: widget.sourceScreenIndex,
-                  ),
-                ),
-              );
-
-              if (strongsResult != null &&
-                  strongsResult.containsKey('verseLocation') &&
-                  context.mounted) {
-                Navigator.pop(context, strongsResult);
-              }
-            },
+            onPressed: _showHelpDialog,
           ),
           IconButton(
             icon: Icon(
@@ -1872,14 +1857,29 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           IconButton(
             icon: Icon(
-              Icons.help_outline,
+              Icons.manage_search,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Show Help Dialog',
+              semanticLabel: 'Open Strongs Search',
             ),
-            tooltip: 'Help',
+            tooltip: 'Strongs Search',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: _showHelpDialog,
+            onPressed: () async {
+              final strongsResult = await Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StrongsSearchScreen(
+                    sourceScreenIndex: widget.sourceScreenIndex,
+                  ),
+                ),
+              );
+
+              if (strongsResult != null &&
+                  strongsResult.containsKey('verseLocation') &&
+                  context.mounted) {
+                Navigator.pop(context, strongsResult);
+              }
+            },
           ),
           IconButton(
             icon: Icon(

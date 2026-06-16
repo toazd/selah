@@ -1,14 +1,15 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'tablet_mode_method_channel.dart';
 import 'tablet_mode_platform_interface.dart';
-import 'error_handler.dart';
+//import 'error_handler.dart';
 
 /// Utility class for detecting tablet mode and device capabilities.
 ///
 /// This class provides a simple API for checking if a device is in tablet mode,
 /// has a keyboard attached, or has touch screen capabilities.
 class TabletModeDetector {
-  static TabletModePlatform _platform = MethodChannelTabletMode();
+  static final TabletModePlatform _platform = MethodChannelTabletMode();
 
   /// Returns true if the device is currently in tablet mode.
   ///
@@ -32,24 +33,24 @@ class TabletModeDetector {
   }
 
   /// Returns the maximum number of touch points supported by the device.
-  static Future<int> getMaximumTouchPoints() {
-    return _platform.getMaximumTouchPoints();
-  }
+  // static Future<int> getMaximumTouchPoints() {
+  //   return _platform.getMaximumTouchPoints();
+  // }
 
   /// Returns true if this is a convertible (2-in-1) device that can switch between tablet and laptop modes.
   ///
   /// This helps distinguish between pure tablets and convertible devices like Surface Pro, Lenovo Yoga, etc.
-  static Future<bool> isConvertibleDevice() {
-    return _platform.isConvertibleDevice();
-  }
+  // static Future<bool> isConvertibleDevice() {
+  //   return _platform.isConvertibleDevice();
+  // }
 
   /// Debug function to log raw input devices for diagnostics.
   ///
   /// This outputs detailed information about all input devices detected by Windows,
   /// helping to diagnose keyboard detection issues on specific hardware.
-  static Future<String> debugLogInputDevices() {
-    return _platform.debugLogInputDevices();
-  }
+  // static Future<String> debugLogInputDevices() {
+  //   return _platform.debugLogInputDevices();
+  // }
 
   /// Returns information about attached keyboard devices.
   ///
@@ -58,9 +59,9 @@ class TabletModeDetector {
   /// - HID keyboards (dwType == RIM_TYPEHID with UsagePage: 0x0001, Usage: 0x0006)
   ///
   /// Returns detailed information about all detected keyboard devices.
-  static Future<String> getKeyboardDevices() {
-    return _platform.getKeyboardDevices();
-  }
+  // static Future<String> getKeyboardDevices() {
+  //   return _platform.getKeyboardDevices();
+  // }
 
   /// Returns comprehensive device information including all tablet mode related data.
   ///
@@ -69,16 +70,17 @@ class TabletModeDetector {
   /// - 'isKeyboardAttached': bool indicating if keyboard is attached
   /// - 'hasTouchScreen': bool indicating if device has touch screen
   /// - 'maxTouchPoints': int indicating maximum touch points supported
-  static Future<Map<String, dynamic>> getDeviceInfo() {
-    return _platform.getDeviceInfo();
-  }
+  // static Future<Map<String, dynamic>> getDeviceInfo() {
+  //   return _platform.getDeviceInfo();
+  // }
 
   /// Sets a mock platform implementation for testing.
   ///
-  @visibleForTesting
-  static set platform(TabletModePlatform platformInstance) {
-    _platform = platformInstance;
-  }
+  // @visibleForTesting
+  // static set platform(TabletModePlatform platformInstance) {
+  //   _platform.dispose();
+  //   _platform = platformInstance;
+  // }
 
   /// Returns a stream that emits true when tablet mode is active, false when inactive.
   /// Returns null on platforms that don't support listening for changes.
@@ -91,23 +93,23 @@ class TabletModeDetector {
     //   debugPrint('Creating tablet mode notifier...');
     // }
 
-    final notifier = ValueNotifier<bool>(false);
+    final notifier = _TabletModeNotifier(false);
 
     // Set initial value
     isTabletMode().then((value) {
       // if (kDebugMode) {
       //   debugPrint('Initial tablet mode set to: $value');
       // }
-      notifier.value = value;
+      notifier.update(value);
     });
 
     // Listen for changes and update the notifier
-    tabletModeChanges?.listen(
+    notifier.subscription = tabletModeChanges?.listen(
       (isTablet) {
         // if (kDebugMode) {
         //   debugPrint('Tablet mode stream received update: $isTablet');
         // }
-        notifier.value = isTablet;
+        notifier.update(isTablet);
       },
       onError: (error) {
         // if (kDebugMode) {
@@ -128,27 +130,52 @@ class TabletModeDetector {
     return notifier;
   }
 
+  static void dispose() {
+    _platform.dispose();
+  }
+
   /// Manually triggers a tablet mode detection and notification for testing
   /// This is useful for debugging when automatic detection isn't working
-  static Future<void> testTabletModeDetection() async {
-    try {
-      // Get current tablet mode
-      final isTablet = await isTabletMode();
-      if (kDebugMode) debugPrint('isTablet: $isTablet');
+  // static Future<void> testTabletModeDetection() async {
+  //   try {
+  //     // Get current tablet mode
+  //     final isTablet = await isTabletMode();
+  //     if (kDebugMode) debugPrint('isTablet: $isTablet');
 
-      // Manually trigger the stream update
-      tabletModeChanges
-          ?.listen((mode) {})
-          .cancel(); // Cancel immediately after testing
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: 'Manual tablet mode test failed',
-        context: {
-          'class': 'TabletModeDetector',
-          'method': 'testTabletModeDetection'
-        },
-      );
+  //     // Manually trigger the stream update
+  //     tabletModeChanges
+  //         ?.listen((mode) {})
+  //         .cancel(); // Cancel immediately after testing
+  //   } catch (e) {
+  //     ErrorHandler.logError(
+  //       e,
+  //       customMessage: 'Manual tablet mode test failed',
+  //       context: {
+  //         'class': 'TabletModeDetector',
+  //         'method': 'testTabletModeDetection'
+  //       },
+  //     );
+  //   }
+  // }
+}
+
+class _TabletModeNotifier extends ValueNotifier<bool> {
+  _TabletModeNotifier(super.value);
+
+  StreamSubscription<bool>? subscription;
+  bool _isDisposed = false;
+
+  void update(bool value) {
+    if (!_isDisposed) {
+      this.value = value;
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    subscription?.cancel();
+    subscription = null;
+    super.dispose();
   }
 }

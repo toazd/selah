@@ -254,9 +254,69 @@ class _HighlightDialogState extends State<HighlightDialog> {
     );
   }
 
+  Future<void> _confirmClearHighlights() async {
+    final existingHighlights =
+        _currentHighlights[widget.verseNumber] ?? const [];
+    if (existingHighlights.length <= 2) {
+      return;
+    }
+
+    final shouldClear = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        content: Text(
+          'Are you sure you want to remove all existing highlights?',
+          style: TextStyle(
+            fontSize: uiFontSize,
+            fontFamily: uiFontFamily,
+            color: getAdaptiveTextColor(dialogContext),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              'No',
+              style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(dialogContext),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'Yes',
+              style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldClear != true || !mounted) {
+      return;
+    }
+
+    await HighlightsDatabase.deleteHighlightsForVerse(
+      book: widget.book,
+      chapter: widget.chapter,
+      verse: widget.verseNumber,
+    );
+
+    await _loadCurrentHighlights();
+    LocalDataChangeNotifier.notifyHighlightsChanged();
+  }
+
   @override
   Widget build(BuildContext context) {
     final existingHighlights = _currentHighlights[widget.verseNumber] ?? [];
+    final existingHighlightsCount = existingHighlights.length;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double dialogWidth =
         screenWidth > 650 ? screenWidth * 0.6 : screenWidth * 0.9;
@@ -511,21 +571,37 @@ class _HighlightDialogState extends State<HighlightDialog> {
                 //Text('No existing highlights for this verse', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
                 //],
                 //const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: TextButton(
-                    onPressed: () {
-                      if (widget.onFinished != null) {
-                        widget.onFinished!();
-                      }
-                      Navigator.pop(context);
-                    },
-                    child: Text('Finished',
-                        style: TextStyle(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (existingHighlightsCount > 2) ...[
+                      TextButton(
+                        onPressed: _confirmClearHighlights,
+                        child: Text(
+                          'Clear',
+                          style: TextStyle(
                             fontSize: uiFontSize,
                             fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context))),
-                  ),
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    TextButton(
+                      onPressed: () {
+                        if (widget.onFinished != null) {
+                          widget.onFinished!();
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: Text('Finished',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                    ),
+                  ],
                 ),
               ],
             ),

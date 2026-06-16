@@ -134,12 +134,12 @@ Future<ReferenceSearchResult> _computeReferenceSearch(
   }
 
   // Get the verse text
-  final verseText =
-      StrongsDatabase.getVerseText(data.book, data.chapter, data.verse);
+  // final verseText =
+  //     StrongsDatabase.getVerseText(data.book, data.chapter, data.verse);
 
   return ReferenceSearchResult(
     strongsNumbers: strongsNumbers,
-    verseText: verseText,
+    //verseText: verseText,
     book: data.book,
     chapter: data.chapter,
     verse: data.verse,
@@ -188,7 +188,7 @@ class ReferenceSearchTaskData {
 
 class ReferenceSearchResult {
   final List<String>? strongsNumbers;
-  final String? verseText;
+  //final String? verseText;
   final String? book;
   final int? chapter;
   final int? verse;
@@ -197,7 +197,7 @@ class ReferenceSearchResult {
 
   ReferenceSearchResult({
     this.strongsNumbers,
-    this.verseText,
+    //this.verseText,
     this.book,
     this.chapter,
     this.verse,
@@ -1526,7 +1526,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                       return RawScrollbar(
                                           minThumbLength: 80.0,
                                           interactive: true,
-                                          thumbVisibility: true,
+                                          thumbVisibility: false,
                                           trackVisibility: false,
                                           thickness: 22.0,
                                           thumbColor: isDark
@@ -1602,6 +1602,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final refStyle = _getPrimaryTextStyle(context, fontSize);
     final snStyle = _getTextStyle(context, fontSize);
+    final phraseColumnMaxWidth = _strongNumbersPhraseColumnMaxWidth(context);
     final tableRows = <TableRow>[];
 
     for (final entry in strongsEntries) {
@@ -1627,10 +1628,13 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
               ),
             ),
           ),
-          Text(
-            phrase,
-            style: snStyle,
-            textAlign: TextAlign.left,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: phraseColumnMaxWidth),
+            child: Text(
+              phrase,
+              style: snStyle,
+              textAlign: TextAlign.left,
+            ),
           ),
         ],
         const [TextAlign.left, TextAlign.center, TextAlign.left],
@@ -1648,6 +1652,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _buildSectionDivider(),
       ],
     );
+  }
+
+  double _strongNumbersPhraseColumnMaxWidth(BuildContext context) {
+    final maxWidth = MediaQuery.sizeOf(context).width - 310.0;
+    return maxWidth < 96.0 ? 96.0 : maxWidth;
   }
 
   Widget _buildPhraseSummaryTableSection(
@@ -1709,6 +1718,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   Widget _buildCenteredTable(List<TableRow> tableRows) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(right: 22.0),
       child: Center(
         child: Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),

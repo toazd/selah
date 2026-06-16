@@ -29,4 +29,7 @@ abstract class TabletModePlatform {
   /// Stream that emits tablet mode changes (true = tablet mode, false = laptop mode).
   /// Returns null on platforms that don't support listening for changes.
   Stream<bool>? get tabletModeChanges;
+
+  /// Cleans up any platform resources such as stream controllers or channel handlers.
+  void dispose();
 }

@@ -6,10 +6,10 @@ import 'package:path_provider/path_provider.dart';
 class PlatformPaths {
   static String? _userDataDirectoryOverride;
 
-  @visibleForTesting
-  static void debugSetUserDataDirectoryOverride(String? path) {
-    _userDataDirectoryOverride = path;
-  }
+  // @visibleForTesting
+  // static void debugSetUserDataDirectoryOverride(String? path) {
+  //   _userDataDirectoryOverride = path;
+  // }
 
   // Get the appropriate user data directory for the current platform
   static Future<String> getUserDataDirectory() async {
@@ -50,15 +50,15 @@ class PlatformPaths {
   }
 
   // Get the appropriate shared preferences path
-  static Future<String> getSharedPreferencesPath() async {
-    if (kIsWeb) {
-      // Web: Use browser's local storage (handled by Flutter)
-      return 'web_shared_preferences';
-    }
+  // static Future<String> getSharedPreferencesPath() async {
+  //   if (kIsWeb) {
+  //     // Web: Use browser's local storage (handled by Flutter)
+  //     return 'web_shared_preferences';
+  //   }
 
-    final userDataDir = await getUserDataDirectory();
-    return join(userDataDir, 'shared_preferences.json');
-  }
+  //   final userDataDir = await getUserDataDirectory();
+  //   return join(userDataDir, 'shared_preferences.json');
+  // }
 
   // Ensure the user data directory exists
   static Future<void> ensureUserDataDirectory() async {

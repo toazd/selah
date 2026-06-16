@@ -5115,18 +5115,4 @@ class SupabaseSyncService {
   void restartConnectionMonitoring() {
     _startConnectionMonitoring();
   }
-
-  // Handle app resume from pause - sync recent changes and restart monitoring
-  Future<void> onAppResumed() async {
-    if (_currentUserId == null) return;
-    try {
-      // Sync any changes that occurred while app was paused
-      await syncRecentChangesOnly();
-    } catch (e) {
-      ErrorHandler.logError(
-        e,
-        customMessage: 'onAppResumed _syncRecentChangesOnly exception',
-      );
-    }
-  }
 }

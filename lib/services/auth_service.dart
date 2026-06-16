@@ -277,7 +277,7 @@ class AuthService {
   }
 
   // Get cached username (for main.dart display)
-  static Future<String?> getCachedUsername() async {
-    return await SupabaseSyncService.getCachedUsername();
-  }
+  // static Future<String?> getCachedUsername() async {
+  //   return await SupabaseSyncService.getCachedUsername();
+  // }
 }

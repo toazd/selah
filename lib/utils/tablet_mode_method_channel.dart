@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
 import 'tablet_mode_platform_interface.dart';
 
 /// An implementation of [TabletModePlatform] that uses method channels.
@@ -147,8 +146,11 @@ class MethodChannelTabletMode extends TabletModePlatform {
   }
 
   /// Clean up resources
+  @override
   void dispose() {
     _eventSubscription?.cancel();
+    _eventSubscription = null;
+    methodChannel.setMethodCallHandler(null);
     _tabletModeChangeController?.close();
     _tabletModeChangeController = null;
   }

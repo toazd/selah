@@ -10,7 +10,7 @@ class VerseDisplayData {
   final List<Map<String, dynamic>> highlightsForVerse;
   final String fontFamily;
   final TextStyle textStyle;
-  final TextStyle numStyle;
+  //final TextStyle numStyle;
   final double verseNumberWidth;
   final Color backgroundColor;
   final bool showNotesInline;
@@ -18,7 +18,7 @@ class VerseDisplayData {
   final String tskText;
   final String noteText;
   final bool addParagraphBreak;
-  final bool customBgColor;
+  //final bool customBgColor;
   final Color? customBackgroundColor;
   final GlobalKey? verseKey;
   final bool showStrongsNumbers;
@@ -30,7 +30,7 @@ class VerseDisplayData {
     required this.highlightsForVerse,
     required this.fontFamily,
     required this.textStyle,
-    required this.numStyle,
+    //required this.numStyle,
     required this.verseNumberWidth,
     required this.backgroundColor,
     required this.showNotesInline,
@@ -38,7 +38,7 @@ class VerseDisplayData {
     required this.tskText,
     required this.noteText,
     required this.addParagraphBreak,
-    required this.customBgColor,
+    //required this.customBgColor,
     this.customBackgroundColor,
     this.verseKey,
     this.showStrongsNumbers = false,

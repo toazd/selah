@@ -12,7 +12,7 @@ class BibleScreenHeader extends StatelessWidget {
   final String? selectedBook;
   final int? selectedChapter;
   final VoidCallback? onShowNotesSearch;
-  final VoidCallback? onShowBookmarksManager;
+  //final VoidCallback? onShowBookmarksManager;
 
   const BibleScreenHeader({
     super.key,
@@ -24,7 +24,7 @@ class BibleScreenHeader extends StatelessWidget {
     this.selectedBook,
     this.selectedChapter,
     this.onShowNotesSearch,
-    this.onShowBookmarksManager,
+    //this.onShowBookmarksManager,
   });
 
   @override

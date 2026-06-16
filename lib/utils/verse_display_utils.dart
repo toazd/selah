@@ -409,63 +409,63 @@ bool _isDisplayOnlyStrongsSeparator(List<InlineSpan> spans, int index) {
 }
 
 /// Convert a position in clean text to raw text position
-int convertCleanPositionToRaw(String rawText, int cleanPosition) {
-  if (cleanPosition <= 0) return 0;
+// int convertCleanPositionToRaw(String rawText, int cleanPosition) {
+//   if (cleanPosition <= 0) return 0;
 
-  int rawPosition = 0;
-  int cleanCharsFound = 0;
+//   int rawPosition = 0;
+//   int cleanCharsFound = 0;
 
-  for (int i = 0; i < rawText.length && cleanCharsFound < cleanPosition; i++) {
-    final markupMatch = _matchDisplayMarkupAt(rawText, i);
-    if (markupMatch != null) {
-      i += markupMatch.end - 1;
-      continue;
-    }
+//   for (int i = 0; i < rawText.length && cleanCharsFound < cleanPosition; i++) {
+//     final markupMatch = _matchDisplayMarkupAt(rawText, i);
+//     if (markupMatch != null) {
+//       i += markupMatch.end - 1;
+//       continue;
+//     }
 
-    // Regular character - count it
-    cleanCharsFound++;
-    rawPosition = i + 1;
-  }
+//     // Regular character - count it
+//     cleanCharsFound++;
+//     rawPosition = i + 1;
+//   }
 
-  return rawPosition;
-}
+//   return rawPosition;
+// }
 
 /// Convert a position in raw text to clean text position
-int convertRawPositionToClean(String rawText, int rawPosition) {
-  if (rawPosition <= 0) return 0;
+// int convertRawPositionToClean(String rawText, int rawPosition) {
+//   if (rawPosition <= 0) return 0;
 
-  if (rawPosition >= rawText.length) {
-    return VerseTextParser.toPlainVerseText(rawText, removePilcrow: false)
-        .length;
-  }
+//   if (rawPosition >= rawText.length) {
+//     return VerseTextParser.toPlainVerseText(rawText, removePilcrow: false)
+//         .length;
+//   }
 
-  // Count characters in clean text up to the raw position
-  int cleanPosition = 0;
-  for (int i = 0; i < rawPosition && i < rawText.length; i++) {
-    final markupMatch = _matchDisplayMarkupAt(rawText, i);
-    if (markupMatch != null) {
-      i += markupMatch.end - 1;
-      continue;
-    }
+//   // Count characters in clean text up to the raw position
+//   int cleanPosition = 0;
+//   for (int i = 0; i < rawPosition && i < rawText.length; i++) {
+//     final markupMatch = _matchDisplayMarkupAt(rawText, i);
+//     if (markupMatch != null) {
+//       i += markupMatch.end - 1;
+//       continue;
+//     }
 
-    cleanPosition++;
-  }
+//     cleanPosition++;
+//   }
 
-  return cleanPosition;
-}
+//   return cleanPosition;
+// }
 
-final RegExp _displayMarkupRegex = RegExp(
-  r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
-  caseSensitive: false,
-);
+// final RegExp _displayMarkupRegex = RegExp(
+//   r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
+//   caseSensitive: false,
+// );
 
 String _removePilcrowMarkup(String text) {
   return text.replaceAll('¶ ', '').replaceAll('¶', '');
 }
 
-Match? _matchDisplayMarkupAt(String text, int index) {
-  return _displayMarkupRegex.matchAsPrefix(text.substring(index));
-}
+// Match? _matchDisplayMarkupAt(String text, int index) {
+//   return _displayMarkupRegex.matchAsPrefix(text.substring(index));
+// }
 
 /// Calculate dynamic width for verse number column based on verses in a list
 /// This ensures the verse number column is sized appropriately for the maximum verse number
@@ -678,7 +678,7 @@ List<VerseDisplayData> buildVerseDataList({
         highlightsForVerse: highlights[vn] ?? [],
         fontFamily: fontFamily,
         textStyle: textStyle,
-        numStyle: numStyle,
+        //numStyle: numStyle,
         verseNumberWidth: verseNumberWidth,
         backgroundColor: backgroundColor,
         showNotesInline: showNotesInline,
@@ -687,7 +687,7 @@ List<VerseDisplayData> buildVerseDataList({
         tskText: rawTskText,
         noteText: noteText,
         addParagraphBreak: addParagraphBreak,
-        customBgColor: customBgColor != null,
+        //customBgColor: customBgColor != null,
         customBackgroundColor: customBgColor,
         verseKey: verseKeys[vn],
       ),
@@ -699,147 +699,147 @@ List<VerseDisplayData> buildVerseDataList({
 
 /// Builds a list of verse widgets with common display logic
 /// Consolidated from bible_screen.dart and chapter_dialog.dart to eliminate duplication
-List<Widget> buildVerseListWidget({
-  required BuildContext context,
-  required List<Map<String, dynamic>> verses,
-  required Map<int, GlobalKey> verseKeys,
-  required Map<int, Map<String, dynamic>> notes,
-  required Map<int, List<Map<String, dynamic>>> highlights,
-  required Color textColor,
-  required Color verseNumberColor,
-  required Color backgroundColor,
-  required double lineHeight,
-  required bool showNotesInline,
-  bool showTskReferences = false,
-  Map<int, String> tskReferences = const {},
-  required String fontFamily,
-  required Color lightHighlightTextColor,
-  required Color darkHighlightTextColor,
-  required Function(int)? onVerseTap,
-  required Function(int)? onVerseLongPress,
-  required Function(String, String?)? onLinkTap,
-  required ValueNotifier<Color> lightVerseReferenceColor,
-  required ValueNotifier<Color> darkVerseReferenceColor,
-  required Function(int, String?)? onNoteIconTap,
-  required Function(int, String?)? onNoteEditTap,
-  List<int> highlightedVerses = const [],
-  Color highlightedVerseBackgroundColor = Colors.transparent,
-}) {
-  final widgets = <Widget>[];
-  bool pilcrowSeen = false;
+// List<Widget> buildVerseListWidget({
+//   required BuildContext context,
+//   required List<Map<String, dynamic>> verses,
+//   required Map<int, GlobalKey> verseKeys,
+//   required Map<int, Map<String, dynamic>> notes,
+//   required Map<int, List<Map<String, dynamic>>> highlights,
+//   required Color textColor,
+//   required Color verseNumberColor,
+//   required Color backgroundColor,
+//   required double lineHeight,
+//   required bool showNotesInline,
+//   bool showTskReferences = false,
+//   Map<int, String> tskReferences = const {},
+//   required String fontFamily,
+//   required Color lightHighlightTextColor,
+//   required Color darkHighlightTextColor,
+//   required Function(int)? onVerseTap,
+//   required Function(int)? onVerseLongPress,
+//   required Function(String, String?)? onLinkTap,
+//   required ValueNotifier<Color> lightVerseReferenceColor,
+//   required ValueNotifier<Color> darkVerseReferenceColor,
+//   required Function(int, String?)? onNoteIconTap,
+//   required Function(int, String?)? onNoteEditTap,
+//   List<int> highlightedVerses = const [],
+//   Color highlightedVerseBackgroundColor = Colors.transparent,
+// }) {
+//   final widgets = <Widget>[];
+//   bool pilcrowSeen = false;
 
-  // Different styles whether it is the verse number or the text itself
-  final numStyle = TextStyle(
-    fontSize:
-        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
-    fontFamily: fontFamily,
-    color: verseNumberColor,
-    fontWeight: FontWeight.normal,
-    height: lineHeight,
-  );
-  final textStyle = TextStyle(
-    fontSize:
-        FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
-    fontFamily: fontFamily,
-    color: textColor,
-    height: lineHeight,
-  );
+//   // Different styles whether it is the verse number or the text itself
+//   final numStyle = TextStyle(
+//     fontSize:
+//         FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+//     fontFamily: fontFamily,
+//     color: verseNumberColor,
+//     fontWeight: FontWeight.normal,
+//     height: lineHeight,
+//   );
+//   final textStyle = TextStyle(
+//     fontSize:
+//         FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
+//     fontFamily: fontFamily,
+//     color: textColor,
+//     height: lineHeight,
+//   );
 
-  // Calculate dynamic width for verse number column based on current chapter's verses
-  final verseNumberWidth = calculateVerseNumberWidth(context, verses, numStyle);
+//   // Calculate dynamic width for verse number column based on current chapter's verses
+//   final verseNumberWidth = calculateVerseNumberWidth(context, verses, numStyle);
 
-  for (final verse in verses) {
-    final vn = toInt(verse['verse'], orElse: 0);
-    if (vn <= 0) continue;
+//   for (final verse in verses) {
+//     final vn = toInt(verse['verse'], orElse: 0);
+//     if (vn <= 0) continue;
 
-    String rawVerseText = verse['text'];
+//     String rawVerseText = verse['text'];
 
-    final hasPilcrow = rawVerseText.contains('¶');
+//     final hasPilcrow = rawVerseText.contains('¶');
 
-    // Add paragraph break before verse if it's a new section (has a pilcrow)
-    final addParagraphBreak = (pilcrowSeen && hasPilcrow);
-    if (hasPilcrow && !pilcrowSeen) {
-      pilcrowSeen = true;
-    }
+//     // Add paragraph break before verse if it's a new section (has a pilcrow)
+//     final addParagraphBreak = (pilcrowSeen && hasPilcrow);
+//     if (hasPilcrow && !pilcrowSeen) {
+//       pilcrowSeen = true;
+//     }
 
-    if (addParagraphBreak) {
-      widgets.add(const SizedBox(height: 16));
-    }
+//     if (addParagraphBreak) {
+//       widgets.add(const SizedBox(height: 16));
+//     }
 
-    final customBgColor =
-        highlightedVerses.contains(vn) ? highlightedVerseBackgroundColor : null;
+//     final customBgColor =
+//         highlightedVerses.contains(vn) ? highlightedVerseBackgroundColor : null;
 
-    // Use the shared verse display widget
-    final verseWidget = buildVerseDisplayWidget(
-      context: context,
-      verseNumber: vn,
-      rawVerseText: rawVerseText,
-      baseTextStyle: textStyle,
-      backgroundColor: backgroundColor,
-      noteForVerse: notes[vn] ?? {},
-      highlightsForVerse: highlights[vn] ?? [],
-      showNotesInline: showNotesInline,
-      fontFamily: fontFamily,
-      lightModeTextColor: lightHighlightTextColor,
-      darkModeTextColor: darkHighlightTextColor,
-      onVerseTap: onVerseTap,
-      onVerseLongPress: onVerseLongPress,
-      onLinkTap: onLinkTap,
-      verseKey: verseKeys[vn],
-      onNoteIconTap: onNoteIconTap,
-      verseNumberWidth: verseNumberWidth,
-      customBackgroundColor: customBgColor,
-    );
+//     // Use the shared verse display widget
+//     final verseWidget = buildVerseDisplayWidget(
+//       context: context,
+//       verseNumber: vn,
+//       rawVerseText: rawVerseText,
+//       baseTextStyle: textStyle,
+//       backgroundColor: backgroundColor,
+//       noteForVerse: notes[vn] ?? {},
+//       highlightsForVerse: highlights[vn] ?? [],
+//       showNotesInline: showNotesInline,
+//       fontFamily: fontFamily,
+//       lightModeTextColor: lightHighlightTextColor,
+//       darkModeTextColor: darkHighlightTextColor,
+//       onVerseTap: onVerseTap,
+//       onVerseLongPress: onVerseLongPress,
+//       onLinkTap: onLinkTap,
+//       verseKey: verseKeys[vn],
+//       onNoteIconTap: onNoteIconTap,
+//       verseNumberWidth: verseNumberWidth,
+//       customBackgroundColor: customBgColor,
+//     );
 
-    widgets.add(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          verseWidget,
-          //SizedBox(height: lineHeight),
-        ],
-      ),
-    );
+//     widgets.add(
+//       Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           verseWidget,
+//           //SizedBox(height: lineHeight),
+//         ],
+//       ),
+//     );
 
-    // If enabled, display TSK references below the verse and above notes.
-    if (showTskReferences) {
-      final rawTskText = (tskReferences[vn] ?? '').trim();
-      if (rawTskText.isNotEmpty) {
-        widgets.add(
-          Container(
-            margin: EdgeInsets.all(0.0),
-            padding:
-                EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
-            child: TskReferenceDisplay(
-              noteText: rawTskText,
-              onLinkTap: onLinkTap,
-            ),
-          ),
-        );
-      }
-    }
+//     // If enabled, display TSK references below the verse and above notes.
+//     if (showTskReferences) {
+//       final rawTskText = (tskReferences[vn] ?? '').trim();
+//       if (rawTskText.isNotEmpty) {
+//         widgets.add(
+//           Container(
+//             margin: EdgeInsets.all(0.0),
+//             padding:
+//                 EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
+//             child: TskReferenceDisplay(
+//               noteText: rawTskText,
+//               onLinkTap: onLinkTap,
+//             ),
+//           ),
+//         );
+//       }
+//     }
 
-    // If showNotesInline, display note content below the verse
-    if (showNotesInline && notes.containsKey(vn)) {
-      final noteText = notes[vn]!['note_text'] as String? ?? '';
-      if (noteText.isNotEmpty) {
-        widgets.add(
-          Container(
-            margin: EdgeInsets.all(0.0),
-            padding:
-                EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
-            child: QuillNoteDisplay(
-              noteText: noteText,
-              onLinkTap: onLinkTap,
-              onTap: onNoteEditTap != null
-                  ? () => onNoteEditTap(vn, noteText)
-                  : null,
-            ),
-          ),
-        );
-      }
-    }
-  }
+//     // If showNotesInline, display note content below the verse
+//     if (showNotesInline && notes.containsKey(vn)) {
+//       final noteText = notes[vn]!['note_text'] as String? ?? '';
+//       if (noteText.isNotEmpty) {
+//         widgets.add(
+//           Container(
+//             margin: EdgeInsets.all(0.0),
+//             padding:
+//                 EdgeInsets.only(left: 65.0, right: 32.0, top: 8.0, bottom: 8.0),
+//             child: QuillNoteDisplay(
+//               noteText: noteText,
+//               onLinkTap: onLinkTap,
+//               onTap: onNoteEditTap != null
+//                   ? () => onNoteEditTap(vn, noteText)
+//                   : null,
+//             ),
+//           ),
+//         );
+//       }
+//     }
+//   }
 
-  return widgets;
-}
+//   return widgets;
+// }

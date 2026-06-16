@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'red_letter_parser.dart';
-import 'strongs_text_parser.dart';
 
 class VerseTextParser {
   static final RegExp _markupTokenRegex = RegExp(
     r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
     caseSensitive: false,
   );
+
+  /// Strips all red-letter tags from the text, returning plain text.
+  static String stripRedLetterTags(String text) {
+    if (!text.contains('<r>')) return text;
+    return text.replaceAll('<r>', '').replaceAll('</r>', '');
+  }
 
   /// Parses verse text handling red-letter tags and optionally Strong's numbers.
   ///
@@ -24,7 +28,7 @@ class VerseTextParser {
     Color tvmColor = const Color(0xFF8B4513),
     void Function(String strongsNumber)? onStrongsTap,
   }) {
-    if (!text.contains('<r>') && !StrongsTextParser.hasStrongsTags(text)) {
+    if (!text.contains('<r>') && !hasStrongsTags(text)) {
       return TextSpan(children: [TextSpan(text: text, style: baseStyle)]);
     }
 
@@ -179,8 +183,8 @@ class VerseTextParser {
     bool removePilcrow = true,
     bool trim = false,
   }) {
-    var result = StrongsTextParser.stripStrongsTags(text);
-    result = RedLetterParser.stripRedLetterTags(result);
+    var result = stripStrongsTags(text);
+    result = stripRedLetterTags(result);
     if (removePilcrow) {
       result = result.replaceAll('¶ ', '').replaceAll('¶', '');
     }
@@ -225,10 +229,27 @@ class VerseTextParser {
     );
   }
 
+  /// Strips all Strong's and TVM tags from the text, returning clean text.
+  static String stripStrongsTags(String text) {
+    String result = text.replaceAll(_tvmRegex, '');
+    result = result.replaceAll(_strongTagRegex, '');
+    return result;
+  }
+
+  /// Checks if text contains any Strong's or TVM tags.
+  static bool hasStrongsTags(String text) {
+    return _strongTagRegex.hasMatch(text) || _tvmRegex.hasMatch(text);
+  }
+
+  /// Regex for any Strong's marker, with TVM markers matched before regular ones.
   static final RegExp _strongTagRegex = RegExp(
     r'\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
     caseSensitive: false,
   );
+
+  /// Regex for TVM (tense/voice/mood) codes: {{H8804}} or {{G1234}}
+  static final RegExp _tvmRegex =
+      RegExp(r'\{\{[GH]\d{1,4}\}\}', caseSensitive: false);
 
   static List<_StrongTag> _extractStrongTags(String text) {
     return _strongTagRegex

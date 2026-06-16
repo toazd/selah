@@ -118,19 +118,19 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
   }
 
   /// Scrolls to the top of the chapter content.
-  void scrollToTop({bool animate = true}) {
-    if (!_scrollController.hasClients) return;
+  // void scrollToTop({bool animate = true}) {
+  //   if (!_scrollController.hasClients) return;
 
-    if (animate) {
-      _scrollController.animateTo(
-        0.0,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    } else {
-      _scrollController.jumpTo(0.0);
-    }
-  }
+  //   if (animate) {
+  //     _scrollController.animateTo(
+  //       0.0,
+  //       duration: Duration(milliseconds: 300),
+  //       curve: Curves.easeOut,
+  //     );
+  //   } else {
+  //     _scrollController.jumpTo(0.0);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
