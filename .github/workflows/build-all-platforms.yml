@@ -1,6 +1,6 @@
 name: Build All Platforms
 env:
-  FLUTTER_VERSION: '3.44.1'
+  FLUTTER_VERSION: '3.44.2'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 on:
   workflow_dispatch:
