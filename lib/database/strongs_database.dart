@@ -3,6 +3,16 @@ import "../data/bible_data_strongs.dart";
 import "../data/book_metadata.dart";
 import "../utils/verse_reference_detector.dart";
 
+class StrongsWordSearchData {
+  final List<Map<String, dynamic>> wordVerses;
+  final Map<String, Map<String, dynamic>> foundStrongsNumbers;
+
+  const StrongsWordSearchData({
+    required this.wordVerses,
+    required this.foundStrongsNumbers,
+  });
+}
+
 /// Helper class for searching Strong's Concordance data from bible_data_strongs.dart
 class StrongsDatabase {
   static final RegExp _strongTagRegex = RegExp(
@@ -15,6 +25,7 @@ class StrongsDatabase {
   static final RegExp _phraseBoundaryRegex = RegExp(r"[.,:;?!¶]+");
   static final RegExp _wordEndingRegex = RegExp(r"[A-Za-z0-9'\-]$");
   static final RegExp _englishWordRegex = RegExp(r"[A-Za-z0-9][A-Za-z0-9'\-]*");
+  static bool get _verboseSearchLogging => false;
 
   /// Validates if the input is a Strong's number (HXXXX or GXXXX format)
   /// Returns the normalized Strong's number (uppercase) or null
@@ -229,59 +240,110 @@ class StrongsDatabase {
   /// Searches for a word in the Strong's data and returns all verses containing that word.
   /// Performs case-insensitive search on the text portion (excluding Strong's numbers in braces).
   static List<Map<String, dynamic>> searchByWord(String word) {
+    return _searchByWordData(
+      word,
+      collectStrongNumbers: false,
+      debugLabel: 'searchByWord',
+    ).wordVerses;
+  }
+
+  /// Searches for literal word matches and collects the Strong's numbers
+  /// directly associated with that word during the same Bible scan.
+  static StrongsWordSearchData searchByWordWithStrongsNumbers(String word) {
+    return _searchByWordData(
+      word,
+      collectStrongNumbers: true,
+      debugLabel: 'searchByWordWithStrongsNumbers',
+    );
+  }
+
+  static StrongsWordSearchData _searchByWordData(
+    String word, {
+    required bool collectStrongNumbers,
+    required String debugLabel,
+  }) {
     if (kDebugMode) {
-      debugPrint('[_StrongsDatabase] searchByWord: starting for "$word"');
+      debugPrint('[_StrongsDatabase] $debugLabel: starting for "$word"');
     }
-    final results = <Map<String, dynamic>>[];
+    final wordVerses = <Map<String, dynamic>>[];
+    final foundStrongsNumbers = <String, Map<String, dynamic>>{};
     final searchWord = word.toLowerCase().trim();
-    if (searchWord.isEmpty) return results;
+    if (searchWord.isEmpty) {
+      return StrongsWordSearchData(
+        wordVerses: wordVerses,
+        foundStrongsNumbers: foundStrongsNumbers,
+      );
+    }
     final wordPattern = _wordBoundaryRegex(searchWord);
 
     int bookCount = 0;
     for (final book in bibleDataStrongs.keys) {
       bookCount++;
       final bookData = bibleDataStrongs[book]!;
-      if (kDebugMode) {
+      if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
-            '[_StrongsDatabase] searchByWord: scanning book #$bookCount "$book" (${bookData.length} chapters)');
+            '[_StrongsDatabase] $debugLabel: scanning book #$bookCount "$book" (${bookData.length} chapters)');
       }
       int chapterCount = 0;
       for (final chapter in bookData.keys) {
         chapterCount++;
         if (book == 'Psa') {
           final superscription = _psalmSuperscriptionForChapter(chapter);
-          if (superscription != null) {
-            if (wordPattern.hasMatch(_plainSearchText(superscription))) {
-              results.add(_psalmSuperscriptionResult(
-                chapter,
-                superscription,
-              ));
+          if (superscription != null &&
+              wordPattern.hasMatch(_plainSearchText(superscription))) {
+            wordVerses.add(_psalmSuperscriptionResult(
+              chapter,
+              superscription,
+            ));
+            if (collectStrongNumbers) {
+              _collectAssociatedStrongsForWord(
+                text: superscription,
+                wordPattern: wordPattern,
+                result: foundStrongsNumbers,
+                book: book,
+                chapter: chapter,
+                verse: 0,
+                isSuperscription: true,
+              );
             }
           }
         }
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {
           final text = chapterData[verse]!;
-          if (wordPattern.hasMatch(_plainSearchText(text))) {
-            results.add({
-              "book": book,
-              "chapter": chapter,
-              "verse": verse,
-              "text": text,
-            });
+          if (!wordPattern.hasMatch(_plainSearchText(text))) continue;
+
+          wordVerses.add({
+            "book": book,
+            "chapter": chapter,
+            "verse": verse,
+            "text": text,
+          });
+          if (collectStrongNumbers) {
+            _collectAssociatedStrongsForWord(
+              text: text,
+              wordPattern: wordPattern,
+              result: foundStrongsNumbers,
+              book: book,
+              chapter: chapter,
+              verse: verse,
+            );
           }
         }
       }
-      if (kDebugMode) {
+      if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
-            '[_StrongsDatabase] searchByWord: book "$book" scanned ($chapterCount chapters, ${results.length} total matches so far)');
+            '[_StrongsDatabase] $debugLabel: book "$book" scanned ($chapterCount chapters, ${wordVerses.length} total matches so far)');
       }
     }
     if (kDebugMode) {
       debugPrint(
-          '[_StrongsDatabase] searchByWord: finished for "$word" — found ${results.length} verses across $bookCount books');
+          '[_StrongsDatabase] $debugLabel: finished for "$word" — found ${wordVerses.length} verses and ${foundStrongsNumbers.length} Strong\'s numbers across $bookCount books');
     }
-    return results;
+    return StrongsWordSearchData(
+      wordVerses: wordVerses,
+      foundStrongsNumbers: foundStrongsNumbers,
+    );
   }
 
   /// Extracts the word(s) immediately preceding a Strong's number tag {XXXXX}
@@ -329,26 +391,46 @@ class StrongsDatabase {
       final isSuperscription = verseData["isSuperscription"] == true;
       final verse = isSuperscription ? 0 : verseData["verse"] as int?;
 
-      for (final association in _parsePhraseAssociations(text)) {
-        if (!association.containsWord(wordPattern)) continue;
-
-        for (final strongsNum in association.regularStrongsNumbers) {
-          if (!result.containsKey(strongsNum)) {
-            result[strongsNum] = {
-              "book": book,
-              "chapter": chapter,
-              "verse": verse,
-              if (isSuperscription) "isSuperscription": true,
-            };
-          }
-        }
-      }
+      _collectAssociatedStrongsForWord(
+        text: text,
+        wordPattern: wordPattern,
+        result: result,
+        book: book,
+        chapter: chapter,
+        verse: verse,
+        isSuperscription: isSuperscription,
+      );
     }
     if (kDebugMode) {
       debugPrint(
           '[_StrongsDatabase] findStrongsNumbersForWord: found ${result.length} unique Strong\'s numbers for "$word"');
     }
     return result;
+  }
+
+  static void _collectAssociatedStrongsForWord({
+    required String text,
+    required RegExp wordPattern,
+    required Map<String, Map<String, dynamic>> result,
+    required String book,
+    required int chapter,
+    required int? verse,
+    bool isSuperscription = false,
+  }) {
+    for (final association in _parsePhraseAssociations(text)) {
+      if (!association.containsWord(wordPattern)) continue;
+
+      for (final strongsNum in association.regularStrongsNumbers) {
+        result.putIfAbsent(strongsNum, () {
+          return {
+            "book": book,
+            "chapter": chapter,
+            "verse": verse,
+            if (isSuperscription) "isSuperscription": true,
+          };
+        });
+      }
+    }
   }
 
   /// Returns all verses that contain ANY of the given Strong's numbers.
@@ -370,7 +452,7 @@ class StrongsDatabase {
     for (final book in bibleDataStrongs.keys) {
       bookCount++;
       final bookData = bibleDataStrongs[book]!;
-      if (kDebugMode) {
+      if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
             '[_StrongsDatabase] searchByStrongsNumbers: scanning book #$bookCount "$book" (${bookData.length} chapters, ${results.length} results so far)');
       }
@@ -418,7 +500,7 @@ class StrongsDatabase {
           }
         }
       }
-      if (kDebugMode) {
+      if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
             '[_StrongsDatabase] searchByStrongsNumbers: book "$book" done ($chapterCount chapters, $matchCountThisBook matching verses, ${results.length} total)');
       }

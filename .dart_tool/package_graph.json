@@ -968,141 +968,6 @@
       "dependencies": []
     },
     {
-      "name": "supabase_flutter",
-      "version": "2.14.2",
-      "dependencies": [
-        "app_links",
-        "async",
-        "crypto",
-        "flutter",
-        "http",
-        "logging",
-        "meta",
-        "path_provider",
-        "shared_preferences",
-        "supabase",
-        "url_launcher",
-        "web"
-      ]
-    },
-    {
-      "name": "supabase",
-      "version": "2.12.2",
-      "dependencies": [
-        "functions_client",
-        "gotrue",
-        "http",
-        "logging",
-        "postgrest",
-        "realtime_client",
-        "rxdart",
-        "storage_client",
-        "yet_another_json_isolate"
-      ]
-    },
-    {
-      "name": "yet_another_json_isolate",
-      "version": "2.1.0",
-      "dependencies": [
-        "async"
-      ]
-    },
-    {
-      "name": "storage_client",
-      "version": "2.5.6",
-      "dependencies": [
-        "http",
-        "http_parser",
-        "logging",
-        "meta",
-        "mime",
-        "retry"
-      ]
-    },
-    {
-      "name": "realtime_client",
-      "version": "2.7.4",
-      "dependencies": [
-        "collection",
-        "http",
-        "logging",
-        "meta",
-        "web_socket_channel"
-      ]
-    },
-    {
-      "name": "postgrest",
-      "version": "2.7.1",
-      "dependencies": [
-        "http",
-        "logging",
-        "meta",
-        "yet_another_json_isolate"
-      ]
-    },
-    {
-      "name": "gotrue",
-      "version": "2.21.0",
-      "dependencies": [
-        "collection",
-        "crypto",
-        "dart_jsonwebtoken",
-        "http",
-        "jwt_decode",
-        "logging",
-        "meta",
-        "retry",
-        "rxdart",
-        "web"
-      ]
-    },
-    {
-      "name": "functions_client",
-      "version": "2.6.0",
-      "dependencies": [
-        "http",
-        "logging",
-        "yet_another_json_isolate"
-      ]
-    },
-    {
-      "name": "jwt_decode",
-      "version": "0.3.1",
-      "dependencies": []
-    },
-    {
-      "name": "retry",
-      "version": "3.1.2",
-      "dependencies": []
-    },
-    {
-      "name": "rxdart",
-      "version": "0.28.0",
-      "dependencies": []
-    },
-    {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
-      ]
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.7",
-      "dependencies": [
-        "typed_data"
-      ]
-    },
-    {
-      "name": "mime",
-      "version": "2.0.0",
-      "dependencies": []
-    },
-    {
       "name": "url_launcher_macos",
       "version": "3.2.5",
       "dependencies": [
@@ -1135,6 +1000,246 @@
         "async",
         "path"
       ]
+    },
+    {
+      "name": "supabase_flutter",
+      "version": "2.15.0",
+      "dependencies": [
+        "app_links",
+        "async",
+        "flutter",
+        "http",
+        "logging",
+        "meta",
+        "passkeys",
+        "shared_preferences",
+        "supabase",
+        "url_launcher",
+        "web"
+      ]
+    },
+    {
+      "name": "supabase",
+      "version": "2.13.0",
+      "dependencies": [
+        "functions_client",
+        "gotrue",
+        "http",
+        "logging",
+        "postgrest",
+        "realtime_client",
+        "rxdart",
+        "storage_client",
+        "yet_another_json_isolate"
+      ]
+    },
+    {
+      "name": "yet_another_json_isolate",
+      "version": "2.1.1",
+      "dependencies": [
+        "async"
+      ]
+    },
+    {
+      "name": "storage_client",
+      "version": "2.5.7",
+      "dependencies": [
+        "http",
+        "http_parser",
+        "logging",
+        "meta",
+        "mime",
+        "retry"
+      ]
+    },
+    {
+      "name": "realtime_client",
+      "version": "2.8.0",
+      "dependencies": [
+        "collection",
+        "http",
+        "logging",
+        "meta",
+        "web_socket_channel"
+      ]
+    },
+    {
+      "name": "postgrest",
+      "version": "2.7.2",
+      "dependencies": [
+        "http",
+        "logging",
+        "meta",
+        "yet_another_json_isolate"
+      ]
+    },
+    {
+      "name": "gotrue",
+      "version": "2.22.0",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "dart_jsonwebtoken",
+        "http",
+        "jwt_decode",
+        "logging",
+        "meta",
+        "retry",
+        "rxdart",
+        "web"
+      ]
+    },
+    {
+      "name": "functions_client",
+      "version": "2.6.1",
+      "dependencies": [
+        "http",
+        "logging",
+        "yet_another_json_isolate"
+      ]
+    },
+    {
+      "name": "jwt_decode",
+      "version": "0.3.1",
+      "dependencies": []
+    },
+    {
+      "name": "passkeys",
+      "version": "2.20.0",
+      "dependencies": [
+        "convert",
+        "flutter",
+        "json_annotation",
+        "passkeys_android",
+        "passkeys_darwin",
+        "passkeys_doctor",
+        "passkeys_platform_interface",
+        "passkeys_web",
+        "passkeys_windows",
+        "ua_client_hints"
+      ]
+    },
+    {
+      "name": "passkeys_windows",
+      "version": "0.1.1",
+      "dependencies": [
+        "flutter",
+        "passkeys_platform_interface"
+      ]
+    },
+    {
+      "name": "passkeys_platform_interface",
+      "version": "2.6.0",
+      "dependencies": [
+        "flutter",
+        "json_annotation",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "passkeys_darwin",
+      "version": "0.4.0",
+      "dependencies": [
+        "flutter",
+        "passkeys_platform_interface"
+      ]
+    },
+    {
+      "name": "passkeys_android",
+      "version": "2.12.0",
+      "dependencies": [
+        "flutter",
+        "passkeys_platform_interface"
+      ]
+    },
+    {
+      "name": "passkeys_web",
+      "version": "2.9.0",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "json_annotation",
+        "passkeys_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "retry",
+      "version": "3.1.2",
+      "dependencies": []
+    },
+    {
+      "name": "passkeys_doctor",
+      "version": "1.4.0",
+      "dependencies": [
+        "device_info_plus",
+        "flutter",
+        "http",
+        "package_info_plus",
+        "passkeys_platform_interface"
+      ]
+    },
+    {
+      "name": "package_info_plus",
+      "version": "9.0.1",
+      "dependencies": [
+        "clock",
+        "ffi",
+        "flutter",
+        "flutter_web_plugins",
+        "http",
+        "meta",
+        "package_info_plus_platform_interface",
+        "path",
+        "web",
+        "win32"
+      ]
+    },
+    {
+      "name": "package_info_plus_platform_interface",
+      "version": "3.2.1",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "rxdart",
+      "version": "0.28.0",
+      "dependencies": []
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
+      "name": "mime",
+      "version": "2.0.0",
+      "dependencies": []
     },
     {
       "name": "win32",
@@ -1338,6 +1443,14 @@
         "ffi",
         "flutter",
         "meta"
+      ]
+    },
+    {
+      "name": "ua_client_hints",
+      "version": "1.7.0",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins"
       ]
     },
     {
@@ -1579,13 +1692,36 @@
       ]
     },
     {
-      "name": "http",
-      "version": "1.6.0",
+      "name": "device_info_plus",
+      "version": "12.4.0",
       "dependencies": [
-        "async",
-        "http_parser",
+        "device_info_plus_platform_interface",
+        "ffi",
+        "file",
+        "flutter",
+        "flutter_web_plugins",
         "meta",
-        "web"
+        "web",
+        "win32",
+        "win32_registry"
+      ]
+    },
+    {
+      "name": "win32_registry",
+      "version": "2.1.0",
+      "dependencies": [
+        "ffi",
+        "meta",
+        "win32"
+      ]
+    },
+    {
+      "name": "device_info_plus_platform_interface",
+      "version": "7.0.3",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
       ]
     },
     {

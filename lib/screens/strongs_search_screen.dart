@@ -36,37 +36,48 @@ Future<List<Map<String, dynamic>>> _computeStrongsNumberSearch(
   return result;
 }
 
-Future<List<Map<String, dynamic>>> _computeWordSearch(String word) async {
+Future<WordSearchComputationResult> _computeWordSearchResult(
+    String word) async {
   if (kDebugMode) {
-    debugPrint('[_computeWordSearch] START: word="$word"');
+    debugPrint('[_computeWordSearchResult] START: word="$word"');
   }
-  final result = StrongsDatabase.searchByWord(word);
-  if (kDebugMode) {
-    debugPrint('[_computeWordSearch] DONE: ${result.length} verses');
+  final wordData = StrongsDatabase.searchByWordWithStrongsNumbers(word);
+  final foundStrongs = wordData.foundStrongsNumbers;
+  if (wordData.wordVerses.isEmpty || foundStrongs.isEmpty) {
+    if (kDebugMode) {
+      debugPrint(
+          '[_computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
+    }
+    return WordSearchComputationResult(
+      wordVerseCount: wordData.wordVerses.length,
+      foundStrongsNumbers: foundStrongs,
+      searchResults: const [],
+      phraseSummary: const {},
+    );
   }
-  return result;
-}
 
-Future<Map<String, Map<String, dynamic>>> _computeFindStrongsNumbers(
-    SearchTaskData data) async {
+  final strongsList = foundStrongs.keys.toList();
+  final results = StrongsDatabase.searchByStrongsNumbers(strongsList);
+  final phraseSummary = results.isEmpty
+      ? <String, int>{}
+      : StrongsDatabase.extractPhraseSummary(results, strongsList);
   if (kDebugMode) {
     debugPrint(
-        '[_computeFindStrongsNumbers] START: word="${data.word}", ${data.wordVerses.length} verses');
+        '[_computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
   }
-  final result =
-      StrongsDatabase.findStrongsNumbersForWord(data.word, data.wordVerses);
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeFindStrongsNumbers] DONE: ${result.length} unique Strong\'s numbers');
-  }
-  return result;
+  return WordSearchComputationResult(
+    wordVerseCount: wordData.wordVerses.length,
+    foundStrongsNumbers: foundStrongs,
+    searchResults: results,
+    phraseSummary: phraseSummary,
+  );
 }
 
 Future<List<Map<String, dynamic>>> _computeSearchByStrongsNumbers(
     SearchTaskData data) async {
   if (kDebugMode) {
     debugPrint(
-        '[_computeSearchByStrongsNumbers] START: ${data.strongsList.length} Strong\'s numbers: $data.strongsList');
+        '[_computeSearchByStrongsNumbers] START: ${data.strongsList.length} Strong\'s numbers: ${data.strongsList}');
   }
   final result = StrongsDatabase.searchByStrongsNumbers(data.strongsList);
   if (kDebugMode) {
@@ -206,6 +217,20 @@ class ReferenceSearchResult {
   });
 }
 
+class WordSearchComputationResult {
+  final int wordVerseCount;
+  final Map<String, Map<String, dynamic>> foundStrongsNumbers;
+  final List<Map<String, dynamic>> searchResults;
+  final Map<String, int> phraseSummary;
+
+  const WordSearchComputationResult({
+    required this.wordVerseCount,
+    required this.foundStrongsNumbers,
+    required this.searchResults,
+    required this.phraseSummary,
+  });
+}
+
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
   final hsl = HSLColor.fromColor(backgroundColor);
@@ -247,9 +272,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   int? _totalVerses;
   String? _searchType;
   String? _searchTerm;
+  bool _isSearchingWeb = false;
   bool _isLoadingDialogVisible = false;
   bool _searchTimedOut = false;
   Timer? _searchTimeoutTimer;
+  int _activeSearchId = 0;
 
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
@@ -257,29 +284,32 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   @override
   bool get wantKeepAlive => true;
 
-  void _showLoadingDialog() {
+  void _showLoadingDialog(int searchId) {
     _searchTimedOut = false;
     _searchTimeoutTimer?.cancel();
-    _searchTimeoutTimer = Timer(const Duration(seconds: 60), () {
-      if (kDebugMode) {
-        debugPrint('[_searchTimeoutTimer] 60s search timeout reached');
-      }
-      _searchTimedOut = true;
-      _hideLoadingDialog();
-      if (mounted) {
-        setState(() {
-          _searchResults = [];
-          _foundStrongsNumbers = {};
-          _phraseSummary = {};
-          _totalMatches = null;
-          _totalVerses = null;
-          _searchType = null;
-          _searchTerm = null;
-        });
-        showStyledSnackBar(context,
-            'Maximum search time exceeded. Please try a different word.');
-      }
-    });
+    if (!kIsWeb) {
+      _searchTimeoutTimer = Timer(const Duration(seconds: 60), () {
+        if (searchId != _activeSearchId) return;
+        if (kDebugMode) {
+          debugPrint('[_searchTimeoutTimer] 60s search timeout reached');
+        }
+        _searchTimedOut = true;
+        _hideLoadingDialog(searchId: searchId);
+        if (mounted) {
+          setState(() {
+            _searchResults = [];
+            _foundStrongsNumbers = {};
+            _phraseSummary = {};
+            _totalMatches = null;
+            _totalVerses = null;
+            _searchType = null;
+            _searchTerm = null;
+          });
+          showStyledSnackBar(context,
+              'Maximum search time exceeded. Please try a different word.');
+        }
+      });
+    }
     _isLoadingDialogVisible = true;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
@@ -319,7 +349,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     );
   }
 
-  void _hideLoadingDialog() {
+  void _hideLoadingDialog({int? searchId}) {
+    if (searchId != null && searchId != _activeSearchId) return;
     _searchTimeoutTimer?.cancel();
     _searchTimeoutTimer = null;
     if (_isLoadingDialogVisible && mounted && Navigator.canPop(context)) {
@@ -453,7 +484,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       debugPrint('[_onSearch] Called with input="${_controller.text.trim()}"');
     }
     final input = _controller.text.trim();
+    final searchId = ++_activeSearchId;
+    _searchTimedOut = false;
     if (input.isEmpty) {
+      _hideLoadingDialog(searchId: searchId);
       setState(() {
         _searchResults = [];
         _foundStrongsNumbers = {};
@@ -462,6 +496,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = 0;
         _searchType = null;
         _searchTerm = null;
+        _isSearchingWeb = false;
       });
       _persistSearchState('');
       return;
@@ -474,6 +509,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _totalMatches = null;
       _totalVerses = null;
       _searchTerm = input;
+      _isSearchingWeb = kIsWeb && showLoading;
     });
 
     _persistSearchState(input);
@@ -482,8 +518,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _resultsScrollController.jumpTo(0.0);
     }
 
-    if (showLoading) {
-      _showLoadingDialog();
+    if (showLoading && !kIsWeb) {
+      _showLoadingDialog(searchId);
     }
 
     // Try to parse as reference search first (e.g., "Gen 2:15 garden")
@@ -492,7 +528,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       if (kDebugMode) {
         debugPrint('[_onSearch] Parsed as REFERENCE search');
       }
-      _performReferenceSearch(referenceSearch);
+      _startSearchTask(
+        searchId: searchId,
+        showLoading: showLoading,
+        task: () => _performReferenceSearch(referenceSearch, searchId),
+      );
       return;
     }
 
@@ -517,16 +557,39 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
     }
 
-    Future.microtask(() {
-      if (strongsNumber != null) {
-        _performStrongsNumberSearch(strongsNumber);
-      } else {
-        _performWordSearch(searchTerm);
-      }
-    });
+    _startSearchTask(
+      searchId: searchId,
+      showLoading: showLoading,
+      task: () {
+        if (strongsNumber != null) {
+          _performStrongsNumberSearch(strongsNumber, searchId);
+        } else {
+          _performWordSearch(searchTerm, searchId);
+        }
+      },
+    );
   }
 
-  void _performStrongsNumberSearch(String strongsNumber) async {
+  void _startSearchTask({
+    required int searchId,
+    required bool showLoading,
+    required VoidCallback task,
+  }) {
+    void runTask() {
+      if (!mounted || searchId != _activeSearchId) return;
+      task();
+    }
+
+    if (kIsWeb && showLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future<void>.delayed(Duration.zero, runTask);
+      });
+    } else {
+      Future.microtask(runTask);
+    }
+  }
+
+  void _performStrongsNumberSearch(String strongsNumber, int searchId) async {
     if (kDebugMode) {
       debugPrint(
           '[_performStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
@@ -536,6 +599,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final results = await compute(_computeStrongsNumberSearch, strongsNumber);
       if (!mounted) return;
       if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
       if (kDebugMode) {
         debugPrint(
@@ -551,8 +615,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'strongs';
           _isRestoring = false;
+          _isSearchingWeb = false;
         });
-        _hideLoadingDialog();
+        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -573,6 +638,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         debugPrint(
             '[_performStrongsNumberSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
       }
+      if (!mounted) return;
+      if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
+      if (_searchTimedOut) return;
+
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
         totalMatches += count;
@@ -586,37 +656,45 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'strongs';
         _isRestoring = false;
+        _isSearchingWeb = false;
       });
-      _hideLoadingDialog();
+      _hideLoadingDialog(searchId: searchId);
     } catch (e) {
       if (mounted) {
         if (!_isResetting) {
+          if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
+            _isSearchingWeb = false;
           });
-          _hideLoadingDialog();
+          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
     }
   }
 
-  void _performWordSearch(String word) async {
+  void _performWordSearch(String word, int searchId) async {
     if (kDebugMode) {
       debugPrint('[_performWordSearch] ===== START: word="$word" =====');
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final wordVerses = await compute(_computeWordSearch, word);
+      final wordSearchResult = await compute(_computeWordSearchResult, word);
       if (kDebugMode) {
         debugPrint(
-            '[_performWordSearch] Step 1 (searchByWord) done: ${wordVerses.length} verses');
+            '[_performWordSearch] Word search compute done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
       }
       if (!mounted) return;
       if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
 
-      if (wordVerses.isEmpty) {
+      final foundStrongs = wordSearchResult.foundStrongsNumbers;
+      final results = wordSearchResult.searchResults;
+      final phraseSummary = wordSearchResult.phraseSummary;
+
+      if (wordSearchResult.wordVerseCount == 0 || foundStrongs.isEmpty) {
         setState(() {
           _searchResults = [];
           _foundStrongsNumbers = {};
@@ -625,62 +703,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'word';
           _isRestoring = false;
+          _isSearchingWeb = false;
         });
-        _hideLoadingDialog();
+        _hideLoadingDialog(searchId: searchId);
         return;
       }
-
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 2: finding Strong\'s numbers for "$word" across ${wordVerses.length} verses...');
-      }
-      final findStrongsData = SearchTaskData(
-        word: word,
-        wordVerses: wordVerses,
-        strongsList: [],
-      );
-      final foundStrongs =
-          await compute(_computeFindStrongsNumbers, findStrongsData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 2 done: found ${foundStrongs.length} unique Strong\'s numbers');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (_searchTimedOut) return;
-
-      if (foundStrongs.isEmpty) {
-        setState(() {
-          _searchResults = [];
-          _foundStrongsNumbers = {};
-          _phraseSummary = {};
-          _totalMatches = 0;
-          _totalVerses = 0;
-          _searchType = 'word';
-          _isRestoring = false;
-        });
-        _hideLoadingDialog();
-        return;
-      }
-
-      final strongsList = foundStrongs.keys.toList();
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 3: searching all verses for ${strongsList.length} Strong\'s numbers: $strongsList...');
-      }
-      final searchData = SearchTaskData(
-        word: word,
-        wordVerses: wordVerses,
-        strongsList: strongsList,
-      );
-      final results = await compute(_computeSearchByStrongsNumbers, searchData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 3 done: ${results.length} verses found');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (_searchTimedOut) return;
 
       if (results.isEmpty) {
         setState(() {
@@ -691,28 +718,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'word';
           _isRestoring = false;
+          _isSearchingWeb = false;
         });
-        _hideLoadingDialog();
+        _hideLoadingDialog(searchId: searchId);
         return;
       }
-
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 4: extracting phrase summary for ${strongsList.length} SNs across ${results.length} verses...');
-      }
-      final summaryData = SummaryTaskData(
-        results: results,
-        strongsList: strongsList,
-      );
-      final phraseSummary =
-          await compute(_computeExtractPhraseSummary, summaryData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performWordSearch] Step 4 done: ${phraseSummary.length} unique phrases');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (_searchTimedOut) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -727,8 +737,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'word';
         _isRestoring = false;
+        _isSearchingWeb = false;
       });
-      _hideLoadingDialog();
+      _hideLoadingDialog(searchId: searchId);
       if (kDebugMode) {
         debugPrint(
             '[_performWordSearch] ===== COMPLETE ($_totalMatches matches in $_totalVerses verses) =====');
@@ -739,10 +750,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
       if (mounted) {
         if (!_isResetting) {
+          if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
+            _isSearchingWeb = false;
           });
-          _hideLoadingDialog();
+          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
@@ -750,7 +763,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   Future<void> _performReferenceSearch(
-      ReferenceSearchTaskData refSearch) async {
+      ReferenceSearchTaskData refSearch, int searchId) async {
     if (kDebugMode) {
       debugPrint(
           '[_performReferenceSearch] START: "${refSearch.book} ${refSearch.chapter}:${refSearch.verse} ${refSearch.word}"');
@@ -764,11 +777,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
       if (!mounted) return;
       if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
 
       // Check for errors
       if (result.error != null) {
-        _hideLoadingDialog();
+        _hideLoadingDialog(searchId: searchId);
         showStyledSnackBar(context, result.error!);
         setState(() {
           _searchResults = [];
@@ -778,6 +792,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'reference';
           _isRestoring = false;
+          _isSearchingWeb = false;
         });
         return;
       }
@@ -816,6 +831,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
       if (!mounted) return;
       if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
 
       if (results.isEmpty) {
@@ -827,8 +843,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'reference';
           _isRestoring = false;
+          _isSearchingWeb = false;
         });
-        _hideLoadingDialog();
+        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -847,6 +864,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
       if (!mounted) return;
       if (_isResetting) return;
+      if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
 
       int totalMatches = 0;
@@ -861,8 +879,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'reference';
         _isRestoring = false;
+        _isSearchingWeb = false;
       });
-      _hideLoadingDialog();
+      _hideLoadingDialog(searchId: searchId);
       if (kDebugMode) {
         debugPrint(
             '[_performReferenceSearch] DONE ($_totalMatches matches in $_totalVerses verses)');
@@ -873,10 +892,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       }
       if (mounted) {
         if (!_isResetting) {
+          if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
+            _isSearchingWeb = false;
           });
-          _hideLoadingDialog();
+          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
@@ -1236,6 +1257,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = null;
         _searchType = null;
         _searchTerm = null;
+        _isSearchingWeb = false;
       });
       return;
     }
@@ -1243,6 +1265,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     setState(() {
       _controller.text = lastSearch;
       _isRestoring = true;
+      _isSearchingWeb = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -1435,6 +1458,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     _searchType = null;
                                     _searchTerm = null;
                                     _isRestoring = false;
+                                    _isSearchingWeb = false;
                                   });
 
                                   Future.delayed(const Duration(seconds: 3),
@@ -1512,80 +1536,111 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                         fontSize: uiFontSize + 8,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
-                            : (_searchResults.isEmpty && _totalMatches == 0)
+                            : _isSearchingWeb
                                 ? Center(
-                                    child: Text('No matches found 🧐',
-                                        style: TextStyle(
-                                            fontSize: uiFontSize + 8,
-                                            fontFamily: uiFontFamily,
-                                            color:
-                                                getAdaptiveTextColor(context))))
-                                : ValueListenableBuilder<double>(
-                                    valueListenable: fontSizeNotifier,
-                                    builder: (context, fontSize, child) {
-                                      return RawScrollbar(
-                                          minThumbLength: 80.0,
-                                          interactive: true,
-                                          thumbVisibility: false,
-                                          trackVisibility: false,
-                                          thickness: 22.0,
-                                          thumbColor: isDark
-                                              ? darkPrimaryColor.value
-                                                  .withValues(alpha: 0.8)
-                                              : lightPrimaryColor.value
-                                                  .withValues(alpha: 0.8),
-                                          controller: _resultsScrollController,
-                                          radius: Radius.circular(8.0),
-                                          child: ScrollConfiguration(
-                                              behavior: ScrollConfiguration.of(
-                                                      context)
-                                                  .copyWith(scrollbars: false),
-                                              child: CustomScrollView(
-                                                controller:
-                                                    _resultsScrollController,
-                                                slivers: [
-                                                  if (showStrongNumbersTable)
-                                                    SliverPadding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 24.0),
-                                                      sliver:
-                                                          SliverToBoxAdapter(
-                                                        child:
-                                                            _buildStrongNumbersTableSection(
-                                                                context,
-                                                                fontSize),
-                                                      ),
-                                                    ),
-                                                  if (_phraseSummary.isNotEmpty)
-                                                    SliverPadding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 24.0),
-                                                      sliver:
-                                                          SliverToBoxAdapter(
-                                                        child:
-                                                            _buildPhraseSummaryTableSection(
-                                                                context,
-                                                                fontSize),
-                                                      ),
-                                                    ),
-                                                  if (_searchResults.isNotEmpty)
-                                                    SliverPadding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              bottom: 100.0,
-                                                              right: 24.0),
-                                                      sliver:
-                                                          _buildVerseResultsSliver(
-                                                              context,
-                                                              fontSize,
-                                                              barColor),
-                                                    ),
-                                                ],
-                                              )));
-                                    },
-                                  ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          strokeWidth: 4.0,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            isDark
+                                                ? darkPrimaryColor.value
+                                                : lightPrimaryColor.value,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text('Searching...',
+                                            style: TextStyle(
+                                                fontSize: uiFontSize + 8,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                    context))),
+                                      ],
+                                    ),
+                                  )
+                                : (_searchResults.isEmpty && _totalMatches == 0)
+                                    ? Center(
+                                        child: Text('No matches found 🧐',
+                                            style: TextStyle(
+                                                fontSize: uiFontSize + 8,
+                                                fontFamily: uiFontFamily,
+                                                color: getAdaptiveTextColor(
+                                                    context))))
+                                    : ValueListenableBuilder<double>(
+                                        valueListenable: fontSizeNotifier,
+                                        builder: (context, fontSize, child) {
+                                          return RawScrollbar(
+                                              minThumbLength: 80.0,
+                                              interactive: true,
+                                              thumbVisibility: false,
+                                              trackVisibility: false,
+                                              thickness: 22.0,
+                                              thumbColor: isDark
+                                                  ? darkPrimaryColor.value
+                                                      .withValues(alpha: 0.8)
+                                                  : lightPrimaryColor.value
+                                                      .withValues(alpha: 0.8),
+                                              controller:
+                                                  _resultsScrollController,
+                                              radius: Radius.circular(8.0),
+                                              child: ScrollConfiguration(
+                                                  behavior: ScrollConfiguration
+                                                          .of(context)
+                                                      .copyWith(
+                                                          scrollbars: false),
+                                                  child: CustomScrollView(
+                                                    controller:
+                                                        _resultsScrollController,
+                                                    slivers: [
+                                                      if (showStrongNumbersTable)
+                                                        SliverPadding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  right: 24.0),
+                                                          sliver:
+                                                              SliverToBoxAdapter(
+                                                            child:
+                                                                _buildStrongNumbersTableSection(
+                                                                    context,
+                                                                    fontSize),
+                                                          ),
+                                                        ),
+                                                      if (_phraseSummary
+                                                          .isNotEmpty)
+                                                        SliverPadding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  right: 24.0),
+                                                          sliver:
+                                                              SliverToBoxAdapter(
+                                                            child:
+                                                                _buildPhraseSummaryTableSection(
+                                                                    context,
+                                                                    fontSize),
+                                                          ),
+                                                        ),
+                                                      if (_searchResults
+                                                          .isNotEmpty)
+                                                        SliverPadding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 100.0,
+                                                                  right: 24.0),
+                                                          sliver:
+                                                              _buildVerseResultsSliver(
+                                                                  context,
+                                                                  fontSize,
+                                                                  barColor),
+                                                        ),
+                                                    ],
+                                                  )));
+                                        },
+                                      ),
                   ),
                 ],
               ),
@@ -1667,15 +1722,19 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final countStyle = _getTextStyle(context, fontSize);
     final totalPhraseStyle = _getTextStyle(context, fontSize, bold: true);
     final totalCountStyle = _getTextStyle(context, fontSize, bold: true);
+    final phraseColumnMaxWidth = _phraseSummaryPhraseColumnMaxWidth(context);
     final tableRows = <TableRow>[];
 
     for (final entry in sortedPhrases) {
       tableRows.add(_buildTableRow(
         [
-          Text(
-            entry.key,
-            style: phraseStyle,
-            textAlign: TextAlign.left,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: phraseColumnMaxWidth),
+            child: Text(
+              entry.key,
+              style: phraseStyle,
+              textAlign: TextAlign.left,
+            ),
           ),
           Text(
             '${entry.value}',
@@ -1713,6 +1772,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _buildSectionDivider(),
       ],
     );
+  }
+
+  double _phraseSummaryPhraseColumnMaxWidth(BuildContext context) {
+    final maxWidth = MediaQuery.sizeOf(context).width - 120.0;
+    return maxWidth < 96.0 ? 96.0 : maxWidth;
   }
 
   Widget _buildCenteredTable(List<TableRow> tableRows) {
