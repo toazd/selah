@@ -595,8 +595,7 @@ jobs:
         flutter build web \
           --release \
           --target lib/main.dart \
-          --dart-define=BUILD_NUMBER=${{ github.run_number }} \
-          --wasm
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
 
     - name: Create web build archive
       run: |
