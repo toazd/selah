@@ -127,14 +127,14 @@ class _ChapterDialogState extends State<ChapterDialog> {
   List<int> get _highlightedVerses {
     // First, check if targetVerses was explicitly provided
     if (widget.targetVerses != null && widget.targetVerses!.isNotEmpty) {
-      return widget.targetVerses!;
+      return _filterSingleOpeningVerseHighlight(widget.targetVerses!);
     }
 
     // Second, try parsing from referenceText (may contain ranges like "1-5" or lists like "1,3,5")
     if (widget.referenceText != null) {
       final parsed = _parseReferenceText(widget.referenceText!);
       if (parsed.isNotEmpty) {
-        return parsed;
+        return _filterSingleOpeningVerseHighlight(parsed);
       }
     }
 
@@ -142,10 +142,19 @@ class _ChapterDialogState extends State<ChapterDialog> {
     if (widget.verse != null) {
       final start = widget.verse!;
       final end = widget.endVerse ?? start;
-      return List.generate(end - start + 1, (i) => start + i);
+      return _filterSingleOpeningVerseHighlight(
+        List.generate(end - start + 1, (i) => start + i),
+      );
     }
 
     return [];
+  }
+
+  List<int> _filterSingleOpeningVerseHighlight(List<int> verses) {
+    if (verses.length == 1 && (verses.single == 0 || verses.single == 1)) {
+      return [];
+    }
+    return verses;
   }
 
   @override

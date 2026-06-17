@@ -21,6 +21,8 @@ import '../utils/verse_text_parser.dart';
 import 'bible_screen_header.dart'; // Import custom header
 import '../widgets/chapter_content_widget.dart'; // For PageView chapter display
 import '../widgets/strongs_definition_dialog.dart';
+import '../widgets/strongs_definition_lookup_dialog.dart';
+import '../widgets/websters_definition_lookup_dialog.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor, BuildContext context) {
@@ -836,6 +838,20 @@ class _BibleScreenState extends State<BibleScreen> {
     StrongsDefinitionDialog.show(context, strongsNumber);
   }
 
+  void _showStrongsDefinitionLookupDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => const StrongsDefinitionLookupDialog(),
+    );
+  }
+
+  void _showWebstersDefinitionLookupDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => const WebstersDefinitionLookupDialog(),
+    );
+  }
+
   void _enterHighlightMode(BuildContext context, int vn) async {
     final verseData = _verses.firstWhere(
         (v) => toInt(v['verse'], orElse: -1) == vn,
@@ -918,6 +934,8 @@ class _BibleScreenState extends State<BibleScreen> {
           selectedBook: _selectedBook,
           selectedChapter: _selectedChapter,
           onShowNotesSearch: widget.onShowNotesSearch ?? _showNotesSearch,
+          onShowStrongsDefinitions: _showStrongsDefinitionLookupDialog,
+          onShowWebstersDefinitions: _showWebstersDefinitionLookupDialog,
           //onShowBookmarksManager: widget.onShowBookmarksManager ?? _showBookmarksManager,
         ),
         Expanded(

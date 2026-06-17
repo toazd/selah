@@ -176,6 +176,13 @@ class VerseReferenceDetector {
     caseSensitive: false,
   );
 
+  // Chapter-only references are intentionally checked after all verse/range
+  // patterns because they are shorter (e.g., "Mat 23" inside "Mat 23:1").
+  static final RegExp _chapterOnlyPattern = RegExp(
+    r'\b([1-3]?\s?[a-zA-Z]+)\s+(\d+)\b(?!\s*:)',
+    caseSensitive: false,
+  );
+
   static List<VerseReference> detectReferences(String text) {
     final allReferences = <VerseReference>[];
     final usedPositions =
@@ -204,11 +211,13 @@ class VerseReferenceDetector {
       final fullMatch = match.group(0)!;
       final bookPart = match.group(1)?.trim() ?? '';
       final chapterStr = match.group(2);
-      final versesStr = match.group(3)!;
+      final versesStr = match.groupCount >= 3 ? match.group(3) : null;
 
       // For dash ranges, we need groups 3 and 4 (start verse and end verse separately)
       final dashEndVerseStr =
-          patternType.contains('dash_range') ? match.group(4) : null;
+          patternType.contains('dash_range') && match.groupCount >= 4
+              ? match.group(4)
+              : null;
 
       if (chapterStr == null) {
         return null;
@@ -229,11 +238,18 @@ class VerseReferenceDetector {
       final endIndex = offset + match.end;
 
       // Check for conflicts with already used positions
-      if (hasConflict(startIndex, endIndex)) {}
+      if (hasConflict(startIndex, endIndex)) {
+        return null;
+      }
 
       // Parse verse specification based on pattern type
       final allVerseNumbers = <int>[];
-      if (patternType.contains('mixed') || patternType.contains('comma')) {
+      if (patternType.contains('chapter_only')) {
+        allVerseNumbers.add(1);
+      } else if (versesStr == null) {
+        return null;
+      } else if (patternType.contains('mixed') ||
+          patternType.contains('comma')) {
         // Handle comma-separated parsing
         final verseParts = versesStr.split(',');
         for (final part in verseParts) {
@@ -305,6 +321,9 @@ class VerseReferenceDetector {
 
       // Create appropriate reference type
       VerseReference reference;
+      final hasSimpleDashRange = versesStr != null &&
+          versesStr.contains('-') &&
+          !versesStr.contains(',');
       if (allVerseNumbers.length == 1) {
         // Single verse
         reference = VerseReference(
@@ -315,8 +334,7 @@ class VerseReferenceDetector {
           originalText: fullMatch,
           startIndex: startIndex,
         );
-      } else if (patternType.contains('dash_range') ||
-          (versesStr.contains('-') && !versesStr.contains(','))) {
+      } else if (patternType.contains('dash_range') || hasSimpleDashRange) {
         // Simple dash range - check pattern type OR versesStr contains dash
         // Note: For dash_range pattern, versesStr is just the start verse (no dash),
         // so we must also check the pattern type
@@ -451,6 +469,18 @@ class VerseReferenceDetector {
       }
     }
 
+    // 7. CHAPTER-ONLY REFERENCES (shortest, so checked after verse refs)
+    for (int i = 0; i < text.length; i++) {
+      final substring = text.substring(i);
+      final match = _chapterOnlyPattern.matchAsPrefix(substring);
+      if (match != null) {
+        final reference = createReferenceFromMatch(match, i, 'chapter_only');
+        if (reference != null) {
+          allReferences.add(reference);
+        }
+      }
+    }
+
     return allReferences;
   }
 
@@ -513,6 +543,11 @@ class VerseReferenceDetector {
     // Direct lookup
     if (_bookMappings.containsKey(lowerBook)) {
       return _bookMappings[lowerBook];
+    }
+
+    final compactBook = lowerBook.replaceAll(RegExp(r'\s+'), '');
+    if (_bookMappings.containsKey(compactBook)) {
+      return _bookMappings[compactBook];
     }
 
     return null;

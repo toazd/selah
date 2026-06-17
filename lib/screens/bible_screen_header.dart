@@ -12,6 +12,8 @@ class BibleScreenHeader extends StatelessWidget {
   final String? selectedBook;
   final int? selectedChapter;
   final VoidCallback? onShowNotesSearch;
+  final VoidCallback? onShowStrongsDefinitions;
+  final VoidCallback? onShowWebstersDefinitions;
   //final VoidCallback? onShowBookmarksManager;
 
   const BibleScreenHeader({
@@ -24,6 +26,8 @@ class BibleScreenHeader extends StatelessWidget {
     this.selectedBook,
     this.selectedChapter,
     this.onShowNotesSearch,
+    this.onShowStrongsDefinitions,
+    this.onShowWebstersDefinitions,
     //this.onShowBookmarksManager,
   });
 
@@ -68,6 +72,18 @@ class BibleScreenHeader extends StatelessWidget {
                 color:
                     isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
+              IconButton(
+                icon: Icon(
+                  Icons.menu_book,
+                  semanticLabel: 'Show Strong\'s Definitions Lookup',
+                ),
+                tooltip: 'Strong\'s Definitions',
+                onPressed: onShowStrongsDefinitions,
+                iconSize: 32,
+                padding: EdgeInsets.all(8),
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              ),
             ],
           ),
           // Title area (centered)
@@ -81,6 +97,18 @@ class BibleScreenHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: Icon(
+                  Icons.library_books,
+                  semanticLabel: 'Show Webster\'s 1828 Dictionary',
+                ),
+                tooltip: 'Webster\'s 1828 Dictionary',
+                onPressed: onShowWebstersDefinitions,
+                iconSize: 32,
+                padding: EdgeInsets.all(8),
+                color:
+                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              ),
               // Uncomment if bookmark functionality is added
               // IconButton(
               //   icon: Icon(
