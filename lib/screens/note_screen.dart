@@ -474,7 +474,7 @@ class _NoteScreenState extends State<NoteScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete',
+            child: Text('Delete',
                 style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,

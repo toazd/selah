@@ -164,7 +164,7 @@ class SelahImportService {
           context: context,
           builder: (context) => AlertDialog(
             constraints: const BoxConstraints(maxWidth: 400),
-            title: const Text('Import Failed',
+            title: Text('Import Failed',
                 style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -659,7 +659,7 @@ class SelahImportService {
         context: context,
         builder: (context) => AlertDialog(
           constraints: const BoxConstraints(maxWidth: 400),
-          title: const Text('Import Completed with Errors',
+          title: Text('Import Completed with Errors',
               style: TextStyle(
                   color: Colors.red,
                   fontSize: uiFontSize,

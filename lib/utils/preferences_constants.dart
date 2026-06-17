@@ -7,7 +7,8 @@ const double defaultFontSize = 22.0;
 const String defaultFontFamily = 'IBM Plex Sans';
 const String defaultNoteFontFamily = 'Scope One';
 const double defaultLineHeight = 1.2;
-const double defaultHighlightAlpha = 0.90; // Not user-configurable
+const double defaultUiFontSize = 18.0;
+const double defaultHighlightAlpha = 0.9; // Not user-configurable
 
 // Color defaults in hex
 const String defaultLightPrimaryColorHex = '#FF607D8B';
@@ -90,8 +91,8 @@ const bool defaultSyncSearchHistory = true;
 const int defaultDayStartHour = 7; // 7 AM
 const int defaultNightStartHour = 18; // 6 PM
 
-// UI constants (non-user customizable)
-const double uiFontSize = 18.0;
+// UI defaults
+double uiFontSize = defaultUiFontSize;
 const String uiFontFamily = 'IBM Plex Sans';
 
 // Notes (quill_note_display.dart) and TSK references (tsk_reference_display.dart) display at a slightly smaller sizes

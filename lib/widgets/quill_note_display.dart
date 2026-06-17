@@ -341,7 +341,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                 code: DefaultTextBlockStyle(
                   TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
-                      'Roboto Mono',
+                      noteFontFamilyNotifier.value,
                       // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
                       (!kIsWeb &&
                               (Platform.isLinux ||
@@ -350,7 +350,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                           ? fontSizeNotifier.value - fontSizeAdjustmentDesktop
                           : fontSizeNotifier.value - fontSizeAdjustmentMobile,
                     ),
-                    fontFamily: 'Roboto Mono',
+                    fontFamily: noteFontFamilyNotifier.value,
                     color: isDark
                         ? Colors.blue.shade200
                         : Colors.blue.shade900.withValues(alpha: 0.9),
@@ -398,7 +398,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   radius: const Radius.circular(3),
                   style: TextStyle(
                     fontSize: FontSizeAdjustments.getAdjustedSize(
-                      'Roboto Mono',
+                      noteFontFamilyNotifier.value,
                       // Adjust note/TSK font size depending on platform (-8 looks good on desktop but not on mobile)
                       (!kIsWeb &&
                               (Platform.isLinux ||
@@ -407,7 +407,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                           ? fontSizeNotifier.value - fontSizeAdjustmentDesktop
                           : fontSizeNotifier.value - fontSizeAdjustmentMobile,
                     ),
-                    fontFamily: 'Roboto Mono',
+                    fontFamily: noteFontFamilyNotifier.value,
                     color: isDark
                         ? Colors.blue.shade200
                         : Colors.blue.shade900.withValues(alpha: 0.8),

@@ -34,7 +34,7 @@ class FontSizeAdjustments {
     'Noto Sans': 0.95,
     'Old Standard': 1.05,
     'Sanchez': 0.95,
-    'Scope One': 1.0,
+    'Scope One': 1.1,
     'Solway': 1.0,
   };
 

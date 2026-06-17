@@ -25,6 +25,487 @@ import '../utils/font_size_adjustments.dart';
 import '../utils/error_handler.dart';
 import 'strongs_search_screen.dart';
 
+// Top-level functions for compute() to keep expensive search work off the UI
+// isolate on native platforms.
+Future<BibleSearchComputationResult> _computeBibleSearch(
+    BibleSearchTaskData data) async {
+  if (data.useNearby) {
+    return _computeNearbyBibleSearch(data);
+  }
+  return _computeRegularBibleSearch(data);
+}
+
+Future<BibleSearchComputationResult> _computeRegularBibleSearch(
+    BibleSearchTaskData data) async {
+  final patternData = _buildBibleSearchPattern(data);
+  final results = await _searchBibleVersesOrdered(data, patternData);
+
+  int matchCount = 0;
+  for (final verse in results) {
+    final text =
+        _getBibleSearchText(verse['text'] as String, data.useRedLetter);
+    matchCount += patternData.regex.allMatches(text).length;
+  }
+
+  return BibleSearchComputationResult(
+    searchResults: results,
+    totalMatches: matchCount,
+    totalVerses: results.length,
+    isNearbySearchActive: false,
+    regexPattern: patternData.pattern,
+    regexCaseSensitive: data.caseSensitive,
+    regexUnicode: patternData.unicode,
+  );
+}
+
+Future<BibleSearchComputationResult> _computeNearbyBibleSearch(
+    BibleSearchTaskData data) async {
+  final results = await _searchBibleVersesNearby(data);
+  final keywords = _getBibleKeywordsFromInput(data.input);
+  if (keywords.isEmpty) {
+    return BibleSearchComputationResult(
+      searchResults: results,
+      totalMatches: 0,
+      totalVerses: 0,
+      isNearbySearchActive: true,
+    );
+  }
+
+  final escapedKeywords = keywords
+      .map((k) =>
+          data.useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k))
+      .toList();
+  final pattern = '(${escapedKeywords.join('|')})';
+  final regex = _createBibleSearchRegExp(pattern, data.caseSensitive);
+
+  int matchCount = 0;
+  int verseCount = 0;
+  for (final result in results) {
+    if (result.containsKey('verses')) {
+      for (final verse in result['verses'] as List) {
+        final text =
+            _getBibleSearchText(verse['text'] as String, data.useRedLetter);
+        if (regex.hasMatch(text)) {
+          verseCount++;
+        }
+      }
+    }
+    final combinedText = result['text'] as String;
+    matchCount += regex.allMatches(combinedText).length;
+  }
+
+  return BibleSearchComputationResult(
+    searchResults: results,
+    totalMatches: matchCount,
+    totalVerses: verseCount,
+    isNearbySearchActive: true,
+  );
+}
+
+class BibleSearchTaskData {
+  final String input;
+  final bool useRegex;
+  final bool useNearby;
+  final bool useWholeWord;
+  final bool useRedLetter;
+  final bool caseSensitive;
+  final List<String> allowedBooks;
+  final Map<String, Set<int>> allowedChapters;
+
+  const BibleSearchTaskData({
+    required this.input,
+    required this.useRegex,
+    required this.useNearby,
+    required this.useWholeWord,
+    required this.useRedLetter,
+    required this.caseSensitive,
+    required this.allowedBooks,
+    required this.allowedChapters,
+  });
+}
+
+class BibleSearchComputationResult {
+  final List<Map<String, dynamic>> searchResults;
+  final int totalMatches;
+  final int totalVerses;
+  final bool isNearbySearchActive;
+  final String? regexPattern;
+  final bool regexCaseSensitive;
+  final bool regexUnicode;
+
+  const BibleSearchComputationResult({
+    required this.searchResults,
+    required this.totalMatches,
+    required this.totalVerses,
+    required this.isNearbySearchActive,
+    this.regexPattern,
+    this.regexCaseSensitive = false,
+    this.regexUnicode = false,
+  });
+}
+
+class _BibleSearchPatternData {
+  final List<String> keywords;
+  final RegExp regex;
+  final List<String> escapedTerms;
+  final String pattern;
+  final bool unicode;
+
+  const _BibleSearchPatternData({
+    required this.keywords,
+    required this.regex,
+    required this.escapedTerms,
+    required this.pattern,
+    required this.unicode,
+  });
+}
+
+RegExp _createBibleSearchRegExp(String pattern, bool caseSensitive) {
+  final unicode = _usesUnicodeSearchPatterns(pattern);
+  return RegExp(pattern, caseSensitive: caseSensitive, unicode: unicode);
+}
+
+bool _usesUnicodeSearchPatterns(String pattern) {
+  return pattern.contains('\\p{P}') ||
+      pattern.contains('\\p{L}') ||
+      pattern.contains('\\p{N}') ||
+      pattern.contains('\\p{S}') ||
+      pattern.contains('\\p{Z}') ||
+      pattern.contains('\\p{M}');
+}
+
+String _extractBibleRedLetterText(String text) {
+  final matches = RegExp(r'<r>(.*?)</r>', dotAll: true).allMatches(text);
+  return matches
+      .map((m) => VerseTextParser.toPlainVerseText(m.group(1)!))
+      .join(' ');
+}
+
+String _cleanBibleVerseTextForSearch(String text) {
+  return VerseTextParser.toPlainVerseText(text, removePilcrow: false);
+}
+
+String _getBibleSearchText(String verseText, bool useRedLetter) {
+  String processedText = useRedLetter
+      ? _extractBibleRedLetterText(verseText)
+      : _cleanBibleVerseTextForSearch(verseText);
+  if (processedText.contains('¶ ')) {
+    processedText = processedText.replaceAll('¶ ', '');
+  }
+  return processedText;
+}
+
+List<String> _getBibleKeywordsFromInput(String input) {
+  final phraseRegExp = RegExp(r'"([^"]+)"');
+  final withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
+  return withoutPhrases
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty)
+      .map((term) => term.replaceAll('*', '').trim())
+      .where((t) => t.isNotEmpty)
+      .toList();
+}
+
+_BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
+  if (data.useRegex) {
+    final regex = _createBibleSearchRegExp(data.input, data.caseSensitive);
+    return _BibleSearchPatternData(
+      keywords: const [],
+      regex: regex,
+      escapedTerms: const [],
+      pattern: data.input,
+      unicode: _usesUnicodeSearchPatterns(data.input),
+    );
+  }
+
+  final phraseRegExp = RegExp(r'"([^"]+)"');
+  final phrases = phraseRegExp
+      .allMatches(data.input)
+      .map((m) => m.group(1)!)
+      .where((p) => p.isNotEmpty)
+      .toList();
+  final queryWithoutPhrases = data.input.replaceAll(phraseRegExp, '').trim();
+  final originalWords = queryWithoutPhrases
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty)
+      .toList();
+  final allTerms = [...phrases, ...originalWords];
+  if (allTerms.isEmpty) {
+    final regex = _createBibleSearchRegExp('.*', data.caseSensitive);
+    return _BibleSearchPatternData(
+      keywords: const [],
+      regex: regex,
+      escapedTerms: const [],
+      pattern: '.*',
+      unicode: false,
+    );
+  }
+
+  final keywords = allTerms
+      .map((term) => term.replaceAll('*', '').trim())
+      .where((t) => t.isNotEmpty)
+      .toList();
+
+  final escapedTerms = allTerms.map((term) {
+    String escaped = RegExp.escape(term);
+    escaped = escaped.replaceAll('\\*', '[A-Za-z]*');
+    return escaped;
+  }).toList();
+
+  final pattern = data.useWholeWord
+      ? '\\b(${escapedTerms.join('|')})\\b'
+      : '(${escapedTerms.join('|')})';
+  final regex = _createBibleSearchRegExp(pattern, data.caseSensitive);
+  return _BibleSearchPatternData(
+    keywords: keywords,
+    regex: regex,
+    escapedTerms: escapedTerms,
+    pattern: pattern,
+    unicode: _usesUnicodeSearchPatterns(pattern),
+  );
+}
+
+Future<List<Map<String, dynamic>>> _searchBibleVersesOrdered(
+    BibleSearchTaskData data, _BibleSearchPatternData patternData) async {
+  final bookOrderIndex =
+      _buildBibleBookOrderIndex(await BibleDatabase.getBooks());
+
+  if (patternData.escapedTerms.length > 1 && !data.useNearby) {
+    final results = await BibleDatabase.getAllVerses();
+    final termRegexes = patternData.escapedTerms.map((term) {
+      final pattern = data.useWholeWord ? '\\b$term\\b' : term;
+      return _createBibleSearchRegExp(pattern, data.caseSensitive);
+    }).toList();
+
+    final filteredResults = results.where((verse) {
+      final searchText =
+          _getBibleSearchText(verse['text'] as String, data.useRedLetter);
+      return termRegexes.every((regex) => regex.hasMatch(searchText));
+    }).where((verse) {
+      return BookFilter.verseMatchesFilter(
+          verse, data.allowedBooks, data.allowedChapters);
+    }).map((result) {
+      return {
+        ...result,
+        'bookLongName':
+            BookNameConverter.shortNameToLongName(result['book'] as String),
+      };
+    }).toList();
+
+    _sortBibleResultsInBibleOrder(filteredResults, bookOrderIndex);
+    return filteredResults;
+  }
+
+  final hasWildcards = data.input.contains('*');
+  final results = patternData.keywords.isEmpty || hasWildcards
+      ? await BibleDatabase.getAllVerses()
+      : await BibleDatabase.searchVerses(
+          preFilterKeywords: patternData.keywords,
+          caseSensitive: data.caseSensitive,
+        );
+
+  final filteredResults = results.where((verse) {
+    final searchText =
+        _getBibleSearchText(verse['text'] as String, data.useRedLetter);
+    return patternData.regex.hasMatch(searchText);
+  }).where((verse) {
+    return BookFilter.verseMatchesFilter(
+        verse, data.allowedBooks, data.allowedChapters);
+  }).map((result) {
+    return {
+      ...result,
+      'bookLongName':
+          BookNameConverter.shortNameToLongName(result['book'] as String),
+    };
+  }).toList();
+
+  _sortBibleResultsInBibleOrder(filteredResults, bookOrderIndex);
+  return filteredResults;
+}
+
+Future<List<Map<String, dynamic>>> _searchBibleVersesNearby(
+    BibleSearchTaskData data) async {
+  final keywords = _getBibleKeywordsFromInput(data.input);
+  if (keywords.length <= 1) {
+    return [];
+  }
+
+  final allVerses = await BibleDatabase.searchVerses(
+      preFilterKeywords: keywords, useOrLogic: true);
+  final filteredVerses = allVerses.where((verse) {
+    return BookFilter.verseMatchesFilter(
+        verse, data.allowedBooks, data.allowedChapters);
+  }).toList();
+
+  final chapterGroups = <String, List<Map<String, dynamic>>>{};
+  for (final verse in filteredVerses) {
+    final key = '${verse['book']}_${verse['chapter']}';
+    chapterGroups.putIfAbsent(key, () => []).add(verse);
+  }
+
+  final results = <Map<String, dynamic>>[];
+  for (final chapterVerses in chapterGroups.values) {
+    chapterVerses
+        .sort((a, b) => (a['verse'] as int).compareTo(b['verse'] as int));
+
+    final clusters = _findNearbyBibleClusters(chapterVerses, keywords, data);
+    for (final cluster in clusters) {
+      final startVerse = cluster.first['verse'] as int;
+      final endVerse = cluster.last['verse'] as int;
+      final book = cluster.first['book'] as String;
+      final chapter = cluster.first['chapter'] as int;
+      final allChapterVerses = await BibleDatabase.getVerses(book, chapter);
+      final versesInRange = allChapterVerses
+          .where((v) =>
+              (v['verse'] as int) >= startVerse &&
+              (v['verse'] as int) <= endVerse)
+          .toList();
+
+      final combinedText = versesInRange.map((v) {
+        String verseText = v['text'] as String;
+        if (verseText.contains('¶ ')) {
+          verseText = verseText.replaceAll('¶ ', '');
+        }
+        return '${v['verse']} $verseText';
+      }).join('\n');
+
+      results.add({
+        'book': book,
+        'chapter': chapter,
+        'startVerse': startVerse,
+        'endVerse': endVerse,
+        'verses': versesInRange,
+        'text': combinedText,
+        'bookLongName': BookNameConverter.shortNameToLongName(book),
+      });
+    }
+  }
+
+  final bookOrderIndex =
+      _buildBibleBookOrderIndex(await BibleDatabase.getBooks());
+  results.sort((a, b) {
+    final bookA = _bibleBookIdx(a['book'], bookOrderIndex);
+    final bookB = _bibleBookIdx(b['book'], bookOrderIndex);
+    if (bookA != bookB) return bookA.compareTo(bookB);
+    final chapterA = a['chapter'] as int;
+    final chapterB = b['chapter'] as int;
+    if (chapterA != chapterB) return chapterA.compareTo(chapterB);
+    final startA = a['startVerse'] as int;
+    final startB = b['startVerse'] as int;
+    return startA.compareTo(startB);
+  });
+
+  return results;
+}
+
+List<List<Map<String, dynamic>>> _findNearbyBibleClusters(
+  List<Map<String, dynamic>> chapterVerses,
+  List<String> keywords,
+  BibleSearchTaskData data,
+) {
+  final clusters = <List<Map<String, dynamic>>>[];
+
+  for (int i = 0; i < chapterVerses.length; i++) {
+    final startVerse = chapterVerses[i];
+    final startVerseNum = startVerse['verse'] as int;
+    int bestEndIndex = i;
+    final foundKeywords = _getBibleKeywordsInVerse(startVerse, keywords, data);
+
+    for (int j = i + 1; j < chapterVerses.length; j++) {
+      final currentVerse = chapterVerses[j];
+      final currentVerseNum = currentVerse['verse'] as int;
+      if (currentVerseNum - startVerseNum > 3) {
+        break;
+      }
+
+      final newKeywords =
+          _getBibleKeywordsInVerse(currentVerse, keywords, data);
+      foundKeywords.addAll(newKeywords);
+      if (foundKeywords.length == keywords.length) {
+        bestEndIndex = j;
+      }
+    }
+
+    if (foundKeywords.length == keywords.length && bestEndIndex > i) {
+      final cluster = chapterVerses.sublist(i, bestEndIndex + 1);
+      final overlaps = clusters.any(
+          (existingCluster) => _bibleClustersOverlap(cluster, existingCluster));
+      if (!overlaps) {
+        clusters.add(cluster);
+      }
+      i = bestEndIndex;
+    }
+  }
+  return clusters;
+}
+
+Set<String> _getBibleKeywordsInVerse(
+  Map<String, dynamic> verse,
+  List<String> keywords,
+  BibleSearchTaskData data,
+) {
+  final found = <String>{};
+  final verseText =
+      _getBibleSearchText(verse['text'] as String, data.useRedLetter);
+
+  for (final keyword in keywords) {
+    final pattern = data.useWholeWord
+        ? '\\b${RegExp.escape(keyword)}\\b'
+        : RegExp.escape(keyword);
+    final regex = _createBibleSearchRegExp(pattern, data.caseSensitive);
+    if (regex.hasMatch(verseText)) {
+      found.add(keyword);
+    }
+  }
+  return found;
+}
+
+bool _bibleClustersOverlap(
+    List<Map<String, dynamic>> cluster1, List<Map<String, dynamic>> cluster2) {
+  final start1 = cluster1.first['verse'] as int;
+  final end1 = cluster1.last['verse'] as int;
+  final start2 = cluster2.first['verse'] as int;
+  final end2 = cluster2.last['verse'] as int;
+  return !(end1 < start2 || end2 < start1);
+}
+
+Map<String, int> _buildBibleBookOrderIndex(List<String> books) {
+  final map = <String, int>{};
+  for (int i = 0; i < books.length; i++) {
+    final raw = books[i];
+    map[raw] = i;
+    map[_normBibleBook(raw)] = i;
+  }
+  return map;
+}
+
+String _normBibleBook(dynamic book) => book.toString().trim().toUpperCase();
+
+int _bibleBookIdx(dynamic book, Map<String, int> bookOrderIndex) {
+  final norm = _normBibleBook(book);
+  return bookOrderIndex[norm] ?? bookOrderIndex[book] ?? (1 << 30);
+}
+
+int _asBibleInt(dynamic value) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+void _sortBibleResultsInBibleOrder(
+    List<Map<String, dynamic>> list, Map<String, int> bookOrderIndex) {
+  list.sort((a, b) {
+    final ia = _bibleBookIdx(a['book'], bookOrderIndex);
+    final ib = _bibleBookIdx(b['book'], bookOrderIndex);
+    if (ia != ib) return ia.compareTo(ib);
+    final ca = _asBibleInt(a['chapter']);
+    final cb = _asBibleInt(b['chapter']);
+    if (ca != cb) return ca.compareTo(cb);
+    final va = _asBibleInt(a['verse']);
+    final vb = _asBibleInt(b['verse']);
+    return va.compareTo(vb);
+  });
+}
+
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
   final hsl = HSLColor.fromColor(backgroundColor);
@@ -89,6 +570,7 @@ class _SearchScreenState extends State<SearchScreen>
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   Timer? _onSearchDebounce;
+  int _activeSearchId = 0;
   int? _totalMatches;
   int? _totalVerses;
   RegExp? _currentRegex;
@@ -151,84 +633,6 @@ class _SearchScreenState extends State<SearchScreen>
     _highlightedSpansCache.clear();
   }
 
-  // Create RegExp with conditional unicode flag based on pattern content
-  RegExp _createRegExp(String pattern, bool caseSensitive) {
-    // Enable unicode mode if the pattern contains Unicode-aware regex features
-    final hasUnicodePatterns = pattern.contains('\\p{P}') ||
-        pattern.contains('\\p{L}') ||
-        pattern.contains('\\p{N}') ||
-        pattern.contains('\\p{S}') ||
-        pattern.contains('\\p{Z}') ||
-        pattern.contains('\\p{M}');
-    return RegExp(pattern,
-        caseSensitive: caseSensitive, unicode: hasUnicodePatterns);
-  }
-
-  // --- BEGIN: Ensure results are in DB/Biblical order ---
-  Map<String, int>? _bookOrderIndex;
-
-  String _normBook(dynamic b) => b.toString().trim().toUpperCase();
-
-  Future<void> _buildBookOrderIndex() async {
-    if (_bookOrderIndex != null) return;
-    final books = await BibleDatabase.getBooks();
-    final map = <String, int>{};
-    for (int i = 0; i < books.length; i++) {
-      final raw = books[i];
-      map[raw] = i; // exact key
-      map[_normBook(raw)] = i; // normalized key
-    }
-    _bookOrderIndex = map;
-  }
-
-  int _bookIdx(dynamic b) {
-    final m = _bookOrderIndex;
-    if (m == null) return 1 << 30;
-    final norm = _normBook(b);
-    return m[norm] ?? m[b] ?? (1 << 30);
-  }
-
-  int _asInt(dynamic v) {
-    if (v is int) return v;
-    return int.tryParse(v?.toString() ?? '') ?? 0;
-  }
-
-  void _sortResultsInBibleOrder(List<Map<String, dynamic>> list) {
-    list.sort((a, b) {
-      final ia = _bookIdx(a['book']);
-      final ib = _bookIdx(b['book']);
-      if (ia != ib) return ia.compareTo(ib);
-      final ca = _asInt(a['chapter']);
-      final cb = _asInt(b['chapter']);
-      if (ca != cb) return ca.compareTo(cb);
-      final va = _asInt(a['verse']);
-      final vb = _asInt(b['verse']);
-      return va.compareTo(vb);
-    });
-  }
-
-  String _extractRedLetterText(String text) {
-    final matches = RegExp(r'<r>(.*?)</r>', dotAll: true).allMatches(text);
-    return matches
-        .map((m) => VerseTextParser.toPlainVerseText(m.group(1)!))
-        .join(' ');
-  }
-
-  String _cleanVerseTextForSearch(String text) {
-    return VerseTextParser.toPlainVerseText(text, removePilcrow: false);
-  }
-
-  String _getSearchText(String verseText, bool useRedLetter) {
-    String processedText = useRedLetter
-        ? _extractRedLetterText(verseText)
-        : _cleanVerseTextForSearch(verseText);
-    // Remove pilcrow symbol if present to exclude from regex processing
-    if (processedText.contains('¶ ')) {
-      processedText = processedText.replaceAll('¶ ', '');
-    }
-    return processedText;
-  }
-
   // Check if input is valid for nearby search (>1 word, no quoted phrases)
   bool _isValidNearbyInput(String input) {
     if (!_useNearby || _useRegex) return false;
@@ -267,178 +671,6 @@ class _SearchScreenState extends State<SearchScreen>
     showStyledSnackBar(context, reason);
   }
 
-  // Perform nearby search - find clusters where all keywords appear within 7 verses
-  Future<List<Map<String, dynamic>>> _searchVersesNearby(String input) async {
-    // Parse input to get keywords (no phrases allowed in nearby search)
-    RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-    String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-    final keywords = withoutPhrases
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .map((term) => term.replaceAll('*', '').trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
-
-    if (keywords.length <= 1) {
-      return []; // Should not happen due to validation, but safety check
-    }
-
-    // Get all verses containing any of the keywords
-    final allVerses = await BibleDatabase.searchVerses(
-        preFilterKeywords: keywords, useOrLogic: true);
-
-    // Apply book filtering
-    final filteredVerses = allVerses.where((verse) {
-      return BookFilter.verseMatchesFilter(
-          verse, _allowedBooks, _allowedChapters);
-    }).toList();
-
-    // Group verses by book and chapter
-    final chapterGroups = <String, List<Map<String, dynamic>>>{};
-    for (final verse in filteredVerses) {
-      final key = '${verse['book']}_${verse['chapter']}';
-      chapterGroups.putIfAbsent(key, () => []).add(verse);
-    }
-
-    final results = <Map<String, dynamic>>[];
-
-    // Process each chapter to find nearby clusters
-    for (final chapterVerses in chapterGroups.values) {
-      // Sort verses by verse number
-      chapterVerses
-          .sort((a, b) => (a['verse'] as int).compareTo(b['verse'] as int));
-
-      // Find clusters where all keywords appear within 7 verses
-      final clusters = _findNearbyClusters(chapterVerses, keywords);
-
-      for (final cluster in clusters) {
-        final startVerse = cluster.first['verse'] as int;
-        final endVerse = cluster.last['verse'] as int;
-        final book = cluster.first['book'] as String;
-        final chapter = cluster.first['chapter'] as int;
-
-        // Get all verses in the continuous range from startVerse to endVerse
-        final allChapterVerses = await BibleDatabase.getVerses(book, chapter);
-        final versesInRange = allChapterVerses
-            .where((v) =>
-                (v['verse'] as int) >= startVerse &&
-                (v['verse'] as int) <= endVerse)
-            .toList();
-
-        // Combine all verse texts for display (remove pilcrow symbols)
-        final combinedText = versesInRange.map((v) {
-          String verseText = v['text'] as String;
-          if (verseText.contains('¶ ')) {
-            verseText = verseText.replaceAll('¶ ', '');
-          }
-          return '${v['verse']} $verseText';
-        }).join('\n');
-
-        results.add({
-          'book': book,
-          'chapter': chapter,
-          'startVerse': startVerse,
-          'endVerse': endVerse,
-          'verses': versesInRange,
-          'text': combinedText,
-          'bookLongName': BookNameConverter.shortNameToLongName(book),
-        });
-      }
-    }
-
-    // Sort results in biblical order
-    await _buildBookOrderIndex();
-    results.sort((a, b) {
-      final bookA = _bookIdx(a['book']);
-      final bookB = _bookIdx(b['book']);
-      if (bookA != bookB) return bookA.compareTo(bookB);
-      final chapterA = a['chapter'] as int;
-      final chapterB = b['chapter'] as int;
-      if (chapterA != chapterB) return chapterA.compareTo(chapterB);
-      final startA = a['startVerse'] as int;
-      final startB = b['startVerse'] as int;
-      return startA.compareTo(startB);
-    });
-
-    return results;
-  }
-
-  // Find clusters of verses within 7 verses that contain all keywords
-  List<List<Map<String, dynamic>>> _findNearbyClusters(
-      List<Map<String, dynamic>> chapterVerses, List<String> keywords) {
-    final clusters = <List<Map<String, dynamic>>>[];
-
-    for (int i = 0; i < chapterVerses.length; i++) {
-      final startVerse = chapterVerses[i];
-      final startVerseNum = startVerse['verse'] as int;
-
-      // Look for the farthest verse within 7 verses that helps complete the keyword set
-      int bestEndIndex = i;
-      Set<String> foundKeywords = _getKeywordsInVerse(startVerse, keywords);
-
-      for (int j = i + 1; j < chapterVerses.length; j++) {
-        final currentVerse = chapterVerses[j];
-        final currentVerseNum = currentVerse['verse'] as int;
-
-        // If this verse is more than 3 verses away from start, stop looking
-        if (currentVerseNum - startVerseNum > 3) {
-          break;
-        }
-
-        // Add keywords found in this verse
-        final newKeywords = _getKeywordsInVerse(currentVerse, keywords);
-        foundKeywords.addAll(newKeywords);
-
-        // If we now have all keywords, update best end index
-        if (foundKeywords.length == keywords.length) {
-          bestEndIndex = j;
-        }
-      }
-
-      // If we found a complete cluster starting from this verse
-      if (foundKeywords.length == keywords.length && bestEndIndex > i) {
-        final cluster = chapterVerses.sublist(i, bestEndIndex + 1);
-
-        // Check if this cluster overlaps with any existing cluster
-        bool overlaps = false;
-        for (final existingCluster in clusters) {
-          if (_clustersOverlap(cluster, existingCluster)) {
-            overlaps = true;
-            break;
-          }
-        }
-
-        if (!overlaps) {
-          clusters.add(cluster);
-        }
-
-        // Skip verses that are part of this cluster to avoid duplicates
-        i = bestEndIndex;
-      }
-    }
-    return clusters;
-  }
-
-  // Get keywords present in a verse
-  Set<String> _getKeywordsInVerse(
-      Map<String, dynamic> verse, List<String> keywords) {
-    final found = <String>{};
-    final verseText = _getSearchText(verse['text'] as String, _useRedLetter);
-
-    for (final keyword in keywords) {
-      // Use word boundaries for whole word matching if enabled
-      final pattern = _useWholeWord
-          ? '\\b${RegExp.escape(keyword)}\\b'
-          : RegExp.escape(keyword);
-      final regex = _createRegExp(pattern, _caseSensitive);
-
-      if (regex.hasMatch(verseText)) {
-        found.add(keyword);
-      }
-    }
-    return found;
-  }
-
   // Extract keywords from search input (same logic as _searchVersesNearby)
   List<String> _getKeywordsFromInput(String input) {
     RegExp phraseRegExp = RegExp(r'"([^"]+)"');
@@ -470,7 +702,7 @@ class _SearchScreenState extends State<SearchScreen>
             _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k))
         .toList();
     final pattern = '(${escapedKeywords.join('|')})';
-    final keywordRegex = _createRegExp(pattern, _caseSensitive);
+    final keywordRegex = _createBibleSearchRegExp(pattern, _caseSensitive);
 
     final lines = combinedText.split('\n');
     final spans = <InlineSpan>[];
@@ -512,146 +744,6 @@ class _SearchScreenState extends State<SearchScreen>
     return TextSpan(children: spans);
   }
 
-  // Check if two clusters overlap
-  bool _clustersOverlap(List<Map<String, dynamic>> cluster1,
-      List<Map<String, dynamic>> cluster2) {
-    final start1 = cluster1.first['verse'] as int;
-    final end1 = cluster1.last['verse'] as int;
-    final start2 = cluster2.first['verse'] as int;
-    final end2 = cluster2.last['verse'] as int;
-
-    return !(end1 < start2 || end2 < start1);
-  }
-
-  Future<List<Map<String, dynamic>>> _searchVersesOrdered(List<String> keywords,
-      RegExp searchRegex, List<String> escapedTerms, String input) async {
-    // Special handling for multi-term searches (except nearby): use AND logic
-    if (escapedTerms.length > 1 && !_useNearby) {
-      final results = await BibleDatabase.getAllVerses();
-      await _buildBookOrderIndex();
-
-      List<Map<String, dynamic>> filteredResults = results.where((verse) {
-        String searchText =
-            _getSearchText(verse['text'] as String, _useRedLetter);
-
-        // Check that all terms match (with word boundaries only if whole word is enabled)
-        return escapedTerms.every((term) {
-          final pattern = _useWholeWord ? '\\b$term\\b' : term;
-          final regex = _createRegExp(pattern, _caseSensitive);
-          return regex.hasMatch(searchText);
-        });
-      }).where((verse) {
-        // Apply book filtering after text search
-        return BookFilter.verseMatchesFilter(
-            verse, _allowedBooks, _allowedChapters);
-      }).toList();
-
-      filteredResults = filteredResults
-          .map((result) => {
-                ...result,
-                'bookLongName': BookNameConverter.shortNameToLongName(
-                    result['book'] as String),
-              })
-          .toList();
-
-      _sortResultsInBibleOrder(filteredResults);
-      return filteredResults;
-    } else {
-      // Normal logic: OR logic for regular searches
-      // For wildcard searches (containing *), skip database prefiltering to avoid false negatives
-      final hasWildcards = input.contains('*');
-      final results = keywords.isEmpty || hasWildcards
-          ? await BibleDatabase.getAllVerses()
-          : await BibleDatabase.searchVerses(
-              preFilterKeywords: keywords, caseSensitive: _caseSensitive);
-
-      await _buildBookOrderIndex();
-
-      List<Map<String, dynamic>> filteredResults = results.where((verse) {
-        String searchText =
-            _getSearchText(verse['text'] as String, _useRedLetter);
-        return searchRegex.hasMatch(searchText);
-      }).where((verse) {
-        // Apply book filtering after text search
-        return BookFilter.verseMatchesFilter(
-            verse, _allowedBooks, _allowedChapters);
-      }).toList();
-
-      filteredResults = filteredResults
-          .map((result) => {
-                ...result,
-                'bookLongName': BookNameConverter.shortNameToLongName(
-                    result['book'] as String),
-              })
-          .toList();
-
-      _sortResultsInBibleOrder(filteredResults);
-      return filteredResults;
-    }
-  }
-
-  Map<String, dynamic> _buildSearchPattern(
-      bool useRegex, String input, bool useWholeWord) {
-    if (useRegex) {
-      RegExp searchRegex = _createRegExp(input, _caseSensitive);
-
-      // For whole word, assume user includes \b in regex if needed
-      return {
-        'keywords': <String>[],
-        'regex': searchRegex,
-        'escapedTerms': <String>[]
-      };
-    } else {
-      // parse phrases and words
-      RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-      final phrases = phraseRegExp
-          .allMatches(input)
-          .map((m) => m.group(1)!)
-          .where((p) => p.isNotEmpty)
-          .toList();
-      String queryWithoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-      final originalWords = queryWithoutPhrases
-          .split(RegExp(r'\s+'))
-          .where((w) => w.isNotEmpty)
-          .toList();
-      final allTerms = [...phrases, ...originalWords];
-      if (allTerms.isEmpty) {
-        return {
-          'keywords': [],
-          'regex': _createRegExp('.*', _caseSensitive),
-          'escapedTerms': <String>[]
-        };
-      }
-
-      // For keywords, remove * for broad LIKE queries
-      List<String> keywords = allTerms
-          .map((term) => term.replaceAll('*', '').trim())
-          .where((t) => t.isNotEmpty)
-          .toList();
-
-      // Treat * as [A-Za-z]*
-      List<String> escapedTerms = allTerms.map((term) {
-        String escaped = RegExp.escape(term);
-        escaped = escaped.replaceAll('\\*', '[A-Za-z]*');
-        return escaped;
-      }).toList();
-
-      // Only use word boundaries when whole word search is enabled
-      String pattern;
-      if (useWholeWord) {
-        pattern = '\\b(${escapedTerms.join('|')})\\b';
-      } else {
-        pattern = '(${escapedTerms.join('|')})';
-      }
-      return {
-        'keywords': keywords,
-        'regex': _createRegExp(pattern, _caseSensitive),
-        'escapedTerms': escapedTerms
-      };
-    }
-  }
-  // --- END: Ensure results are in DB/Biblical order ---
-
   @override
   void initState() {
     super.initState();
@@ -677,6 +769,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   void dispose() {
+    _activeSearchId++;
     _searchButtonFocusNode.dispose();
     //_isDisposing = true; // Set flag to prevent platform channel calls during disposal
     _saveLastSearchOnExit(); // Save search term only if different from saved one
@@ -806,6 +899,51 @@ class _SearchScreenState extends State<SearchScreen>
     });
   }
 
+  BibleSearchTaskData _buildBibleSearchTask(String input) {
+    return BibleSearchTaskData(
+      input: input,
+      useRegex: _useRegex,
+      useNearby: _useNearby,
+      useWholeWord: _useWholeWord,
+      useRedLetter: _useRedLetter,
+      caseSensitive: _caseSensitive,
+      allowedBooks: List<String>.from(_allowedBooks),
+      allowedChapters: _allowedChapters.map(
+        (book, chapters) => MapEntry(book, Set<int>.from(chapters)),
+      ),
+    );
+  }
+
+  Future<BibleSearchComputationResult> _runBibleSearchTask(
+      BibleSearchTaskData taskData) {
+    if (kIsWeb) {
+      return _computeBibleSearch(taskData);
+    }
+    return compute(_computeBibleSearch, taskData);
+  }
+
+  RegExp? _buildHighlightRegex(BibleSearchComputationResult result) {
+    final pattern = result.regexPattern;
+    if (pattern == null) return null;
+    return RegExp(
+      pattern,
+      caseSensitive: result.regexCaseSensitive,
+      unicode: result.regexUnicode,
+    );
+  }
+
+  void _applyBibleSearchResult(BibleSearchComputationResult result) {
+    _clearHighlightCache();
+    setState(() {
+      _searchResults = result.searchResults;
+      _setTotals(result.totalMatches, result.totalVerses);
+      _currentRegex =
+          result.isNearbySearchActive ? null : _buildHighlightRegex(result);
+      _isNearbySearchActive = result.isNearbySearchActive;
+      _isSearching = false;
+    });
+  }
+
   Future<void> _loadLastSearch() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -895,71 +1033,11 @@ class _SearchScreenState extends State<SearchScreen>
         return;
       }
 
-      // Load the last search results - use appropriate method based on search type
-      List<Map<String, dynamic>> results;
-      if (_useNearby) {
-        // Perform nearby search
-        results = await _searchVersesNearby(restoredSearchText);
-        _isNearbySearchActive = true;
-
-        // For nearby search, calculate totals differently
-        int matchCount = 0;
-        int verseCount = 0;
-        final keywords = _getKeywordsFromInput(restoredSearchText);
-        final escapedKeywords = keywords
-            .map((k) =>
-                _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k))
-            .toList();
-        final pattern = '(${escapedKeywords.join('|')})';
-        final regex = _createRegExp(pattern, _caseSensitive);
-
-        for (var result in results) {
-          if (result.containsKey('verses')) {
-            for (var verse in result['verses'] as List) {
-              String text =
-                  _getSearchText(verse['text'] as String, _useRedLetter);
-              if (regex.hasMatch(text)) {
-                verseCount++;
-              }
-            }
-          }
-          // Count keyword occurrences in the combined text
-          final combinedText = result['text'] as String;
-          matchCount += regex.allMatches(combinedText).length;
-        }
-
-        setState(() {
-          _searchResults = results;
-          _setTotals(matchCount, verseCount);
-          _currentRegex = null; // Nearby search doesn't use regex highlighting
-          _isSearching = false;
-        });
-      } else {
-        // Perform regular search
-        final patternData =
-            _buildSearchPattern(_useRegex, restoredSearchText, _useWholeWord);
-        final keywords = patternData['keywords'] as List<String>;
-        final searchRegex = patternData['regex'] as RegExp;
-
-        // Get all results at once
-        results = await _searchVersesOrdered(keywords, searchRegex,
-            patternData['escapedTerms'], restoredSearchText);
-
-        // Calculate match and verse counts
-        int verseCount = results.length;
-        int matchCount = 0;
-        for (var verse in results) {
-          String text = _getSearchText(verse['text'] as String, _useRedLetter);
-          matchCount += searchRegex.allMatches(text).length;
-        }
-
-        setState(() {
-          _searchResults = results;
-          _setTotals(matchCount, verseCount);
-          _currentRegex = searchRegex;
-          _isSearching = false;
-        });
-      }
+      final searchId = ++_activeSearchId;
+      final result =
+          await _runBibleSearchTask(_buildBibleSearchTask(restoredSearchText));
+      if (!mounted || searchId != _activeSearchId) return;
+      _applyBibleSearchResult(result);
     } catch (e) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('searchScrollOffset', 0.0);
@@ -1089,6 +1167,8 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Future<void> _onSearch() async {
+    final searchId = ++_activeSearchId;
+
     // Check for invalid custom range
     if (_bookFilterType == 'Custom Range' && _customRangeError != null) {
       // ErrorHandler.logError(
@@ -1121,6 +1201,9 @@ class _SearchScreenState extends State<SearchScreen>
       setState(() {
         _searchResults = [];
         _setTotals(0, 0);
+        _currentRegex = null;
+        _isNearbySearchActive = false;
+        _isSearching = false;
       });
       return;
     }
@@ -1155,82 +1238,16 @@ class _SearchScreenState extends State<SearchScreen>
 
     // Ensure results start at the top for each new search
     await _resetResultsScrollToTop();
+    if (!mounted || searchId != _activeSearchId) return;
 
     try {
-      // Check if we should perform nearby search
-      if (_isValidNearbyInput(searchText)) {
-        // Perform nearby search
-        final results = await _searchVersesNearby(searchText);
-        _isNearbySearchActive = true;
-
-        // For nearby search, calculate totals differently
-        int matchCount = 0;
-        int verseCount = 0;
-        final keywords = _getKeywordsFromInput(searchText);
-        final escapedKeywords = keywords
-            .map((k) =>
-                _useWholeWord ? '\\b${RegExp.escape(k)}\\b' : RegExp.escape(k))
-            .toList();
-        final pattern = '(${escapedKeywords.join('|')})';
-        final regex = _createRegExp(pattern, _caseSensitive);
-
-        for (var result in results) {
-          if (result.containsKey('verses')) {
-            for (var verse in result['verses'] as List) {
-              String text =
-                  _getSearchText(verse['text'] as String, _useRedLetter);
-              if (regex.hasMatch(text)) {
-                verseCount++;
-              }
-            }
-          }
-          // Count keyword occurrences in the combined text
-          final combinedText = result['text'] as String;
-          matchCount += regex.allMatches(combinedText).length;
-        }
-
-        setState(() {
-          _searchResults = results;
-          _setTotals(matchCount, verseCount);
-          _currentRegex = null; // Nearby search doesn't use regex highlighting
-          _isSearching = false;
-        });
-      } else {
-        // Perform regular search
-        final patternData =
-            _buildSearchPattern(_useRegex, searchText, _useWholeWord);
-        final keywords = patternData['keywords'] as List<String>;
-        final searchRegex = patternData['regex'] as RegExp;
-
-        // Get all results at once
-        final results = await _searchVersesOrdered(
-            keywords, searchRegex, patternData['escapedTerms'], searchText);
-
-        // Calculate match and verse counts
-        int verseCount = results.length;
-        int matchCount = 0;
-        for (var verse in results) {
-          String text = _getSearchText(verse['text'] as String, _useRedLetter);
-          matchCount += searchRegex.allMatches(text).length;
-        }
-
-        // Clear cache when new search results are loaded
-        _clearHighlightCache();
-
-        setState(() {
-          _searchResults = results;
-          _setTotals(matchCount, verseCount);
-          _currentRegex = searchRegex;
-          _isSearching = false;
-        });
-
-        // Show warning if nearby was enabled but criteria not met
-        if (_useNearby && !_isNearbySearchActive) {
-          _showNearbyWarning(searchText);
-        }
-      }
+      final result =
+          await _runBibleSearchTask(_buildBibleSearchTask(searchText));
+      if (!mounted || searchId != _activeSearchId) return;
+      _applyBibleSearchResult(result);
 
       await _saveLastSearch();
+      if (!mounted || searchId != _activeSearchId) return;
 
       // Don't bother to use this bug-workaround if we aren't on windows
       // and we aren't in tablet mode because it can be frustrating having
@@ -1250,6 +1267,7 @@ class _SearchScreenState extends State<SearchScreen>
         // After a delay of 1s, check if any input was recieved in the last 1s, if not
         // then force the focus away to prevent the windows OSK bug
         Future.delayed(const Duration(milliseconds: 1000), () {
+          if (!mounted || searchId != _activeSearchId) return;
           if (!_isSearching &&
               DateTime.now().difference(_lastInputTime).inMilliseconds >=
                   1000) {
@@ -1269,9 +1287,12 @@ class _SearchScreenState extends State<SearchScreen>
         });
       }
     } catch (e) {
+      if (!mounted || searchId != _activeSearchId) return;
       setState(() {
         _searchResults = [];
         _setTotals(0, 0);
+        _currentRegex = null;
+        _isNearbySearchActive = false;
         _isSearching = false;
       });
     }
@@ -2265,7 +2286,17 @@ class _SearchScreenState extends State<SearchScreen>
                           semanticLabel: 'Clear Search Query',
                         ),
                         onPressed: () async {
-                          _controller.clear();
+                          _onSearchDebounce?.cancel();
+                          _activeSearchId++;
+                          setState(() {
+                            _controller.clear();
+                            _searchResults = [];
+                            _totalMatches = null;
+                            _totalVerses = null;
+                            _currentRegex = null;
+                            _isNearbySearchActive = false;
+                            _isSearching = false;
+                          });
                           await _saveSearchOptions();
                         },
                         iconSize: 32,
@@ -2274,16 +2305,22 @@ class _SearchScreenState extends State<SearchScreen>
                     onChanged: (_) {
                       _lastInputTime = DateTime.now();
                       unawaited(_saveSearchOptions());
+                      _activeSearchId++;
                       if (_onSearchDebounce?.isActive ?? false) {
                         _onSearchDebounce?.cancel();
                       }
+                      final canLiveSearch = _controller.text.isNotEmpty &&
+                          _controller.text.length > 3 &&
+                          (_controller.text.split('"').length - 1) % 2 == 0;
+                      if (kIsWeb || !canLiveSearch) {
+                        if (_isSearching) {
+                          setState(() => _isSearching = false);
+                        }
+                        return;
+                      }
                       _onSearchDebounce =
                           Timer(Duration(milliseconds: 500), () {
-                        if (_controller.text.isNotEmpty &&
-                            _controller.text.length > 1 &&
-                            (_controller.text.split('"').length - 1) % 2 == 0) {
-                          _onSearch();
-                        }
+                        _onSearch();
                       });
                     },
                     onSubmitted: (_) {
@@ -2360,6 +2397,8 @@ class _SearchScreenState extends State<SearchScreen>
                               ? null
                               : () async {
                                   if (_isResetting) return;
+                                  _onSearchDebounce?.cancel();
+                                  _activeSearchId++;
                                   setState(() => _isResetting = true);
 
                                   setState(() {
@@ -2379,6 +2418,8 @@ class _SearchScreenState extends State<SearchScreen>
                                     _customRangeController.text = '';
                                     // Clear search results and totals
                                     _searchResults = [];
+                                    _currentRegex = null;
+                                    _isSearching = false;
                                     _totalMatches = null;
                                     _totalVerses = null;
                                   });
@@ -2477,7 +2518,7 @@ class _SearchScreenState extends State<SearchScreen>
                                   children: [
                                     CircularProgressIndicator(),
                                     const SizedBox(height: 16),
-                                    Text('Searching...🔎',
+                                    Text('Searching 🔎',
                                         style: TextStyle(
                                             fontSize: uiFontSize + 8,
                                             fontFamily: uiFontFamily,

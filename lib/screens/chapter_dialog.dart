@@ -70,12 +70,15 @@ class ChapterDialog extends StatefulWidget {
 class _ChapterDialogState extends State<ChapterDialog> {
   List<Map<String, dynamic>> _verses = [];
   bool _loading = true;
+  bool _isOptionsDrawerOpen = false;
   final ScrollController _scrollController = ScrollController();
   final Map<int, GlobalKey> _verseKeys = {};
   Size? _dialogSize;
 
-  // Lazy-rendering: cached verse data list for ListView.builder
+  // Cached verse data used by the dialog scroll view.
   List<VerseDisplayData> _verseDataList = [];
+  int _targetVerseScrollAttempts = 0;
+  bool _targetVerseScrollCompleted = false;
 
   // Real-time data for notes and highlights
   Map<int, Map<String, dynamic>> _notes = {};
@@ -105,6 +108,21 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   bool get _shouldShowBookColophon =>
       _bookColophon != null && _bookColophon!.isNotEmpty && _isLastChapter;
+
+  int? get _initialScrollVerse {
+    if (widget.verse != null && widget.verse! > 0) {
+      return widget.verse;
+    }
+
+    final targetVerses = widget.targetVerses;
+    if (targetVerses != null) {
+      for (final verse in targetVerses) {
+        if (verse > 0) return verse;
+      }
+    }
+
+    return null;
+  }
 
   List<int> get _highlightedVerses {
     // First, check if targetVerses was explicitly provided
@@ -230,6 +248,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
     _dialogSize = await _getDialogSize(context);
     if (mounted) {
       setState(() {});
+      if (!_loading && _initialScrollVerse != null) {
+        _scheduleTargetVerseScroll(force: true);
+      }
     }
   }
 
@@ -264,38 +285,32 @@ class _ChapterDialogState extends State<ChapterDialog> {
         _verseKeys[verseNum] = GlobalKey();
       }
 
+      if (!mounted) return;
+
       // Load notes and highlights after verses are loaded
       await _loadNotes();
       await _loadHighlights();
 
-      // Build the verse data list for lazy rendering
+      if (!mounted) return;
+
+      // Build the verse data list for rendering
       _rebuildVerseDataList();
 
       setState(() {
         _loading = false;
       });
 
-      // Scroll to the target verse after the build
-      if (widget.verse != null && widget.verse! > 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToVerse(widget.verse!);
-        });
-      } else if (widget.targetVerses != null &&
-          widget.targetVerses!.isNotEmpty &&
-          widget.targetVerses!.first > 0) {
-        // Scroll to the first target verse
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToVerse(widget.targetVerses!.first);
+      _scheduleTargetVerseScroll();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        _loading = false;
-      });
     }
   }
 
-  /// Rebuilds the cached verse data list for lazy rendering.
+  /// Rebuilds the cached verse data list for rendering.
   /// Called when verses, notes, highlights, or display settings change.
   void _rebuildVerseDataList() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -330,15 +345,52 @@ class _ChapterDialogState extends State<ChapterDialog> {
     );
   }
 
-  void _scrollToVerse(int verseNumber) {
+  void _scheduleTargetVerseScroll({bool force = false}) {
+    final verseNumber = _initialScrollVerse;
+    if (verseNumber == null) return;
+    if (_targetVerseScrollCompleted && !force) return;
+
+    if (force) {
+      _targetVerseScrollCompleted = false;
+    }
+    _targetVerseScrollAttempts = 0;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tryScrollToTargetVerse(verseNumber);
+    });
+  }
+
+  void _tryScrollToTargetVerse(int verseNumber) {
+    if (!mounted || _targetVerseScrollCompleted) return;
+
+    if (_scrollToVerse(verseNumber)) {
+      _targetVerseScrollCompleted = true;
+      return;
+    }
+
+    _targetVerseScrollAttempts++;
+    if (_targetVerseScrollAttempts >= 10) return;
+
+    Future<void>.delayed(const Duration(milliseconds: 16), () {
+      if (!mounted || _targetVerseScrollCompleted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _tryScrollToTargetVerse(verseNumber);
+      });
+    });
+  }
+
+  bool _scrollToVerse(int verseNumber) {
     final key = _verseKeys[verseNumber];
-    if (key?.currentContext != null) {
+    final targetContext = key?.currentContext;
+    if (_scrollController.hasClients && targetContext != null) {
       Scrollable.ensureVisible(
-        key!.currentContext!,
+        targetContext,
         alignment: 0.4, // Center the verse in the viewport
         duration: Duration.zero,
       );
+      return true;
     }
+    return false;
   }
 
   Future<Size> _getDialogSize(BuildContext context) async {
@@ -438,6 +490,82 @@ class _ChapterDialogState extends State<ChapterDialog> {
     );
   }
 
+  Widget _buildOptionsDrawer(Color bgColor, Color primaryColor) {
+    final textStyle = TextStyle(
+      fontSize: uiFontSize,
+      fontFamily: uiFontFamily,
+      color: getAdaptiveTextColor(context),
+    );
+
+    return Material(
+      color: bgColor,
+      elevation: 16,
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.menu_open,
+                      color: primaryColor,
+                      size: 32,
+                      semanticLabel: 'Close chapter options',
+                    ),
+                    tooltip: 'Close',
+                    onPressed: () {
+                      setState(() => _isOptionsDrawerOpen = false);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ValueListenableBuilder<bool>(
+                valueListenable: showDialogTskNotifier,
+                builder: (context, showDialogTsk, _) {
+                  return SwitchListTile(
+                    title: Text(
+                      showDialogTsk ? 'Show TSK' : 'Hide TSK',
+                      style: textStyle,
+                    ),
+                    value: showDialogTsk,
+                    onChanged: (val) async {
+                      showDialogTskNotifier.value = val;
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('showDialogTskReferences', val);
+                    },
+                  );
+                },
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: showDialogStrongsNotifier,
+                builder: (context, showDialogStrongs, _) {
+                  return SwitchListTile(
+                    title: Text(
+                      showDialogStrongs ? 'Show Strong\'s' : 'Hide Strong\'s',
+                      style: textStyle,
+                    ),
+                    value: showDialogStrongs,
+                    onChanged: (val) async {
+                      showDialogStrongsNotifier.value = val;
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('showDialogStrongs', val);
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -445,214 +573,203 @@ class _ChapterDialogState extends State<ChapterDialog> {
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
     final primaryColor =
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
+    final dialogBorderRadius = BorderRadius.circular(16.0);
 
     return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: dialogBorderRadius),
+      clipBehavior: Clip.antiAlias,
       child: SizedBox(
         width: _dialogSize?.width ?? MediaQuery.of(context).size.width * 0.5,
         height: _dialogSize?.height ?? MediaQuery.of(context).size.height * 0.5,
-        child: Column(
-          children: [
-            // Header with book title, TSK toggle, and close button
-            Container(
-              decoration: BoxDecoration(
-                color: _adjustBarColor(bgColor),
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Row(
+        child: ClipRRect(
+          borderRadius: dialogBorderRadius,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final drawerWidth = constraints.maxWidth <= 304
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth * 0.5).clamp(304.0, 380.0).toDouble();
+
+              return Stack(
+                clipBehavior: Clip.hardEdge,
                 children: [
-                  // Left: TSK toggle
-                  ValueListenableBuilder<bool>(
-                    valueListenable: showDialogTskNotifier,
-                    builder: (context, showDialogTsk, _) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'TSK',
-                            style: TextStyle(
-                              fontSize: uiFontSize - 2,
-                              fontWeight: FontWeight.w400,
-                              color: getAdaptiveTextColor(context),
-                              fontFamily: uiFontFamily,
+                  Column(
+                    children: [
+                      // Header with options menu, book title, and close button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: _adjustBarColor(bgColor),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.menu,
+                                color: primaryColor,
+                                size: 32,
+                                semanticLabel: 'Chapter options',
+                              ),
+                              tooltip: 'Options',
+                              onPressed: () {
+                                setState(() => _isOptionsDrawerOpen = true);
+                              },
                             ),
-                          ),
-                          Switch(
-                            value: showDialogTsk,
-                            onChanged: (val) async {
-                              showDialogTskNotifier.value = val;
-                              // Save immediately
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setBool(
-                                  'showDialogTskReferences', val);
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  // Center: title
-                  Expanded(
-                    child: Text(
-                      '$bookLongName ${widget.chapter}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: uiFontSize + 2,
-                        fontWeight: FontWeight.bold,
-                        color: getAdaptiveTextColor(context),
-                        fontFamily: uiFontFamily,
+                            Expanded(
+                              child: Text(
+                                '$bookLongName ${widget.chapter}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: uiFontSize + 2,
+                                  fontWeight: FontWeight.bold,
+                                  color: getAdaptiveTextColor(context),
+                                  fontFamily: uiFontFamily,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                color: primaryColor,
+                                size: 32,
+                                semanticLabel: 'Close',
+                              ),
+                              tooltip: 'Close',
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ],
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+
+                      // Chapter content
+                      Expanded(
+                        child: Container(
+                          color: bgColor,
+                          child: _loading
+                              ? Center(child: CircularProgressIndicator())
+                              : ValueListenableBuilder<bool>(
+                                  valueListenable: showNotesInlineNotifier,
+                                  builder: (context, showNotesInline, _) {
+                                    return ValueListenableBuilder<bool>(
+                                      valueListenable: showDialogTskNotifier,
+                                      builder: (context, showDialogTsk, _) {
+                                        return ValueListenableBuilder<bool>(
+                                          valueListenable:
+                                              showDialogStrongsNotifier,
+                                          builder:
+                                              (context, showDialogStrongs, _) {
+                                            // Rebuild data list when display settings change
+                                            _rebuildVerseDataList();
+                                            final showBookTitle =
+                                                _shouldShowBookTitle;
+                                            final showBookColophon =
+                                                _shouldShowBookColophon;
+                                            final children = <Widget>[
+                                              if (showBookTitle)
+                                                _buildBookTitleWidget(
+                                                    isDark, showDialogStrongs),
+                                              ..._verseDataList.map((data) {
+                                                return buildVerseWidgetFromData(
+                                                  context,
+                                                  data,
+                                                  (verseNum) =>
+                                                      _showChapterVerseMenu(
+                                                          context, verseNum),
+                                                  (verseNum) =>
+                                                      _enterHighlightMode(
+                                                          context, verseNum),
+                                                  _handleVerseLink,
+                                                  widget.onNoteIconTap != null
+                                                      ? (vn, noteText) =>
+                                                          widget.onNoteIconTap!(
+                                                              vn, noteText)
+                                                      : null,
+                                                  widget.onNoteEditTap != null
+                                                      ? (vn, noteText) =>
+                                                          widget.onNoteEditTap!(
+                                                              vn, noteText)
+                                                      : null,
+                                                  lightTextColor.value,
+                                                  darkTextColor.value,
+                                                  _showStrongsDefinitionDialog,
+                                                );
+                                              }),
+                                              if (showBookColophon)
+                                                _buildBookColophonWidget(
+                                                    isDark, showDialogStrongs),
+                                            ];
+                                            return ScrollConfiguration(
+                                              behavior: ScrollConfiguration.of(
+                                                      context)
+                                                  .copyWith(scrollbars: false),
+                                              child: RawScrollbar(
+                                                thumbColor: isDark
+                                                    ? darkPrimaryColor.value
+                                                        .withValues(alpha: 0.7)
+                                                    : lightPrimaryColor.value
+                                                        .withValues(alpha: 0.7),
+                                                thumbVisibility: false,
+                                                trackVisibility: false,
+                                                thickness: 22.0,
+                                                radius: Radius.circular(8.0),
+                                                controller: _scrollController,
+                                                child: SingleChildScrollView(
+                                                  controller: _scrollController,
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 22),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .stretch,
+                                                    children: children,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      ignoring: !_isOptionsDrawerOpen,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 180),
+                        opacity: _isOptionsDrawerOpen ? 1 : 0,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            setState(() => _isOptionsDrawerOpen = false);
+                          },
+                          child: ColoredBox(
+                            color: Colors.black.withValues(alpha: 0.54),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  // Strong's toggle
-                  ValueListenableBuilder<bool>(
-                    valueListenable: showDialogStrongsNotifier,
-                    builder: (context, showDialogStrongs, _) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'STR',
-                            style: TextStyle(
-                              fontSize: uiFontSize - 2,
-                              fontWeight: FontWeight.w400,
-                              color: getAdaptiveTextColor(context),
-                              fontFamily: uiFontFamily,
-                            ),
-                          ),
-                          Switch(
-                            value: showDialogStrongs,
-                            onChanged: (val) async {
-                              showDialogStrongsNotifier.value = val;
-                              // Save immediately
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setBool('showDialogStrongs', val);
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  // Right: close button
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: primaryColor,
-                      size: 32,
-                      semanticLabel: 'Close',
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 246),
+                    curve: Curves.easeOutCubic,
+                    top: 0,
+                    bottom: 0,
+                    left: _isOptionsDrawerOpen ? 0 : -drawerWidth,
+                    width: drawerWidth,
+                    child: _buildOptionsDrawer(bgColor, primaryColor),
                   ),
                 ],
-              ),
-            ),
-
-            // Chapter content
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(16.0),
-                      bottomRight: Radius.circular(16.0)),
-                ),
-                child: _loading
-                    ? Center(child: CircularProgressIndicator())
-                    : ValueListenableBuilder<bool>(
-                        valueListenable: showNotesInlineNotifier,
-                        builder: (context, showNotesInline, _) {
-                          return ValueListenableBuilder<bool>(
-                            valueListenable: showDialogTskNotifier,
-                            builder: (context, showDialogTsk, _) {
-                              return ValueListenableBuilder<bool>(
-                                valueListenable: showDialogStrongsNotifier,
-                                builder: (context, showDialogStrongs, _) {
-                                  // Rebuild data list when display settings change
-                                  _rebuildVerseDataList();
-                                  final showBookTitle = _shouldShowBookTitle;
-                                  final showBookColophon =
-                                      _shouldShowBookColophon;
-                                  final leadingMetadataCount =
-                                      showBookTitle ? 1 : 0;
-                                  final itemCount = _verseDataList.length +
-                                      leadingMetadataCount +
-                                      (showBookColophon ? 1 : 0);
-                                  return ScrollConfiguration(
-                                    behavior: ScrollConfiguration.of(context)
-                                        .copyWith(scrollbars: false),
-                                    child: RawScrollbar(
-                                      thumbColor: isDark
-                                          ? darkPrimaryColor.value
-                                              .withValues(alpha: 0.7)
-                                          : lightPrimaryColor.value
-                                              .withValues(alpha: 0.7),
-                                      thumbVisibility: false,
-                                      trackVisibility: false,
-                                      thickness: 22.0,
-                                      radius: Radius.circular(8.0),
-                                      controller: _scrollController,
-                                      child: ListView.builder(
-                                        controller: _scrollController,
-                                        padding:
-                                            const EdgeInsets.only(right: 22),
-                                        itemCount: itemCount,
-                                        itemBuilder: (context, index) {
-                                          if (showBookTitle && index == 0) {
-                                            return _buildBookTitleWidget(
-                                                isDark, showDialogStrongs);
-                                          }
-
-                                          final verseIndex =
-                                              index - leadingMetadataCount;
-                                          if (verseIndex >=
-                                              _verseDataList.length) {
-                                            return _buildBookColophonWidget(
-                                                isDark, showDialogStrongs);
-                                          }
-
-                                          final data =
-                                              _verseDataList[verseIndex];
-                                          return buildVerseWidgetFromData(
-                                            context,
-                                            data,
-                                            (verseNum) => _showChapterVerseMenu(
-                                                context, verseNum),
-                                            (verseNum) => _enterHighlightMode(
-                                                context, verseNum),
-                                            _handleVerseLink,
-                                            widget.onNoteIconTap != null
-                                                ? (vn, noteText) =>
-                                                    widget.onNoteIconTap!(
-                                                        vn, noteText)
-                                                : null,
-                                            widget.onNoteEditTap != null
-                                                ? (vn, noteText) =>
-                                                    widget.onNoteEditTap!(
-                                                        vn, noteText)
-                                                : null,
-                                            lightTextColor.value,
-                                            darkTextColor.value,
-                                            _showStrongsDefinitionDialog,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );

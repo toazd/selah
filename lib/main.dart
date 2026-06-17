@@ -61,6 +61,8 @@ final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
 bool _isTimeBasedThemeEnabled = false; // Track if time-based theme is enabled
 Timer? _timeBasedThemeTimer; // Track the time-based theme timer
 final ValueNotifier<double> fontSizeNotifier = ValueNotifier(defaultFontSize);
+final ValueNotifier<double> uiFontSizeNotifier =
+    ValueNotifier(defaultUiFontSize);
 final ValueNotifier<String> fontFamilyNotifier =
     ValueNotifier(defaultFontFamily);
 final ValueNotifier<String> noteFontFamilyNotifier =
@@ -306,6 +308,12 @@ Color _parseHexColor(String? hex, Color fallback) {
 Color _loadColorPref(SharedPreferences prefs, String key, Color fallback) {
   final s = prefs.getString(key);
   return _parseHexColor(s, fallback);
+}
+
+void _setUiFontSize(double value) {
+  final newValue = value.clamp(12.0, 36.0).toDouble();
+  uiFontSize = newValue;
+  uiFontSizeNotifier.value = newValue;
 }
 
 // Adaptive color for some UI elements to always keep them readable
@@ -675,10 +683,16 @@ Future<void> _loadAllPrefs() async {
     // Font
     double fontSize = prefs.getDouble('fontSize') ?? defaultFontSize;
     if (fontSize < 12.0 || fontSize > 30.0) fontSize = defaultFontSize;
+    double loadedUiFontSize =
+        prefs.getDouble('uiFontSize') ?? defaultUiFontSize;
+    if (loadedUiFontSize < 12.0 || loadedUiFontSize > 36.0) {
+      loadedUiFontSize = defaultUiFontSize;
+    }
     String fontFamily = prefs.getString('fontFamily') ?? defaultFontFamily;
     String noteFontFamily =
         prefs.getString('noteFontFamily') ?? defaultNoteFontFamily;
     fontSizeNotifier.value = fontSize;
+    _setUiFontSize(loadedUiFontSize);
     fontFamilyNotifier.value = fontFamily;
     noteFontFamilyNotifier.value = noteFontFamily;
 
@@ -881,6 +895,7 @@ Future<void> _saveAllCurrentPrefs() async {
     List<Future<bool>> saveOperations = [
       prefs.setInt('themeMode', themeModeValue),
       prefs.setDouble('fontSize', fontSizeNotifier.value),
+      prefs.setDouble('uiFontSize', uiFontSizeNotifier.value),
       prefs.setString('fontFamily', fontFamilyNotifier.value),
       prefs.setString('noteFontFamily', noteFontFamilyNotifier.value),
       prefs.setString(
@@ -962,379 +977,419 @@ class BibleStudyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier,
-      builder: (context, mode, _) {
-        return ValueListenableBuilder<double>(
-          valueListenable: fontSizeNotifier,
-          builder: (context, fontSize, _) {
-            return ValueListenableBuilder<String>(
-              valueListenable: fontFamilyNotifier,
-              builder: (context, fontFamily, _) {
-                return ValueListenableBuilder<Color>(
-                  valueListenable: lightBackgroundColor,
-                  builder: (context, lightBg, _) {
+    return ValueListenableBuilder<double>(
+      valueListenable: uiFontSizeNotifier,
+      builder: (context, currentUiFontSize, _) {
+        uiFontSize = currentUiFontSize;
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: themeModeNotifier,
+          builder: (context, mode, _) {
+            return ValueListenableBuilder<double>(
+              valueListenable: fontSizeNotifier,
+              builder: (context, fontSize, _) {
+                return ValueListenableBuilder<String>(
+                  valueListenable: fontFamilyNotifier,
+                  builder: (context, fontFamily, _) {
                     return ValueListenableBuilder<Color>(
-                      valueListenable: lightTextColor,
-                      builder: (context, lightTxt, _) {
+                      valueListenable: lightBackgroundColor,
+                      builder: (context, lightBg, _) {
                         return ValueListenableBuilder<Color>(
-                          valueListenable: lightPrimaryColor,
-                          builder: (context, lightPrimary, _) {
+                          valueListenable: lightTextColor,
+                          builder: (context, lightTxt, _) {
                             return ValueListenableBuilder<Color>(
-                              valueListenable: darkBackgroundColor,
-                              builder: (context, darkBg, _) {
+                              valueListenable: lightPrimaryColor,
+                              builder: (context, lightPrimary, _) {
                                 return ValueListenableBuilder<Color>(
-                                  valueListenable: darkTextColor,
-                                  builder: (context, darkTxt, _) {
+                                  valueListenable: darkBackgroundColor,
+                                  builder: (context, darkBg, _) {
                                     return ValueListenableBuilder<Color>(
-                                      valueListenable: darkPrimaryColor,
-                                      builder: (context, darkPrimary, _) {
-                                        return MaterialApp(
-                                          title: 'Selah',
-                                          localizationsDelegates: const [
-                                            GlobalMaterialLocalizations
-                                                .delegate,
-                                            GlobalWidgetsLocalizations.delegate,
-                                            GlobalCupertinoLocalizations
-                                                .delegate,
-                                            FlutterQuillLocalizations.delegate,
-                                          ],
-                                          // supportedLocales: [
-                                          //   const Locale('en', 'US') // English, US
-                                          // ],
-                                          // // 2. Add a localeResolutionCallback to handle failures
-                                          // localeResolutionCallback: (
-                                          //   Locale? locale,
-                                          //   Iterable<Locale> supportedLocales,
-                                          // ) {
-                                          //   // Check if the current device locale is supported
-                                          //   if (locale != null) {
-                                          //     for (var supportedLocale in supportedLocales) {
-                                          //       if (supportedLocale.languageCode == locale.languageCode) {
-                                          //         return supportedLocale;
-                                          //       }
-                                          //     }
-                                          //   }
+                                      valueListenable: darkTextColor,
+                                      builder: (context, darkTxt, _) {
+                                        return ValueListenableBuilder<Color>(
+                                          valueListenable: darkPrimaryColor,
+                                          builder: (context, darkPrimary, _) {
+                                            return MaterialApp(
+                                              title: 'Selah',
+                                              localizationsDelegates: const [
+                                                GlobalMaterialLocalizations
+                                                    .delegate,
+                                                GlobalWidgetsLocalizations
+                                                    .delegate,
+                                                GlobalCupertinoLocalizations
+                                                    .delegate,
+                                                FlutterQuillLocalizations
+                                                    .delegate,
+                                              ],
+                                              // supportedLocales: [
+                                              //   const Locale('en', 'US') // English, US
+                                              // ],
+                                              // // 2. Add a localeResolutionCallback to handle failures
+                                              // localeResolutionCallback: (
+                                              //   Locale? locale,
+                                              //   Iterable<Locale> supportedLocales,
+                                              // ) {
+                                              //   // Check if the current device locale is supported
+                                              //   if (locale != null) {
+                                              //     for (var supportedLocale in supportedLocales) {
+                                              //       if (supportedLocale.languageCode == locale.languageCode) {
+                                              //         return supportedLocale;
+                                              //       }
+                                              //     }
+                                              //   }
 
-                                          //   // If the device locale is null or not supported, use a fallback
-                                          //   return supportedLocales.first; // e.g., default to 'en_US'
-                                          // },
-                                          theme: ThemeData(
-                                            scrollbarTheme: ScrollbarThemeData(
-                                                interactive: true),
-                                            primaryColor: lightPrimary,
-                                            scaffoldBackgroundColor: lightBg,
-                                            appBarTheme: AppBarTheme(
-                                              backgroundColor: lightBg,
-                                              foregroundColor: lightTxt,
-                                              scrolledUnderElevation: 0,
-                                            ),
-                                            dialogTheme: DialogThemeData(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16.0),
-                                                side: BorderSide(
-                                                  color:
+                                              //   // If the device locale is null or not supported, use a fallback
+                                              //   return supportedLocales.first; // e.g., default to 'en_US'
+                                              // },
+                                              theme: ThemeData(
+                                                scrollbarTheme:
+                                                    ScrollbarThemeData(
+                                                        interactive: true),
+                                                primaryColor: lightPrimary,
+                                                scaffoldBackgroundColor:
+                                                    lightBg,
+                                                appBarTheme: AppBarTheme(
+                                                  backgroundColor: lightBg,
+                                                  foregroundColor: lightTxt,
+                                                  scrolledUnderElevation: 0,
+                                                ),
+                                                dialogTheme: DialogThemeData(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16.0),
+                                                    side: BorderSide(
+                                                      color: lightPrimaryColor
+                                                          .value,
+                                                      width: 1.0,
+                                                    ),
+                                                  ),
+                                                  backgroundColor:
+                                                      lightBackgroundColor
+                                                          .value,
+                                                ),
+                                                tooltipTheme: TooltipThemeData(
+                                                  decoration: BoxDecoration(
+                                                    color: (lightBackgroundColor
+                                                        .value),
+                                                    borderRadius:
+                                                        const BorderRadius.all(
+                                                      Radius.circular(8.0),
+                                                    ),
+                                                  ),
+                                                  textStyle: TextStyle(
+                                                    fontSize: uiFontSize,
+                                                    fontFamily: uiFontFamily,
+                                                    color: getAdaptiveTextColor(
+                                                        context,
+                                                        usePrimaryColor: false),
+                                                  ),
+                                                ),
+                                                switchTheme: SwitchThemeData(
+                                                  thumbColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                              (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return lightPrimaryColor
+                                                          .value;
+                                                    }
+                                                    return Colors.grey;
+                                                  }),
+                                                  trackColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                              (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return lightPrimaryColor
+                                                          .value
+                                                          .withValues(
+                                                        alpha: 0.5,
+                                                      );
+                                                    }
+                                                    return Colors.grey
+                                                        .withValues(alpha: 0.5);
+                                                  }),
+                                                ),
+                                                sliderTheme: SliderThemeData(
+                                                  activeTrackColor:
                                                       lightPrimaryColor.value,
-                                                  width: 1.0,
+                                                  inactiveTrackColor:
+                                                      lightPrimaryColor.value
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                  thumbColor:
+                                                      lightPrimaryColor.value,
+                                                  valueIndicatorColor:
+                                                      lightPrimaryColor.value,
+                                                ),
+                                                checkboxTheme:
+                                                    CheckboxThemeData(
+                                                  fillColor: WidgetStateProperty
+                                                      .resolveWith<Color>(
+                                                          (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return lightPrimaryColor
+                                                          .value;
+                                                    }
+                                                    return Colors.transparent;
+                                                  }),
+                                                  checkColor:
+                                                      WidgetStateProperty.all(
+                                                    Colors.white,
+                                                  ),
+                                                ),
+                                                elevatedButtonTheme:
+                                                    ElevatedButtonThemeData(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        lightPrimaryColor.value,
+                                                    foregroundColor:
+                                                        lightPrimaryColor.value
+                                                                    .computeLuminance() >
+                                                                0.5
+                                                            ? Colors.black
+                                                            : Colors.white,
+                                                  ),
+                                                ),
+                                                textButtonTheme:
+                                                    TextButtonThemeData(
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        lightPrimaryColor.value,
+                                                  ),
+                                                ),
+                                                textSelectionTheme:
+                                                    TextSelectionThemeData(
+                                                  cursorColor:
+                                                      lightPrimaryColor.value,
+                                                  selectionColor:
+                                                      lightPrimaryColor.value
+                                                          .withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                  selectionHandleColor:
+                                                      lightPrimaryColor.value,
+                                                ),
+                                                textTheme: TextTheme(
+                                                  bodyMedium: TextStyle(
+                                                    color: lightTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value,
+                                                    fontFamily: fontFamily,
+                                                  ),
+                                                  bodyLarge: TextStyle(
+                                                    color: lightTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value +
+                                                            2,
+                                                    fontFamily: fontFamily,
+                                                  ),
+                                                  titleLarge: TextStyle(
+                                                    color: lightTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value +
+                                                            4,
+                                                    fontFamily: fontFamily,
+                                                  ),
                                                 ),
                                               ),
-                                              backgroundColor:
-                                                  lightBackgroundColor.value,
-                                            ),
-                                            tooltipTheme: TooltipThemeData(
-                                              decoration: BoxDecoration(
-                                                color: (lightBackgroundColor
-                                                    .value),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                  Radius.circular(8.0),
+                                              darkTheme:
+                                                  ThemeData.dark().copyWith(
+                                                primaryColor: darkPrimary,
+                                                scaffoldBackgroundColor: darkBg,
+                                                appBarTheme: AppBarTheme(
+                                                  backgroundColor: darkBg,
+                                                  foregroundColor: darkTxt,
+                                                  scrolledUnderElevation: 0,
+                                                ),
+                                                dialogTheme: DialogThemeData(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16.0),
+                                                    side: BorderSide(
+                                                      color: darkPrimaryColor
+                                                          .value,
+                                                      width: 1.0,
+                                                    ),
+                                                  ),
+                                                  backgroundColor:
+                                                      darkBackgroundColor.value,
+                                                ),
+                                                tooltipTheme: TooltipThemeData(
+                                                  decoration: BoxDecoration(
+                                                    color: (darkBackgroundColor
+                                                        .value),
+                                                    borderRadius:
+                                                        const BorderRadius.all(
+                                                      Radius.circular(8.0),
+                                                    ),
+                                                  ),
+                                                  textStyle: TextStyle(
+                                                    fontSize: uiFontSize,
+                                                    fontFamily: uiFontFamily,
+                                                    color: getAdaptiveTextColor(
+                                                        context,
+                                                        usePrimaryColor: true),
+                                                  ),
+                                                ),
+                                                switchTheme: SwitchThemeData(
+                                                  thumbColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                              (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return darkPrimaryColor
+                                                          .value;
+                                                    }
+                                                    return Colors.grey;
+                                                  }),
+                                                  trackColor:
+                                                      WidgetStateProperty
+                                                          .resolveWith<Color>(
+                                                              (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return darkPrimaryColor
+                                                          .value
+                                                          .withValues(
+                                                        alpha: 0.5,
+                                                      );
+                                                    }
+                                                    return Colors.grey
+                                                        .withValues(alpha: 0.5);
+                                                  }),
+                                                ),
+                                                sliderTheme: SliderThemeData(
+                                                  activeTrackColor:
+                                                      darkPrimaryColor.value,
+                                                  inactiveTrackColor:
+                                                      darkPrimaryColor.value
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                  thumbColor:
+                                                      darkPrimaryColor.value,
+                                                  valueIndicatorColor:
+                                                      darkPrimaryColor.value,
+                                                ),
+                                                checkboxTheme:
+                                                    CheckboxThemeData(
+                                                  fillColor: WidgetStateProperty
+                                                      .resolveWith<Color>(
+                                                          (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return darkPrimaryColor
+                                                          .value;
+                                                    }
+                                                    return Colors.transparent;
+                                                  }),
+                                                  checkColor:
+                                                      WidgetStateProperty.all(
+                                                    Colors.white,
+                                                  ),
+                                                ),
+                                                elevatedButtonTheme:
+                                                    ElevatedButtonThemeData(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        darkPrimaryColor.value,
+                                                    foregroundColor:
+                                                        darkPrimaryColor.value
+                                                                    .computeLuminance() >
+                                                                0.5
+                                                            ? Colors.black
+                                                            : Colors.white,
+                                                  ),
+                                                ),
+                                                textButtonTheme:
+                                                    TextButtonThemeData(
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        darkPrimaryColor.value,
+                                                  ),
+                                                ),
+                                                textSelectionTheme:
+                                                    TextSelectionThemeData(
+                                                  cursorColor:
+                                                      darkPrimaryColor.value,
+                                                  selectionColor:
+                                                      darkPrimaryColor.value
+                                                          .withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                  selectionHandleColor:
+                                                      darkPrimaryColor.value,
+                                                ),
+                                                textTheme: TextTheme(
+                                                  bodyMedium: TextStyle(
+                                                    color: darkTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value,
+                                                    fontFamily: fontFamily,
+                                                  ),
+                                                  bodyLarge: TextStyle(
+                                                    color: darkTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value +
+                                                            2,
+                                                    fontFamily: fontFamily,
+                                                  ),
+                                                  titleLarge: TextStyle(
+                                                    color: darkTxt,
+                                                    fontSize:
+                                                        fontSizeNotifier.value +
+                                                            4,
+                                                    fontFamily: fontFamily,
+                                                  ),
                                                 ),
                                               ),
-                                              textStyle: TextStyle(
-                                                fontSize: uiFontSize,
-                                                fontFamily: uiFontFamily,
-                                                color: getAdaptiveTextColor(
-                                                    context,
-                                                    usePrimaryColor: false),
-                                              ),
-                                            ),
-                                            switchTheme: SwitchThemeData(
-                                              thumbColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return lightPrimaryColor
-                                                      .value;
-                                                }
-                                                return Colors.grey;
-                                              }),
-                                              trackColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return lightPrimaryColor.value
-                                                      .withValues(
-                                                    alpha: 0.5,
+                                              builder: (context, child) {
+                                                // This ensures the current, resolved theme is available to the Overlay
+                                                return Theme(
+                                                  data: Theme.of(context),
+                                                  child: child!,
+                                                );
+                                              },
+                                              themeMode: mode,
+                                              navigatorKey: navigatorKey,
+                                              navigatorObservers: [
+                                                fullscreenRouteObserver,
+                                              ],
+                                              scaffoldMessengerKey:
+                                                  scaffoldMessengerKey,
+                                              home:
+                                                  ValueListenableBuilder<Color>(
+                                                valueListenable:
+                                                    lightVerseReferenceColor,
+                                                builder: (context,
+                                                    lightVerseRef, _) {
+                                                  return ValueListenableBuilder<
+                                                      Color>(
+                                                    valueListenable:
+                                                        darkVerseReferenceColor,
+                                                    builder: (context,
+                                                        darkVerseRef, _) {
+                                                      return MultiBibleView();
+                                                    },
                                                   );
-                                                }
-                                                return Colors.grey
-                                                    .withValues(alpha: 0.5);
-                                              }),
-                                            ),
-                                            sliderTheme: SliderThemeData(
-                                              activeTrackColor:
-                                                  lightPrimaryColor.value,
-                                              inactiveTrackColor:
-                                                  lightPrimaryColor.value
-                                                      .withValues(alpha: 0.3),
-                                              thumbColor:
-                                                  lightPrimaryColor.value,
-                                              valueIndicatorColor:
-                                                  lightPrimaryColor.value,
-                                            ),
-                                            checkboxTheme: CheckboxThemeData(
-                                              fillColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return lightPrimaryColor
-                                                      .value;
-                                                }
-                                                return Colors.transparent;
-                                              }),
-                                              checkColor:
-                                                  WidgetStateProperty.all(
-                                                Colors.white,
+                                                },
                                               ),
-                                            ),
-                                            elevatedButtonTheme:
-                                                ElevatedButtonThemeData(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    lightPrimaryColor.value,
-                                                foregroundColor: lightPrimaryColor
-                                                            .value
-                                                            .computeLuminance() >
-                                                        0.5
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                              ),
-                                            ),
-                                            textButtonTheme:
-                                                TextButtonThemeData(
-                                              style: TextButton.styleFrom(
-                                                foregroundColor:
-                                                    lightPrimaryColor.value,
-                                              ),
-                                            ),
-                                            textSelectionTheme:
-                                                TextSelectionThemeData(
-                                              cursorColor:
-                                                  lightPrimaryColor.value,
-                                              selectionColor: lightPrimaryColor
-                                                  .value
-                                                  .withValues(
-                                                alpha: 0.3,
-                                              ),
-                                              selectionHandleColor:
-                                                  lightPrimaryColor.value,
-                                            ),
-                                            textTheme: TextTheme(
-                                              bodyMedium: TextStyle(
-                                                color: lightTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value,
-                                                fontFamily: fontFamily,
-                                              ),
-                                              bodyLarge: TextStyle(
-                                                color: lightTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value + 2,
-                                                fontFamily: fontFamily,
-                                              ),
-                                              titleLarge: TextStyle(
-                                                color: lightTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value + 4,
-                                                fontFamily: fontFamily,
-                                              ),
-                                            ),
-                                          ),
-                                          darkTheme: ThemeData.dark().copyWith(
-                                            primaryColor: darkPrimary,
-                                            scaffoldBackgroundColor: darkBg,
-                                            appBarTheme: AppBarTheme(
-                                              backgroundColor: darkBg,
-                                              foregroundColor: darkTxt,
-                                              scrolledUnderElevation: 0,
-                                            ),
-                                            dialogTheme: DialogThemeData(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16.0),
-                                                side: BorderSide(
-                                                  color: darkPrimaryColor.value,
-                                                  width: 1.0,
-                                                ),
-                                              ),
-                                              backgroundColor:
-                                                  darkBackgroundColor.value,
-                                            ),
-                                            tooltipTheme: TooltipThemeData(
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (darkBackgroundColor.value),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                  Radius.circular(8.0),
-                                                ),
-                                              ),
-                                              textStyle: TextStyle(
-                                                fontSize: uiFontSize,
-                                                fontFamily: uiFontFamily,
-                                                color: getAdaptiveTextColor(
-                                                    context,
-                                                    usePrimaryColor: true),
-                                              ),
-                                            ),
-                                            switchTheme: SwitchThemeData(
-                                              thumbColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return darkPrimaryColor.value;
-                                                }
-                                                return Colors.grey;
-                                              }),
-                                              trackColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return darkPrimaryColor.value
-                                                      .withValues(
-                                                    alpha: 0.5,
-                                                  );
-                                                }
-                                                return Colors.grey
-                                                    .withValues(alpha: 0.5);
-                                              }),
-                                            ),
-                                            sliderTheme: SliderThemeData(
-                                              activeTrackColor:
-                                                  darkPrimaryColor.value,
-                                              inactiveTrackColor:
-                                                  darkPrimaryColor.value
-                                                      .withValues(alpha: 0.3),
-                                              thumbColor:
-                                                  darkPrimaryColor.value,
-                                              valueIndicatorColor:
-                                                  darkPrimaryColor.value,
-                                            ),
-                                            checkboxTheme: CheckboxThemeData(
-                                              fillColor: WidgetStateProperty
-                                                  .resolveWith<Color>((states) {
-                                                if (states.contains(
-                                                  WidgetState.selected,
-                                                )) {
-                                                  return darkPrimaryColor.value;
-                                                }
-                                                return Colors.transparent;
-                                              }),
-                                              checkColor:
-                                                  WidgetStateProperty.all(
-                                                Colors.white,
-                                              ),
-                                            ),
-                                            elevatedButtonTheme:
-                                                ElevatedButtonThemeData(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    darkPrimaryColor.value,
-                                                foregroundColor: darkPrimaryColor
-                                                            .value
-                                                            .computeLuminance() >
-                                                        0.5
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                              ),
-                                            ),
-                                            textButtonTheme:
-                                                TextButtonThemeData(
-                                              style: TextButton.styleFrom(
-                                                foregroundColor:
-                                                    darkPrimaryColor.value,
-                                              ),
-                                            ),
-                                            textSelectionTheme:
-                                                TextSelectionThemeData(
-                                              cursorColor:
-                                                  darkPrimaryColor.value,
-                                              selectionColor: darkPrimaryColor
-                                                  .value
-                                                  .withValues(
-                                                alpha: 0.3,
-                                              ),
-                                              selectionHandleColor:
-                                                  darkPrimaryColor.value,
-                                            ),
-                                            textTheme: TextTheme(
-                                              bodyMedium: TextStyle(
-                                                color: darkTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value,
-                                                fontFamily: fontFamily,
-                                              ),
-                                              bodyLarge: TextStyle(
-                                                color: darkTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value + 2,
-                                                fontFamily: fontFamily,
-                                              ),
-                                              titleLarge: TextStyle(
-                                                color: darkTxt,
-                                                fontSize:
-                                                    fontSizeNotifier.value + 4,
-                                                fontFamily: fontFamily,
-                                              ),
-                                            ),
-                                          ),
-                                          builder: (context, child) {
-                                            // This ensures the current, resolved theme is available to the Overlay
-                                            return Theme(
-                                              data: Theme.of(context),
-                                              child: child!,
+                                              debugShowCheckedModeBanner: false,
                                             );
                                           },
-                                          themeMode: mode,
-                                          navigatorKey: navigatorKey,
-                                          navigatorObservers: [
-                                            fullscreenRouteObserver,
-                                          ],
-                                          scaffoldMessengerKey:
-                                              scaffoldMessengerKey,
-                                          home: ValueListenableBuilder<Color>(
-                                            valueListenable:
-                                                lightVerseReferenceColor,
-                                            builder:
-                                                (context, lightVerseRef, _) {
-                                              return ValueListenableBuilder<
-                                                  Color>(
-                                                valueListenable:
-                                                    darkVerseReferenceColor,
-                                                builder:
-                                                    (context, darkVerseRef, _) {
-                                                  return MultiBibleView();
-                                                },
-                                              );
-                                            },
-                                          ),
-                                          debugShowCheckedModeBanner: false,
                                         );
                                       },
                                     );
@@ -1775,6 +1830,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _saveFontPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setDouble('fontSize', fontSizeNotifier.value);
+    prefs.setDouble('uiFontSize', uiFontSizeNotifier.value);
     prefs.setString('fontFamily', fontFamilyNotifier.value);
     prefs.setString('noteFontFamily', noteFontFamilyNotifier.value);
   }
@@ -2065,68 +2121,35 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 //   ),
                 // ),
                 // const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    'Font Size',
-                    style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<double>(
+                _buildFontSizeAdjuster(
+                  context: context,
+                  title: 'Bible Font Size',
                   valueListenable: fontSizeNotifier,
-                  builder: (context, fontSize, _) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            fontSizeNotifier.value =
-                                (fontSizeNotifier.value - 1).clamp(12.0, 36.0);
-                            _saveFontPrefs();
-                          },
-                          child: Icon(
-                            Icons.remove,
-                            color: getAdaptiveTextColor(
-                              context,
-                              usePrimaryColor: true,
-                            ),
-                            semanticLabel: 'Decrease Font Size',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '${fontSize.toInt()}',
-                          style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            fontSizeNotifier.value =
-                                (fontSizeNotifier.value + 1).clamp(12.0, 36.0);
-                            _saveFontPrefs();
-                          },
-                          child: Icon(
-                            Icons.add,
-                            color: getAdaptiveTextColor(
-                              context,
-                              usePrimaryColor: true,
-                            ),
-                            semanticLabel: 'Increase Font Size',
-                          ),
-                        ),
-                      ],
-                    );
+                  decreaseSemanticLabel: 'Decrease Bible Font Size',
+                  increaseSemanticLabel: 'Increase Bible Font Size',
+                  onChanged: (newFontSize) {
+                    fontSizeNotifier.value = newFontSize;
+                    _saveFontPrefs();
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                _buildFontSizeAdjuster(
+                  context: context,
+                  title: 'UI Font Size',
+                  valueListenable: uiFontSizeNotifier,
+                  decreaseSemanticLabel: 'Decrease UI Font Size',
+                  increaseSemanticLabel: 'Increase UI Font Size',
+                  onChanged: (newUiFontSize) {
+                    _setUiFontSize(newUiFontSize);
+                    _saveFontPrefs();
+                  },
+                ),
+                const SizedBox(height: 20),
+                Divider(
+                  height: 1,
+                  color: getAdaptiveTextColor(context).withValues(alpha: 0.25),
+                ),
+                const SizedBox(height: 16),
                 ValueListenableBuilder<String>(
                   valueListenable: fontFamilyNotifier,
                   builder: (context, fontFamily, _) {
@@ -2183,6 +2206,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                         fontFamilyNotifier.value = defaultFontFamily;
                         noteFontFamilyNotifier.value = defaultNoteFontFamily;
                         fontSizeNotifier.value = defaultFontSize;
+                        _setUiFontSize(defaultUiFontSize);
                         _saveFontPrefs();
                       },
                     ),
@@ -2204,6 +2228,81 @@ class _MultiBibleViewState extends State<MultiBibleView>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFontSizeAdjuster({
+    required BuildContext context,
+    required String title,
+    required ValueListenable<double> valueListenable,
+    required String decreaseSemanticLabel,
+    required String increaseSemanticLabel,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ValueListenableBuilder<double>(
+          valueListenable: valueListenable,
+          builder: (context, fontSize, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    onChanged((fontSize - 1).clamp(12.0, 36.0).toDouble());
+                  },
+                  child: Icon(
+                    Icons.remove,
+                    color: getAdaptiveTextColor(
+                      context,
+                      usePrimaryColor: true,
+                    ),
+                    semanticLabel: decreaseSemanticLabel,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  '${fontSize.toInt()}',
+                  style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    onChanged((fontSize + 1).clamp(12.0, 36.0).toDouble());
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: getAdaptiveTextColor(
+                      context,
+                      usePrimaryColor: true,
+                    ),
+                    semanticLabel: increaseSemanticLabel,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
