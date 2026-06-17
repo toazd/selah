@@ -42,7 +42,7 @@ import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.9";
+final appVersion = "0.7.10";
 
 final bool _isDesktop =
     (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
