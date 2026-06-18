@@ -268,7 +268,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                           style: TextStyle(
                             fontSize: uiFontSize + 2,
                             fontFamily: uiFontFamily,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.bold,
                             color: getAdaptiveTextColor(context),
                           ),
                           textAlign: TextAlign.center,
@@ -294,7 +294,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                             style: TextStyle(
                               fontSize: uiFontSize + 2,
                               fontFamily: uiFontFamily,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.bold,
                               color: getAdaptiveTextColor(context),
                             ),
                             textAlign: TextAlign.center,
@@ -382,7 +382,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                               TextSpan(
                                 text: optionsText,
                                 style: TextStyle(
-                                    fontSize: uiFontSize - 4,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context)),
                               ),
@@ -391,7 +391,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                             TextSpan(
                                 text: dateStr,
                                 style: TextStyle(
-                                    fontSize: uiFontSize - 6,
+                                    fontSize: uiFontSize - 2,
                                     fontFamily: uiFontFamily,
                                     color: getAdaptiveTextColor(context))),
                           ],

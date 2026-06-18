@@ -18,7 +18,7 @@ SnackBar _buildStyledSnackBar(String message, {bool isError = false}) {
     content: Text(
       message,
       style: TextStyle(
-        fontSize: uiFontSize + 6,
+        fontSize: uiFontSize + 4,
         fontFamily: uiFontFamily,
         color: textColor,
       ),

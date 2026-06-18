@@ -1,4 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+
+bool get isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+final bool isDesktop =
+    (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
+bool shouldDefaultVerticalTile() {
+  if (isDesktop) {
+    return true;
+  }
+
+  if (!kIsWeb) {
+    return false;
+  }
+
+  final views = WidgetsBinding.instance.platformDispatcher.views;
+  if (views.isEmpty) {
+    return true;
+  }
+
+  final view = views.first;
+  final logicalWidth = view.physicalSize.width / view.devicePixelRatio;
+  final logicalHeight = view.physicalSize.height / view.devicePixelRatio;
+
+  if (logicalWidth <= 0 || logicalHeight <= 0) {
+    return true;
+  }
+
+  final shortestSide =
+      logicalWidth < logicalHeight ? logicalWidth : logicalHeight;
+  final aspectRatio = logicalWidth / logicalHeight;
+
+  // Treat web as desktop-like only when the viewport is comfortably large.
+  return shortestSide >= 600 || (logicalWidth >= 900 && aspectRatio >= 1.1);
+}
+
+final ValueNotifier<bool> isVerticalTile =
+    ValueNotifier(shouldDefaultVerticalTile());
 
 // Centralized default values for all preferences
 
@@ -73,7 +111,7 @@ const List<Color> defaultHighlightColors = [
 ];
 
 const bool defaultShowNotesInline = true;
-const bool defaultShowNavigationBar = true;
+final bool defaultShowNavigationBar = !isMobile;
 const bool defaultShowTskReferences = false;
 const bool defaultShowStrongs = false;
 

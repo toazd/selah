@@ -227,7 +227,7 @@ class _OliveTreeColorMappingDialogState
                   Text(
                     '→',
                     style: TextStyle(
-                      fontSize: uiFontSize + 10,
+                      fontSize: uiFontSize + 6,
                       fontFamily: uiFontFamily,
                       color: getAdaptiveTextColor(context),
                     ),

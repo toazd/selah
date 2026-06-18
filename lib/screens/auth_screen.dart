@@ -307,7 +307,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         title: Text(_isSignUp ? 'Sign up' : 'Sign in',
             style: TextStyle(
-                fontSize: uiFontSize + 4,
+                fontSize: uiFontSize,
                 fontFamily: uiFontFamily,
                 color: getAdaptiveTextColor(context))),
         leading: IconButton(
@@ -334,7 +334,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     style: TextStyle(
                         fontSize: uiFontSize + 8,
                         fontFamily: uiFontFamily,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                         color: getAdaptiveTextColor(context)),
                   ),
                   const SizedBox(height: 16),
@@ -356,7 +356,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Username',
                       labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2,
+                          fontSize: uiFontSize,
                           fontFamily: uiFontFamily,
                           color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
@@ -377,7 +377,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Password',
                       labelStyle: TextStyle(
-                          fontSize: uiFontSize + 2,
+                          fontSize: uiFontSize,
                           fontFamily: uiFontFamily,
                           color: getAdaptiveTextColor(context)),
                       border: OutlineInputBorder(),
@@ -396,7 +396,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       _errorMessage!,
                       style: TextStyle(
                           color: Colors.red,
-                          fontSize: uiFontSize + 4,
+                          fontSize: uiFontSize,
                           fontFamily: uiFontFamily),
                       textAlign: TextAlign.center,
                     ),
@@ -429,7 +429,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         : Text(
                             _isSignUp ? 'Sign up' : 'Sign in',
                             style: TextStyle(
-                                fontSize: uiFontSize + 2,
+                                fontSize: uiFontSize,
                                 fontFamily: uiFontFamily,
                                 color: getAdaptiveTextColor(context,
                                     usePrimaryColor: true)),
@@ -445,11 +445,16 @@ class _AuthScreenState extends State<AuthScreen> {
                     },
                     child: Text(
                       _isSignUp
-                          ? 'Already have an account? Sign in'
-                          : 'Don\'t have an account? Sign up',
+                          ? isMobile
+                              ? 'Already have an account? Tap here to sign in.'
+                              : 'Already have an account? Click here to sign in.'
+                          : isMobile
+                              ? 'Don\'t have an account? Tap here to create one.'
+                              : 'Don\'t have an account? Click here to create one.',
                       style: TextStyle(
-                          fontSize: uiFontSize + 6,
+                          fontSize: uiFontSize,
                           fontFamily: uiFontFamily,
+                          fontWeight: FontWeight.bold,
                           color: getAdaptiveTextColor(context)),
                     ),
                   ),

@@ -43,7 +43,7 @@ class StrongsDefinitionDialog {
             : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
         title: Text(
           strongsNumber,
-          style: primaryTextStyle(dialogContext, uiFontSize + 4),
+          style: primaryTextStyle(dialogContext, uiFontSize),
         ),
         content: ConstrainedBox(
           constraints: BoxConstraints(

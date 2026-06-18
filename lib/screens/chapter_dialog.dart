@@ -629,7 +629,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                 '$bookLongName ${widget.chapter}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: uiFontSize + 2,
+                                  fontSize: uiFontSize,
                                   fontWeight: FontWeight.bold,
                                   color: getAdaptiveTextColor(context),
                                   fontFamily: uiFontFamily,
@@ -806,7 +806,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     'Goto Verse $verseNumber',
                     style: TextStyle(
                         fontFamily: uiFontFamily,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
@@ -820,7 +820,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     _notes.containsKey(verseNumber) ? 'Edit Note' : 'Add Note',
                     style: TextStyle(
                         fontFamily: uiFontFamily,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
@@ -840,7 +840,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     'Copy Verse $verseNumber',
                     style: TextStyle(
                         fontFamily: uiFontFamily,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () async {
@@ -864,7 +864,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                     'Copy Multiple Verses',
                     style: TextStyle(
                         fontFamily: uiFontFamily,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {

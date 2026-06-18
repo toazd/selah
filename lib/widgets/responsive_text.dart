@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 
 /// A text widget that automatically adjusts its font size to fit within the available width.
 /// Uses TextPainter to measure text dimensions and reduces font size incrementally until
-/// the text fits within the available constraints. Currently, only used in the
-/// searh screen to ensure that the "X matches in X verses" text in the appbar
-/// always fits no matter what screen size is available (and it dynamically adjusts
-/// and reponds to window size changes)
+/// the text fits within the available constraints. Used by search AppBars to ensure
+/// that result totals fit on narrow screens while responding to window size changes.
 class ResponsiveText extends StatefulWidget {
   final String text;
   final TextStyle style;

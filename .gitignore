@@ -5,3 +5,5 @@ build
 android/.gradle
 .crush
 .vscode
+linux/flutter/ephemeral
+android/.gradle

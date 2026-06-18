@@ -150,7 +150,7 @@ class _NoteScreenState extends State<NoteScreen> {
   /// Builds consistent editor styles that match the display styles in QuillNoteDisplay
   DefaultStyles _buildEditorStyles(bool isDark, Color textColor) {
     final noteFontFamily = noteFontFamilyNotifier.value;
-    final noteFontSize = uiFontSize + 4;
+    final noteFontSize = uiFontSize + 2;
     final verseRefColor =
         isDark ? darkVerseReferenceColor.value : lightVerseReferenceColor.value;
 
@@ -306,7 +306,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                 '$bookLongName ${widget.chapter}:${widget.verse}',
                                 style: TextStyle(
                                     fontFamily: uiFontFamily,
-                                    fontSize: uiFontSize + 6,
+                                    fontSize: uiFontSize,
                                     color: getAdaptiveTextColor(context)),
                               ),
                               backgroundColor: _adjustBarColor(bgColor),
@@ -460,7 +460,7 @@ class _NoteScreenState extends State<NoteScreen> {
         content: Text(
             'Are you sure you want to delete this note? This action cannot be undone.',
             style: TextStyle(
-                fontSize: uiFontSize + 6,
+                fontSize: uiFontSize,
                 fontFamily: uiFontFamily,
                 color: getAdaptiveTextColor(context))),
         actions: [

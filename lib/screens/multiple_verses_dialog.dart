@@ -102,9 +102,9 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
               child: Text(
                 '$bookDisplayFullName ${widget.chapter}',
                 style: TextStyle(
-                    fontSize: uiFontSize + 4,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                     color: getAdaptiveTextColor(context)),
                 textAlign: TextAlign.center,
               ),
@@ -120,7 +120,7 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
                           value: v,
                           child: Text('$v',
                               style: TextStyle(
-                                  fontSize: uiFontSize + 10,
+                                  fontSize: uiFontSize + 2,
                                   fontFamily: uiFontFamily,
                                   color: getAdaptiveTextColor(context)))))
                       .toList(),
@@ -146,7 +146,7 @@ class _MultipleVersesDialogState extends State<MultipleVersesDialog> {
                           value: v,
                           child: Text('$v',
                               style: TextStyle(
-                                  fontSize: uiFontSize + 10,
+                                  fontSize: uiFontSize + 2,
                                   fontFamily: uiFontFamily,
                                   color: getAdaptiveTextColor(context)))))
                       .toList(),

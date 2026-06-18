@@ -245,7 +245,7 @@ class _StrongsDefinitionLookupDialogState
                 hintText: 'Enter a Strong\'s number or choose one below',
                 hintStyle: TextStyle(
                   fontFamily: uiFontFamily,
-                  fontSize: uiFontSize + 2,
+                  fontSize: uiFontSize,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -347,7 +347,7 @@ class _StrongsDefinitionLookupDialogState
                                     child: Text(
                                       sn,
                                       style: TextStyle(
-                                        fontSize: uiFontSize + 4,
+                                        fontSize: uiFontSize + 2,
                                         fontFamily: fontFamilyNotifier.value,
                                         color: isSelected
                                             ? primaryColor
@@ -411,7 +411,7 @@ class _StrongsDefinitionLookupDialogState
                           Expanded(
                             child: Center(
                               child: Text(
-                                'Select or search a Strong\'s number',
+                                'Strong\'s Concordance Definitions',
                                 style: StrongsDefinitionDialog.textStyle(
                                         context, uiFontSize)
                                     .copyWith(

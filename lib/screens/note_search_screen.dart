@@ -616,7 +616,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 'Goto Verse',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
-                    fontSize: uiFontSize + 10,
+                    fontSize: uiFontSize + 8,
                     color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
@@ -630,7 +630,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 'Copy Verse',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
-                    fontSize: uiFontSize + 10,
+                    fontSize: uiFontSize + 8,
                     color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
@@ -745,10 +745,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 text:
                     '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'note' : 'notes'}',
                 style: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context)),
-                minFontSize: uiFontSize - 14,
+                minFontSize: uiFontSize - 8,
               ))
             : Text(
                 '',

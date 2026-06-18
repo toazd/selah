@@ -689,7 +689,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     _notes.containsKey(vn) ? 'Edit Note' : 'Add Note',
                     style: TextStyle(
                         fontFamily: fontFamilyNotifier.value,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
@@ -704,7 +704,7 @@ class _BibleScreenState extends State<BibleScreen> {
                       'Delete Note',
                       style: TextStyle(
                           fontFamily: fontFamilyNotifier.value,
-                          fontSize: uiFontSize + 10,
+                          fontSize: uiFontSize + 8,
                           color: Colors.red),
                     )),
                     onTap: () async {
@@ -718,7 +718,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     'Copy Verse $vn',
                     style: TextStyle(
                         fontFamily: fontFamilyNotifier.value,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () async {
@@ -742,7 +742,7 @@ class _BibleScreenState extends State<BibleScreen> {
                     'Copy Multiple Verses',
                     style: TextStyle(
                         fontFamily: fontFamilyNotifier.value,
-                        fontSize: uiFontSize + 10,
+                        fontSize: uiFontSize + 8,
                         color: getAdaptiveTextColor(context)),
                   )),
                   onTap: () {
@@ -784,7 +784,7 @@ class _BibleScreenState extends State<BibleScreen> {
         content: Text(
             'Are you sure you want to delete this note? This action cannot be undone.',
             style: TextStyle(
-                fontSize: uiFontSize + 6,
+                fontSize: uiFontSize,
                 fontFamily: uiFontFamily,
                 color: getAdaptiveTextColor(context))),
         actions: [

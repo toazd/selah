@@ -652,7 +652,7 @@ class _WebstersDefinitionLookupDialogState
                 hintText: 'Enter a word or choose one below',
                 hintStyle: TextStyle(
                   fontFamily: uiFontFamily,
-                  fontSize: uiFontSize + 2,
+                  fontSize: uiFontSize,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -806,7 +806,7 @@ class _WebstersDefinitionLookupDialogState
                               Expanded(
                                 child: Center(
                                   child: Text(
-                                    'Select or search Webster\'s 1828 Dictionary',
+                                    'Noah Webster\'s 1828 Dictionary Unabridged',
                                     style: _textStyle(context, uiFontSize)
                                         .copyWith(
                                       fontStyle: FontStyle.italic,

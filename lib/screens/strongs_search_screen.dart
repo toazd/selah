@@ -17,6 +17,7 @@ import '../utils/verse_reference_detector.dart';
 import '../utils/verse_text_parser.dart';
 import '../screens/chapter_dialog.dart';
 import '../screens/note_screen.dart';
+import '../widgets/responsive_text.dart';
 import '../widgets/strongs_definition_dialog.dart';
 import '../widgets/strongs_definition_lookup_dialog.dart';
 
@@ -269,7 +270,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   int? _totalMatches;
   int? _totalVerses;
   String? _searchType;
-  String? _searchTerm;
+  //String? _searchTerm;
   bool _isSearchingWeb = false;
   bool _isLoadingDialogVisible = false;
   bool _searchTimedOut = false;
@@ -301,7 +302,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             _totalMatches = null;
             _totalVerses = null;
             _searchType = null;
-            _searchTerm = null;
+            //_searchTerm = null;
           });
           showStyledSnackBar(context,
               'Maximum search time exceeded. Please try a different word.');
@@ -336,7 +337,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             Text(
               'Searching...',
               style: TextStyle(
-                fontSize: uiFontSize + 4,
+                fontSize: uiFontSize,
                 fontFamily: uiFontFamily,
                 color: getAdaptiveTextColor(context),
               ),
@@ -493,7 +494,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalMatches = 0;
         _totalVerses = 0;
         _searchType = null;
-        _searchTerm = null;
+        //_searchTerm = null;
         _isSearchingWeb = false;
       });
       _persistSearchState('');
@@ -506,7 +507,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _phraseSummary = {};
       _totalMatches = null;
       _totalVerses = null;
-      _searchTerm = input;
+      //_searchTerm = input;
       _isSearchingWeb = kIsWeb && showLoading;
     });
 
@@ -1035,7 +1036,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                 'Goto Verse',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
-                    fontSize: uiFontSize + 10,
+                    fontSize: uiFontSize + 8,
                     color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
@@ -1050,7 +1051,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                 'Show Context',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
-                    fontSize: uiFontSize + 10,
+                    fontSize: uiFontSize + 8,
                     color: getAdaptiveTextColor(context)),
               )),
               onTap: () {
@@ -1064,7 +1065,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
               isSuperscription ? 'Copy Superscription' : 'Copy Verse $verseNum',
               style: TextStyle(
                   fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
+                  fontSize: uiFontSize + 8,
                   color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
@@ -1254,7 +1255,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalMatches = null;
         _totalVerses = null;
         _searchType = null;
-        _searchTerm = null;
+        //_searchTerm = null;
         _isSearchingWeb = false;
       });
       return;
@@ -1320,16 +1321,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         elevation: 0,
         title: (_totalMatches != null && _totalVerses != null)
             ? Center(
-                child: Text(
-                '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'verse' : 'verses'}',
+                child: ResponsiveText(
+                text:
+                    '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'verse' : 'verses'}',
                 style: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context)),
+                minFontSize: uiFontSize - 14,
               ))
-            : Text('Strongs Search',
+            : Text('Strong\'s Search',
                 style: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context))),
         toolbarHeight: 60,
@@ -1399,9 +1402,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     controller: _controller,
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(),
-                      hintText: 'Search Strongs',
+                      hintText: 'Search for Strong\'s numbers',
                       hintStyle: TextStyle(
-                          fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
+                          fontFamily: uiFontFamily, fontSize: uiFontSize),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: Colors.blueGrey),
@@ -1432,7 +1435,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       _onSearch();
                     },
                     style: TextStyle(
-                        fontSize: uiFontSize + 4,
+                        fontSize: uiFontSize,
                         fontFamily: fontFamilyNotifier.value),
                   ),
                   const SizedBox(height: 16),
@@ -1454,7 +1457,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     _totalMatches = null;
                                     _totalVerses = null;
                                     _searchType = null;
-                                    _searchTerm = null;
+                                    //_searchTerm = null;
                                     _isRestoring = false;
                                     _isSearchingWeb = false;
                                   });
@@ -1520,18 +1523,19 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                   const SizedBox(height: 8),
                   Expanded(
                     child: _controller.text.trim().isEmpty
-                        ? Center(
-                            child: Text('Enter search terms above',
-                                style: TextStyle(
-                                  fontSize: uiFontSize + 6,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context),
-                                )))
+                        ? SizedBox.shrink()
+                        //Center(
+                        //     child: Text('Enter search terms above',
+                        //         style: TextStyle(
+                        //           fontSize: uiFontSize + 6,
+                        //           fontFamily: uiFontFamily,
+                        //           color: getAdaptiveTextColor(context),
+                        //         )))
                         : _isRestoring
                             ? Center(
                                 child: Text('Restoring search results...',
                                     style: TextStyle(
-                                        fontSize: uiFontSize + 8,
+                                        fontSize: uiFontSize,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
                             : _isSearchingWeb
@@ -1551,7 +1555,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                         const SizedBox(height: 16),
                                         Text('Searching...',
                                             style: TextStyle(
-                                                fontSize: uiFontSize + 8,
+                                                fontSize: uiFontSize,
                                                 fontFamily: uiFontFamily,
                                                 color: getAdaptiveTextColor(
                                                     context))),
@@ -1560,9 +1564,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                   )
                                 : (_searchResults.isEmpty && _totalMatches == 0)
                                     ? Center(
-                                        child: Text('No matches found 🧐',
+                                        child: Text(
+                                            'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
                                             style: TextStyle(
-                                                fontSize: uiFontSize + 8,
+                                                fontSize: uiFontSize,
                                                 fontFamily: uiFontFamily,
                                                 color: getAdaptiveTextColor(
                                                     context))))
@@ -1699,8 +1704,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildSectionHeader(context,
-            'Strong\'s numbers associated with "${_searchTerm ?? ''}"'),
+        // _buildSectionHeader(context,
+        //     'Strong\'s numbers associated with "${_searchTerm ?? ''}"'),
+        _buildSectionHeader(context, 'Strong\'s Summary'),
         _buildCenteredTable(tableRows),
         _buildSectionDivider(),
       ],
@@ -1737,10 +1743,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           Text(
             '${entry.value}',
             style: countStyle,
-            textAlign: TextAlign.left,
+            textAlign: TextAlign.right,
           ),
         ],
-        const [TextAlign.left, TextAlign.left],
+        const [TextAlign.left, TextAlign.right],
       ));
     }
 
@@ -1809,8 +1815,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   TextStyle _getPrimaryTextStyle(BuildContext context, double fontSize) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextStyle(
-      fontSize: FontSizeAdjustments.getAdjustedSize(
-          fontFamilyNotifier.value, fontSize),
+      fontSize: fontSize,
+      fontFamily: noteFontFamilyNotifier.value,
       color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
     );
   }
@@ -1819,9 +1825,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       {bool bold = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextStyle(
-      fontSize: FontSizeAdjustments.getAdjustedSize(
-          fontFamilyNotifier.value, fontSize + 2),
-      fontWeight: bold ? FontWeight.bold : null,
+      fontSize: fontSize,
+      fontFamily: noteFontFamilyNotifier.value,
+      fontWeight: bold ? FontWeight.bold : FontWeight.normal,
       color: isDark ? darkTextColor.value : lightTextColor.value,
     );
   }
@@ -1895,11 +1901,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 4.0),
+      padding:
+          const EdgeInsets.only(top: 4.0, bottom: 8.0, left: 0.0, right: 22.0),
       child: Text(title,
           textAlign: TextAlign.center,
           style: TextStyle(
-              fontSize: uiFontSize + 2,
+              fontSize: uiFontSize,
               fontFamily: uiFontFamily,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).brightness == Brightness.dark

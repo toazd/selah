@@ -1632,7 +1632,7 @@ class _SearchScreenState extends State<SearchScreen>
               'Goto Verse',
               style: TextStyle(
                   fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
+                  fontSize: uiFontSize + 8,
                   color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
@@ -1646,7 +1646,7 @@ class _SearchScreenState extends State<SearchScreen>
               'Show Context',
               style: TextStyle(
                   fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
+                  fontSize: uiFontSize + 8,
                   color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
@@ -1660,7 +1660,7 @@ class _SearchScreenState extends State<SearchScreen>
               'Copy ${isNearbyResult ? 'Verses $verseNum-$endVerseNum' : 'Verse $verseNum'}',
               style: TextStyle(
                   fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 10,
+                  fontSize: uiFontSize + 8,
                   color: getAdaptiveTextColor(context)),
             )),
             onTap: () {
@@ -1815,14 +1815,17 @@ class _SearchScreenState extends State<SearchScreen>
                 text:
                     '${_formatNumber(_totalMatches)} ${_totalMatches == 1 ? 'match' : 'matches'} in ${_formatNumber(_totalVerses)} ${_totalVerses == 1 ? 'verse' : 'verses'}',
                 style: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context)),
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
-                '',
-                style: TextStyle(color: Colors.transparent),
+                'Bible Search',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context)),
               ),
         toolbarHeight: 60,
         backgroundColor: barColor,
@@ -2255,9 +2258,9 @@ class _SearchScreenState extends State<SearchScreen>
                     controller: _controller,
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(),
-                      hintText: 'Search',
+                      hintText: 'Search the Holy Bible',
                       hintStyle: TextStyle(
-                          fontFamily: uiFontFamily, fontSize: uiFontSize + 4),
+                          fontFamily: uiFontFamily, fontSize: uiFontSize),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
@@ -2327,7 +2330,7 @@ class _SearchScreenState extends State<SearchScreen>
                       _onSearch();
                     },
                     style: TextStyle(
-                        fontSize: uiFontSize + 4,
+                        fontSize: uiFontSize,
                         fontFamily: fontFamilyNotifier.value),
                   ),
                   const SizedBox(height: 16),
@@ -2430,10 +2433,10 @@ class _SearchScreenState extends State<SearchScreen>
                                   // Save reset options
                                   await _saveSearchOptions();
 
-                                  if (context.mounted) {
-                                    showStyledSnackBar(
-                                        context, 'Search Options Reset');
-                                  }
+                                  // if (context.mounted) {
+                                  //   showStyledSnackBar(
+                                  //       context, 'Search Options Reset');
+                                  // }
 
                                   // Enable button again after 3 seconds
                                   Future.delayed(const Duration(seconds: 3),
@@ -2501,16 +2504,17 @@ class _SearchScreenState extends State<SearchScreen>
                   const SizedBox(height: 8),
                   Expanded(
                     child: _controller.text.trim().isEmpty
-                        ? Center(
-                            child: Text(
-                              'Enter search terms above',
-                              style: TextStyle(
-                                fontSize: uiFontSize + 6,
-                                fontFamily: uiFontFamily,
-                                color: getAdaptiveTextColor(context),
-                              ),
-                            ),
-                          )
+                        ? SizedBox.shrink()
+                        // Center(
+                        //     child: Text(
+                        //       'Enter search terms above',
+                        //       style: TextStyle(
+                        //         fontSize: uiFontSize + 6,
+                        //         fontFamily: uiFontFamily,
+                        //         color: getAdaptiveTextColor(context),
+                        //       ),
+                        //     ),
+                        //   )
                         : _isSearching
                             ? Center(
                                 child: Column(
@@ -2532,9 +2536,10 @@ class _SearchScreenState extends State<SearchScreen>
                                             2 ==
                                         0)
                                 ? Center(
-                                    child: Text('No matches found 🧐',
+                                    child: Text(
+                                        'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
                                         style: TextStyle(
-                                            fontSize: uiFontSize + 8,
+                                            fontSize: uiFontSize,
                                             fontFamily: uiFontFamily,
                                             color:
                                                 getAdaptiveTextColor(context))))

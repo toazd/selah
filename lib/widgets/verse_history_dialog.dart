@@ -511,7 +511,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                           style: TextStyle(
                             fontSize: uiFontSize + 2,
                             fontFamily: uiFontFamily,
-                            fontWeight: FontWeight.normal,
+                            fontWeight: FontWeight.bold,
                             color: getAdaptiveTextColor(context),
                           ),
                           textAlign: TextAlign.center,
@@ -537,7 +537,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                             style: TextStyle(
                               fontSize: uiFontSize + 2,
                               fontFamily: uiFontFamily,
-                              fontWeight: FontWeight.normal,
+                              fontWeight: FontWeight.bold,
                               color: getAdaptiveTextColor(context),
                             ),
                             textAlign: TextAlign.center,

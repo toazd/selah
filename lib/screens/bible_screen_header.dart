@@ -37,122 +37,199 @@ class BibleScreenHeader extends StatelessWidget {
     final barColor = _adjustBarColor(
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value,
         context);
+    final primaryColor =
+        isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
+    final actions = _buildHeaderActions();
 
     return Container(
       height: 55, // Fixed height for consistent sizing
       color: barColor,
-      child: Row(
-        children: [
-          // Leading area
-          SizedBox(
-              child: IconButton(
-            icon: Icon(
-              Icons.menu,
-              semanticLabel: 'Main Options Menu',
-            ),
-            tooltip: 'Options',
-            onPressed: onOpenDrawer,
-            iconSize: 32,
-            padding: EdgeInsets.all(8),
-            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-          )),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final visibleActionIds =
+              _visibleActionIdsForWidth(constraints.maxWidth);
+          final visibleActions = actions
+              .where((action) => visibleActionIds.contains(action.id))
+              .toList();
+          final hiddenActions = actions
+              .where((action) => !visibleActionIds.contains(action.id))
+              .toList();
+          final canShowOverflow =
+              constraints.maxWidth >= _minTitleWidth + _headerIconExtent;
+          final leftActions = visibleActions
+              .where((action) => action.side == _HeaderActionSide.left);
+          final rightActions = visibleActions
+              .where((action) => action.side == _HeaderActionSide.right);
 
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          return Row(
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.manage_search_rounded,
-                  semanticLabel: 'Search Notes',
-                ),
-                tooltip: 'Notes Search',
-                onPressed: onShowNotesSearch,
-                iconSize: 32,
-                padding: EdgeInsets.all(8),
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.menu_book,
-                  semanticLabel: 'Show Strong\'s Definitions Lookup',
-                ),
-                tooltip: 'Strong\'s Definitions',
-                onPressed: onShowStrongsDefinitions,
-                iconSize: 32,
-                padding: EdgeInsets.all(8),
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
-            ],
-          ),
-          // Title area (centered)
-          //Expanded(
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTitleButton(context),
-          ),
+              for (final action in leftActions)
+                _buildHeaderIconButton(action, primaryColor),
 
-          // Actions area
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.library_books,
-                  semanticLabel: 'Show Webster\'s 1828 Dictionary',
-                ),
-                tooltip: 'Webster\'s 1828 Dictionary',
-                onPressed: onShowWebstersDefinitions,
-                iconSize: 32,
-                padding: EdgeInsets.all(8),
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              // Title area (centered)
+              //Expanded(
+              Flexible(
+                fit: FlexFit.tight,
+                child: _buildTitleButton(context),
               ),
-              // Uncomment if bookmark functionality is added
-              // IconButton(
-              //   icon: Icon(
-              //     Icons.bookmark_border_rounded,
-              //     semanticLabel: 'Manage Bookmarks',
-              //   ),
-              //   tooltip: 'Bookmarks',
-              //   onPressed: onShowBookmarksManager,
-              //   iconSize: 32,
-              //   padding: EdgeInsets.all(8),
-              //   color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              // ),
-              IconButton(
-                icon: Icon(
-                  Icons.history,
-                  semanticLabel: 'Show Verse Reference History Dialog',
-                ),
-                tooltip: 'History',
-                onPressed: onShowHistory,
-                iconSize: 32,
-                padding: EdgeInsets.all(8),
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.search,
-                  semanticLabel: 'Goto Search Screen',
-                ),
-                tooltip: 'Search',
-                onPressed: onShowSearch != null
-                    ? () async {
-                        await onShowSearch!();
-                      }
-                    : null,
-                iconSize: 32,
-                padding: EdgeInsets.all(8),
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
+
+              for (final action in rightActions)
+                _buildHeaderIconButton(action, primaryColor),
+              if (hiddenActions.isNotEmpty && canShowOverflow)
+                _buildOverflowMenu(hiddenActions, primaryColor),
             ],
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  List<_HeaderAction> _buildHeaderActions() {
+    void showSearch() {
+      final callback = onShowSearch;
+      if (callback != null) {
+        callback();
+      }
+    }
+
+    return [
+      _HeaderAction(
+        id: _HeaderActionId.menu,
+        side: _HeaderActionSide.left,
+        icon: Icons.menu,
+        semanticLabel: 'Main Options Menu',
+        tooltip: 'Options',
+        onPressed: onOpenDrawer,
+      ),
+      _HeaderAction(
+        id: _HeaderActionId.notesSearch,
+        side: _HeaderActionSide.left,
+        icon: Icons.manage_search_rounded,
+        semanticLabel: 'Search Notes',
+        tooltip: 'Notes Search',
+        onPressed: onShowNotesSearch,
+      ),
+      _HeaderAction(
+        id: _HeaderActionId.strongsDefinitions,
+        side: _HeaderActionSide.left,
+        icon: Icons.menu_book,
+        semanticLabel: 'Show Strong\'s Definitions Lookup',
+        tooltip: 'Strong\'s Definitions',
+        onPressed: onShowStrongsDefinitions,
+      ),
+      _HeaderAction(
+        id: _HeaderActionId.webstersDefinitions,
+        side: _HeaderActionSide.right,
+        icon: Icons.auto_stories,
+        semanticLabel: 'Show Webster\'s 1828 Dictionary',
+        tooltip: 'Webster\'s 1828 Dictionary',
+        onPressed: onShowWebstersDefinitions,
+      ),
+      // Uncomment if bookmark functionality is added
+      // _HeaderAction(
+      //   id: _HeaderActionId.bookmarks,
+      //   side: _HeaderActionSide.right,
+      //   icon: Icons.bookmark_border_rounded,
+      //   semanticLabel: 'Manage Bookmarks',
+      //   tooltip: 'Bookmarks',
+      //   onPressed: onShowBookmarksManager,
+      // ),
+      _HeaderAction(
+        id: _HeaderActionId.history,
+        side: _HeaderActionSide.right,
+        icon: Icons.history,
+        semanticLabel: 'Show Verse Reference History Dialog',
+        tooltip: 'Verse History',
+        onPressed: onShowHistory,
+      ),
+      _HeaderAction(
+        id: _HeaderActionId.search,
+        side: _HeaderActionSide.right,
+        icon: Icons.search,
+        semanticLabel: 'Goto Search Screen',
+        tooltip: 'Search',
+        onPressed: onShowSearch == null ? null : showSearch,
+      ),
+    ];
+  }
+
+  Set<_HeaderActionId> _visibleActionIdsForWidth(double maxWidth) {
+    // Wide to narrow: keep the full bar until overflow is needed, then
+    // preserve symmetry with only the outer menu and More Actions buttons.
+    final visibleActionSets = [
+      {
+        _HeaderActionId.menu,
+        _HeaderActionId.search,
+        _HeaderActionId.notesSearch,
+        _HeaderActionId.history,
+        _HeaderActionId.strongsDefinitions,
+        _HeaderActionId.webstersDefinitions,
+      },
+      {
+        _HeaderActionId.menu,
+      },
+      <_HeaderActionId>{},
+    ];
+
+    for (final visibleActionIds in visibleActionSets) {
+      final hiddenActionCount = _headerActionCount - visibleActionIds.length;
+      final overflowWidth = hiddenActionCount > 0 ? _headerIconExtent : 0.0;
+      final reservedWidth =
+          (visibleActionIds.length * _headerIconExtent) + overflowWidth;
+
+      if (maxWidth - reservedWidth >= _minTitleWidth) {
+        return visibleActionIds;
+      }
+    }
+
+    return const {};
+  }
+
+  Widget _buildHeaderIconButton(_HeaderAction action, Color color) {
+    return IconButton(
+      icon: Icon(
+        action.icon,
+        semanticLabel: action.semanticLabel,
+      ),
+      tooltip: action.tooltip,
+      onPressed: action.onPressed,
+      iconSize: 32,
+      padding: EdgeInsets.all(8),
+      color: color,
+    );
+  }
+
+  Widget _buildOverflowMenu(List<_HeaderAction> actions, Color color) {
+    return PopupMenuButton<_HeaderActionId>(
+      icon: Icon(
+        Icons.more_vert,
+        semanticLabel: 'More Bible Header Actions',
+        color: color,
+      ),
+      tooltip: 'More Actions',
+      iconSize: 32,
+      padding: EdgeInsets.all(8),
+      onSelected: (id) {
+        final action = actions.firstWhere((action) => action.id == id);
+        action.onPressed?.call();
+      },
+      itemBuilder: (context) {
+        return [
+          for (final action in actions)
+            PopupMenuItem<_HeaderActionId>(
+              value: action.id,
+              enabled: action.onPressed != null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(action.icon, size: 22),
+                  const SizedBox(width: 12),
+                  Text(action.tooltip),
+                ],
+              ),
+            ),
+        ];
+      },
     );
   }
 
@@ -263,4 +340,40 @@ class BibleScreenHeader extends StatelessWidget {
       return hsl.withLightness(adjustedLightness).toColor();
     }
   }
+}
+
+const double _headerIconExtent = 48.0;
+const double _minTitleWidth = 80.0;
+const int _headerActionCount = 6;
+
+enum _HeaderActionId {
+  menu,
+  notesSearch,
+  strongsDefinitions,
+  webstersDefinitions,
+  history,
+  search,
+}
+
+enum _HeaderActionSide {
+  left,
+  right,
+}
+
+class _HeaderAction {
+  const _HeaderAction({
+    required this.id,
+    required this.side,
+    required this.icon,
+    required this.semanticLabel,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final _HeaderActionId id;
+  final _HeaderActionSide side;
+  final IconData icon;
+  final String semanticLabel;
+  final String tooltip;
+  final VoidCallback? onPressed;
 }

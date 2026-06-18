@@ -51,11 +51,11 @@ Widget buildVerseDisplayWidget({
 
   final verseNumberStyle = baseTextStyle.copyWith(
     // Verse number font size
-    fontSize: baseTextStyle.fontSize! - 2,
-    color:
-        (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(
-      alpha: 0.9,
-    ),
+    fontSize: baseTextStyle.fontSize,
+    color: (isDark ? darkPrimaryColor.value : lightPrimaryColor.value),
+    //   (isDark ? darkPrimaryColor.value : lightPrimaryColor.value).withValues(
+    // alpha: 0.9,
+    //),
     fontWeight: FontWeight.normal,
   );
 
@@ -90,7 +90,7 @@ Widget buildVerseDisplayWidget({
             applyTextScaling: true,
             Icons.text_snippet_outlined,
             size: FontSizeAdjustments.getAdjustedSize(
-                fontFamilyNotifier.value, fontSizeNotifier.value - 2),
+                fontFamilyNotifier.value, fontSizeNotifier.value),
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             semanticLabel: 'Verse note',
           ),

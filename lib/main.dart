@@ -42,18 +42,7 @@ import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.11";
-
-final bool _isDesktop =
-    (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux));
-final ValueNotifier<bool> isVerticalTile = ValueNotifier(
-  () {
-    if (_isDesktop || kIsWeb) {
-      return true;
-    }
-    return false;
-  }(), // <--- The crucial '()' executes the function immediately
-);
+final appVersion = "0.7.12";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -832,7 +821,7 @@ Future<void> _loadAllPrefs() async {
 
     // Layout preference
     isVerticalTile.value =
-        prefs.getBool('isVerticalTile') ?? isVerticalTile.value;
+        prefs.getBool('isVerticalTile') ?? shouldDefaultVerticalTile();
   } catch (e) {
     ErrorHandler.logError(
       e,
@@ -4866,7 +4855,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
               // use selected font and selected font size
               style: TextStyle(
                 fontFamily: uiFontFamily,
-                fontSize: uiFontSize + 2,
+                fontSize: uiFontSize,
               ),
             ),
           ),
@@ -5591,7 +5580,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                   labelText: 'Current Password',
                   labelStyle: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context),
                   ),
@@ -5609,7 +5598,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                   labelText: 'New Password',
                   labelStyle: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context),
                   ),
@@ -5627,7 +5616,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                   labelText: 'Confirm New Password',
                   labelStyle: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context),
                   ),
@@ -5769,7 +5758,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
               Text(
                 'This action cannot be undone.',
                 style: TextStyle(
-                  fontSize: uiFontSize + 2,
+                  fontSize: uiFontSize,
                   fontFamily: uiFontFamily,
                   color: Colors.red,
                 ),
@@ -5785,7 +5774,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                   labelText: 'Confirm your password',
                   labelStyle: TextStyle(
-                    fontSize: uiFontSize + 2,
+                    fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
                     color: getAdaptiveTextColor(context),
                   ),

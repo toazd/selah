@@ -482,20 +482,22 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (!_showQuickJump) return SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 44, right: 44, bottom: 16),
+      padding: const EdgeInsets.only(left: 100, right: 100, bottom: 8),
       child: TextField(
         autofocus:
             false, // Don't autofocus, it's annoying on mobile/tablet mode
         textAlign: TextAlign.center,
         maxLength: 25,
+        maxLines: 1,
         style: TextStyle(
             fontFamily: uiFontFamily,
-            fontSize: uiFontSize + 6,
+            fontSize: uiFontSize,
             color: getAdaptiveTextColor(context)),
         controller: _quickJumpController,
         decoration: InputDecoration(
+          hintText: 'eg. Sos 2:3',
           counterText: "",
-          contentPadding: const EdgeInsets.only(top: 18),
+          contentPadding: const EdgeInsets.only(top: 22),
           //labelText: 'Quick Jump',
           //labelStyle: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize),
           //alignLabelWithHint: true,
@@ -681,13 +683,13 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     final bookColors = isDark ? _bookColorsDark : _bookColorsLight;
     final currentBookBackground = _currentBookTileBackground(context);
     final bookTileStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: uiFontSize + 6,
+      fontWeight: FontWeight.normal,
+      fontSize: uiFontSize,
       fontFamily: fontFamilyNotifier.value,
     );
     final numberTileStyle = TextStyle(
       fontWeight: FontWeight.normal,
-      fontSize: uiFontSize + 7,
+      fontSize: uiFontSize,
       fontFamily: fontFamilyNotifier.value,
     );
     final bookChipSize = _scaledTileSize(
@@ -772,33 +774,22 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                       final textStyle = TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: bookColors[disp] ?? txtColor,
-                                        fontSize: uiFontSize + 6,
+                                        fontSize: uiFontSize + 2,
                                         fontFamily: fontFamilyNotifier.value,
                                       );
-                                      return GestureDetector(
+                                      return _HoverOutlineTile(
+                                        width: bookChipSize.width,
+                                        height: bookChipSize.height,
+                                        backgroundColor: isCurrentScreenBook
+                                            ? currentBookBackground
+                                            : Colors.transparent,
                                         onTap: () => _onBookSelected(b),
-                                        child: Container(
-                                          width: bookChipSize.width,
-                                          height: bookChipSize.height,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: isCurrentScreenBook
-                                                ? currentBookBackground
-                                                : Colors.transparent,
-                                            borderRadius:
-                                                BorderRadius.circular(6),
-                                            border: Border.all(
-                                              color: Colors.transparent,
-                                              width: 0.5,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            disp,
-                                            textAlign: TextAlign.center,
-                                            style: textStyle,
-                                            overflow: TextOverflow.clip,
-                                            softWrap: false,
-                                          ),
+                                        child: Text(
+                                          disp,
+                                          textAlign: TextAlign.center,
+                                          style: textStyle,
+                                          overflow: TextOverflow.clip,
+                                          softWrap: false,
                                         ),
                                       );
                                     }).toList(),
@@ -844,8 +835,11 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                         IconButton(
                                           icon: Icon(
                                             Icons.arrow_back,
-                                            color:
-                                                selectedBookColor ?? txtColor,
+                                            color: isDark
+                                                ? darkPrimaryColor.value
+                                                : lightPrimaryColor.value,
+                                            // Use below to change arrow color to the same as the book color
+                                            // selectedBookColor ?? txtColor,
                                             size: 32,
                                             semanticLabel: 'Back',
                                           ),
@@ -859,7 +853,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             softWrap: true,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: uiFontSize + 7,
+                                              fontSize: uiFontSize + 2,
                                               color:
                                                   selectedBookColor ?? txtColor,
                                             ),
@@ -873,44 +867,28 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                         spacing: 8,
                                         runSpacing: 8,
                                         children: _chapters
-                                            .map((c) => GestureDetector(
-                                                  onTap: () =>
-                                                      _onChapterSelected(c),
-                                                  child: Container(
-                                                    width:
-                                                        chapterChipSize.width,
-                                                    height:
-                                                        chapterChipSize.height,
-                                                    alignment: Alignment.center,
-                                                    decoration: BoxDecoration(
-                                                      color: _isCurrentScreenChapter(
-                                                              c)
+                                            .map((c) => _HoverOutlineTile(
+                                                  width: chapterChipSize.width,
+                                                  height:
+                                                      chapterChipSize.height,
+                                                  backgroundColor:
+                                                      _isCurrentScreenChapter(c)
                                                           ? currentBookBackground
                                                           : Colors.transparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              6),
-                                                      border: Border.all(
-                                                        color:
-                                                            Colors.transparent,
-                                                        width: 0.5,
-                                                      ),
-                                                    ),
-                                                    child: Text(
-                                                      '$c',
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      softWrap: false,
-                                                      style: TextStyle(
-                                                        color: txtColor,
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontSize:
-                                                            uiFontSize + 7,
-                                                        fontFamily:
-                                                            fontFamilyNotifier
-                                                                .value,
-                                                      ),
+                                                  onTap: () =>
+                                                      _onChapterSelected(c),
+                                                  child: Text(
+                                                    '$c',
+                                                    textAlign: TextAlign.center,
+                                                    softWrap: false,
+                                                    style: TextStyle(
+                                                      color: txtColor,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                      fontSize: uiFontSize + 2,
+                                                      fontFamily:
+                                                          fontFamilyNotifier
+                                                              .value,
                                                     ),
                                                   ),
                                                 ))
@@ -940,8 +918,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                         IconButton(
                                           icon: Icon(
                                             Icons.arrow_back,
-                                            color:
-                                                selectedBookColor ?? txtColor,
+                                            color: isDark
+                                                ? darkPrimaryColor.value
+                                                : lightPrimaryColor.value,
+                                            //selectedBookColor ?? txtColor,
                                             size: 32,
                                             semanticLabel: 'Back',
                                           ),
@@ -955,7 +935,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                             softWrap: true,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: uiFontSize + 7,
+                                              fontSize: uiFontSize,
                                               color:
                                                   selectedBookColor ?? txtColor,
                                               fontFamily:
@@ -971,41 +951,26 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                         spacing: 8,
                                         runSpacing: 8,
                                         children: _verses
-                                            .map((v) => GestureDetector(
-                                                  onTap: () =>
-                                                      _onVerseSelected(v),
-                                                  child: Container(
-                                                    width: verseChipSize.width,
-                                                    height:
-                                                        verseChipSize.height,
-                                                    alignment: Alignment.center,
-                                                    decoration: BoxDecoration(
-                                                      color: _isCurrentScreenVerse(
-                                                              v)
+                                            .map((v) => _HoverOutlineTile(
+                                                  width: verseChipSize.width,
+                                                  height: verseChipSize.height,
+                                                  backgroundColor:
+                                                      _isCurrentScreenVerse(v)
                                                           ? currentBookBackground
                                                           : Colors.transparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              6),
-                                                      border: Border.all(
-                                                        color:
-                                                            Colors.transparent,
-                                                        width: 0.5,
-                                                      ),
-                                                    ),
-                                                    child: Text(
-                                                      '$v',
-                                                      softWrap: false,
-                                                      style: TextStyle(
-                                                        color: txtColor,
-                                                        fontSize:
-                                                            uiFontSize + 7,
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontFamily:
-                                                            fontFamilyNotifier
-                                                                .value,
-                                                      ),
+                                                  onTap: () =>
+                                                      _onVerseSelected(v),
+                                                  child: Text(
+                                                    '$v',
+                                                    softWrap: false,
+                                                    style: TextStyle(
+                                                      color: txtColor,
+                                                      fontSize: uiFontSize + 2,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                      fontFamily:
+                                                          fontFamilyNotifier
+                                                              .value,
                                                     ),
                                                   ),
                                                 ))
@@ -1047,6 +1012,63 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                   ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _HoverOutlineTile extends StatefulWidget {
+  const _HoverOutlineTile({
+    required this.width,
+    required this.height,
+    required this.backgroundColor,
+    required this.onTap,
+    required this.child,
+  });
+
+  final double width;
+  final double height;
+  final Color backgroundColor;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_HoverOutlineTile> createState() => _HoverOutlineTileState();
+}
+
+class _HoverOutlineTileState extends State<_HoverOutlineTile> {
+  bool _hovered = false;
+
+  Color _hoverBorderColor(BuildContext context) {
+    //final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Theme.of(context)
+        .colorScheme
+        .onSurface
+        .withValues(alpha: 0.9); //isDark ? 0.26 : 0.16);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: _hovered ? _hoverBorderColor(context) : Colors.transparent,
+              width: 1.0,
+            ),
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }

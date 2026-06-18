@@ -5,6 +5,7 @@ import '../utils/verse_display_utils.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/verse_text_parser.dart';
+//import '../utils/preferences_constants.dart';
 
 /// A widget that displays a single chapter's content with its own scroll state.
 /// Used by PageView in BibleScreen for smooth chapter navigation animations.
@@ -102,10 +103,10 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
 
     if (ctx != null) {
       try {
-        final alignment = isVerticalTile.value ? 0.005 : 0.025;
+        //final alignment = isVerticalTile.value ? 0.005 : 0.025;
         Scrollable.ensureVisible(
           ctx,
-          alignment: alignment,
+          //alignment: alignment,
           duration: Duration(milliseconds: animate ? 250 : 0),
           curve: Curves.easeOut,
         );
