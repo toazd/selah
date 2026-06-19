@@ -4,69 +4,56 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="selah">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-
   <title>Selah</title>
   <link rel="manifest" href="manifest.json">
-
-  <!-- Show a simple loading overlay until Flutter boots -->
   <style>
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      background-color: #2e2c2c;
-      margin: 0;
-      padding: 0;
-    }
-
-    #preloader {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #2e2c2c;
-      z-index: 9999;
-      pointer-events: none;
-    }
-
-    #preloader-text {
-      color: white;
-      font-family: sans-serif;
-      font-size: 32px;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-      margin: 0;
-    }
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #2e2c2c;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out;
+  }
+  .loader {
+    border: 12px solid #f3f3f3;
+    border-top: 12px solid #4ca2ed;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation: spin 1.5s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
   </style>
 </head>
 <body>
-  <div id="preloader">
-    <h1 id="preloader-text">
-        Loading...
-    </h1>
+  <div id="loading-indicator" class="loading-container">
+    <div class="loader"></div>
   </div>
-
-  <script src="flutter_bootstrap.js" async></script>
-
-  <!-- After Flutter loads, remove the preloader overlay -->
   <script>
-    window.addEventListener('load', function() {
-      const preloader = document.getElementById('preloader');
-      if (preloader) {
-        preloader.remove();
+    window.addEventListener("flutter-first-frame", function() {
+      var loadingIndicator = document.getElementById("loading-indicator");
+      if (loadingIndicator) {
+        loadingIndicator.style.opacity = "0";
+        setTimeout(function() {
+          loadingIndicator.remove();
+        }, 500);
       }
     });
-    </script>
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
