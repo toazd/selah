@@ -42,7 +42,7 @@ import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.12";
+final appVersion = "0.7.13";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
