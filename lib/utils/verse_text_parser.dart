@@ -28,8 +28,13 @@ class VerseTextParser {
     Color tvmColor = const Color(0xFF8B4513),
     void Function(String strongsNumber)? onStrongsTap,
   }) {
-    if (!text.contains('<r>') && !hasStrongsTags(text)) {
-      return TextSpan(children: [TextSpan(text: text, style: baseStyle)]);
+    final displayText =
+        showStrongsNumbers ? text : _removeSpaceAfterLeadingStrongsTags(text);
+
+    if (!displayText.contains('<r>') && !hasStrongsTags(displayText)) {
+      return TextSpan(
+        children: [TextSpan(text: displayText, style: baseStyle)],
+      );
     }
 
     final spans = <InlineSpan>[];
@@ -44,8 +49,8 @@ class VerseTextParser {
       previousInlineStrong = false;
     }
 
-    for (final match in _markupTokenRegex.allMatches(text)) {
-      addText(text.substring(lastEnd, match.start));
+    for (final match in _markupTokenRegex.allMatches(displayText)) {
+      addText(displayText.substring(lastEnd, match.start));
 
       final token = match.group(0)!;
       final lowerToken = token.toLowerCase();
@@ -70,7 +75,7 @@ class VerseTextParser {
       lastEnd = match.end;
     }
 
-    addText(text.substring(lastEnd));
+    addText(displayText.substring(lastEnd));
     return TextSpan(children: spans);
   }
 
@@ -231,9 +236,27 @@ class VerseTextParser {
 
   /// Strips all Strong's and TVM tags from the text, returning clean text.
   static String stripStrongsTags(String text) {
-    String result = text.replaceAll(_tvmRegex, '');
+    String result = _removeSpaceAfterLeadingStrongsTags(text);
+    result = result.replaceAll(_tvmRegex, '');
     result = result.replaceAll(_strongTagRegex, '');
     return result;
+  }
+
+  /// Removes the single display space after Strong's tags at the text boundary.
+  static String _removeSpaceAfterLeadingStrongsTags(String text) {
+    var tagEnd = 0;
+    var match = _strongTagRegex.matchAsPrefix(text, tagEnd);
+    if (match == null) return text;
+
+    while (match != null) {
+      tagEnd = match.end;
+      match = _strongTagRegex.matchAsPrefix(text, tagEnd);
+    }
+
+    if (tagEnd < text.length && text.codeUnitAt(tagEnd) == 0x20) {
+      return text.replaceRange(tagEnd, tagEnd + 1, '');
+    }
+    return text;
   }
 
   /// Checks if text contains any Strong's or TVM tags.

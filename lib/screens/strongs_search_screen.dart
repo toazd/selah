@@ -275,6 +275,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   bool _isLoadingDialogVisible = false;
   bool _searchTimedOut = false;
   Timer? _searchTimeoutTimer;
+  Timer? _scrollOffsetSaveTimer;
   int _activeSearchId = 0;
 
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
@@ -1226,7 +1227,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   void initState() {
     super.initState();
     _restoreSearchState();
-    _resultsScrollController.addListener(_saveScrollOffset);
+    _resultsScrollController.addListener(_scheduleScrollOffsetSave);
   }
 
   @override
@@ -1234,7 +1235,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     _disposeVerseReferenceRecognizers();
     _searchButtonFocusNode.dispose();
     _persistSearchState(_controller.text.trim());
-    _resultsScrollController.removeListener(_saveScrollOffset);
+    _scrollOffsetSaveTimer?.cancel();
+    if (_resultsScrollController.hasClients) {
+      unawaited(_saveScrollOffset(_resultsScrollController.offset));
+    }
+    _resultsScrollController.removeListener(_scheduleScrollOffsetSave);
     _controller.dispose();
     _resultsScrollController.dispose();
     super.dispose();
@@ -1288,10 +1293,19 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     });
   }
 
-  Future<void> _saveScrollOffset() async {
+  void _scheduleScrollOffsetSave() {
     if (!_resultsScrollController.hasClients) return;
+    final offset = _resultsScrollController.offset;
+    _scrollOffsetSaveTimer?.cancel();
+    _scrollOffsetSaveTimer = Timer(const Duration(milliseconds: 400), () {
+      _scrollOffsetSaveTimer = null;
+      unawaited(_saveScrollOffset(offset));
+    });
+  }
+
+  Future<void> _saveScrollOffset(double offset) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_scrollOffsetKey, _resultsScrollController.offset);
+    await prefs.setDouble(_scrollOffsetKey, offset);
   }
 
   @override
@@ -1613,19 +1627,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                                         ),
                                                       if (_phraseSummary
                                                           .isNotEmpty)
-                                                        SliverPadding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  right: 24.0),
-                                                          sliver:
-                                                              SliverToBoxAdapter(
-                                                            child:
-                                                                _buildPhraseSummaryTableSection(
-                                                                    context,
-                                                                    fontSize),
-                                                          ),
-                                                        ),
+                                                        ..._buildPhraseSummarySlivers(
+                                                            context, fontSize),
                                                       if (_searchResults
                                                           .isNotEmpty)
                                                         SliverPadding(
@@ -1718,7 +1721,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     return maxWidth < 96.0 ? 96.0 : maxWidth;
   }
 
-  Widget _buildPhraseSummaryTableSection(
+  List<Widget> _buildPhraseSummarySlivers(
       BuildContext context, double fontSize) {
     final sortedPhrases = _phraseSummary.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
@@ -1727,55 +1730,156 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final totalPhraseStyle = _getTextStyle(context, fontSize, bold: true);
     final totalCountStyle = _getTextStyle(context, fontSize, bold: true);
     final phraseColumnMaxWidth = _phraseSummaryPhraseColumnMaxWidth(context);
-    final tableRows = <TableRow>[];
-
-    for (final entry in sortedPhrases) {
-      tableRows.add(_buildTableRow(
-        [
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: phraseColumnMaxWidth),
-            child: Text(
-              entry.key,
-              style: phraseStyle,
-              textAlign: TextAlign.left,
-            ),
-          ),
-          Text(
-            '${entry.value}',
-            style: countStyle,
-            textAlign: TextAlign.right,
-          ),
-        ],
-        const [TextAlign.left, TextAlign.right],
-      ));
-    }
-
     final total =
         _phraseSummary.values.fold<int>(0, (sum, count) => sum + count);
-    tableRows.add(_buildTableRow(
-      [
-        Text(
-          'Total',
-          style: totalPhraseStyle,
-          textAlign: TextAlign.left,
-        ),
-        Text(
-          '$total',
-          style: totalCountStyle,
-          textAlign: TextAlign.left,
-        ),
-      ],
-      const [TextAlign.left, TextAlign.left],
-    ));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildSectionHeader(context, 'Phrase Summary'),
-        _buildCenteredTable(tableRows),
-        _buildSectionDivider(),
-      ],
+    final phraseColumnWidth = _phraseSummaryColumnWidth(
+      context,
+      sortedPhrases.map((entry) => entry.key),
+      phraseStyle,
+      totalPhraseStyle,
+      phraseColumnMaxWidth,
     );
+    final countColumnWidth = _phraseSummaryCountColumnWidth(
+      context,
+      sortedPhrases.map((entry) => '${entry.value}'),
+      '$total',
+      countStyle,
+      totalCountStyle,
+    );
+    return [
+      SliverPadding(
+        padding: const EdgeInsets.only(right: 24.0),
+        sliver: SliverToBoxAdapter(
+          child: _buildSectionHeader(context, 'Phrase Summary'),
+        ),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.only(right: 24.0),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final isTotalRow = index == sortedPhrases.length;
+              final Widget phraseCell;
+              final Widget countCell;
+              final List<TextAlign> alignments;
+
+              if (isTotalRow) {
+                phraseCell = Text(
+                  'Total',
+                  style: totalPhraseStyle,
+                  textAlign: TextAlign.left,
+                );
+                countCell = Text(
+                  '$total',
+                  style: totalCountStyle,
+                  textAlign: TextAlign.left,
+                );
+                alignments = const [TextAlign.left, TextAlign.left];
+              } else {
+                final entry = sortedPhrases[index];
+                phraseCell = ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: phraseColumnMaxWidth),
+                  child: Text(
+                    entry.key,
+                    style: phraseStyle,
+                    textAlign: TextAlign.left,
+                  ),
+                );
+                countCell = Text(
+                  '${entry.value}',
+                  style: countStyle,
+                  textAlign: TextAlign.right,
+                );
+                alignments = const [TextAlign.left, TextAlign.right];
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 22.0),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    var fittedPhraseColumnWidth = phraseColumnWidth;
+                    final availablePhraseWidth =
+                        constraints.maxWidth - countColumnWidth;
+                    if (availablePhraseWidth <= 0.0) {
+                      fittedPhraseColumnWidth = 1.0;
+                    } else if (fittedPhraseColumnWidth > availablePhraseWidth) {
+                      fittedPhraseColumnWidth = availablePhraseWidth;
+                    }
+
+                    return Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: fittedPhraseColumnWidth + countColumnWidth,
+                        child: Table(
+                          columnWidths: {
+                            0: FixedColumnWidth(fittedPhraseColumnWidth),
+                            1: FixedColumnWidth(countColumnWidth),
+                          },
+                          defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                          children: [
+                            _buildTableRow(
+                              [phraseCell, countCell],
+                              alignments,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            childCount: sortedPhrases.length + 1,
+            addAutomaticKeepAlives: false,
+          ),
+        ),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.only(right: 24.0),
+        sliver: SliverToBoxAdapter(child: _buildSectionDivider()),
+      ),
+    ];
+  }
+
+  double _phraseSummaryColumnWidth(
+    BuildContext context,
+    Iterable<String> phrases,
+    TextStyle phraseStyle,
+    TextStyle totalStyle,
+    double maxContentWidth,
+  ) {
+    var contentWidth = _measureTextWidth(context, 'Total', totalStyle);
+    for (final phrase in phrases) {
+      final width = _measureTextWidth(context, phrase, phraseStyle);
+      if (width > contentWidth) contentWidth = width;
+    }
+    return contentWidth.clamp(0.0, maxContentWidth) + 16.0;
+  }
+
+  double _phraseSummaryCountColumnWidth(
+    BuildContext context,
+    Iterable<String> counts,
+    String total,
+    TextStyle countStyle,
+    TextStyle totalStyle,
+  ) {
+    var contentWidth = _measureTextWidth(context, total, totalStyle);
+    for (final count in counts) {
+      final width = _measureTextWidth(context, count, countStyle);
+      if (width > contentWidth) contentWidth = width;
+    }
+    return contentWidth + 16.0;
+  }
+
+  double _measureTextWidth(BuildContext context, String text, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return painter.width;
   }
 
   double _phraseSummaryPhraseColumnMaxWidth(BuildContext context) {
