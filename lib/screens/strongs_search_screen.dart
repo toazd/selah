@@ -305,8 +305,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             _searchType = null;
             //_searchTerm = null;
           });
-          showStyledSnackBar(context,
-              'Maximum search time exceeded. Please try a different word.');
+          showStyledSnackBar(
+              context, 'Maximum search time exceeded. Please try again.');
         }
       });
     }
@@ -1773,6 +1773,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                   '$total',
                   style: totalCountStyle,
                   textAlign: TextAlign.left,
+                  softWrap: false,
                 );
                 alignments = const [TextAlign.left, TextAlign.left];
               } else {
@@ -1789,6 +1790,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                   '${entry.value}',
                   style: countStyle,
                   textAlign: TextAlign.right,
+                  softWrap: false,
                 );
                 alignments = const [TextAlign.left, TextAlign.right];
               }
