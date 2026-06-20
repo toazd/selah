@@ -239,13 +239,13 @@ class StrongsDatabase {
 
   /// Searches for a word in the Strong's data and returns all verses containing that word.
   /// Performs case-insensitive search on the text portion (excluding Strong's numbers in braces).
-  static List<Map<String, dynamic>> searchByWord(String word) {
-    return _searchByWordData(
-      word,
-      collectStrongNumbers: false,
-      debugLabel: 'searchByWord',
-    ).wordVerses;
-  }
+  // static List<Map<String, dynamic>> searchByWord(String word) {
+  //   return _searchByWordData(
+  //     word,
+  //     collectStrongNumbers: false,
+  //     debugLabel: 'searchByWord',
+  //   ).wordVerses;
+  // }
 
   /// Searches for literal word matches and collects the Strong's numbers
   /// directly associated with that word during the same Bible scan.
@@ -373,40 +373,40 @@ class StrongsDatabase {
 
   /// Finds all unique Strong's numbers associated with a word in the given verses.
   /// Returns a map of Strong's number -> map of (book, chapter, verse) where first found.
-  static Map<String, Map<String, dynamic>> findStrongsNumbersForWord(
-      String word, List<Map<String, dynamic>> verses) {
-    if (kDebugMode) {
-      debugPrint(
-          '[_StrongsDatabase] findStrongsNumbersForWord: starting for "$word" across ${verses.length} verses');
-    }
-    final result = <String, Map<String, dynamic>>{};
-    final searchWord = word.toLowerCase().trim();
-    if (searchWord.isEmpty) return result;
-    final wordPattern = _wordBoundaryRegex(searchWord);
+  // static Map<String, Map<String, dynamic>> findStrongsNumbersForWord(
+  //     String word, List<Map<String, dynamic>> verses) {
+  //   if (kDebugMode) {
+  //     debugPrint(
+  //         '[_StrongsDatabase] findStrongsNumbersForWord: starting for "$word" across ${verses.length} verses');
+  //   }
+  //   final result = <String, Map<String, dynamic>>{};
+  //   final searchWord = word.toLowerCase().trim();
+  //   if (searchWord.isEmpty) return result;
+  //   final wordPattern = _wordBoundaryRegex(searchWord);
 
-    for (final verseData in verses) {
-      final text = verseData["text"] as String;
-      final book = verseData["book"] as String;
-      final chapter = verseData["chapter"] as int;
-      final isSuperscription = verseData["isSuperscription"] == true;
-      final verse = isSuperscription ? 0 : verseData["verse"] as int?;
+  //   for (final verseData in verses) {
+  //     final text = verseData["text"] as String;
+  //     final book = verseData["book"] as String;
+  //     final chapter = verseData["chapter"] as int;
+  //     final isSuperscription = verseData["isSuperscription"] == true;
+  //     final verse = isSuperscription ? 0 : verseData["verse"] as int?;
 
-      _collectAssociatedStrongsForWord(
-        text: text,
-        wordPattern: wordPattern,
-        result: result,
-        book: book,
-        chapter: chapter,
-        verse: verse,
-        isSuperscription: isSuperscription,
-      );
-    }
-    if (kDebugMode) {
-      debugPrint(
-          '[_StrongsDatabase] findStrongsNumbersForWord: found ${result.length} unique Strong\'s numbers for "$word"');
-    }
-    return result;
-  }
+  //     _collectAssociatedStrongsForWord(
+  //       text: text,
+  //       wordPattern: wordPattern,
+  //       result: result,
+  //       book: book,
+  //       chapter: chapter,
+  //       verse: verse,
+  //       isSuperscription: isSuperscription,
+  //     );
+  //   }
+  //   if (kDebugMode) {
+  //     debugPrint(
+  //         '[_StrongsDatabase] findStrongsNumbersForWord: found ${result.length} unique Strong\'s numbers for "$word"');
+  //   }
+  //   return result;
+  // }
 
   static void _collectAssociatedStrongsForWord({
     required String text,

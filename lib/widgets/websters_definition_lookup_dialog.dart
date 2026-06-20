@@ -256,16 +256,16 @@ class WebstersDefinitionDialog {
         .replaceAll('>', '&gt;');
   }
 
-  static TextStyle primaryTextStyle(BuildContext context, double fontSize) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return TextStyle(
-      fontSize: FontSizeAdjustments.getAdjustedSize(
-        fontFamilyNotifier.value,
-        fontSize,
-      ),
-      color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-    );
-  }
+  // static TextStyle primaryTextStyle(BuildContext context, double fontSize) {
+  //   final isDark = Theme.of(context).brightness == Brightness.dark;
+  //   return TextStyle(
+  //     fontSize: FontSizeAdjustments.getAdjustedSize(
+  //       fontFamilyNotifier.value,
+  //       fontSize,
+  //     ),
+  //     color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+  //   );
+  // }
 
   static TextStyle textStyle(
     BuildContext context,

@@ -341,28 +341,28 @@ void _initializeSqflite() {
   }
 }
 
-// Initialize time-based theme switching
-void _initializeTimeBasedTheme() async {
-  //final prefs = await SharedPreferences.getInstance();
-  //final modeIndex = prefs.getInt('themeMode') ?? defaultThemeMode;
+// Initialize time-based theme switching and schedule the next exact transition.
+void _initializeTimeBasedTheme() {
+  _timeBasedThemeTimer?.cancel();
+  _timeBasedThemeTimer = null;
 
-  // Only set up time-based switching if time-based theme is selected
-  //if (modeIndex == 3) {
-  if (_isTimeBasedThemeEnabled) {
-    // Cancel any existing timer first
-    _timeBasedThemeTimer?.cancel();
-    _timeBasedThemeTimer = null;
+  if (!_isTimeBasedThemeEnabled) return;
 
-    // Check theme immediately
-    _updateThemeBasedOnTime();
+  _updateThemeBasedOnTime();
 
-    // Set up periodic timer to check every 5 minutes
-    _timeBasedThemeTimer = Timer.periodic(const Duration(minutes: 5), (
-      Timer timer,
-    ) {
-      _updateThemeBasedOnTime();
-    });
-  }
+  final now = DateTime.now();
+  final transitions = <DateTime>[
+    DateTime(now.year, now.month, now.day, dayStartHourNotifier.value),
+    DateTime(now.year, now.month, now.day, nightStartHourNotifier.value),
+    DateTime(now.year, now.month, now.day + 1, dayStartHourNotifier.value),
+    DateTime(now.year, now.month, now.day + 1, nightStartHourNotifier.value),
+  ]..sort();
+  final nextTransition = transitions.firstWhere((time) => time.isAfter(now));
+
+  _timeBasedThemeTimer = Timer(
+    nextTransition.difference(now),
+    _initializeTimeBasedTheme,
+  );
 }
 
 // Update theme based on current time
@@ -1505,69 +1505,93 @@ class _MultiBibleViewState extends State<MultiBibleView>
   final FocusNode _invisibleElevatedButtonNode = FocusNode();
   String _drawerUsername = 'Unknown';
   int _drawerUsernameLoadGeneration = 0;
+  bool _wasAppHidden = false;
+
+  Future<void> _resumeSyncAfterAppWasHidden() async {
+    if (Supabase.instance.client.auth.currentUser == null) return;
+
+    try {
+      SupabaseSyncService().restartConnectionMonitoring();
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage:
+            'AppLifecycleState.resumed SupabaseSyncService().restartConnectionMonitoring exception',
+        context: {
+          'class': 'main.dart',
+          'method': '_resumeSyncAfterAppWasHidden',
+        },
+      );
+    }
+
+    try {
+      await SupabaseSyncService().syncRecentChangesOnly();
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage:
+            'AppLifecycleState.resumed SupabaseSyncService().syncRecentChangesOnly exception',
+        context: {
+          'class': 'main.dart',
+          'method': '_resumeSyncAfterAppWasHidden',
+        },
+      );
+    }
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      super.didChangeAppLifecycleState(state);
+    super.didChangeAppLifecycleState(state);
 
-      // Handle mobile app termination/backgrounding to ensure sync service cleanup
-      if (state == AppLifecycleState.detached) {
-        // App is being terminated/killed - save preferences and dispose sync service
-        _saveAllCurrentPrefs(); // Save preferences like desktop close handler does
-
-        // Properly dispose the listeners
-        LocalDataChangeNotifier.dispose();
-
-        // Properly dispose sync service to handle retry queues
-        if (Supabase.instance.client.auth.currentUser != null) {
-          SupabaseSyncService().dispose();
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // Timers may be delayed while an app is hidden. Recalculate the theme
+        // on every platform when the app becomes active again.
+        if (_isTimeBasedThemeEnabled) {
+          _initializeTimeBasedTheme();
         }
-      } else if (state == AppLifecycleState.inactive) {
-        // App in inactive state
-      }
-      // Note: We handle paused separately in case the app gets suspended but not detached
-      else if (state == AppLifecycleState.paused) {
-        // App is going to background - stop connectivity monitoring to save battery
+
+        if (_wasAppHidden) {
+          _wasAppHidden = false;
+          unawaited(_resumeSyncAfterAppWasHidden());
+        }
+
+        // System UI fullscreen is a mobile-only concern; the helper contains
+        // the platform guard before calling SystemChrome.
+        unawaited(_reapplyMobileFullscreenIfEnabled());
+
+      case AppLifecycleState.hidden:
+        // This state means backgrounded on mobile, minimized on desktop, and a
+        // hidden tab/window on web. Unlike inactive, it is safe to pause work.
+        _wasAppHidden = true;
+        _timeBasedThemeTimer?.cancel();
+        _timeBasedThemeTimer = null;
         if (Supabase.instance.client.auth.currentUser != null) {
           SupabaseSyncService().stopConnectionMonitoring();
         }
-      }
-      // Handle app returning to foreground - re-establish realtime listeners
-      // and sync recent changes
-      else if (state == AppLifecycleState.resumed) {
-        // App is coming back to foreground - restart sync service for realtime listeners
-        if (Supabase.instance.client.auth.currentUser != null) {
-          try {
-            SupabaseSyncService().restartConnectionMonitoring();
-          } catch (e) {
-            ErrorHandler.logError(
-              e,
-              customMessage:
-                  'AppLifecycleState.resumed SupabaseSyncService().restartConnectionMonitoring exception',
-              context: {
-                'class': 'main.dart',
-                'method': 'didChangeAppLifecycleState'
-              },
-            );
-          }
 
-          try {
-            SupabaseSyncService().syncRecentChangesOnly();
-          } catch (e) {
-            ErrorHandler.logError(
-              e,
-              customMessage:
-                  'AppLifecycleState.resumed SupabaseSyncService().syncRecentChangesOnly exception',
-              context: {
-                'class': 'main.dart',
-                'method': 'didChangeAppLifecycleState'
-              },
-            );
-          }
+      case AppLifecycleState.paused:
+        // Paused is mobile-only and normally follows hidden. Keep this as an
+        // idempotent fallback in case lifecycle notifications are skipped.
+        _wasAppHidden = true;
+        if (Supabase.instance.client.auth.currentUser != null) {
+          SupabaseSyncService().stopConnectionMonitoring();
         }
-        unawaited(_reapplyMobileFullscreenIfEnabled());
-      }
+
+      case AppLifecycleState.detached:
+        // Detached can occur on mobile and web after all Flutter views have
+        // gone away. Desktop shutdown is handled by _WindowManagerListener.
+        _timeBasedThemeTimer?.cancel();
+        _timeBasedThemeTimer = null;
+        unawaited(_saveAllCurrentPrefs());
+        LocalDataChangeNotifier.dispose();
+        if (Supabase.instance.client.auth.currentUser != null) {
+          SupabaseSyncService().dispose();
+        }
+
+      case AppLifecycleState.inactive:
+      // The app is still visible but has lost focus. Keep timers and
+      // connectivity active on mobile, desktop, and web.
     }
   }
 
@@ -3085,6 +3109,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
                     } else {
                       // Disable time-based theme - revert to system
                       _isTimeBasedThemeEnabled = false;
+                      _timeBasedThemeTimer?.cancel();
+                      _timeBasedThemeTimer = null;
                       themeModeNotifier.value = ThemeMode.system;
                     }
                     _saveThemeMode();
@@ -6025,7 +6051,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       onPressed: () {
                         dayStartHourNotifier.value = defaultDayStartHour;
                         nightStartHourNotifier.value = defaultNightStartHour;
-                        _updateThemeBasedOnTime(); // Update theme immediately
+                        _initializeTimeBasedTheme();
                       },
                     ),
                     TextButton(
@@ -6058,7 +6084,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                           'nightStartHour',
                           nightStartHourNotifier.value,
                         );
-                        _updateThemeBasedOnTime(); // Update theme immediately
+                        _initializeTimeBasedTheme();
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
