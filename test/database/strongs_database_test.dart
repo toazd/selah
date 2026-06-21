@@ -81,5 +81,19 @@ void main() {
       expect(regularSummary, isEmpty);
       expect(tvmSummary['yielded up'], 1);
     });
+
+    test('phrase summary preserves the source text case', () {
+      final verse = {
+        'book': 'Heb',
+        'chapter': 3,
+        'verse': 1,
+        'text': StrongsDatabase.getVerseText('Heb', 3, 1)!,
+      };
+
+      final summary = StrongsDatabase.extractPhraseSummary([verse], ['G652']);
+
+      expect(summary['the Apostle'], 1);
+      expect(summary, isNot(contains('the apostle')));
+    });
   });
 }

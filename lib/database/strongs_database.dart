@@ -513,7 +513,8 @@ class StrongsDatabase {
   }
 
   /// Extracts all phrase occurrences (word(s) before each matched Strong's number)
-  /// from a list of verses. Returns a map of lowercase phrase -> count.
+  /// from a list of verses. Returns phrases exactly as they appear in the data,
+  /// mapped to their occurrence counts.
   /// Phrases are the word(s) immediately preceding a Strong's number tag,
   /// with leading/trailing punctuation and extra whitespace stripped.
   static Map<String, int> extractPhraseSummary(
@@ -537,7 +538,7 @@ class StrongsDatabase {
         );
         if (matchCount == 0) continue;
 
-        final phrase = association.phrase.toLowerCase();
+        final phrase = association.phrase;
         if (phrase.isNotEmpty) {
           phraseCounts[phrase] = (phraseCounts[phrase] ?? 0) + matchCount;
         }
