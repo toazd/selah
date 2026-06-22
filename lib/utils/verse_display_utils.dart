@@ -594,7 +594,7 @@ Widget buildVerseWidgetFromData(
 
   return Column(
     mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: widgets,
   );
 }

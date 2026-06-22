@@ -71,8 +71,12 @@ jobs:
           ninja-build \
           pkg-config \
           libgtk-3-dev \
+          libgirepository1.0-dev \
+          librsvg2-dev \
           libblkid-dev \
           liblzma-dev \
+          dpkg-dev \
+          file \
           ruby \
           ruby-dev \
           build-essential \
@@ -178,29 +182,57 @@ jobs:
         rm -rf "$TEMP_DIR"
 
         echo "📦 Creating AppImage package..."
-        TEMP_DIR2=$(mktemp -d)
-        APPDIR=$(mktemp -d)/Selah.AppDir
-        mkdir -p "$APPDIR"
+        APPIMAGE_WORK=$(mktemp -d)
+        APPDIR="$APPIMAGE_WORK/Selah.AppDir"
+        LINUXDEPLOY="$APPIMAGE_WORK/linuxdeploy-x86_64.AppImage"
+        GTK_PLUGIN="$APPIMAGE_WORK/linuxdeploy-plugin-gtk.sh"
+        DESKTOP_FILE="$APPIMAGE_WORK/io.github.toazd.selah.desktop"
+        ICON_FILE="$APPIMAGE_WORK/io.github.toazd.selah.png"
 
-        cp -r "$BUILD_DIR"/* "$APPDIR/"
+        # Flutter resolves data/ and its own libraries relative to the executable,
+        # so keep the complete release bundle together under usr/bin. linuxdeploy
+        # adds the discovered system libraries under usr/lib and creates AppRun.
+        mkdir -p "$APPDIR/usr/bin"
+        cp -a "$BUILD_DIR/." "$APPDIR/usr/bin/"
+        cp "$BUILD_DIR/data/flutter_assets/assets/icon.png" "$ICON_FILE"
+        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=io.github.toazd.selah\nType=Application\nCategories=Education\nKeywords=Bible;Study;KJV;\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$DESKTOP_FILE"
 
-        # Copy icon to root
-        cp "$APPDIR/data/flutter_assets/assets/icon.png" "$APPDIR/io.github.toazd.selah.png"
-        ln -s io.github.toazd.selah.png "$APPDIR/selah.png"
+        # Pin and verify the packaging tools instead of executing mutable
+        # continuous-build downloads directly.
+        wget -q -O "$LINUXDEPLOY" "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage"
+        wget -q -O "$GTK_PLUGIN" "https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/3b67a1d1c1b0c8268f57f2bce40fe2d33d409cea/linuxdeploy-plugin-gtk.sh"
+        printf '%s  %s\n' 'c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d' "$LINUXDEPLOY" | sha256sum --check -
+        printf '%s  %s\n' 'b0f4cbc684a0103a9651f0955b635eaea0096b3a66c0f5a2c2aa337960375171' "$GTK_PLUGIN" | sha256sum --check -
+        chmod +x "$LINUXDEPLOY" "$GTK_PLUGIN"
 
-        # Create AppRun
-        printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./selah\n' > "$APPDIR/AppRun"
-        chmod +x "$APPDIR/AppRun"
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        export DEPLOY_GTK_VERSION=3
+        export LDAI_OUTPUT="$OUTPUT_DIR/Selah-${VERSION}.AppImage"
+        export NO_STRIP=1
+        "$LINUXDEPLOY" \
+          --appdir "$APPDIR" \
+          --executable "$APPDIR/usr/bin/selah" \
+          --desktop-file "$DESKTOP_FILE" \
+          --icon-file "$ICON_FILE" \
+          --plugin gtk \
+          --output appimage
 
-        # Create .desktop
-        printf '[Desktop Entry]\nName=Selah\nComment=A cross-platform Bible study app using Flutter and the 1769 King James Version\nExec=selah\nIcon=io.github.toazd.selah\nType=Application\nCategories=Education\nStartupNotify=true\nStartupWMClass=io.github.toazd.selah\n' > "$APPDIR/io.github.toazd.selah.desktop"
-
-        # download appimagetool
-        wget -q -O appimagetool.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-        chmod +x appimagetool.AppImage
-        ./appimagetool.AppImage "$APPDIR" "$OUTPUT_DIR/Selah-${VERSION}.AppImage"
-        rm -f appimagetool.AppImage
-        rm -rf "$TEMP_DIR2" "$APPDIR"
+        # Confirm that dependency deployment occurred and the generated image is
+        # structurally runnable without mounting it through FUSE.
+        test -e "$APPDIR/usr/lib/libgtk-3.so.0"
+        test -e "$APPDIR/usr/lib/libglib-2.0.so.0"
+        BUNDLED_LIBRARY_COUNT=$(find "$APPDIR/usr/lib" -type f -name '*.so*' | wc -l)
+        echo "Bundled $BUNDLED_LIBRARY_COUNT shared libraries into the AppImage"
+        EXTRACT_DIR="$APPIMAGE_WORK/extracted"
+        mkdir -p "$EXTRACT_DIR"
+        (
+          cd "$EXTRACT_DIR"
+          APPIMAGE_EXTRACT_AND_RUN= "$LDAI_OUTPUT" --appimage-extract > /dev/null
+        )
+        test -x "$EXTRACT_DIR/squashfs-root/AppRun"
+        test -x "$EXTRACT_DIR/squashfs-root/usr/bin/selah"
+        test -e "$EXTRACT_DIR/squashfs-root/usr/lib/libgtk-3.so.0"
+        rm -rf "$APPIMAGE_WORK"
 
         echo "📦 Creating Flatpak package..."
         TEMP_DIR3=$(mktemp -d)

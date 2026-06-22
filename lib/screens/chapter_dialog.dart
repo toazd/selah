@@ -85,8 +85,10 @@ class _ChapterDialogState extends State<ChapterDialog> {
   Map<int, List<Map<String, dynamic>>> _highlights = {};
 
   // Stream subscriptions for real-time updates
-  late StreamSubscription _highlightsSubscription;
-  late StreamSubscription _notesSubscription;
+  late final StreamSubscription<void> _highlightsSubscription;
+  late final StreamSubscription<void> _notesSubscription;
+  late final StreamSubscription<void> _localHighlightsSubscription;
+  late final StreamSubscription<void> _localNotesSubscription;
 
   // Local fallback for notes inline mode
   late final ValueNotifier<bool> _localShowNotesInlineFallback =
@@ -224,32 +226,34 @@ class _ChapterDialogState extends State<ChapterDialog> {
     _highlightsSubscription =
         SupabaseSyncService.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
+      if (!mounted) return;
       _rebuildVerseDataList();
-      if (mounted) {
-        setState(() {});
-      }
+      setState(() {});
     });
 
     _notesSubscription =
         SupabaseSyncService.notesChangedStream.listen((_) async {
       await _loadNotes();
+      if (!mounted) return;
       _rebuildVerseDataList();
-      if (mounted) setState(() {});
+      setState(() {});
     });
 
     // Listen to local data change notifier streams for immediate updates during local operations
-    LocalDataChangeNotifier.highlightsChangedStream.listen((_) async {
+    _localHighlightsSubscription =
+        LocalDataChangeNotifier.highlightsChangedStream.listen((_) async {
       await _loadHighlights();
+      if (!mounted) return;
       _rebuildVerseDataList();
-      if (mounted) {
-        setState(() {});
-      }
+      setState(() {});
     });
 
-    LocalDataChangeNotifier.notesChangedStream.listen((_) async {
+    _localNotesSubscription =
+        LocalDataChangeNotifier.notesChangedStream.listen((_) async {
       await _loadNotes();
+      if (!mounted) return;
       _rebuildVerseDataList();
-      if (mounted) setState(() {});
+      setState(() {});
     });
   }
 
@@ -339,7 +343,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
       textColor: textColor,
       verseNumberColor:
           (isDark ? darkPrimaryColor.value : lightPrimaryColor.value)
-              .withValues(alpha: 0.5),
+              .withValues(alpha: 0.9),
       backgroundColor: bgColor,
       lineHeight: lineHeightNotifier.value,
       showNotesInline: showNotesInlineNotifier.value,
@@ -445,7 +449,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   Widget _buildBookTitleWidget(bool isDark, bool showStrongsNumbers) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 8.0, 22.0, 16.0),
+      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 22.0, 8.0),
       child: Center(
         child: RichText(
           textAlign: TextAlign.center,
@@ -457,6 +461,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                 fontFamilyNotifier.value,
                 fontSizeNotifier.value + 1,
               ),
+              fontFamily: fontFamilyNotifier.value,
               height: showStrongsNumbers
                   ? lineHeightNotifier.value + 0.35
                   : lineHeightNotifier.value,
@@ -474,17 +479,19 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   Widget _buildBookColophonWidget(bool isDark, bool showStrongsNumbers) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 16.0, 22.0, 48.0),
+      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 22.0, 16.0),
       child: RichText(
         textAlign: TextAlign.left,
         text: VerseTextParser.parseVerseText(
           _bookColophon!,
           TextStyle(
             fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.normal,
             fontSize: FontSizeAdjustments.getAdjustedSize(
               fontFamilyNotifier.value,
               fontSizeNotifier.value - 1,
             ),
+            fontFamily: fontFamilyNotifier.value,
             height: showStrongsNumbers
                 ? lineHeightNotifier.value + 0.35
                 : lineHeightNotifier.value,
@@ -608,8 +615,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
                         decoration: BoxDecoration(
                           color: _adjustBarColor(bgColor),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                        // padding: const EdgeInsets.symmetric(
+                        //     horizontal: 4, vertical: 4),
                         child: Row(
                           children: [
                             IconButton(
@@ -680,29 +687,35 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                                 _buildBookTitleWidget(
                                                     isDark, showDialogStrongs),
                                               ..._verseDataList.map((data) {
-                                                return buildVerseWidgetFromData(
-                                                  context,
-                                                  data,
-                                                  (verseNum) =>
-                                                      _showChapterVerseMenu(
-                                                          context, verseNum),
-                                                  (verseNum) =>
-                                                      _enterHighlightMode(
-                                                          context, verseNum),
-                                                  _handleVerseLink,
-                                                  widget.onNoteIconTap != null
-                                                      ? (vn, noteText) =>
-                                                          widget.onNoteIconTap!(
-                                                              vn, noteText)
-                                                      : null,
-                                                  widget.onNoteEditTap != null
-                                                      ? (vn, noteText) =>
-                                                          widget.onNoteEditTap!(
-                                                              vn, noteText)
-                                                      : null,
-                                                  lightTextColor.value,
-                                                  darkTextColor.value,
-                                                  _showStrongsDefinitionDialog,
+                                                return Padding(
+                                                  padding:
+                                                      EdgeInsetsGeometry.only(
+                                                          left: 8.0),
+                                                  child:
+                                                      buildVerseWidgetFromData(
+                                                    context,
+                                                    data,
+                                                    (verseNum) =>
+                                                        _showChapterVerseMenu(
+                                                            context, verseNum),
+                                                    (verseNum) =>
+                                                        _enterHighlightMode(
+                                                            context, verseNum),
+                                                    _handleVerseLink,
+                                                    widget.onNoteIconTap != null
+                                                        ? (vn, noteText) =>
+                                                            widget.onNoteIconTap!(
+                                                                vn, noteText)
+                                                        : null,
+                                                    widget.onNoteEditTap != null
+                                                        ? (vn, noteText) =>
+                                                            widget.onNoteEditTap!(
+                                                                vn, noteText)
+                                                        : null,
+                                                    lightTextColor.value,
+                                                    darkTextColor.value,
+                                                    _showStrongsDefinitionDialog,
+                                                  ),
                                                 );
                                               }),
                                               if (showBookColophon)
@@ -716,9 +729,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                               child: RawScrollbar(
                                                 thumbColor: isDark
                                                     ? darkPrimaryColor.value
-                                                        .withValues(alpha: 0.7)
+                                                        .withValues(alpha: 0.9)
                                                     : lightPrimaryColor.value
-                                                        .withValues(alpha: 0.7),
+                                                        .withValues(alpha: 0.9),
                                                 thumbVisibility: false,
                                                 trackVisibility: false,
                                                 thickness: 22.0,
@@ -732,7 +745,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
-                                                            .stretch,
+                                                            .start,
                                                     children: children,
                                                   ),
                                                 ),
@@ -928,10 +941,9 @@ class _ChapterDialogState extends State<ChapterDialog> {
       chapter: widget.chapter,
       onFinished: () async {
         await _loadHighlights();
+        if (!mounted) return;
         _rebuildVerseDataList();
-        if (mounted) {
-          setState(() {});
-        }
+        setState(() {});
       },
     );
   }
@@ -972,6 +984,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
     // Cancel stream subscriptions
     _highlightsSubscription.cancel();
     _notesSubscription.cancel();
+    _localHighlightsSubscription.cancel();
+    _localNotesSubscription.cancel();
 
     // Dispose controllers
     _scrollController.dispose();

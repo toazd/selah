@@ -255,11 +255,11 @@ class _HighlightDialogState extends State<HighlightDialog> {
   }
 
   Future<void> _confirmClearHighlights() async {
-    final existingHighlights =
-        _currentHighlights[widget.verseNumber] ?? const [];
-    if (existingHighlights.length <= 2) {
-      return;
-    }
+    // final existingHighlights =
+    //     _currentHighlights[widget.verseNumber] ?? const [];
+    // if (existingHighlights.length <= 2) {
+    //   return;
+    // }
 
     final shouldClear = await showDialog<bool>(
       context: context,
@@ -574,7 +574,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (existingHighlightsCount > 2) ...[
+                    if (existingHighlightsCount >= 2) ...[
                       TextButton(
                         onPressed: _confirmClearHighlights,
                         child: Text(

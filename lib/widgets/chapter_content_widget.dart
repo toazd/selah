@@ -160,11 +160,11 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
 
     return RawScrollbar(
       thumbColor: isDark
-          ? darkPrimaryColor.value.withValues(alpha: 0.3)
-          : lightPrimaryColor.value.withValues(alpha: 0.5),
+          ? darkPrimaryColor.value.withValues(alpha: 0.8)
+          : lightPrimaryColor.value.withValues(alpha: 0.8),
       thumbVisibility: false,
       trackVisibility: false,
-      thickness: 16.0,
+      thickness: 22.0,
       radius: Radius.circular(8.0),
       controller: _scrollController,
       child: ScrollConfiguration(
@@ -181,7 +181,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                   if (widget.bookTitle != null &&
                       (widget.chapter == 1 || widget.book == 'Psa'))
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.only(bottom: 8.0, right: 22.0),
                       child: Center(
                         child: RichText(
                           textAlign: TextAlign.center,
@@ -209,14 +209,14 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                         ),
                       ),
                     ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: 0.0,
-                      top: 8.0,
-                      right: 16.0,
-                    ),
-                    child: SizedBox.shrink(),
-                  ),
+                  // Padding(
+                  //   padding: EdgeInsets.only(
+                  //     left: 64.0,
+                  //     top: 64.0,
+                  //     right: 64.0,
+                  //   ),
+                  //   child: SizedBox.shrink(),
+                  // ),
                 ],
               ),
             ),
@@ -225,31 +225,32 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
             SliverPadding(
               padding: EdgeInsets.only(
                 left: 0.0,
-                right: 16.0,
+                right: 22.0,
               ),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: verseDataList.map((verseData) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        top: 0.0,
-                        bottom: 0.0,
-                      ),
-                      child: buildVerseWidgetFromData(
-                        context,
-                        verseData,
-                        widget.onVerseTap,
-                        widget.onVerseLongPress,
-                        widget.onLinkTap,
-                        widget.onNoteIconTap,
-                        widget.onNoteEditTap,
-                        lightTextColor.value,
-                        darkTextColor.value,
-                        widget.onStrongsTap,
-                      ),
+                    // return Padding(
+                    //   padding: EdgeInsets.only(
+                    //     top: 0.0,
+                    //     bottom: 0.0,
+                    //   ),
+                    //   child:
+                    return buildVerseWidgetFromData(
+                      context,
+                      verseData,
+                      widget.onVerseTap,
+                      widget.onVerseLongPress,
+                      widget.onLinkTap,
+                      widget.onNoteIconTap,
+                      widget.onNoteEditTap,
+                      lightTextColor.value,
+                      darkTextColor.value,
+                      widget.onStrongsTap,
                     );
+                    //);
                   }).toList(),
                 ),
               ),
@@ -261,29 +262,27 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                   left: 0.0,
                   top: 8.0,
                   bottom: 300.0,
-                  right: 16.0,
+                  right: 22.0,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (widget.bookColophon != null &&
                         widget.bookColophon!.isNotEmpty &&
                         widget.isLastChapter)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Text(
-                          widget.bookColophon!,
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: FontSizeAdjustments.getAdjustedSize(
-                              fontFamilyNotifier.value,
-                              fontSizeNotifier.value - 1,
-                            ),
-                            color: isDark
-                                ? darkTextColor.value
-                                : lightTextColor.value,
+                      Text(
+                        widget.bookColophon!,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: FontSizeAdjustments.getAdjustedSize(
+                            fontFamilyNotifier.value,
+                            fontSizeNotifier.value - 1,
                           ),
+                          fontFamily: fontFamilyNotifier.value,
+                          color: isDark
+                              ? darkTextColor.value
+                              : lightTextColor.value,
                         ),
                       ),
                   ],
