@@ -30576,7 +30576,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       24: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
       25: 'Now{G1161} to him that is of power{G1410}{{G5740}} to stablish{G4741}{{G5658}} you{G5209} according{G2596} to my{G3450} gospel{G2098}, and{G2532} the preaching{G2782} of Jesus{G2424} Christ{G5547}, according{G2596} to the revelation{G602} of the mystery{G3466}, which was kept secret{G4601}{{G5772}} since the world began{G5550}{G166},',
       26: 'But{G1161} now{G3568} is made manifest{G5319}{{G5685}}, and{G5037} by{G1223} the scriptures{G1124} of the prophets{G4397}, according{G2596} to the commandment{G2003} of the everlasting{G166} God{G2316}, made known{G1107}{{G5685}} to{G1519} all{G3956} nations{G1484} for{G1519} the obedience{G5218} of faith{G4102}:',
-      27: 'To God{G2316} only{G3441} wise{G4680}, be glory{G1391} through{G1223} Jesus{G2424} Christ{G5547} for{G1519} ever{G165}. Amen{G281}. (Written{G1125}{{G5648}} to the Romans from Corinthus, and sent by Phebe servant of the church at Cenchrea.)',
+      27: 'To God{G2316} only{G3441} wise{G4680}, be glory{G1391} through{G1223} Jesus{G2424} Christ{G5547} for{G1519} ever{G165}. Amen{G281}.',
     },
   },
   '1Co': {
@@ -31047,7 +31047,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       21: 'The salutation{G783} of me Paul{G3972} with mine own{G1699} hand{G5495}.',
       22: 'If any man{G1536} love{G5368}{{G5719}} not{G3756} the Lord{G2962} Jesus{G2424} Christ{G5547}, let him be{G2277}{{G5749}} Anathema{G331} Maran-atha{G3134}.',
       23: 'The grace{G5485} of our Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216}.',
-      24: 'My{G3450} love{G26} be with{G3326} you{G5216} all{G3956} in{G1722} Christ{G5547} Jesus{G2424}. Amen{G281}. (The first epistle to the Corinthians was written{G1125}{{G5648}} from Philippi by Stephanas and Fortunatus and Achaicus and Timotheus.)',
+      24: 'My{G3450} love{G26} be with{G3326} you{G5216} all{G3956} in{G1722} Christ{G5547} Jesus{G2424}. Amen{G281}.',
     },
   },
   '2Co': {
@@ -31332,7 +31332,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'Finally{G3063}, brethren{G80}, farewell{G5463}{{G5720}}. Be perfect{G2675}{{G5744}}, be of good comfort{G3870}{{G5744}}, be of one{G846} mind{G5426}{{G5720}}, live in peace{G1514}{{G5720}}; and{G2532} the God{G2316} of love{G26} and{G2532} peace{G1515} shall be{G2071}{{G5704}} with{G3326} you{G5216}.',
       12: 'Greet{G782}{{G5663}} one another{G240} with{G1722} an holy{G40} kiss{G5370}.',
       13: 'All{G3956} the saints{G40} salute{G782}{{G5736}} you{G5209}.',
-      14: 'The grace{G5485} of the Lord{G2962} Jesus{G2424} Christ{G5547}, and{G2532} the love{G26} of God{G2316}, and{G2532} the communion{G2842} of the Holy{G40} Ghost{G4151}, be with{G3326} you{G5216} all{G3956}. Amen{G281}. (The second epistle to the Corinthians was written{G1125}{{G5648}} from Philippi, a city of Macedonia, by Titus and Lucas.)',
+      14: 'The grace{G5485} of the Lord{G2962} Jesus{G2424} Christ{G5547}, and{G2532} the love{G26} of God{G2316}, and{G2532} the communion{G2842} of the Holy{G40} Ghost{G4151}, be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
     },
   },
   'Gal': {
@@ -31495,7 +31495,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       15: 'For{G1063} in{G1722} Christ{G5547} Jesus{G2424} neither{G3777} circumcision{G4061} availeth{G2480}{{G5719}} any thing{G5100}, nor{G3777} uncircumcision{G203}, but{G235} a new{G2537} creature{G2937}.',
       16: 'And{G2532} as many as{G3745} walk{G4748}{{G5692}} according to{G2583} this{G5129} rule{G2583}, peace{G1515} be on{G1909} them{G846}, and{G2532} mercy{G1656}, and{G2532} upon{G1909} the Israel{G2474} of God{G2316}.',
       17: 'From henceforth{G3064} let{G3930} no man{G3367} trouble{G3930}{{G5720}} me{G2873}{G3427}: for{G1063} I{G1473} bear{G941}{{G5719}} in{G1722} my{G3450} body{G4983} the marks{G4742} of the Lord{G2962} Jesus{G2424}.',
-      18: 'Brethren{G80}, the grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} your{G5216} spirit{G4151}. Amen{G281}. (Unto the Galatians written{G1125}{{G5648}} from Rome.)',
+      18: 'Brethren{G80}, the grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} your{G5216} spirit{G4151}. Amen{G281}.',
     },
   },
   'Eph': {
@@ -31664,7 +31664,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       21: 'But{G1161} that{G2443} ye{G5210} also{G2532} may know{G1492}{{G5762}} my{G1691} affairs{G2596}, and how{G5101} I do{G4238}{{G5719}}, Tychicus{G5190}, a beloved{G27} brother{G80} and{G2532} faithful{G4103} minister{G1249} in{G1722} the Lord{G2962}, shall make known{G1107}{{G5692}} to you{G5213} all things{G3956}:',
       22: 'Whom{G3739} I have sent{G3992}{{G5656}} unto{G4314} you{G5209} for{G1519} the same{G846} purpose{G5124}, that{G2443} ye might know{G1097}{{G5632}} our{G2257} affairs{G4012}, and{G2532} that he might comfort{G3870}{{G5661}} your{G5216} hearts{G2588}.',
       23: 'Peace{G1515} be to the brethren{G80}, and{G2532} love{G26} with{G3326} faith{G4102}, from{G575} God{G2316} the Father{G3962} and{G2532} the Lord{G2962} Jesus{G2424} Christ{G5547}.',
-      24: 'Grace{G5485} be with{G3326} all{G3956} them that love{G25}{{G5723}} our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} in{G1722} sincerity{G861}. Amen{G281}. (Written from Rome unto the Ephesians by Tychicus.)',
+      24: 'Grace{G5485} be with{G3326} all{G3956} them that love{G25}{{G5723}} our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} in{G1722} sincerity{G861}. Amen{G281}.',
     },
   },
   'Phi': {
@@ -31778,7 +31778,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       20: 'Now{G1161} unto God{G2316} and{G2532} our{G2257} Father{G3962} be glory{G1391} for{G1519} ever{G165} and ever{G165}. Amen{G281}.',
       21: 'Salute{G782}{{G5663}} every{G3956} saint{G40} in{G1722} Christ{G5547} Jesus{G2424}. The brethren{G80} which are with{G4862} me{G1698} greet{G782}{{G5736}} you{G5209}.',
       22: 'All{G3956} the saints{G40} salute{G782}{{G5736}} you{G5209}{G1161}, chiefly{G3122} they that are of{G1537} Caesar\'s{G2541} household{G3614}.',
-      23: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216} all{G3956}. Amen{G281}. (It was written to the Philippians from Rome by Epaphroditus.)',
+      23: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
     },
   },
   'Col': {
@@ -31883,7 +31883,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       15: 'Salute{G782}{{G5663}} the brethren{G80} which are in{G1722} Laodicea{G2993}, and{G2532} Nymphas{G3564}, and{G2532} the church{G1577} which is in{G2596} his{G846} house{G3624}.',
       16: 'And{G2532} when{G3752} this epistle{G1992} is read{G314}{{G5686}} among{G3844} you{G5213}, cause{G4160}{{G5657}} that{G2443} it be read{G314}{{G5686}} also{G2532} in{G1722} the church{G1577} of the Laodiceans{G2994}; and{G2532} that{G2443} ye{G5210}{G314} likewise{G2532} read{G314}{{G5632}} the epistle from{G1537} Laodicea{G2993}.',
       17: 'And{G2532} say{G2036}{{G5628}} to Archippus{G751}, Take heed{G991}{{G5720}} to the ministry{G1248} which{G3739} thou hast received{G3880}{{G5627}} in{G1722} the Lord{G2962}, that{G2443} thou fulfil{G4137}{{G5725}} it{G846}.',
-      18: 'The salutation{G783} by the hand{G5495} of me{G1699} Paul{G3972}. Remember{G3421}{{G5720}} my{G3450} bonds{G1199}. Grace{G5485} be with{G3326} you{G5216}. Amen{G281}. (Written{G1125}{{G5648}} from Rome to the Colossians by Tychicus and Onesimus.)',
+      18: 'The salutation{G783} by the hand{G5495} of me{G1699} Paul{G3972}. Remember{G3421}{{G5720}} my{G3450} bonds{G1199}. Grace{G5485} be with{G3326} you{G5216}. Amen{G281}.',
     },
   },
   '1Th': {
@@ -31984,7 +31984,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       25: 'Brethren{G80}, pray{G4336}{{G5737}} for{G4012} us{G2257}.',
       26: 'Greet{G782}{{G5663}} all{G3956} the brethren{G80} with{G1722} an holy{G40} kiss{G5370}.',
       27: 'I charge{G3726}{{G5719}} you{G5209} by the Lord{G2962} that this epistle{G1992} be read{G314}{{G5683}} unto all{G3956} the holy{G40} brethren{G80}.',
-      28: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216}. Amen{G281}. (The first epistle unto the Thessalonians was written{G1125}{{G5648}} from Athens.)',
+      28: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216}. Amen{G281}.',
     },
   },
   '2Th': {
@@ -32039,7 +32039,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       15: 'Yet{G2532} count{G2233}{{G5737}} him not{G3361} as{G5613} an enemy{G2190}, but{G235} admonish{G3560}{{G5720}} him as{G5613} a brother{G80}.',
       16: 'Now{G1161} the Lord{G2962} of peace{G1515} himself{G846} give{G1325}{{G5630}} you{G5213} peace{G1515} always{G1223}{G3956} by{G1722} all{G3956} means{G5158}. The Lord{G2962} be with{G3326} you{G5216} all{G3956}.',
       17: 'The salutation{G783} of Paul{G3972} with mine own{G1699} hand{G5495}, which{G3739} is{G2076}{{G5748}} the token{G4592} in{G1722} every{G3956} epistle{G1992}: so{G3779} I write{G1125}{{G5719}}.',
-      18: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216} all{G3956}. Amen{G281}. (The second epistle to the Thessalonians was written{G1125}{{G5648}} from Athens.)',
+      18: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
     },
   },
   '1Ti': {
@@ -32166,7 +32166,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       18: 'That they do good{G14}{{G5721}}, that they be rich{G4147}{{G5721}} in{G1722} good{G2570} works{G2041}, ready to distribute{G1511}{G2130}{{G5750}}, willing to communicate{G2843};',
       19: 'Laying up in store{G597}{{G5723}} for themselves{G1438} a good{G2570} foundation{G2310} against{G1519} the time to come{G3195}{{G5723}}, that{G2443} they may lay hold on{G1949}{{G5638}} eternal{G166} life{G2222}.',
       20: 'O{G5599} Timothy{G5095}, keep{G5442}{{G5657}} that which is committed to thy trust{G3872}, avoiding{G1624}{{G5734}} profane{G952} and vain babblings{G2757}, and{G2532} oppositions{G477} of science{G1108} falsely so called{G5581}:',
-      21: 'Which{G3739} some{G5100} professing{G1861}{{G5740}} have erred{G795}{{G5656}} concerning{G4012} the faith{G4102}. Grace{G5485} be with{G3326} thee{G4675}. Amen{G281}. (The first to Timothy was written from Laodicea, which is the chiefest city of Phrygia Pacatiana.)',
+      21: 'Which{G3739} some{G5100} professing{G1861}{{G5740}} have erred{G795}{{G5656}} concerning{G4012} the faith{G4102}. Grace{G5485} be with{G3326} thee{G4675}. Amen{G281}.',
     },
   },
   '2Ti': {
@@ -32259,7 +32259,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       19: 'Salute{G782}{{G5663}} Prisca{G4251} and{G2532} Aquila{G207}, and{G2532} the household{G3624} of Onesiphorus{G3683}.',
       20: 'Erastus{G2037} abode{G3306}{{G5656}} at{G1722} Corinth{G2882}: but{G1161} Trophimus{G5161} have I left{G620}{{G5627}} at{G1722} Miletum{G3399} sick{G770}{{G5723}}.',
       21: 'Do thy diligence{G4704}{{G5657}} to come{G2064}{{G5629}} before{G4253} winter{G5494}. Eubulus{G2103} greeteth{G782}{{G5736}} thee{G4571}, and{G2532} Pudens{G4227}, and{G2532} Linus{G3044}, and{G2532} Claudia{G2803}, and{G2532} all{G3956} the brethren{G80}.',
-      22: 'The Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} thy{G4675} spirit{G4151}. Grace{G5485} be with{G3326} you{G5216}. Amen{G281}. (The second epistle unto Timotheus, ordained{G5500}{{G5685}} the first bishop of the church of the Ephesians, was written{G1125}{{G5648}} from Rome, when Paul was brought before{G3936}{{G5627}} Nero the second time.)',
+      22: 'The Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} thy{G4675} spirit{G4151}. Grace{G5485} be with{G3326} you{G5216}. Amen{G281}.',
     },
   },
   'Tit': {
@@ -32313,7 +32313,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'When{G3752} I shall send{G3992}{{G5692}} Artemas{G734} unto{G4314} thee{G4571}, or{G2228} Tychicus{G5190}, be diligent{G4704}{{G5657}} to come{G2064}{{G5629}} unto{G4314} me{G3165} to{G1519} Nicopolis{G3533}: for{G1063} I have determined{G2919}{{G5758}} there{G1563} to winter{G3914}{{G5658}}.',
       13: 'Bring{G4311} Zenas{G2211} the lawyer{G3544} and{G2532} Apollos{G625} on their journey{G4311}{{G5657}} diligently{G4709}, that{G2443} nothing{G3367} be wanting{G3007}{{G5725}} unto them{G846}.',
       14: 'And{G1161} let{G3129} ours{G2251} also{G2532} learn{G3129}{{G5720}} to maintain{G4291}{{G5733}} good{G2570} works{G2041} for{G1519} necessary{G316} uses{G5532}, that{G3363} they be{G5600}{{G5753}} not{G3363} unfruitful{G175}.',
-      15: 'All{G3956} that are with{G3326} me{G1700} salute{G782}{{G5736}} thee{G4571}. Greet{G782}{{G5663}} them that love{G5368}{{G5723}} us{G2248} in{G1722} the faith{G4102}. Grace{G5485} be with{G3326} you{G5216} all{G3956}. Amen{G281}. (It was written{G1125}{{G5648}} to Titus, ordained{G5500}{{G5685}} the first bishop of the church of the Cretians, from Nicopolis of Macedonia.)',
+      15: 'All{G3956} that are with{G3326} me{G1700} salute{G782}{{G5736}} thee{G4571}. Greet{G782}{{G5663}} them that love{G5368}{{G5723}} us{G2248} in{G1722} the faith{G4102}. Grace{G5485} be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
     },
   },
   'Phm': {
@@ -32342,7 +32342,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'But{G1161} withal{G260} prepare{G2090}{{G5720}} me{G3427} also{G2532} a lodging{G3578}: for{G1063} I trust{G1679}{{G5719}} that{G3754} through{G1223} your{G5216} prayers{G4335} I shall be given{G5483}{{G5701}} unto you{G5213}.',
       23: 'There salute{G782}{{G5736}} thee{G4571} Epaphras{G1889}, my{G3450} fellowprisoner{G4869} in{G1722} Christ{G5547} Jesus{G2424};',
       24: 'Marcus{G3138}, Aristarchus{G708}, Demas{G1214}, Lucas{G3065}, my{G3450} fellowlabourers{G4904}.',
-      25: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} your{G5216} spirit{G4151}. Amen{G281}. (Written{G1125}{{G5648}} from Rome to Philemon, by Onesimus a servant.)',
+      25: 'The grace{G5485} of our{G2257} Lord{G2962} Jesus{G2424} Christ{G5547} be with{G3326} your{G5216} spirit{G4151}. Amen{G281}.',
     },
   },
   'Heb': {
