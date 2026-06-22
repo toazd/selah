@@ -8,3 +8,4 @@ android/.gradle
 linux/flutter/ephemeral
 android/.gradle
 *.lock
+*.kate-swp
