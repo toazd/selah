@@ -478,7 +478,8 @@ void _releaseSingleInstanceLock() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SemanticsBinding.instance.ensureSemantics();
+  // Do not enable the following or text input in the quill editor will break on web builds
+  //SemanticsBinding.instance.ensureSemantics();
 
   // Enforce single instance on desktop platforms before doing any IO that may
   // be blocked by multiple processes opening the same DB files.
