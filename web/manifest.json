@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#0f4c81",
-    "description": "A new Flutter project.",
+    "description": "A cross-platform Bible study app using Flutter and the 1769 King James Version",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
