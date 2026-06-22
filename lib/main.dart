@@ -1,6 +1,5 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
-//import 'package:selah/utils/tablet_mode_test_example.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_config.dart';
 import 'package:flutter/material.dart';
@@ -38,11 +37,9 @@ import 'database/search_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
-//import 'package:flutter_onscreen_keyboard/flutter_onscreen_keyboard.dart';
 import 'utils/error_handler.dart';
-import 'package:flutter/rendering.dart';
 
-final appVersion = "0.7.16";
+final appVersion = "0.7.17";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
