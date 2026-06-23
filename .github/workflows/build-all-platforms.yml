@@ -285,11 +285,13 @@ jobs:
         ls -lah build/packages/
         ls -lah "$OUTPUT_DIR"
 
-    - name: Upload Linux packages artifact
+    - name: Upload Linux Debian package artifact
       uses: actions/upload-artifact@v6
       with:
-        name: linux-packages
-        path: build/packages
+        name: linux-deb-package
+        path: build/packages/selah_*.deb
+        if-no-files-found: error
+        retention-days: 1
 
     - name: Upload Linux to Release
       uses: softprops/action-gh-release@v3
@@ -364,16 +366,17 @@ jobs:
       - build-linux
     runs-on: ubuntu-22.04
     permissions:
+      actions: write
       contents: write
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
 
-    - name: Download Linux package artifacts
+    - name: Download Linux Debian package artifact
       uses: actions/download-artifact@v8
       with:
-        name: linux-packages
+        name: linux-deb-package
         path: build/packages
 
     - name: Prepare Snap build directory and copy icon
@@ -400,6 +403,7 @@ jobs:
           exit 1
         fi
         dpkg-deb -x "$DEB_FILE" build/snap-build/prime
+        rm -f "$DEB_FILE"
         mkdir -p build/snap-build/prime/usr/share/applications
         mkdir -p build/snap-build/prime/usr/share/icons/hicolor/256x256/apps
         # Copy icon to snap/gui directory for snapcraft
@@ -551,6 +555,23 @@ jobs:
         draft: false
         prerelease: false
         files: build/packages/*.snap
+
+    - name: Delete temporary Linux Debian artifact
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -euo pipefail
+        ARTIFACT_ID=$(
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "linux-deb-package") | .id' \
+            | head -n 1
+        )
+        if [ -z "$ARTIFACT_ID" ]; then
+          echo "No temporary Debian artifact found to delete."
+          exit 0
+        fi
+        gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}"
+        echo "Deleted temporary Debian artifact $ARTIFACT_ID."
 
   build-web:
     name: Build Web App
