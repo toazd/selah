@@ -181,7 +181,12 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                   if (widget.bookTitle != null &&
                       (widget.chapter == 1 || widget.book == 'Psa'))
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0, right: 22.0),
+                      padding: const EdgeInsets.only(
+                        top: 0.0,
+                        left: 4.0,
+                        bottom: 8.0,
+                        right: 22.0,
+                      ),
                       child: Center(
                         child: RichText(
                           textAlign: TextAlign.center,
@@ -224,7 +229,9 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
             // navigation can scroll to off-screen verses reliably.
             SliverPadding(
               padding: EdgeInsets.only(
-                left: 0.0,
+                left: 4.0,
+                top: 0.0,
+                bottom: 0.0,
                 right: 22.0,
               ),
               sliver: SliverToBoxAdapter(
@@ -259,7 +266,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.only(
-                  left: 0.0,
+                  left: 4.0,
                   top: 8.0,
                   bottom: 300.0,
                   right: 22.0,
