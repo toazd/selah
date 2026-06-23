@@ -1495,7 +1495,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                 phraseTextStyle = totalPhraseStyle;
                 countText = '$total';
                 countTextStyle = totalCountStyle;
-                alignments = const [TextAlign.left, TextAlign.left];
+                alignments = const [TextAlign.left, TextAlign.right];
               } else {
                 final entry = sortedPhrases[index];
                 phraseText = entry.key;
@@ -1555,7 +1555,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     final countCell = Text(
                       countText,
                       style: countTextStyle,
-                      textAlign: isTotalRow ? TextAlign.left : TextAlign.right,
+                      //textAlign: isTotalRow ? TextAlign.left : TextAlign.right,
+                      textAlign: TextAlign.right,
                       softWrap: false,
                     );
 
