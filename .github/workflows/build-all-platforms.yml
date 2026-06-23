@@ -1072,7 +1072,7 @@ jobs:
           # 3. Inject the dynamic fields safely using basic stream editing
           sed -i "s|^pkgver=.*|pkgver=${VERSION}|" PKGBUILD
           sed -i "s|^pkgrel=.*|pkgrel=${PKGREL}|" PKGBUILD
-          sed -i "s|^source=.*|source=(\"\${pkgname}-\${pkgver}.deb::${RELEASE_URL}\")|" PKGBUILD
+          sed -i "s|^source=.*|source=(\"\${pkgname}-\${pkgver}-\${pkgrel}.deb::${RELEASE_URL}\")|" PKGBUILD
           sed -i "s|^sha256sums=.*|sha256sums=('${NEW_SHA}')|" PKGBUILD
 
       - name: Generate .SRCINFO via Arch Linux Container
