@@ -1003,9 +1003,13 @@ jobs:
         - extract-version
         - build-linux
       runs-on: ubuntu-latest
+      permissions:
+        contents: write
       steps:
       - name: Checkout repository source
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Configure SSH credentials for AUR
         run: |
@@ -1045,12 +1049,29 @@ jobs:
           NEW_SHA=$(sha256sum "$ASSET_NAME" | awk '{print $1}')
           rm "$ASSET_NAME"
 
+          CURRENT_PKGVER=$(sed -n 's/^pkgver=//p' aur-workspace/PKGBUILD)
+          CURRENT_PKGREL=$(sed -n 's/^pkgrel=//p' aur-workspace/PKGBUILD)
+          CURRENT_SHA=$(sed -n "s/^sha256sums=('\([^']*\)').*/\1/p" aur-workspace/PKGBUILD)
+
+          case "$CURRENT_PKGREL" in
+            ''|*[!0-9]*) CURRENT_PKGREL=0 ;;
+          esac
+
+          if [ "$CURRENT_PKGVER" != "$VERSION" ]; then
+            PKGREL=1
+          elif grep -Fq "::${RELEASE_URL}\")" aur-workspace/PKGBUILD && [ "$CURRENT_SHA" = "$NEW_SHA" ]; then
+            PKGREL="$CURRENT_PKGREL"
+          else
+            PKGREL=$((CURRENT_PKGREL + 1))
+          fi
+
           # 2. Copy your repo's template PKGBUILD over to our workspace
           cp arch-aur/PKGBUILD aur-workspace/PKGBUILD
           cd aur-workspace
 
           # 3. Inject the dynamic fields safely using basic stream editing
           sed -i "s|^pkgver=.*|pkgver=${VERSION}|" PKGBUILD
+          sed -i "s|^pkgrel=.*|pkgrel=${PKGREL}|" PKGBUILD
           sed -i "s|^source=.*|source=(\"\${pkgname}-\${pkgver}.deb::${RELEASE_URL}\")|" PKGBUILD
           sed -i "s|^sha256sums=.*|sha256sums=('${NEW_SHA}')|" PKGBUILD
 
@@ -1060,9 +1081,31 @@ jobs:
           args: >
             bash -c "pacman -Syu --noconfirm pacman-contrib && chown -R nobody:nobody $GITHUB_WORKSPACE/aur-workspace && cd $GITHUB_WORKSPACE/aur-workspace && runuser -u nobody -- makepkg --printsrcinfo > .SRCINFO && chown -R 1001:1001 $GITHUB_WORKSPACE/aur-workspace"
 
+      - name: Sync generated AUR files back to repository
+        run: |
+          cp aur-workspace/PKGBUILD arch-aur/PKGBUILD
+          cp aur-workspace/.SRCINFO arch-aur/.SRCINFO
+
       - name: Commit and Push Changes directly to AUR
         run: |
           cd $GITHUB_WORKSPACE/aur-workspace
           git add PKGBUILD .SRCINFO
-          git commit -m "Github actions automated update for v${{ needs.extract-version.outputs.app_version }} (Build ${{ github.run_number }})"
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key" git push origin master
+          if git diff --cached --quiet; then
+            echo "AUR metadata is already current; nothing to push."
+          else
+            git commit -m "Github actions automated update for v${{ needs.extract-version.outputs.app_version }} (Build ${{ github.run_number }})"
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/aur_key" git push origin master
+          fi
+
+      - name: Commit generated AUR files back to repository
+        if: github.ref_type == 'branch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add arch-aur/PKGBUILD arch-aur/.SRCINFO
+          if git diff --cached --quiet; then
+            echo "Repository AUR files are already current; nothing to push."
+          else
+            git commit -m "Update generated AUR metadata for v${{ needs.extract-version.outputs.app_version }} build ${{ github.run_number }}"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
