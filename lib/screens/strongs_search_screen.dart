@@ -8,6 +8,7 @@ import '../database/strongs_database.dart';
 import '../database/history_database.dart';
 import '../utils/error_handler.dart';
 import '../main.dart';
+import '../services/strongs_search_worker.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
 import '../utils/snackbar_notification.dart';
@@ -20,215 +21,6 @@ import '../screens/note_screen.dart';
 import '../widgets/responsive_text.dart';
 import '../widgets/strongs_definition_dialog.dart';
 import '../widgets/strongs_definition_lookup_dialog.dart';
-
-// Top-level functions for compute() to enable off-main-thread execution
-Future<List<Map<String, dynamic>>> _computeStrongsNumberSearch(
-    String strongsNumber) async {
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
-  }
-  final result = StrongsDatabase.searchByStrongsNumber(strongsNumber);
-  if (kDebugMode) {
-    debugPrint('[_computeStrongsNumberSearch] DONE: ${result.length} verses');
-  }
-  return result;
-}
-
-Future<WordSearchComputationResult> _computeWordSearchResult(
-    String word) async {
-  if (kDebugMode) {
-    debugPrint('[_computeWordSearchResult] START: word="$word"');
-  }
-  final wordData = StrongsDatabase.searchByWordWithStrongsNumbers(word);
-  final foundStrongs = wordData.foundStrongsNumbers;
-  if (wordData.wordVerses.isEmpty || foundStrongs.isEmpty) {
-    if (kDebugMode) {
-      debugPrint(
-          '[_computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
-    }
-    return WordSearchComputationResult(
-      wordVerseCount: wordData.wordVerses.length,
-      foundStrongsNumbers: foundStrongs,
-      searchResults: const [],
-      phraseSummary: const {},
-    );
-  }
-
-  final strongsList = foundStrongs.keys.toList();
-  final results = StrongsDatabase.searchByStrongsNumbers(strongsList);
-  final phraseSummary = results.isEmpty
-      ? <String, int>{}
-      : StrongsDatabase.extractPhraseSummary(results, strongsList);
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
-  }
-  return WordSearchComputationResult(
-    wordVerseCount: wordData.wordVerses.length,
-    foundStrongsNumbers: foundStrongs,
-    searchResults: results,
-    phraseSummary: phraseSummary,
-  );
-}
-
-Future<List<Map<String, dynamic>>> _computeSearchByStrongsNumbers(
-    SearchTaskData data) async {
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeSearchByStrongsNumbers] START: ${data.strongsList.length} Strong\'s numbers: ${data.strongsList}');
-  }
-  final result = StrongsDatabase.searchByStrongsNumbers(data.strongsList);
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeSearchByStrongsNumbers] DONE: ${result.length} verses');
-  }
-  return result;
-}
-
-Future<Map<String, int>> _computeExtractPhraseSummary(
-    SummaryTaskData data) async {
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeExtractPhraseSummary] START: ${data.strongsList.length} SNs, ${data.results.length} results');
-  }
-  final result = StrongsDatabase.extractPhraseSummary(
-    data.results,
-    data.strongsList,
-    includeTvm: data.includeTvmMatches,
-  );
-  if (kDebugMode) {
-    debugPrint(
-        '[_computeExtractPhraseSummary] DONE: ${result.length} unique phrases');
-  }
-  return result;
-}
-
-Future<ReferenceSearchResult> _computeReferenceSearch(
-    ReferenceSearchTaskData data) async {
-  // Validate book, chapter, verse
-  final availableBooks = StrongsDatabase.getAvailableBooks();
-  if (!availableBooks.contains(data.book)) {
-    return ReferenceSearchResult(error: 'Invalid book: ${data.book}');
-  }
-
-  final availableChapters = StrongsDatabase.getAvailableChapters(data.book);
-  if (!availableChapters.contains(data.chapter)) {
-    return ReferenceSearchResult(
-        error: 'Invalid chapter ${data.chapter} for ${data.book}');
-  }
-
-  final availableVerses =
-      StrongsDatabase.getAvailableVerses(data.book, data.chapter);
-  if (!availableVerses.contains(data.verse)) {
-    return ReferenceSearchResult(
-        error: 'Invalid verse ${data.verse} for ${data.book} ${data.chapter}');
-  }
-
-  // Check if word exists in verse
-  if (!StrongsDatabase.wordExistsInVerse(
-      data.book, data.chapter, data.verse, data.word)) {
-    return ReferenceSearchResult(
-        error:
-            'Word "${data.word}" not found in ${data.book} ${data.chapter}:${data.verse}');
-  }
-
-  // Get Strong's numbers for the word in this verse
-  final strongsNumbers = StrongsDatabase.findStrongsNumbersForWordInVerse(
-      data.book, data.chapter, data.verse, data.word);
-
-  if (strongsNumbers.isEmpty) {
-    return ReferenceSearchResult(
-        error:
-            'No Strong\'s numbers found for "${data.word}" in ${data.book} ${data.chapter}:${data.verse}');
-  }
-
-  // Get the verse text
-  // final verseText =
-  //     StrongsDatabase.getVerseText(data.book, data.chapter, data.verse);
-
-  return ReferenceSearchResult(
-    strongsNumbers: strongsNumbers,
-    //verseText: verseText,
-    book: data.book,
-    chapter: data.chapter,
-    verse: data.verse,
-    word: data.word,
-  );
-}
-
-// Helper data classes for passing data to compute()
-class SearchTaskData {
-  final String word;
-  final List<Map<String, dynamic>> wordVerses;
-  final List<String> strongsList;
-
-  SearchTaskData({
-    required this.word,
-    required this.wordVerses,
-    required this.strongsList,
-  });
-}
-
-class SummaryTaskData {
-  final List<Map<String, dynamic>> results;
-  final List<String> strongsList;
-  final bool includeTvmMatches;
-
-  SummaryTaskData({
-    required this.results,
-    required this.strongsList,
-    this.includeTvmMatches = false,
-  });
-}
-
-class ReferenceSearchTaskData {
-  final String book;
-  final int chapter;
-  final int verse;
-  final String word;
-
-  ReferenceSearchTaskData({
-    required this.book,
-    required this.chapter,
-    required this.verse,
-    required this.word,
-  });
-}
-
-class ReferenceSearchResult {
-  final List<String>? strongsNumbers;
-  //final String? verseText;
-  final String? book;
-  final int? chapter;
-  final int? verse;
-  final String? word;
-  final String? error;
-
-  ReferenceSearchResult({
-    this.strongsNumbers,
-    //this.verseText,
-    this.book,
-    this.chapter,
-    this.verse,
-    this.word,
-    this.error,
-  });
-}
-
-class WordSearchComputationResult {
-  final int wordVerseCount;
-  final Map<String, Map<String, dynamic>> foundStrongsNumbers;
-  final List<Map<String, dynamic>> searchResults;
-  final Map<String, int> phraseSummary;
-
-  const WordSearchComputationResult({
-    required this.wordVerseCount,
-    required this.foundStrongsNumbers,
-    required this.searchResults,
-    required this.phraseSummary,
-  });
-}
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor) {
@@ -599,14 +391,17 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final results = await compute(_computeStrongsNumberSearch, strongsNumber);
+      final searchResult =
+          await compute(computeStrongsNumberSearchResult, strongsNumber);
       if (!mounted) return;
       if (_isResetting) return;
       if (searchId != _activeSearchId) return;
       if (_searchTimedOut) return;
+      final results = searchResult.searchResults;
+      final phraseSummary = searchResult.phraseSummary;
       if (kDebugMode) {
         debugPrint(
-            '[_performStrongsNumberSearch] Got ${results.length} results from compute');
+            '[_performStrongsNumberSearch] Got ${results.length} results and ${phraseSummary.length} phrases from compute');
       }
 
       if (results.isEmpty) {
@@ -623,28 +418,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _hideLoadingDialog(searchId: searchId);
         return;
       }
-
-      if (_searchTimedOut) return;
-
-      if (kDebugMode) {
-        debugPrint(
-            '[_performStrongsNumberSearch] Calling extractPhraseSummary...');
-      }
-      final summaryData = SummaryTaskData(
-        results: results,
-        strongsList: [strongsNumber],
-        includeTvmMatches: true,
-      );
-      final phraseSummary =
-          await compute(_computeExtractPhraseSummary, summaryData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performStrongsNumberSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
 
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
@@ -683,7 +456,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final wordSearchResult = await compute(_computeWordSearchResult, word);
+      final wordSearchResult = await compute(computeWordSearchResult, word);
       if (kDebugMode) {
         debugPrint(
             '[_performWordSearch] Word search compute done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
@@ -773,7 +546,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField();
     try {
-      final result = await compute(_computeReferenceSearch, refSearch);
+      final result = await compute(computeReferenceSearchResult, refSearch);
       if (kDebugMode) {
         debugPrint(
             '[_performReferenceSearch] Reference search done: error=${result.error}, strongsNumbers=${result.strongsNumbers}');
@@ -800,42 +573,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
-      final strongsNumbers = result.strongsNumbers!;
-
-      final foundStrongs = <String, Map<String, dynamic>>{};
-      for (final sn in strongsNumbers) {
-        foundStrongs[sn] = {
-          'book': result.book!,
-          'chapter': result.chapter!,
-          'verse': result.verse!,
-        };
-      }
-
-      setState(() {
-        _foundStrongsNumbers = foundStrongs;
-      });
-
-      if (_searchTimedOut) return;
-
-      // Search the entire bible for all these Strong's numbers
-      if (kDebugMode) {
-        debugPrint(
-            '[_performReferenceSearch] Searching all verses for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers');
-      }
-      final searchData = SearchTaskData(
-        word: result.word!,
-        wordVerses: [],
-        strongsList: strongsNumbers,
-      );
-      final results = await compute(_computeSearchByStrongsNumbers, searchData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performReferenceSearch] searchByStrongsNumbers done: ${results.length} verses');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
+      final results = result.searchResults;
+      final phraseSummary = result.phraseSummary;
 
       if (results.isEmpty) {
         setState(() {
@@ -852,24 +591,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         return;
       }
 
-      if (kDebugMode) {
-        debugPrint('[_performReferenceSearch] Extracting phrase summary...');
-      }
-      final summaryData = SummaryTaskData(
-        results: results,
-        strongsList: strongsNumbers,
-      );
-      final phraseSummary =
-          await compute(_computeExtractPhraseSummary, summaryData);
-      if (kDebugMode) {
-        debugPrint(
-            '[_performReferenceSearch] extractPhraseSummary done: ${phraseSummary.length} phrases');
-      }
-      if (!mounted) return;
-      if (_isResetting) return;
-      if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
-
       int totalMatches = 0;
       for (final count in phraseSummary.values) {
         totalMatches += count;
@@ -877,6 +598,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
       setState(() {
         _searchResults = results;
+        _foundStrongsNumbers = result.foundStrongsNumbers;
         _phraseSummary = phraseSummary;
         _totalMatches = totalMatches;
         _totalVerses = results.length;

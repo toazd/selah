@@ -44,6 +44,26 @@ void main() {
     expect(find.textContaining('Maximum search time exceeded'), findsNothing);
   });
 
+  testWidgets('reference search completes through the Strong worker',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: StrongsSearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), 'Gen 2:15 garden');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('Phrase Summary'));
+
+    expect(find.textContaining('Maximum search time exceeded'), findsNothing);
+  });
+
   testWidgets('phrase summary does not wrap when the phrase has enough width',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
