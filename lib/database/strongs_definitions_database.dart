@@ -2,7 +2,7 @@ import '../data/strongs_definitions.dart';
 
 class StrongsDefinitionsDatabase {
   static String? getDefinition(String strongsNumber) {
-    final normalized = _normalizeStrongNumber(strongsNumber);
+    final normalized = normalizeStrongsNumber(strongsNumber);
     if (normalized == null) return null;
 
     final prefix = normalized[0];
@@ -10,6 +10,10 @@ class StrongsDefinitionsDatabase {
     if (number == null) return null;
 
     return strongsDefinitions[prefix]?[number];
+  }
+
+  static bool hasDefinition(String strongsNumber) {
+    return getDefinition(strongsNumber) != null;
   }
 
   /// Strips HTML tags from a definition string, converting <br> to newlines.
@@ -29,16 +33,16 @@ class StrongsDefinitionsDatabase {
     return result.trim();
   }
 
-  static String? _normalizeStrongNumber(String strongsNumber) {
+  static String? normalizeStrongsNumber(String strongsNumber) {
     final trimmed = strongsNumber.trim();
-    if (trimmed.length < 2) return null;
+    final match = RegExp(r'^([HhGg])(\d{1,4})$').firstMatch(trimmed);
+    if (match == null) return null;
 
-    final prefix = trimmed[0].toUpperCase();
-    if (prefix != 'H' && prefix != 'G') return null;
+    final prefix = match.group(1)!.toUpperCase();
+    final suffix = match.group(2)!;
+    final number = int.tryParse(suffix);
+    if (number == null) return null;
 
-    final suffix = trimmed.substring(1);
-    if (int.tryParse(suffix) == null) return null;
-
-    return '$prefix$suffix';
+    return '$prefix$number';
   }
 }

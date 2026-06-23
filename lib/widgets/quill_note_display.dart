@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import '../database/strongs_definitions_database.dart';
 import '../utils/note_storage_format.dart';
 import '../utils/verse_reference_linker.dart';
 import '../main.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
+import 'strongs_definition_dialog.dart';
 import 'dart:io';
 
 class QuillNoteDisplay extends StatefulWidget {
@@ -37,6 +39,8 @@ class QuillNoteDisplay extends StatefulWidget {
 }
 
 class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
+  static const String _strongsLinkPrefix = 'strongs://';
+
   late QuillController _controller;
   late FocusNode _focusNode;
   late ScrollController _scrollController;
@@ -96,11 +100,11 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
       document = Document.fromDelta(Delta.fromJson(operations));
     }
 
-    // Add verse reference links only when enabled (TSK can ship pre-linked static data).
+    // Add internal links only when enabled (TSK can ship pre-linked static data).
     if (widget.autoLinkVerseReferences) {
       final plainText = document.getPlainText(0, document.length);
-      if (plainText.contains(':')) {
-        document = VerseReferenceLinker.addVerseReferenceLinks(document);
+      if (VerseReferenceLinker.textMightContainAutomaticLinks(plainText)) {
+        document = VerseReferenceLinker.addAutomaticLinks(document);
       }
     }
 
@@ -145,10 +149,39 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
 
   void _handleLinkTap(String? link) {
     _linkWasTapped = true;
-    if (link != null && widget.onLinkTap != null) {
-      // Get the text of the link from the document if possible
+    if (link == null) {
+      return;
+    }
+
+    final strongsNumber = _strongsNumberFromLink(link);
+    if (strongsNumber != null) {
+      StrongsDefinitionDialog.show(context, strongsNumber);
+      return;
+    }
+
+    if (widget.onLinkTap != null) {
       widget.onLinkTap!(link, null);
     }
+  }
+
+  String? _strongsNumberFromLink(String link) {
+    var normalizedLink = link;
+    if (normalizedLink.startsWith('unsafe:')) {
+      normalizedLink = normalizedLink.substring('unsafe:'.length);
+    }
+
+    String? strongsNumber;
+    if (normalizedLink.startsWith(_strongsLinkPrefix)) {
+      strongsNumber = normalizedLink.substring(_strongsLinkPrefix.length);
+    } else if (normalizedLink.startsWith('strongs:')) {
+      strongsNumber = normalizedLink.substring('strongs:'.length);
+    }
+
+    if (strongsNumber == null) {
+      return null;
+    }
+
+    return StrongsDefinitionsDatabase.normalizeStrongsNumber(strongsNumber);
   }
 
   /// Converts note text to plain text for searching/highlighting
@@ -277,7 +310,12 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
               embedBuilders: kIsWeb
                   ? FlutterQuillEmbeds.editorWebBuilders()
                   : FlutterQuillEmbeds.editorBuilders(),
-              customLinkPrefixes: const ['v://', 'v:'],
+              customLinkPrefixes: const [
+                'v://',
+                'v:',
+                'strongs://',
+                'strongs:',
+              ],
               onLaunchUrl: _handleLinkTap,
               customStyles: DefaultStyles(
                 paragraph: DefaultTextBlockStyle(

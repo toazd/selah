@@ -355,7 +355,9 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               textColor),
                                                       customLinkPrefixes: const [
                                                         'v://',
-                                                        'v:'
+                                                        'v:',
+                                                        'strongs://',
+                                                        'strongs:',
                                                       ],
                                                     ),
                                                   ),
@@ -387,7 +389,9 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               textColor),
                                                       customLinkPrefixes: const [
                                                         'v://',
-                                                        'v:'
+                                                        'v:',
+                                                        'strongs://',
+                                                        'strongs:',
                                                       ],
                                                     ),
                                                   ),
@@ -433,10 +437,9 @@ class _NoteScreenState extends State<NoteScreen> {
         (_existingCreatedAt == 0 || _contentHasChanged())) {
       Document finalDocument = _quillController.document;
 
-      // If there's no colon in the plain text there's no reason to run the verse linker
-      if (plainText.contains(':')) {
-        finalDocument = VerseReferenceLinker.addVerseReferenceLinks(
-            _quillController.document);
+      if (VerseReferenceLinker.textMightContainAutomaticLinks(plainText)) {
+        finalDocument =
+            VerseReferenceLinker.addAutomaticLinks(_quillController.document);
       }
 
       // Save with proper timestamp handling (preserve created_at if exists)
