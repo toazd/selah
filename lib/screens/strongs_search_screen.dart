@@ -253,6 +253,9 @@ class StrongsSearchScreen extends StatefulWidget {
 
 class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     with AutomaticKeepAliveClientMixin {
+  static const double _phraseSummaryColumnHorizontalPadding = 16.0;
+  static const double _phraseSummaryWidthBuffer = 4.0;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
   final FocusNode _searchButtonFocusNode = FocusNode();
@@ -1759,39 +1762,24 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final isTotalRow = index == sortedPhrases.length;
-              final Widget phraseCell;
-              final Widget countCell;
+              final String phraseText;
+              final TextStyle phraseTextStyle;
+              final String countText;
+              final TextStyle countTextStyle;
               final List<TextAlign> alignments;
 
               if (isTotalRow) {
-                phraseCell = Text(
-                  'Total',
-                  style: totalPhraseStyle,
-                  textAlign: TextAlign.left,
-                );
-                countCell = Text(
-                  '$total',
-                  style: totalCountStyle,
-                  textAlign: TextAlign.left,
-                  softWrap: false,
-                );
+                phraseText = 'Total';
+                phraseTextStyle = totalPhraseStyle;
+                countText = '$total';
+                countTextStyle = totalCountStyle;
                 alignments = const [TextAlign.left, TextAlign.left];
               } else {
                 final entry = sortedPhrases[index];
-                phraseCell = ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: phraseColumnMaxWidth),
-                  child: Text(
-                    entry.key,
-                    style: phraseStyle,
-                    textAlign: TextAlign.left,
-                  ),
-                );
-                countCell = Text(
-                  '${entry.value}',
-                  style: countStyle,
-                  textAlign: TextAlign.right,
-                  softWrap: false,
-                );
+                phraseText = entry.key;
+                phraseTextStyle = phraseStyle;
+                countText = '${entry.value}';
+                countTextStyle = countStyle;
                 alignments = const [TextAlign.left, TextAlign.right];
               }
 
@@ -1807,6 +1795,47 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     } else if (fittedPhraseColumnWidth > availablePhraseWidth) {
                       fittedPhraseColumnWidth = availablePhraseWidth;
                     }
+                    final assignedPhraseTextWidth = fittedPhraseColumnWidth >
+                            _phraseSummaryColumnHorizontalPadding
+                        ? fittedPhraseColumnWidth -
+                            _phraseSummaryColumnHorizontalPadding
+                        : 0.0;
+                    final phraseShouldWrap = !isTotalRow &&
+                        _measureTextWidth(
+                              context,
+                              phraseText,
+                              phraseTextStyle,
+                            ) >
+                            assignedPhraseTextWidth;
+                    final phraseCell = isTotalRow
+                        ? SizedBox(
+                            width: assignedPhraseTextWidth,
+                            child: Text(
+                              phraseText,
+                              style: phraseTextStyle,
+                              textAlign: TextAlign.left,
+                              softWrap: false,
+                            ),
+                          )
+                        : ConstrainedBox(
+                            constraints:
+                                BoxConstraints(maxWidth: phraseColumnMaxWidth),
+                            child: SizedBox(
+                              width: assignedPhraseTextWidth,
+                              child: Text(
+                                phraseText,
+                                style: phraseTextStyle,
+                                textAlign: TextAlign.left,
+                                softWrap: phraseShouldWrap,
+                              ),
+                            ),
+                          );
+                    final countCell = Text(
+                      countText,
+                      style: countTextStyle,
+                      textAlign: isTotalRow ? TextAlign.left : TextAlign.right,
+                      softWrap: false,
+                    );
 
                     return Align(
                       alignment: Alignment.center,
@@ -1856,7 +1885,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final width = _measureTextWidth(context, phrase, phraseStyle);
       if (width > contentWidth) contentWidth = width;
     }
-    return contentWidth.clamp(0.0, maxContentWidth) + 16.0;
+    return contentWidth.clamp(0.0, maxContentWidth) +
+        _phraseSummaryColumnHorizontalPadding;
   }
 
   double _phraseSummaryCountColumnWidth(
@@ -1871,7 +1901,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       final width = _measureTextWidth(context, count, countStyle);
       if (width > contentWidth) contentWidth = width;
     }
-    return contentWidth + 16.0;
+    return contentWidth + _phraseSummaryColumnHorizontalPadding;
   }
 
   double _measureTextWidth(BuildContext context, String text, TextStyle style) {
@@ -1879,9 +1909,19 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
-      maxLines: 1,
     )..layout();
-    return painter.width;
+    // Table cells receive this value as a hard max width. Verify the rounded
+    // candidate against finite-width paragraph layout so phrases do not wrap
+    // just because the measured intrinsic width landed on a break boundary.
+    var width = painter.width.ceilToDouble() + _phraseSummaryWidthBuffer;
+    final maxVerifiedWidth = width + 16.0;
+    while (width <= maxVerifiedWidth) {
+      painter.layout(maxWidth: width);
+      if (painter.computeLineMetrics().length <= 1) return width;
+      width += 1.0;
+    }
+
+    return width;
   }
 
   double _phraseSummaryPhraseColumnMaxWidth(BuildContext context) {
