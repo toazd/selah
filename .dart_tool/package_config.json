@@ -609,9 +609,9 @@
     },
     {
       "name": "path_provider_linux",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.10"
     },
     {
       "name": "path_provider_platform_interface",
@@ -1157,6 +1157,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.2",
+  "flutterVersion": "3.44.3",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }
