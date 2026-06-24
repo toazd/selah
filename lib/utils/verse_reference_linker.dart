@@ -87,9 +87,9 @@ class VerseReferenceLinker {
 
   /// Adds verse reference links to a Quill document for any plain text references
   /// that haven't been converted to links yet. Existing links are preserved.
-  static Document addVerseReferenceLinks(Document document) {
-    return addAutomaticLinks(document);
-  }
+  // static Document addVerseReferenceLinks(Document document) {
+  //   return addAutomaticLinks(document);
+  // }
 
   static void _addVerseReferenceLinks(Document document, String plainText) {
     final references = VerseReferenceDetector.detectReferences(plainText);
