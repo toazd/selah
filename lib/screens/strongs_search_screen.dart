@@ -683,7 +683,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       BuildContext context, String refText, TextStyle refStyle) {
     final reference = VerseReferenceDetector.detectQuickJumpReference(refText);
     if (reference?.verse == null) {
-      return TextSpan(text: refText, style: refStyle);
+      return TextSpan(
+        text: refText,
+        style: refStyle,
+      );
     }
 
     final recognizer = _getVerseReferenceRecognizer(context, reference!);
@@ -1391,7 +1394,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final phraseColumnMaxWidth = _strongNumbersPhraseColumnMaxWidth(context);
     final tableRows = <TableRow>[];
 
-    for (final entry in strongsEntries) {
+    for (var index = 0; index < strongsEntries.length; index++) {
+      final entry = strongsEntries[index];
+      final isLastRow = index == strongsEntries.length - 1;
       final ref = entry.value;
       final refText = '${ref['book']} ${ref['chapter']}:${ref['verse']}';
       final phrase =
@@ -1424,6 +1429,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           ),
         ],
         const [TextAlign.left, TextAlign.center, TextAlign.left],
+        showBottomBorder: !isLastRow,
       ));
     }
 
@@ -1549,6 +1555,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                 style: phraseTextStyle,
                                 textAlign: TextAlign.left,
                                 softWrap: phraseShouldWrap,
+                                overflow: phraseShouldWrap
+                                    ? TextOverflow.clip
+                                    : TextOverflow.visible,
                               ),
                             ),
                           );
@@ -1575,6 +1584,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                             _buildTableRow(
                               [phraseCell, countCell],
                               alignments,
+                              showBottomBorder: !isTotalRow,
                             ),
                           ],
                         ),
@@ -1666,8 +1676,23 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     );
   }
 
-  TableRow _buildTableRow(List<Widget> cells, List<TextAlign> alignments) {
+  TableRow _buildTableRow(List<Widget> cells, List<TextAlign> alignments,
+      {bool showBottomBorder = true}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TableRow(
+      decoration: showBottomBorder
+          ? BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark
+                      ? darkPrimaryColor.value.withAlpha(64)
+                      : lightPrimaryColor.value.withAlpha(64),
+                  width: 0.5,
+                ),
+              ),
+            )
+          : null,
       children: List.generate(cells.length, (index) {
         return _buildTableCell(cells[index], alignments[index]);
       }),
@@ -1684,8 +1709,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   TextStyle _getPrimaryTextStyle(BuildContext context, double fontSize) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextStyle(
-      fontSize: fontSize,
-      fontFamily: noteFontFamilyNotifier.value,
+      fontSize: fontSize - 2,
+      //fontFamily: noteFontFamilyNotifier.value,
       color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
     );
   }
@@ -1694,8 +1719,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       {bool bold = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextStyle(
-      fontSize: fontSize,
-      fontFamily: noteFontFamilyNotifier.value,
+      fontSize: fontSize - 2,
+      //fontFamily: noteFontFamilyNotifier.value,
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,
       color: isDark ? darkTextColor.value : lightTextColor.value,
     );
