@@ -8,7 +8,7 @@ Selah is a cross-platform, touch-friendly Bible study application built with <a 
 ## 📖 Features
 
 ### Core Bible Study Tools
-- **AV1769 King James Version** - With the words of our Lord colored in red.
+- **AV1769 King James Version** - With the words of the Lord Jesus Christ colored in red.
 - **Offline Reading** - No internet connection required if you don't want to use the online account sync feature
 - **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
