@@ -90,7 +90,8 @@ Future<BibleSearchComputationResult> _computeNearbyBibleSearch(
         }
       }
     }
-    final combinedText = result['text'] as String;
+    final combinedText =
+        (result['searchText'] as String?) ?? (result['text'] as String);
     matchCount += regex.allMatches(combinedText).length;
   }
 
@@ -242,6 +243,73 @@ List<String> _getBibleKeywordsFromInput(String input) {
       .toList();
 }
 
+List<String> _getBiblePreFilterKeywords(List<String> terms) {
+  return terms.expand((term) {
+    final cleanTerm = term.replaceAll('*', '').trim();
+    if (cleanTerm.isEmpty) return const Iterable<String>.empty();
+
+    final words = cleanTerm
+        .split(RegExp(r"[^A-Za-z0-9'\-]+"))
+        .where((word) => word.isNotEmpty)
+        .toList();
+    return words.isEmpty ? [cleanTerm] : words;
+  }).toList();
+}
+
+Future<List<Map<String, dynamic>>> _searchBibleVersesByCleanKeywords(
+  BibleSearchTaskData data, {
+  required List<String> preFilterKeywords,
+  bool useOrLogic = false,
+}) async {
+  if (preFilterKeywords.isEmpty) return [];
+
+  final results = <Map<String, dynamic>>[];
+  final allVerses = await BibleDatabase.getAllVerses();
+
+  final keywordCounts = <String, int>{};
+  if (!useOrLogic) {
+    for (final keyword in preFilterKeywords) {
+      final key = data.caseSensitive ? keyword : keyword.toLowerCase();
+      keywordCounts[key] = (keywordCounts[key] ?? 0) + 1;
+    }
+  }
+
+  for (final verse in allVerses) {
+    final text = _getBibleSearchText(
+      verse['text'] as String,
+      data.useRedLetter,
+    );
+    final searchText = data.caseSensitive ? text : text.toLowerCase();
+
+    var matches = true;
+    if (useOrLogic) {
+      matches = false;
+      for (final keyword in preFilterKeywords) {
+        final checkKeyword =
+            data.caseSensitive ? keyword : keyword.toLowerCase();
+        if (searchText.contains(checkKeyword)) {
+          matches = true;
+          break;
+        }
+      }
+    } else {
+      for (final entry in keywordCounts.entries) {
+        final actualCount = entry.key.allMatches(searchText).length;
+        if (actualCount < entry.value) {
+          matches = false;
+          break;
+        }
+      }
+    }
+
+    if (matches) {
+      results.add(verse);
+    }
+  }
+
+  return results;
+}
+
 _BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
   if (data.useRegex) {
     final regex = _createBibleSearchRegExp(data.input, data.caseSensitive);
@@ -266,10 +334,7 @@ _BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
     );
   }
 
-  final keywords = allTerms
-      .map((term) => term.replaceAll('*', '').trim())
-      .where((t) => t.isNotEmpty)
-      .toList();
+  final keywords = _getBiblePreFilterKeywords(allTerms);
 
   final escapedTerms = allTerms.map((term) {
     String escaped = RegExp.escape(term);
@@ -325,9 +390,9 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesOrdered(
       patternData.escapedTerms.any((term) => term.contains('[A-Za-z]*'));
   final results = patternData.keywords.isEmpty || hasWildcards
       ? await BibleDatabase.getAllVerses()
-      : await BibleDatabase.searchVerses(
+      : await _searchBibleVersesByCleanKeywords(
+          data,
           preFilterKeywords: patternData.keywords,
-          caseSensitive: data.caseSensitive,
         );
 
   final filteredResults = results.where((verse) {
@@ -356,8 +421,11 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesNearby(
     return [];
   }
 
-  final allVerses = await BibleDatabase.searchVerses(
-      preFilterKeywords: keywords, useOrLogic: true);
+  final allVerses = await _searchBibleVersesByCleanKeywords(
+    data,
+    preFilterKeywords: keywords,
+    useOrLogic: true,
+  );
   final filteredVerses = allVerses.where((verse) {
     return BookFilter.verseMatchesFilter(
         verse, data.allowedBooks, data.allowedChapters);
@@ -394,6 +462,11 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesNearby(
         }
         return '${v['verse']} $verseText';
       }).join('\n');
+      final combinedSearchText = versesInRange.map((v) {
+        final verseText =
+            _getBibleSearchText(v['text'] as String, data.useRedLetter);
+        return '${v['verse']} $verseText';
+      }).join('\n');
 
       results.add({
         'book': book,
@@ -402,6 +475,7 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesNearby(
         'endVerse': endVerse,
         'verses': versesInRange,
         'text': combinedText,
+        'searchText': combinedSearchText,
         'bookLongName': BookNameConverter.shortNameToLongName(book),
       });
     }
