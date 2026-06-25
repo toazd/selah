@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -159,6 +160,29 @@ class _BibleSearchPatternData {
     required this.pattern,
     required this.unicode,
   });
+}
+
+class _BibleHighlightRange {
+  final int start;
+  final int end;
+
+  const _BibleHighlightRange(this.start, this.end);
+}
+
+class _BibleHighlightSegment {
+  final int start;
+  final int end;
+  final bool eligible;
+
+  const _BibleHighlightSegment({
+    required this.start,
+    required this.end,
+    required this.eligible,
+  });
+}
+
+class _BibleHighlightOffset {
+  int value = 0;
 }
 
 RegExp _createBibleSearchRegExp(String pattern, bool caseSensitive) {
@@ -1369,62 +1393,211 @@ class _SearchScreenState extends State<SearchScreen>
       TextSpan span, RegExp regex, BuildContext context,
       {bool redLetterOnly = false}) {
     final color = _getHighlightColor(context);
+    final visibleText = StringBuffer();
+    final segments = <_BibleHighlightSegment>[];
+    _collectHighlightSegments(
+      span,
+      visibleText,
+      segments,
+      redLetterOnly: redLetterOnly,
+    );
 
-    // Performance optimization: if no children and no text, return as-is
-    if (span.children == null && (span.text == null || span.text!.isEmpty)) {
+    if (visibleText.isEmpty) {
       return span;
     }
 
-    // Handle spans with children (from VerseTextParser)
-    if (span.children != null && span.children!.isNotEmpty) {
-      return TextSpan(
-        style: span.style,
-        children: span.children!.map((child) {
-          if (child is TextSpan) {
-            return _highlightParsedSpan(child, regex, context,
-                redLetterOnly: redLetterOnly);
-          }
-          return child;
-        }).toList(),
+    final ranges = _getHighlightRanges(
+      visibleText.toString(),
+      regex,
+      segments,
+      redLetterOnly: redLetterOnly,
+    );
+    if (ranges.isEmpty) {
+      return span;
+    }
+
+    return _applyHighlightRanges(
+      span,
+      ranges,
+      color,
+      _BibleHighlightOffset(),
+    );
+  }
+
+  void _collectHighlightSegments(
+    InlineSpan span,
+    StringBuffer visibleText,
+    List<_BibleHighlightSegment> segments, {
+    required bool redLetterOnly,
+    TextStyle? inheritedStyle,
+  }) {
+    if (span is! TextSpan) return;
+
+    final effectiveStyle = span.style ?? inheritedStyle;
+    final text = span.text;
+    if (text != null && text.isNotEmpty) {
+      final start = visibleText.length;
+      visibleText.write(text);
+      final end = visibleText.length;
+      segments.add(_BibleHighlightSegment(
+        start: start,
+        end: end,
+        eligible: !redLetterOnly || effectiveStyle?.color == Colors.red,
+      ));
+    }
+
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      _collectHighlightSegments(
+        child,
+        visibleText,
+        segments,
+        redLetterOnly: redLetterOnly,
+        inheritedStyle: effectiveStyle,
       );
     }
+  }
 
-    // Handle simple text spans (most common case after optimization)
-    if (span.text != null && span.text!.isNotEmpty) {
-      if (redLetterOnly && span.style?.color != Colors.red) {
-        return span;
-      }
-
-      final text = span.text!;
-      final spans = <InlineSpan>[];
-      int start = 0;
-
-      // Performance optimization: early exit if no matches
-      if (!regex.hasMatch(text)) {
-        return span;
-      }
-
-      for (final match in regex.allMatches(text)) {
-        if (match.start > start) {
-          spans.add(TextSpan(
-              text: text.substring(start, match.start), style: span.style));
-        }
-        spans.add(
-          TextSpan(
-            text: text.substring(match.start, match.end),
-            style: (span.style ?? TextStyle())
-                .copyWith(backgroundColor: color, fontWeight: FontWeight.bold),
-          ),
-        );
-        start = match.end;
-      }
-      if (start < text.length) {
-        spans.add(TextSpan(text: text.substring(start), style: span.style));
-      }
-      return TextSpan(style: span.style, children: spans);
+  List<_BibleHighlightRange> _getHighlightRanges(
+    String text,
+    RegExp regex,
+    List<_BibleHighlightSegment> segments, {
+    required bool redLetterOnly,
+  }) {
+    if (!redLetterOnly) {
+      return _getHighlightRangesInText(text, regex);
     }
 
-    return span;
+    final ranges = <_BibleHighlightRange>[];
+    int? runStart;
+    int? runEnd;
+
+    void flushRun() {
+      if (runStart == null || runEnd == null || runStart == runEnd) return;
+      ranges.addAll(_getHighlightRangesInText(
+        text.substring(runStart!, runEnd!),
+        regex,
+        offset: runStart!,
+      ));
+      runStart = null;
+      runEnd = null;
+    }
+
+    for (final segment in segments) {
+      if (!segment.eligible || segment.start == segment.end) {
+        flushRun();
+        continue;
+      }
+
+      if (runStart == null) {
+        runStart = segment.start;
+        runEnd = segment.end;
+      } else if (segment.start == runEnd) {
+        runEnd = segment.end;
+      } else {
+        flushRun();
+        runStart = segment.start;
+        runEnd = segment.end;
+      }
+    }
+
+    flushRun();
+    return ranges;
+  }
+
+  List<_BibleHighlightRange> _getHighlightRangesInText(
+    String text,
+    RegExp regex, {
+    int offset = 0,
+  }) {
+    return regex
+        .allMatches(text)
+        .where((match) => match.start < match.end)
+        .map((match) =>
+            _BibleHighlightRange(offset + match.start, offset + match.end))
+        .toList();
+  }
+
+  TextSpan _applyHighlightRanges(
+    TextSpan span,
+    List<_BibleHighlightRange> ranges,
+    Color color,
+    _BibleHighlightOffset offset, {
+    TextStyle? inheritedStyle,
+  }) {
+    final effectiveStyle = span.style ?? inheritedStyle;
+    final children = <InlineSpan>[];
+    final text = span.text;
+
+    if (text != null && text.isNotEmpty) {
+      children.addAll(_buildHighlightedTextSpans(
+        text,
+        span.style,
+        effectiveStyle,
+        offset.value,
+        ranges,
+        color,
+      ));
+      offset.value += text.length;
+    }
+
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      if (child is TextSpan) {
+        children.add(_applyHighlightRanges(
+          child,
+          ranges,
+          color,
+          offset,
+          inheritedStyle: effectiveStyle,
+        ));
+      } else {
+        children.add(child);
+      }
+    }
+
+    if (children.isEmpty) return span;
+    return TextSpan(style: span.style, children: children);
+  }
+
+  List<InlineSpan> _buildHighlightedTextSpans(
+    String text,
+    TextStyle? spanStyle,
+    TextStyle? effectiveStyle,
+    int globalStart,
+    List<_BibleHighlightRange> ranges,
+    Color color,
+  ) {
+    final spans = <InlineSpan>[];
+    final globalEnd = globalStart + text.length;
+    var localStart = 0;
+
+    for (final range in ranges) {
+      if (range.end <= globalStart) continue;
+      if (range.start >= globalEnd) break;
+
+      final highlightStart = math.max(range.start, globalStart) - globalStart;
+      final highlightEnd = math.min(range.end, globalEnd) - globalStart;
+      if (highlightStart > localStart) {
+        spans.add(TextSpan(
+          text: text.substring(localStart, highlightStart),
+          style: spanStyle,
+        ));
+      }
+      if (highlightEnd > highlightStart) {
+        spans.add(TextSpan(
+          text: text.substring(highlightStart, highlightEnd),
+          style: (effectiveStyle ?? spanStyle ?? const TextStyle()).copyWith(
+            backgroundColor: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+      }
+      localStart = math.max(localStart, highlightEnd);
+    }
+
+    if (localStart < text.length) {
+      spans.add(TextSpan(text: text.substring(localStart), style: spanStyle));
+    }
+    return spans;
   }
 
   // Show help dialog
