@@ -134,15 +134,6 @@
       ]
     },
     {
-      "name": "intl",
-      "version": "0.20.2",
-      "dependencies": [
-        "clock",
-        "meta",
-        "path"
-      ]
-    },
-    {
       "name": "supabase_flutter",
       "version": "2.14.2",
       "dependencies": [
@@ -196,6 +187,15 @@
       "dependencies": [
         "flutter",
         "intl",
+        "path"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.20.2",
+      "dependencies": [
+        "clock",
+        "meta",
         "path"
       ]
     },
@@ -1611,7 +1611,7 @@
     },
     {
       "name": "video_player_android",
-      "version": "2.9.6",
+      "version": "2.9.7",
       "dependencies": [
         "flutter",
         "video_player_platform_interface"

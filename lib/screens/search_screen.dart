@@ -195,12 +195,48 @@ String _getBibleSearchText(String verseText, bool useRedLetter) {
   return processedText;
 }
 
+final RegExp _bibleSearchPhraseRegExp = RegExp(r'"([^"]+)"');
+
+bool _isEffectiveBibleSearchTerm(String term) {
+  return term.replaceAll('*', '').trim().isNotEmpty;
+}
+
+List<String> _getEffectiveBibleSearchTerms(String input) {
+  final phrases = _bibleSearchPhraseRegExp
+      .allMatches(input)
+      .map((m) => m.group(1)!)
+      .where(_isEffectiveBibleSearchTerm)
+      .toList();
+  final queryWithoutPhrases =
+      input.replaceAll(_bibleSearchPhraseRegExp, '').trim();
+  final words = queryWithoutPhrases
+      .split(RegExp(r'\s+'))
+      .where(_isEffectiveBibleSearchTerm)
+      .toList();
+  return [...phrases, ...words];
+}
+
+bool _hasEffectiveBibleSearchInput(String input, {required bool useRegex}) {
+  final searchText = useRegex ? input : input.trim();
+  if (searchText.isEmpty) return false;
+
+  if (!useRegex) {
+    return _getEffectiveBibleSearchTerms(searchText).isNotEmpty;
+  }
+
+  try {
+    final regex = _createBibleSearchRegExp(searchText, false);
+    return !regex.hasMatch('');
+  } on FormatException {
+    return false;
+  }
+}
+
 List<String> _getBibleKeywordsFromInput(String input) {
-  final phraseRegExp = RegExp(r'"([^"]+)"');
-  final withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
+  final withoutPhrases = input.replaceAll(_bibleSearchPhraseRegExp, '').trim();
   return withoutPhrases
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty)
+      .where(_isEffectiveBibleSearchTerm)
       .map((term) => term.replaceAll('*', '').trim())
       .where((t) => t.isNotEmpty)
       .toList();
@@ -218,25 +254,14 @@ _BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
     );
   }
 
-  final phraseRegExp = RegExp(r'"([^"]+)"');
-  final phrases = phraseRegExp
-      .allMatches(data.input)
-      .map((m) => m.group(1)!)
-      .where((p) => p.isNotEmpty)
-      .toList();
-  final queryWithoutPhrases = data.input.replaceAll(phraseRegExp, '').trim();
-  final originalWords = queryWithoutPhrases
-      .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty)
-      .toList();
-  final allTerms = [...phrases, ...originalWords];
+  final allTerms = _getEffectiveBibleSearchTerms(data.input);
   if (allTerms.isEmpty) {
-    final regex = _createBibleSearchRegExp('.*', data.caseSensitive);
+    final regex = _createBibleSearchRegExp(r'\b\B', data.caseSensitive);
     return _BibleSearchPatternData(
       keywords: const [],
       regex: regex,
       escapedTerms: const [],
-      pattern: '.*',
+      pattern: r'\b\B',
       unicode: false,
     );
   }
@@ -296,7 +321,8 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesOrdered(
     return filteredResults;
   }
 
-  final hasWildcards = data.input.contains('*');
+  final hasWildcards =
+      patternData.escapedTerms.any((term) => term.contains('[A-Za-z]*'));
   final results = patternData.keywords.isEmpty || hasWildcards
       ? await BibleDatabase.getAllVerses()
       : await BibleDatabase.searchVerses(
@@ -636,16 +662,9 @@ class _SearchScreenState extends State<SearchScreen>
   // Check if input is valid for nearby search (>1 word, no quoted phrases)
   bool _isValidNearbyInput(String input) {
     if (!_useNearby || _useRegex) return false;
+    if (input.contains('"')) return false;
 
-    // Parse input similar to _buildSearchPattern
-    RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-    String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-    final words = withoutPhrases
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .toList();
-
-    return words.length > 1;
+    return _getBibleKeywordsFromInput(input).length > 1;
   }
 
   // Show warning when nearby search criteria aren't met
@@ -654,16 +673,11 @@ class _SearchScreenState extends State<SearchScreen>
     if (_useRegex) {
       reason = 'Nearby search does not work with Regex mode.';
     } else {
-      RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-      String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-      final words = withoutPhrases
-          .split(RegExp(r'\s+'))
-          .where((w) => w.isNotEmpty)
-          .toList();
+      final keywords = _getBibleKeywordsFromInput(input);
 
       if (input.contains('"')) {
         reason = 'Nearby search does not work with phrases.';
-      } else if (words.length <= 1) {
+      } else if (keywords.length <= 1) {
         reason = 'Nearby search requires more than one word.';
       }
     }
@@ -673,15 +687,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   // Extract keywords from search input (same logic as _searchVersesNearby)
   List<String> _getKeywordsFromInput(String input) {
-    RegExp phraseRegExp = RegExp(r'"([^"]+)"');
-    String withoutPhrases = input.replaceAll(phraseRegExp, '').trim();
-    final keywords = withoutPhrases
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty)
-        .map((term) => term.replaceAll('*', '').trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
-    return keywords;
+    return _getBibleKeywordsFromInput(input);
   }
 
   // Highlight keywords in nearby search combined text, and also highlight verse numbers and red letters
@@ -1022,6 +1028,20 @@ class _SearchScreenState extends State<SearchScreen>
         return;
       }
 
+      if (!_hasEffectiveBibleSearchInput(
+        restoredSearchText,
+        useRegex: _useRegex,
+      )) {
+        setState(() {
+          _searchResults = [];
+          _setTotals(null, null);
+          _currentRegex = null;
+          _isSearching = false;
+          _isNearbySearchActive = false;
+        });
+        return;
+      }
+
       if (_useNearby && !_isValidNearbyInput(restoredSearchText)) {
         setState(() {
           _searchResults = [];
@@ -1171,54 +1191,27 @@ class _SearchScreenState extends State<SearchScreen>
 
     // Check for invalid custom range
     if (_bookFilterType == 'Custom Range' && _customRangeError != null) {
-      // ErrorHandler.logError(
-      //   'Invalid Custom Range',
-      //   context: {
-      //     'class': 'SearchScreen',
-      //     'method': '_onSearch',
-      //     'error': 'Invalid custom range'
-      //   },
-      // );
       return;
     }
 
     // Check for empty custom range
     if (_bookFilterType == 'Custom Range' && _customBookFilter.isEmpty) {
-      // ErrorHandler.logError(
-      //   'Custom range is empty',
-      //   context: {
-      //     'class': 'SearchScreen',
-      //     'method': '_onSearch',
-      //     'error': 'Custom range is empty'
-      //   },
-      // );
       return;
     }
 
-    // Validate input - prevent empty searches that would cause freezing
+    // Validate input - prevent empty searches that would cause freezing or return
+    // a lot of results that aren't useful
     final searchText = _useRegex ? _controller.text : _controller.text.trim();
-    if (searchText.isEmpty) {
+    if (!_hasEffectiveBibleSearchInput(searchText, useRegex: _useRegex)) {
       setState(() {
         _searchResults = [];
-        _setTotals(0, 0);
+        _setTotals(null, null);
         _currentRegex = null;
         _isNearbySearchActive = false;
         _isSearching = false;
       });
       return;
     }
-
-    // Additional validation - check if search is too short
-    //if (searchText.length < 2) {
-    //  showStyledSnackBar(context, 'Search too short', isError: true);
-    //  return;
-    //}
-
-    // Additional validation - check if 2-character search contains special characters
-    //if (searchText.length == 2 && searchText.contains('*')) {
-    //  showStyledSnackBar(context, 'Search too short');
-    //  return;
-    //}
 
     // Check if nearby search is enabled but input is invalid
     if (_useNearby && !_isValidNearbyInput(searchText)) {
