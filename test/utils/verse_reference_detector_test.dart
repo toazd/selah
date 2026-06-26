@@ -87,5 +87,22 @@ void main() {
 
       expect(references, isEmpty);
     });
+
+    test('detects common abbreviated references from definition data', () {
+      final references = VerseReferenceDetector.detectReferences(
+        'Compare Mt 18:6, Ro 5:14, Php 2:7, and 1Pe 3:21.',
+      );
+
+      expect(
+        references.map((reference) => reference.originalText),
+        containsAllInOrder(['Mt 18:6', 'Ro 5:14', 'Php 2:7', '1Pe 3:21']),
+      );
+      expect(references.map((reference) => reference.book), [
+        'Mat',
+        'Rom',
+        'Phi',
+        '1Pe',
+      ]);
+    });
   });
 }
