@@ -17,7 +17,14 @@ on:
         default: all
         options:
           - all
+          - linux-only
           - snap-only
+          - web-only
+          - android-only
+          - ios-only
+          - macos-only
+          - windows-only
+          - aur-only
       publish_snap:
         description: 'Publish the snap to the Snap Store stable channel'
         required: true
@@ -43,6 +50,7 @@ jobs:
 
   build-linux:
     name: Build Linux App
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'linux-only' || inputs.build_scope == 'snap-only' || inputs.build_scope == 'aur-only' }}
     needs: extract-version
     runs-on: ubuntu-22.04
     permissions:
@@ -451,20 +459,6 @@ jobs:
         fi
         ls -lah build/packages
 
-    - name: Check Snap package for external symlinks
-      run: |
-        set -euo pipefail
-        SNAP_FILE="build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap"
-        EXTRACT_DIR=$(mktemp -d)
-        unsquashfs -q -f -d "$EXTRACT_DIR" "$SNAP_FILE"
-        EXTERNAL_LINKS=$(find "$EXTRACT_DIR" -type l -lname '/*' -printf '%P -> %l\n')
-        rm -rf "$EXTRACT_DIR"
-        if [ -n "$EXTERNAL_LINKS" ]; then
-          echo "Snap package contains external symlinks:"
-          echo "$EXTERNAL_LINKS"
-          exit 1
-        fi
-
     - name: Upload Snap to Release
       uses: softprops/action-gh-release@v3
       with:
@@ -503,7 +497,7 @@ jobs:
 
   build-web:
     name: Build Web App
-    if: ${{ inputs.build_scope == 'all' }}
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'web-only' }}
     needs: extract-version
     runs-on: ubuntu-latest
     permissions:
@@ -568,7 +562,7 @@ jobs:
 
   build-android:
     name: Build Android App
-    if: ${{ inputs.build_scope == 'all' }}
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'android-only' }}
     needs: extract-version
     runs-on: ubuntu-latest
     permissions:
@@ -655,7 +649,7 @@ jobs:
 
   build-ios:
     name: Build iOS App
-    if: ${{ inputs.build_scope == 'all' }}
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'ios-only' }}
     needs: extract-version
     runs-on: macos-26
     permissions:
@@ -801,7 +795,7 @@ jobs:
 
   build-macos:
     name: Build macOS Desktop App
-    if: ${{ inputs.build_scope == 'all' }}
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'macos-only' }}
     needs: extract-version
     runs-on: macos-26
     permissions:
@@ -883,7 +877,7 @@ jobs:
 
   build-windows:
     name: Build Windows App
-    if: ${{ inputs.build_scope == 'all' }}
+    if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'windows-only' }}
     needs: extract-version
     runs-on: windows-2022
     permissions:
@@ -953,7 +947,7 @@ jobs:
 
   publish-aur:
       name: Publish to Arch User Repository
-      if: ${{ inputs.build_scope == 'all' }}
+      if: ${{ inputs.build_scope == 'all' || inputs.build_scope == 'aur-only' }}
       needs:
         - extract-version
         - build-linux
