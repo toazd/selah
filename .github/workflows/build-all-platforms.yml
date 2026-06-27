@@ -407,7 +407,7 @@ jobs:
         mkdir -p build/snap-build/snap/gui
         cp snapcraft/snapcraft.yaml build/snap-build/snapcraft.yaml
         cp snapcraft/io.github.toazd.selah.desktop build/snap-build/snap/gui/
-        cp snapcraft/io.github.toazd.selah.svg build/snap-build/snap/gui/
+        cp snapcraft/io.github.toazd.selah.png build/snap-build/snap/gui/
 
     - name: Install snapcraft dependencies
       run: |
@@ -477,6 +477,13 @@ jobs:
       with:
         snap: build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap
         release: stable
+
+    - name: Upload Snap Store metadata
+      if: ${{ inputs.publish_snap }}
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      run: |
+        snapcraft upload-metadata "build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap" --force
 
     - name: Delete temporary Linux Debian artifact
       env:

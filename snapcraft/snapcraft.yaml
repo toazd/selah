@@ -1,7 +1,7 @@
 name: selah
-title: Selah Bible Study App
+title: Selah KJV Bible Study App
 version: "0.8.1"
-summary: Cross-platform Bible study app
+summary: Cross-platform KJV Bible study app
 description: |
   Selah is a cross-platform, touch-friendly Bible study application built with
   Flutter. It provides offline King James Bible reading, rich verse notes,
@@ -14,7 +14,7 @@ contact: https://github.com/toazd/selah/issues
 issues: https://github.com/toazd/selah/issues
 source-code: https://github.com/toazd/selah
 website: https://toazd.github.io
-icon: snap/gui/io.github.toazd.selah.svg
+icon: snap/gui/io.github.toazd.selah.png
 type: app
 
 base: core22
