@@ -29,11 +29,7 @@ apps:
       __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
       GTK_PATH: $SNAP/usr/lib/x86_64-linux-gnu/gtk-3.0
       LIBGL_DRIVERS_PATH: $SNAP/usr/lib/x86_64-linux-gnu/dri
-      XDG_CONFIG_HOME: $SNAP_REAL_HOME/.config
-      XDG_DATA_HOME: $SNAP_REAL_HOME/.local/share
     plugs:
-      - dot-config-selah
-      - dot-local-share-selah
       - home
       - network
       - network-bind
@@ -46,22 +42,6 @@ apps:
       - desktop-legacy
       - browser-support
       - opengl
-
-plugs:
-  dot-config-selah:
-    interface: personal-files
-    read:
-      - $HOME/.config/selah
-    write:
-      - $HOME/.config/selah
-  dot-local-share-selah:
-    interface: personal-files
-    read:
-      - $HOME/.local/share/io.github.toazd.selah
-      - $HOME/.local/share/selah
-    write:
-      - $HOME/.local/share/io.github.toazd.selah
-      - $HOME/.local/share/selah
 
 parts:
   selah:
