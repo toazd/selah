@@ -412,7 +412,7 @@ jobs:
         mkdir -p build/snap-build/snap/gui
         cp snapcraft/snapcraft.yaml build/snap-build/snapcraft.yaml
         cp snapcraft/io.github.toazd.selah.desktop build/snap-build/snap/gui/
-        cp snapcraft/io.github.toazd.selah.png build/snap-build/snap/gui/
+        cp snapcraft/icon.png build/snap-build/snap/gui/
 
     - name: Install snapcraft dependencies
       run: |
@@ -468,13 +468,12 @@ jobs:
       run: |
         set -euo pipefail
         SNAP_TARGET="build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap"
-        SNAP_METADATA="$(unsquashfs -cat "$SNAP_TARGET" meta/snap.yaml)"
-        if ! echo "$SNAP_METADATA" | grep -Eq '^icon: (meta|snap)/gui/io\.github\.toazd\.selah\.png$'; then
-          echo "Snap metadata does not declare the expected Store icon:"
-          echo "$SNAP_METADATA"
+        if ! unsquashfs -ll "$SNAP_TARGET" meta/gui/icon.png; then
+          echo "Snap package does not contain the expected Store icon at meta/gui/icon.png."
+          echo "Packaged GUI metadata files:"
+          unsquashfs -ll "$SNAP_TARGET" meta/gui || true
           exit 1
         fi
-        unsquashfs -ll "$SNAP_TARGET" meta/gui/io.github.toazd.selah.png
 
     - name: Upload Snap to Release
       uses: softprops/action-gh-release@v3

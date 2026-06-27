@@ -2,7 +2,7 @@
 Name=Selah
 Comment=A cross-platform Bible study app using Flutter and the 1769 King James Version
 Exec=selah
-Icon=${SNAP}/meta/gui/io.github.toazd.selah.png
+Icon=${SNAP}/meta/gui/icon.png
 Terminal=false
 Type=Application
 Categories=Education;Literature;

@@ -14,7 +14,7 @@ contact: https://github.com/toazd/selah/issues
 issues: https://github.com/toazd/selah/issues
 source-code: https://github.com/toazd/selah
 website: https://toazd.github.io
-icon: snap/gui/io.github.toazd.selah.png
+icon: snap/gui/icon.png
 type: app
 
 base: core22
