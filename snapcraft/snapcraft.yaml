@@ -21,15 +21,32 @@ base: core22
 confinement: strict
 grade: stable
 
+plugs:
+  graphics-core22:
+    interface: content
+    target: $SNAP/graphics
+    default-provider: mesa-core22
+
+layout:
+  /usr/share/libdrm:
+    bind: $SNAP/graphics/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/graphics/drirc.d
+  /usr/share/X11/XErrorDB:
+    symlink: $SNAP/graphics/X11/XErrorDB
+  /usr/share/X11/locale:
+    symlink: $SNAP/graphics/X11/locale
+
 apps:
   selah:
+    command-chain:
+      - bin/graphics-core22-wrapper
     command: opt/selah/selah
     desktop: snap/gui/io.github.toazd.selah.desktop
     environment:
-      __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
       GTK_PATH: $SNAP/usr/lib/x86_64-linux-gnu/gtk-3.0
-      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/x86_64-linux-gnu/dri
     plugs:
+      - graphics-core22
       - home
       - network
       - network-manager-observe
@@ -98,3 +115,15 @@ parts:
       - libwayland-cursor0
       - libwayland-egl1
       - xdg-utils
+
+  graphics-core22:
+    after:
+      - selah
+    source: https://github.com/canonical/gpu-snap.git
+    plugin: dump
+    override-prime: |
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
+      rm -f "${CRAFT_PRIME}/opt/selah/lib/libdartjni.so"
+    prime:
+      - bin/graphics-core22-wrapper
