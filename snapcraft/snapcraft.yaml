@@ -32,15 +32,11 @@ apps:
     plugs:
       - home
       - network
-      - network-bind
       - network-manager-observe
-      - network-observe
-      - removable-media
       - x11
       - wayland
       - desktop
       - desktop-legacy
-      - browser-support
       - opengl
 
 parts:
