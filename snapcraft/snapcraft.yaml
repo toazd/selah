@@ -124,6 +124,7 @@ parts:
     override-prime: |
       craftctl default
       ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
+      rm -f "${CRAFT_PRIME}/usr/bin/selah"
       rm -f "${CRAFT_PRIME}/opt/selah/lib/libdartjni.so"
     prime:
       - bin/graphics-core22-wrapper
