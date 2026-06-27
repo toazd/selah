@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'linux_config_paths.dart';
+
 class PlatformPaths {
   static String? _userDataDirectoryOverride;
 
@@ -34,8 +36,7 @@ class PlatformPaths {
       return join(appData, 'com.selah.holybible', 'selah');
     } else if (Platform.isLinux) {
       // Linux: Use ~/.config/selah
-      final homeDir = Platform.environment['HOME'] ?? '';
-      return join(homeDir, '.config', 'selah');
+      return LinuxConfigPaths.selahConfigDirectory();
     } else if (Platform.isMacOS) {
       // macOS: Use ~/Library/Application Support/Selah
       final appSupport = await getApplicationSupportDirectory();

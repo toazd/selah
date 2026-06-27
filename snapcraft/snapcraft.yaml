@@ -1,0 +1,124 @@
+name: selah
+title: Selah Bible Study App
+version: "0.8.1"
+summary: Cross-platform Bible study app
+description: |
+  Selah is a cross-platform, touch-friendly Bible study application built with
+  Flutter. It provides offline King James Bible reading, rich verse notes,
+  word-level highlighting, Strong's definitions and search, TSK cross
+  references, verse history, import and export tools, and optional account-based
+  sync.
+
+license: Unlicense
+contact: https://github.com/toazd/selah/issues
+issues: https://github.com/toazd/selah/issues
+source-code: https://github.com/toazd/selah
+website: https://toazd.github.io
+icon: snap/gui/io.github.toazd.selah.svg
+type: app
+
+base: core22
+confinement: strict
+grade: stable
+
+apps:
+  selah:
+    command: opt/selah/selah
+    desktop: snap/gui/io.github.toazd.selah.desktop
+    environment:
+      __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
+      GTK_PATH: $SNAP/usr/lib/x86_64-linux-gnu/gtk-3.0
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/x86_64-linux-gnu/dri
+      XDG_CONFIG_HOME: $SNAP_REAL_HOME/.config
+      XDG_DATA_HOME: $SNAP_REAL_HOME/.local/share
+    plugs:
+      - dot-config-selah
+      - dot-local-share-selah
+      - home
+      - network
+      - network-bind
+      - network-manager-observe
+      - network-observe
+      - removable-media
+      - x11
+      - wayland
+      - desktop
+      - desktop-legacy
+      - browser-support
+      - opengl
+
+plugs:
+  dot-config-selah:
+    interface: personal-files
+    read:
+      - $HOME/.config/selah
+    write:
+      - $HOME/.config/selah
+  dot-local-share-selah:
+    interface: personal-files
+    read:
+      - $HOME/.local/share/io.github.toazd.selah
+      - $HOME/.local/share/selah
+    write:
+      - $HOME/.local/share/io.github.toazd.selah
+      - $HOME/.local/share/selah
+
+parts:
+  selah:
+    plugin: dump
+    source: prime
+    stage-packages:
+      - ca-certificates
+      - libgtk-3-0
+      - libglib2.0-0
+      - libpango-1.0-0
+      - libpangocairo-1.0-0
+      - libgdk-pixbuf2.0-0
+      - libx11-6
+      - libx11-xcb1
+      - libxkbcommon0
+      - libdrm2
+      - libegl1
+      - libegl-mesa0
+      - libgbm1
+      - libgl1
+      - libgl1-mesa-dri
+      - libgles2
+      - libglvnd0
+      - libglx0
+      - libglx-mesa0
+      - libopengl0
+      - libfontconfig1
+      - libfreetype6
+      - libcanberra-gtk-module
+      - libcanberra-gtk3-module
+      - libsecret-1-0
+      - libsqlite3-0
+      - libopus0
+      - libjsoncpp25
+      - libasound2
+      - libatk1.0-0
+      - libc6
+      - libxcb1
+      - libxcb-dri2-0
+      - libxcb-dri3-0
+      - libxcb-glx0
+      - libxcb-present0
+      - libxcb-randr0
+      - libxcb-sync1
+      - libxcb-xfixes0
+      - libxrender1
+      - libxrandr2
+      - libxss1
+      - libxcursor1
+      - libxcomposite1
+      - libxdamage1
+      - libxfixes3
+      - libxext6
+      - libxinerama1
+      - libxshmfence1
+      - libxtst6
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - xdg-utils

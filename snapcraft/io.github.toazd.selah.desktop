@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Selah
+Comment=A cross-platform Bible study app using Flutter and the 1769 King James Version
+Exec=selah
+Icon=${SNAP}/meta/gui/io.github.toazd.selah.svg
+Terminal=false
+Type=Application
+Categories=Education;Literature;
+Keywords=Bible;Study;KJV;King James Version;Strong's;TSK;
+StartupNotify=true
+StartupWMClass=io.github.toazd.selah
