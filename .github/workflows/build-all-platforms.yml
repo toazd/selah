@@ -433,6 +433,9 @@ jobs:
         fi
         dpkg-deb -x "$DEB_FILE" build/snap-build/prime
         rm -f "$DEB_FILE"
+        # The snap has its own desktop entry under snap/gui; keep the .deb
+        # launcher out of prime so snapd only exports one Selah launcher.
+        rm -f build/snap-build/prime/usr/share/applications/io.github.toazd.selah.desktop
         mkdir -p build/snap-build/prime/usr/share/applications
         mkdir -p build/snap-build/prime/usr/share/icons/hicolor/256x256/apps
 
