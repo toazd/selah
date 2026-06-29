@@ -561,7 +561,7 @@
     },
     {
       "name": "native_toolchain_c",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/native_toolchain_c-0.19.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/native_toolchain_c-0.19.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -915,7 +915,7 @@
     },
     {
       "name": "sqflite_darwin",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.3",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.3+1",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1065,15 +1065,15 @@
     },
     {
       "name": "video_player_avfoundation",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.9.7",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.10.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "video_player_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.7.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.8.0",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "video_player_web",
@@ -1157,6 +1157,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.3",
+  "flutterVersion": "3.44.4",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }

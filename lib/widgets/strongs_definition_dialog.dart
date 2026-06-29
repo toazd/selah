@@ -152,10 +152,10 @@ class StrongsDefinitionDialog {
     ];
   }
 
-  @visibleForTesting
-  static String linkDefinitionReferencesForTesting(String html) {
-    return _linkDefinitionReferencesInHtml(html);
-  }
+  // @visibleForTesting
+  // static String linkDefinitionReferencesForTesting(String html) {
+  //   return _linkDefinitionReferencesInHtml(html);
+  // }
 
   static String _linkDefinitionReferencesInHtml(String html) {
     final buffer = StringBuffer();
