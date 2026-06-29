@@ -66,10 +66,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   int? _totalVerses;
   String? _searchType;
   //String? _searchTerm;
-  bool _isSearchingWeb = false;
-  bool _isLoadingDialogVisible = false;
-  bool _searchTimedOut = false;
-  Timer? _searchTimeoutTimer;
+  bool _isSearching = false;
   Timer? _scrollOffsetSaveTimer;
   int _activeSearchId = 0;
 
@@ -78,81 +75,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
   @override
   bool get wantKeepAlive => true;
-
-  void _showLoadingDialog(int searchId) {
-    _searchTimedOut = false;
-    _searchTimeoutTimer?.cancel();
-    if (!kIsWeb) {
-      _searchTimeoutTimer = Timer(const Duration(seconds: 60), () {
-        if (searchId != _activeSearchId) return;
-        if (kDebugMode) {
-          debugPrint('[_searchTimeoutTimer] 60s search timeout reached');
-        }
-        _searchTimedOut = true;
-        _hideLoadingDialog(searchId: searchId);
-        if (mounted) {
-          setState(() {
-            _searchResults = [];
-            _foundStrongsNumbers = {};
-            _phraseSummary = {};
-            _totalMatches = null;
-            _totalVerses = null;
-            _searchType = null;
-            //_searchTerm = null;
-          });
-          showStyledSnackBar(
-              context, 'Maximum search time exceeded. Please try again.');
-        }
-      });
-    }
-    _isLoadingDialogVisible = true;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor =
-        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
-
-    showDialog(
-      animationStyle: AnimationStyle(duration: Duration(seconds: 0)),
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: bgColor,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(
-              padding: EdgeInsetsGeometry.all(0),
-              constraints: BoxConstraints.tight(Size(72, 72)),
-              strokeWidth: 7.0,
-              semanticsLabel: "Searching",
-              strokeCap: StrokeCap.round,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Searching...',
-              style: TextStyle(
-                fontSize: uiFontSize,
-                fontFamily: uiFontFamily,
-                color: getAdaptiveTextColor(context),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _hideLoadingDialog({int? searchId}) {
-    if (searchId != null && searchId != _activeSearchId) return;
-    _searchTimeoutTimer?.cancel();
-    _searchTimeoutTimer = null;
-    if (_isLoadingDialogVisible && mounted && Navigator.canPop(context)) {
-      _isLoadingDialogVisible = false;
-      Navigator.pop(context);
-    }
-  }
 
   /// Attempts to parse a reference search (e.g., "Gen 2:15 garden")
   /// Returns a ReferenceSearchTaskData if valid, null otherwise
@@ -280,9 +202,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     final input = _controller.text.trim();
     final searchId = ++_activeSearchId;
-    _searchTimedOut = false;
     if (input.isEmpty) {
-      _hideLoadingDialog(searchId: searchId);
       setState(() {
         _searchResults = [];
         _foundStrongsNumbers = {};
@@ -291,7 +211,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = 0;
         _searchType = null;
         //_searchTerm = null;
-        _isSearchingWeb = false;
+        _isSearching = false;
       });
       _persistSearchState('');
       return;
@@ -304,17 +224,13 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _totalMatches = null;
       _totalVerses = null;
       //_searchTerm = input;
-      _isSearchingWeb = kIsWeb && showLoading;
+      _isSearching = showLoading;
     });
 
     _persistSearchState(input);
 
     if (resetScroll && _resultsScrollController.hasClients) {
       _resultsScrollController.jumpTo(0.0);
-    }
-
-    if (showLoading && !kIsWeb) {
-      _showLoadingDialog(searchId);
     }
 
     // Try to parse as reference search first (e.g., "Gen 2:15 garden")
@@ -357,9 +273,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       showLoading: showLoading,
       task: () {
         if (strongsNumber != null) {
-          _performStrongsNumberSearch(strongsNumber, searchId);
+          return _performStrongsNumberSearch(strongsNumber, searchId);
         } else {
-          _performWordSearch(searchTerm, searchId);
+          return _performWordSearch(searchTerm, searchId);
         }
       },
     );
@@ -368,40 +284,37 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   void _startSearchTask({
     required int searchId,
     required bool showLoading,
-    required VoidCallback task,
+    required Future<void> Function() task,
   }) {
-    void runTask() {
+    Future<void> runTask() async {
       if (!mounted || searchId != _activeSearchId) return;
-      task();
+      if (showLoading) {
+        await _waitForNextFrame();
+      }
+      if (!mounted || searchId != _activeSearchId) return;
+      await task();
     }
 
-    if (kIsWeb && showLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future<void>.delayed(Duration.zero, runTask);
-      });
-    } else {
-      Future.microtask(runTask);
-    }
+    unawaited(runTask());
   }
 
-  void _performStrongsNumberSearch(String strongsNumber, int searchId) async {
+  Future<void> _performStrongsNumberSearch(
+      String strongsNumber, int searchId) async {
     if (kDebugMode) {
       debugPrint(
           '[_performStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final searchResult =
-          await compute(computeStrongsNumberSearchResult, strongsNumber);
+      final searchResult = runStrongsNumberSearch(strongsNumber);
       if (!mounted) return;
       if (_isResetting) return;
       if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
       final results = searchResult.searchResults;
       final phraseSummary = searchResult.phraseSummary;
       if (kDebugMode) {
         debugPrint(
-            '[_performStrongsNumberSearch] Got ${results.length} results and ${phraseSummary.length} phrases from compute');
+            '[_performStrongsNumberSearch] Got ${results.length} results and ${phraseSummary.length} phrases');
       }
 
       if (results.isEmpty) {
@@ -413,9 +326,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'strongs';
           _isRestoring = false;
-          _isSearchingWeb = false;
+          _isSearching = false;
         });
-        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -432,39 +344,36 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'strongs';
         _isRestoring = false;
-        _isSearchingWeb = false;
+        _isSearching = false;
       });
-      _hideLoadingDialog(searchId: searchId);
     } catch (e) {
       if (mounted) {
         if (!_isResetting) {
           if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
-            _isSearchingWeb = false;
+            _isSearching = false;
           });
-          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
     }
   }
 
-  void _performWordSearch(String word, int searchId) async {
+  Future<void> _performWordSearch(String word, int searchId) async {
     if (kDebugMode) {
       debugPrint('[_performWordSearch] ===== START: word="$word" =====');
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final wordSearchResult = await compute(computeWordSearchResult, word);
+      final wordSearchResult = runWordSearch(word);
       if (kDebugMode) {
         debugPrint(
-            '[_performWordSearch] Word search compute done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
+            '[_performWordSearch] Word search done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
       }
       if (!mounted) return;
       if (_isResetting) return;
       if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
 
       final foundStrongs = wordSearchResult.foundStrongsNumbers;
       final results = wordSearchResult.searchResults;
@@ -479,9 +388,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'word';
           _isRestoring = false;
-          _isSearchingWeb = false;
+          _isSearching = false;
         });
-        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -494,9 +402,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'word';
           _isRestoring = false;
-          _isSearchingWeb = false;
+          _isSearching = false;
         });
-        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -513,9 +420,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'word';
         _isRestoring = false;
-        _isSearchingWeb = false;
+        _isSearching = false;
       });
-      _hideLoadingDialog(searchId: searchId);
       if (kDebugMode) {
         debugPrint(
             '[_performWordSearch] ===== COMPLETE ($_totalMatches matches in $_totalVerses verses) =====');
@@ -529,9 +435,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
-            _isSearchingWeb = false;
+            _isSearching = false;
           });
-          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
@@ -546,7 +451,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField();
     try {
-      final result = await compute(computeReferenceSearchResult, refSearch);
+      final result = runReferenceSearch(refSearch);
       if (kDebugMode) {
         debugPrint(
             '[_performReferenceSearch] Reference search done: error=${result.error}, strongsNumbers=${result.strongsNumbers}');
@@ -554,11 +459,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       if (!mounted) return;
       if (_isResetting) return;
       if (searchId != _activeSearchId) return;
-      if (_searchTimedOut) return;
 
       // Check for errors
       if (result.error != null) {
-        _hideLoadingDialog(searchId: searchId);
         showStyledSnackBar(context, result.error!);
         setState(() {
           _searchResults = [];
@@ -568,7 +471,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'reference';
           _isRestoring = false;
-          _isSearchingWeb = false;
+          _isSearching = false;
         });
         return;
       }
@@ -585,9 +488,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _totalVerses = 0;
           _searchType = 'reference';
           _isRestoring = false;
-          _isSearchingWeb = false;
+          _isSearching = false;
         });
-        _hideLoadingDialog(searchId: searchId);
         return;
       }
 
@@ -604,9 +506,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = results.length;
         _searchType = 'reference';
         _isRestoring = false;
-        _isSearchingWeb = false;
+        _isSearching = false;
       });
-      _hideLoadingDialog(searchId: searchId);
       if (kDebugMode) {
         debugPrint(
             '[_performReferenceSearch] DONE ($_totalMatches matches in $_totalVerses verses)');
@@ -620,9 +521,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           if (searchId != _activeSearchId) return;
           setState(() {
             _isRestoring = false;
-            _isSearchingWeb = false;
+            _isSearching = false;
           });
-          _hideLoadingDialog(searchId: searchId);
           showStyledSnackBar(context, 'Search failed: ${e.toString()}');
         }
       }
@@ -941,8 +841,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _disposeVerseReferenceRecognizers() {
-    _searchTimeoutTimer?.cancel();
-    _searchTimeoutTimer = null;
     for (final recognizer in _verseReferenceRecognizers) {
       recognizer.onTap = null;
       recognizer.dispose();
@@ -954,8 +852,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   @override
   void initState() {
     super.initState();
-    _restoreSearchState();
     _resultsScrollController.addListener(_scheduleScrollOffsetSave);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_restoreSearchState());
+    });
   }
 
   @override
@@ -989,21 +890,76 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = null;
         _searchType = null;
         //_searchTerm = null;
-        _isSearchingWeb = false;
+        _isSearching = false;
       });
       return;
     }
 
+    await _waitForRouteTransition();
+    if (!mounted) return;
     setState(() {
       _controller.text = lastSearch;
       _isRestoring = true;
-      _isSearchingWeb = false;
+      _isSearching = false;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      _onSearch(showLoading: false, resetScroll: false);
-      await _loadScrollOffset();
-    });
+    await _waitForFrames(2);
+    if (!mounted) return;
+    _onSearch(showLoading: false, resetScroll: false);
+    await _loadScrollOffset();
+  }
+
+  Future<void> _waitForNextFrame() async {
+    await _waitForFrames(1);
+  }
+
+  Future<void> _waitForFrames(int frameCount) async {
+    for (int i = 0; i < frameCount; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  Future<void> _waitForRouteTransition() async {
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      await _waitForFrames(2);
+      return;
+    }
+
+    final animation = route.animation;
+    if (animation == null ||
+        animation.status == AnimationStatus.completed ||
+        animation.status == AnimationStatus.dismissed) {
+      await _waitForFrames(2);
+      return;
+    }
+
+    final completer = Completer<void>();
+    late AnimationStatusListener listener;
+    listener = (status) {
+      if (status == AnimationStatus.completed ||
+          status == AnimationStatus.dismissed) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }
+    };
+
+    animation.addStatusListener(listener);
+    try {
+      if (animation.status != AnimationStatus.completed &&
+          animation.status != AnimationStatus.dismissed) {
+        final timeout =
+            route.transitionDuration + const Duration(milliseconds: 100);
+        await completer.future.timeout(timeout, onTimeout: () {});
+      }
+    } finally {
+      animation.removeStatusListener(listener);
+    }
+
+    if (mounted) {
+      await _waitForFrames(2);
+    }
   }
 
   Future<void> _persistSearchState(String searchTerm) async {
@@ -1174,7 +1130,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     ),
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) {
-                      _onSearch();
+                      if (!_isSearching) {
+                        _onSearch();
+                      }
                     },
                     style: TextStyle(
                         fontSize: uiFontSize,
@@ -1186,7 +1144,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       runAlignment: WrapAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: _isResetting
+                          onPressed: _isResetting || _isSearching
                               ? null
                               : () async {
                                   if (_isResetting) return;
@@ -1201,7 +1159,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     _searchType = null;
                                     //_searchTerm = null;
                                     _isRestoring = false;
-                                    _isSearchingWeb = false;
+                                    _isSearching = false;
                                   });
 
                                   Future.delayed(const Duration(seconds: 3),
@@ -1251,7 +1209,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                         const SizedBox(width: 8),
                         ElevatedButton(
                           focusNode: _searchButtonFocusNode,
-                          onPressed: () => _onSearch(),
+                          onPressed: _isSearching ? null : () => _onSearch(),
                           child: Text('Search',
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
@@ -1280,24 +1238,24 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                         fontSize: uiFontSize,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
-                            : _isSearchingWeb
+                            : _isSearching
                                 ? Center(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        CircularProgressIndicator(
-                                          strokeWidth: 4.0,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            isDark
-                                                ? darkPrimaryColor.value
-                                                : lightPrimaryColor.value,
-                                          ),
-                                        ),
+                                        // CircularProgressIndicator(
+                                        //   strokeWidth: 4.0,
+                                        //   valueColor:
+                                        //       AlwaysStoppedAnimation<Color>(
+                                        //     isDark
+                                        //         ? darkPrimaryColor.value
+                                        //         : lightPrimaryColor.value,
+                                        //   ),
+                                        // ),
                                         const SizedBox(height: 16),
                                         Text('Searching...',
                                             style: TextStyle(
-                                                fontSize: uiFontSize,
+                                                fontSize: uiFontSize + 2,
                                                 fontFamily: uiFontFamily,
                                                 color: getAdaptiveTextColor(
                                                     context))),

@@ -2,11 +2,10 @@ import 'package:flutter/foundation.dart';
 
 import '../database/strongs_database.dart';
 
-Future<StrongsNumberSearchComputationResult> computeStrongsNumberSearchResult(
-    String strongsNumber) async {
+StrongsNumberSearchResult runStrongsNumberSearch(String strongsNumber) {
   if (kDebugMode) {
     debugPrint(
-        '[computeStrongsNumberSearchResult] START: strongsNumber="$strongsNumber"');
+        '[runStrongsNumberSearch] START: strongsNumber="$strongsNumber"');
   }
 
   final results = StrongsDatabase.searchByStrongsNumber(strongsNumber);
@@ -20,18 +19,18 @@ Future<StrongsNumberSearchComputationResult> computeStrongsNumberSearchResult(
 
   if (kDebugMode) {
     debugPrint(
-        '[computeStrongsNumberSearchResult] DONE: ${results.length} verses, ${phraseSummary.length} phrases');
+        '[runStrongsNumberSearch] DONE: ${results.length} verses, ${phraseSummary.length} phrases');
   }
 
-  return StrongsNumberSearchComputationResult(
+  return StrongsNumberSearchResult(
     searchResults: results,
     phraseSummary: phraseSummary,
   );
 }
 
-Future<WordSearchComputationResult> computeWordSearchResult(String word) async {
+WordSearchResult runWordSearch(String word) {
   if (kDebugMode) {
-    debugPrint('[computeWordSearchResult] START: word="$word"');
+    debugPrint('[runWordSearch] START: word="$word"');
   }
 
   final wordData = StrongsDatabase.searchByWordWithStrongsNumbers(word);
@@ -39,9 +38,9 @@ Future<WordSearchComputationResult> computeWordSearchResult(String word) async {
   if (wordData.wordVerses.isEmpty || foundStrongs.isEmpty) {
     if (kDebugMode) {
       debugPrint(
-          '[computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
+          '[runWordSearch] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
     }
-    return WordSearchComputationResult(
+    return WordSearchResult(
       wordVerseCount: wordData.wordVerses.length,
       foundStrongsNumbers: foundStrongs,
       searchResults: const [],
@@ -57,10 +56,10 @@ Future<WordSearchComputationResult> computeWordSearchResult(String word) async {
 
   if (kDebugMode) {
     debugPrint(
-        '[computeWordSearchResult] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
+        '[runWordSearch] DONE: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
   }
 
-  return WordSearchComputationResult(
+  return WordSearchResult(
     wordVerseCount: wordData.wordVerses.length,
     foundStrongsNumbers: foundStrongs,
     searchResults: results,
@@ -68,22 +67,20 @@ Future<WordSearchComputationResult> computeWordSearchResult(String word) async {
   );
 }
 
-Future<ReferenceSearchComputationResult> computeReferenceSearchResult(
-    ReferenceSearchTaskData data) async {
+ReferenceSearchResult runReferenceSearch(ReferenceSearchTaskData data) {
   if (kDebugMode) {
     debugPrint(
-        '[computeReferenceSearchResult] START: "${data.book} ${data.chapter}:${data.verse} ${data.word}"');
+        '[runReferenceSearch] START: "${data.book} ${data.chapter}:${data.verse} ${data.word}"');
   }
 
   final availableBooks = StrongsDatabase.getAvailableBooks();
   if (!availableBooks.contains(data.book)) {
-    return ReferenceSearchComputationResult(
-        error: 'Invalid book: ${data.book}');
+    return ReferenceSearchResult(error: 'Invalid book: ${data.book}');
   }
 
   final availableChapters = StrongsDatabase.getAvailableChapters(data.book);
   if (!availableChapters.contains(data.chapter)) {
-    return ReferenceSearchComputationResult(
+    return ReferenceSearchResult(
       error: 'Invalid chapter ${data.chapter} for ${data.book}',
     );
   }
@@ -91,14 +88,14 @@ Future<ReferenceSearchComputationResult> computeReferenceSearchResult(
   final availableVerses =
       StrongsDatabase.getAvailableVerses(data.book, data.chapter);
   if (!availableVerses.contains(data.verse)) {
-    return ReferenceSearchComputationResult(
+    return ReferenceSearchResult(
       error: 'Invalid verse ${data.verse} for ${data.book} ${data.chapter}',
     );
   }
 
   if (!StrongsDatabase.wordExistsInVerse(
       data.book, data.chapter, data.verse, data.word)) {
-    return ReferenceSearchComputationResult(
+    return ReferenceSearchResult(
       error:
           'Word "${data.word}" not found in ${data.book} ${data.chapter}:${data.verse}',
     );
@@ -111,7 +108,7 @@ Future<ReferenceSearchComputationResult> computeReferenceSearchResult(
     data.word,
   );
   if (strongsNumbers.isEmpty) {
-    return ReferenceSearchComputationResult(
+    return ReferenceSearchResult(
       error:
           'No Strong\'s numbers found for "${data.word}" in ${data.book} ${data.chapter}:${data.verse}',
     );
@@ -133,10 +130,10 @@ Future<ReferenceSearchComputationResult> computeReferenceSearchResult(
 
   if (kDebugMode) {
     debugPrint(
-        '[computeReferenceSearchResult] DONE: ${strongsNumbers.length} Strong\'s numbers, ${results.length} verses, ${phraseSummary.length} phrases');
+        '[runReferenceSearch] DONE: ${strongsNumbers.length} Strong\'s numbers, ${results.length} verses, ${phraseSummary.length} phrases');
   }
 
-  return ReferenceSearchComputationResult(
+  return ReferenceSearchResult(
     strongsNumbers: strongsNumbers,
     foundStrongsNumbers: foundStrongs,
     searchResults: results,
@@ -144,11 +141,11 @@ Future<ReferenceSearchComputationResult> computeReferenceSearchResult(
   );
 }
 
-class StrongsNumberSearchComputationResult {
+class StrongsNumberSearchResult {
   final List<Map<String, dynamic>> searchResults;
   final Map<String, int> phraseSummary;
 
-  const StrongsNumberSearchComputationResult({
+  const StrongsNumberSearchResult({
     required this.searchResults,
     required this.phraseSummary,
   });
@@ -168,14 +165,14 @@ class ReferenceSearchTaskData {
   });
 }
 
-class ReferenceSearchComputationResult {
+class ReferenceSearchResult {
   final List<String> strongsNumbers;
   final Map<String, Map<String, dynamic>> foundStrongsNumbers;
   final List<Map<String, dynamic>> searchResults;
   final Map<String, int> phraseSummary;
   final String? error;
 
-  const ReferenceSearchComputationResult({
+  const ReferenceSearchResult({
     this.strongsNumbers = const [],
     this.foundStrongsNumbers = const {},
     this.searchResults = const [],
@@ -184,13 +181,13 @@ class ReferenceSearchComputationResult {
   });
 }
 
-class WordSearchComputationResult {
+class WordSearchResult {
   final int wordVerseCount;
   final Map<String, Map<String, dynamic>> foundStrongsNumbers;
   final List<Map<String, dynamic>> searchResults;
   final Map<String, int> phraseSummary;
 
-  const WordSearchComputationResult({
+  const WordSearchResult({
     required this.wordVerseCount,
     required this.foundStrongsNumbers,
     required this.searchResults,
