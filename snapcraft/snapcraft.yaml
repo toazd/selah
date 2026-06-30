@@ -26,6 +26,18 @@ plugs:
     interface: content
     target: $SNAP/graphics
     default-provider: mesa-core22
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
 
 layout:
   /usr/share/libdrm:
@@ -44,8 +56,13 @@ apps:
     command: opt/selah/selah
     environment:
       GTK_PATH: $SNAP/usr/lib/x86_64-linux-gnu/gtk-3.0
+      XDG_DATA_DIRS: $SNAP/data-dir:$SNAP/usr/share:$XDG_DATA_DIRS
+      XCURSOR_PATH: $SNAP/data-dir/icons:$SNAP/usr/share/icons
     plugs:
       - graphics-core22
+      - gtk-3-themes
+      - icon-themes
+      - sound-themes
       - home
       - network
       - network-manager-observe
@@ -53,6 +70,7 @@ apps:
       - wayland
       - desktop
       - desktop-legacy
+      - gsettings
       - opengl
 
 parts:
