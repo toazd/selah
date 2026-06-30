@@ -155,6 +155,95 @@ final ValueNotifier<bool> syncSearchHistoryNotifier =
 // Supabase auth state
 final ValueNotifier<bool> isSignedIn = ValueNotifier(false);
 final ValueNotifier<User?> currentUser = ValueNotifier(null);
+int _authStateGeneration = 0;
+
+bool _shouldIgnoreNullSessionAuthEvent({
+  required AuthChangeEvent event,
+  required bool signedIn,
+  required bool hasCurrentUser,
+}) {
+  if (event == AuthChangeEvent.signedOut) {
+    return false;
+  }
+
+  // A null initialSession is the normal startup state when there is no stored
+  // session. Ignore only if the app already accepted a later signed-in user.
+  if (event == AuthChangeEvent.initialSession) {
+    return signedIn || hasCurrentUser;
+  }
+
+  return true;
+}
+
+Future<void> _handleAuthenticatedUser(
+  User user,
+  AuthChangeEvent event,
+  int generation,
+) async {
+  isSignedIn.value = true;
+  currentUser.value = user;
+
+  final prefs = await SharedPreferences.getInstance();
+  if (generation != _authStateGeneration) return;
+
+  final lastLoginTime = prefs.getInt('lastLoginTime');
+  final shouldDeferSyncToAuthScreen =
+      event == AuthChangeEvent.signedIn && lastLoginTime == null;
+
+  if (lastLoginTime == null) {
+    await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
+    if (generation != _authStateGeneration) return;
+  }
+
+  if (!shouldDeferSyncToAuthScreen) {
+    await SupabaseSyncService().initialize(isLoginResync: true);
+  }
+}
+
+Future<void> _handleSignedOutAuthState(int generation) async {
+  isSignedIn.value = false;
+  currentUser.value = null;
+
+  final prefs = await SharedPreferences.getInstance();
+  if (generation != _authStateGeneration) return;
+
+  await prefs.remove('lastLoginTime');
+  if (generation != _authStateGeneration) return;
+
+  SupabaseSyncService().dispose(); // Handles sign-out
+}
+
+Future<void> _handleSupabaseAuthStateChange(AuthState data) async {
+  final generation = ++_authStateGeneration;
+  final user = data.session?.user;
+
+  if (user != null) {
+    await _handleAuthenticatedUser(user, data.event, generation);
+    return;
+  }
+
+  if (_shouldIgnoreNullSessionAuthEvent(
+    event: data.event,
+    signedIn: isSignedIn.value,
+    hasCurrentUser: currentUser.value != null,
+  )) {
+    if (isSignedIn.value || currentUser.value != null) {
+      await ErrorHandler.logError(
+        'Ignored Supabase auth event with null session while signed in',
+        customMessage: 'Supabase auth null-session event ignored',
+        context: {
+          'class': 'main.dart',
+          'method': '_handleSupabaseAuthStateChange',
+          'event': data.event.name,
+          'fromBroadcast': data.fromBroadcast,
+        },
+      );
+    }
+    return;
+  }
+
+  await _handleSignedOutAuthState(generation);
+}
 
 // Global navigator key for showing dialogs from window manager
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -536,34 +625,20 @@ void main() async {
   }
 
   // Listen to auth state changes
-  Supabase.instance.client.auth.onAuthStateChange
-      .listen((AuthState data) async {
-    final user = data.session?.user;
-    isSignedIn.value = user != null;
-    currentUser.value = user;
-
-    // Maintain Supabase sync services based on authentication state
-    if (isSignedIn.value) {
-      // Check if this is a fresh login (no existing session) vs app restart (existing session)
-      final prefs = await SharedPreferences.getInstance();
-      final lastLoginTime = prefs.getInt('lastLoginTime');
-
-      if (lastLoginTime == null) {
-        // Fresh login - store login time but DON'T initialize sync yet
-        // Let AuthScreen handle sync initialization after user confirms preferences
-        await prefs.setInt(
-            'lastLoginTime', DateTime.now().millisecondsSinceEpoch);
-      } else {
-        // App restart - initialize sync normally since preferences are already set
-        await SupabaseSyncService().initialize(isLoginResync: true);
-      }
-    } else {
-      // Sign out - clear last login time and dispose sync service
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('lastLoginTime');
-      SupabaseSyncService().dispose(); // Handles sign-out
-    }
-  });
+  Supabase.instance.client.auth.onAuthStateChange.listen(
+    _handleSupabaseAuthStateChange,
+    onError: (Object error, StackTrace stackTrace) {
+      unawaited(ErrorHandler.logError(
+        error,
+        customMessage: 'Supabase auth state stream error',
+        context: {
+          'class': 'main.dart',
+          'method': 'main',
+          'stack': stackTrace.toString(),
+        },
+      ));
+    },
+  );
 
   await _loadAllPrefs();
   final prefs = await SharedPreferences.getInstance();
