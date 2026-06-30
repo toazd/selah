@@ -14,7 +14,7 @@ contact: https://github.com/toazd/selah/issues
 issues: https://github.com/toazd/selah/issues
 source-code: https://github.com/toazd/selah
 website: https://toazd.github.io
-icon: snap/gui/icon.png
+icon: snap/gui/selah.png
 type: app
 
 base: core22
@@ -42,7 +42,6 @@ apps:
     command-chain:
       - bin/graphics-core22-wrapper
     command: opt/selah/selah
-    desktop: snap/gui/io.github.toazd.selah.desktop
     environment:
       GTK_PATH: $SNAP/usr/lib/x86_64-linux-gnu/gtk-3.0
     plugs:

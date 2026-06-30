@@ -411,8 +411,8 @@ jobs:
       run: |
         mkdir -p build/snap-build/snap/gui
         cp snapcraft/snapcraft.yaml build/snap-build/snapcraft.yaml
-        cp snapcraft/io.github.toazd.selah.desktop build/snap-build/snap/gui/
-        cp snapcraft/icon.png build/snap-build/snap/gui/
+        cp snapcraft/selah.desktop build/snap-build/snap/gui/
+        cp snapcraft/icon.png build/snap-build/snap/gui/selah.png
 
     - name: Install snapcraft dependencies
       run: |
@@ -471,10 +471,26 @@ jobs:
       run: |
         set -euo pipefail
         SNAP_TARGET="build/packages/Selah-${{ needs.extract-version.outputs.app_version }}.snap"
-        if ! unsquashfs -ll "$SNAP_TARGET" meta/gui/icon.png; then
-          echo "Snap package does not contain the expected Store icon at meta/gui/icon.png."
+        SNAP_FILE_LIST="$RUNNER_TEMP/selah-snap-files.txt"
+        unsquashfs -ll "$SNAP_TARGET" > "$SNAP_FILE_LIST"
+        if ! grep -Fq "meta/gui/selah.png" "$SNAP_FILE_LIST"; then
+          echo "Snap package does not contain the expected Store icon at meta/gui/selah.png."
           echo "Packaged GUI metadata files:"
-          unsquashfs -ll "$SNAP_TARGET" meta/gui || true
+          grep -F "meta/gui" "$SNAP_FILE_LIST" || true
+          exit 1
+        fi
+        if ! grep -Fq "meta/gui/selah.desktop" "$SNAP_FILE_LIST"; then
+          echo "Snap package does not contain the expected desktop entry at meta/gui/selah.desktop."
+          echo "Packaged GUI metadata files:"
+          grep -F "meta/gui" "$SNAP_FILE_LIST" || true
+          exit 1
+        fi
+        if grep -Fq "meta/gui/io.github.toazd.selah.desktop" "$SNAP_FILE_LIST"; then
+          echo "Snap package still contains the old GUI desktop entry name."
+          exit 1
+        fi
+        if grep -Fq "usr/share/applications/io.github.toazd.selah.desktop" "$SNAP_FILE_LIST"; then
+          echo "Snap package still contains the inherited Debian desktop entry."
           exit 1
         fi
 
