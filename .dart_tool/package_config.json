@@ -135,9 +135,9 @@
     },
     {
       "name": "cross_file",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/cross_file-0.3.5+2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/cross_file-0.3.5+3",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "crypto",
@@ -411,9 +411,9 @@
     },
     {
       "name": "image_picker",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/image_picker-1.2.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/image_picker-1.2.3",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "image_picker_android",
@@ -927,7 +927,7 @@
     },
     {
       "name": "sqlite3",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.3.3",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.3.4",
       "packageUri": "lib/",
       "languageVersion": "3.9"
     },

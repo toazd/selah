@@ -197,11 +197,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   void _onSearch({bool showLoading = true, bool resetScroll = true}) {
-    if (kDebugMode) {
-      debugPrint('[_onSearch] Called with input="${_controller.text.trim()}"');
-    }
     final input = _controller.text.trim();
     final searchId = ++_activeSearchId;
+    if (kDebugMode) {
+      debugPrint(
+          '[_onSearch#$searchId] input="$input", showLoading=$showLoading, resetScroll=$resetScroll');
+    }
     if (input.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -211,6 +212,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _totalVerses = 0;
         _searchType = null;
         //_searchTerm = null;
+        _isRestoring = false;
         _isSearching = false;
       });
       _persistSearchState('');
@@ -224,61 +226,103 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _totalMatches = null;
       _totalVerses = null;
       //_searchTerm = input;
+      if (showLoading) {
+        _isRestoring = false;
+      }
       _isSearching = showLoading;
     });
 
-    _persistSearchState(input);
+    try {
+      _persistSearchState(input);
 
-    if (resetScroll && _resultsScrollController.hasClients) {
-      _resultsScrollController.jumpTo(0.0);
-    }
-
-    // Try to parse as reference search first (e.g., "Gen 2:15 garden")
-    final referenceSearch = _parseReferenceSearch(input);
-    if (referenceSearch != null) {
-      if (kDebugMode) {
-        debugPrint('[_onSearch] Parsed as REFERENCE search');
+      if (resetScroll && _resultsScrollController.hasClients) {
+        _resultsScrollController.jumpTo(0.0);
       }
+
+      // Try to parse as reference search first (e.g., "Gen 2:15 garden")
+      final referenceSearch = _parseReferenceSearch(input);
+      if (referenceSearch != null) {
+        if (kDebugMode) {
+          debugPrint('[_onSearch#$searchId] Parsed as REFERENCE search');
+        }
+        _startSearchTask(
+          searchId: searchId,
+          showLoading: showLoading,
+          task: () => _performReferenceSearch(referenceSearch, searchId),
+        );
+        return;
+      }
+
+      // Try to parse as Strong's number (e.g., "H1234")
+      final words =
+          input.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      String searchTerm = words[0];
+
+      if (words.length > 1) {
+        showStyledSnackBar(context,
+            'Strong\'s search only supports single words. Extra words were ignored.');
+      }
+
+      final strongsNumber = StrongsDatabase.validateStrongsNumber(searchTerm);
+
+      if (kDebugMode) {
+        if (strongsNumber != null) {
+          debugPrint(
+              '[_onSearch#$searchId] Parsed as STRONGS NUMBER search: "$strongsNumber"');
+        } else {
+          debugPrint(
+              '[_onSearch#$searchId] Parsed as WORD search: "$searchTerm"');
+        }
+      }
+
       _startSearchTask(
         searchId: searchId,
         showLoading: showLoading,
-        task: () => _performReferenceSearch(referenceSearch, searchId),
+        task: () {
+          if (strongsNumber != null) {
+            return _performStrongsNumberSearch(strongsNumber, searchId);
+          } else {
+            return _performWordSearch(searchTerm, searchId);
+          }
+        },
       );
-      return;
+    } catch (e) {
+      _handleSearchSetupError(searchId, e);
     }
+  }
 
-    // Try to parse as Strong's number (e.g., "H1234")
-    final words =
-        input.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    String searchTerm = words[0];
-
-    if (words.length > 1) {
-      showStyledSnackBar(context,
-          'Strong\'s search only supports single words. Extra words were ignored.');
-    }
-
-    final strongsNumber = StrongsDatabase.validateStrongsNumber(searchTerm);
-
+  void _handleSearchSetupError(int searchId, Object error) {
     if (kDebugMode) {
-      if (strongsNumber != null) {
-        debugPrint(
-            '[_onSearch] Parsed as STRONGS NUMBER search: "$strongsNumber"');
-      } else {
-        debugPrint('[_onSearch] Parsed as WORD search: "$searchTerm"');
+      debugPrint(
+          '[_onSearch#$searchId] setup failed before task start: $error');
+    }
+    if (mounted && searchId == _activeSearchId && !_isResetting) {
+      setState(() {
+        _searchResults = [];
+        _foundStrongsNumbers = {};
+        _phraseSummary = {};
+        _totalMatches = 0;
+        _totalVerses = 0;
+        _searchType = null;
+        _isRestoring = false;
+        _isSearching = false;
+      });
+      try {
+        showStyledSnackBar(context, 'Search failed: ${error.toString()}');
+      } catch (_) {
+        // The setup error may already be a missing transient ScaffoldMessenger.
       }
     }
-
-    _startSearchTask(
-      searchId: searchId,
-      showLoading: showLoading,
-      task: () {
-        if (strongsNumber != null) {
-          return _performStrongsNumberSearch(strongsNumber, searchId);
-        } else {
-          return _performWordSearch(searchTerm, searchId);
-        }
+    unawaited(ErrorHandler.logError(
+      error,
+      customMessage: 'Strongs search setup exception',
+      context: {
+        'class': 'StrongsSearchScreen',
+        'method': '_onSearch',
+        'searchId': searchId,
+        'activeSearchId': _activeSearchId,
       },
-    );
+    ));
   }
 
   void _startSearchTask({
@@ -286,16 +330,94 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     required bool showLoading,
     required Future<void> Function() task,
   }) {
+    final stopwatch = Stopwatch()..start();
     Future<void> runTask() async {
-      if (!mounted || searchId != _activeSearchId) return;
-      if (showLoading) {
-        await _waitForNextFrame();
+      var taskStarted = false;
+      try {
+        if (!mounted || searchId != _activeSearchId) {
+          _debugSearchLifecycle(
+              searchId, 'not starting stale/unmounted task', stopwatch);
+          return;
+        }
+        if (showLoading) {
+          _debugSearchLifecycle(searchId, 'waiting for busy frame', stopwatch);
+          await _waitForNextFrame();
+        }
+        if (!mounted || searchId != _activeSearchId) {
+          _debugSearchLifecycle(
+              searchId, 'task became stale before start', stopwatch);
+          return;
+        }
+        taskStarted = true;
+        _debugSearchLifecycle(searchId, 'starting task body', stopwatch);
+        await task();
+        _debugSearchLifecycle(searchId, 'task body returned', stopwatch);
+      } catch (e) {
+        _debugSearchLifecycle(searchId, 'task threw: $e', stopwatch);
+        if (mounted && searchId == _activeSearchId && !_isResetting) {
+          setState(() {
+            _searchResults = [];
+            _foundStrongsNumbers = {};
+            _phraseSummary = {};
+            _totalMatches = 0;
+            _totalVerses = 0;
+            _searchType = null;
+            _isRestoring = false;
+            _isSearching = false;
+          });
+          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
+        }
+        unawaited(ErrorHandler.logError(
+          e,
+          customMessage: 'Strongs search task exception',
+          context: {
+            'class': 'StrongsSearchScreen',
+            'method': '_startSearchTask',
+            'searchId': searchId,
+            'activeSearchId': _activeSearchId,
+            'taskStarted': taskStarted,
+          },
+        ));
+      } finally {
+        _clearBusyStateIfTaskReturned(searchId, stopwatch, taskStarted);
       }
-      if (!mounted || searchId != _activeSearchId) return;
-      await task();
     }
 
+    _debugSearchLifecycle(searchId, 'scheduled task', stopwatch);
     unawaited(runTask());
+  }
+
+  void _debugSearchLifecycle(
+      int searchId, String message, Stopwatch stopwatch) {
+    if (!kDebugMode) return;
+    debugPrint(
+        '[StrongsSearch#$searchId] $message after ${stopwatch.elapsedMilliseconds}ms '
+        '(active=$_activeSearchId, searching=$_isSearching, restoring=$_isRestoring, resetting=$_isResetting)');
+  }
+
+  void _clearBusyStateIfTaskReturned(
+      int searchId, Stopwatch stopwatch, bool taskStarted) {
+    if (!mounted || searchId != _activeSearchId || _isResetting) return;
+    if (!_isSearching && !_isRestoring) return;
+
+    _debugSearchLifecycle(
+      searchId,
+      taskStarted
+          ? 'task returned without applying a terminal UI state'
+          : 'task ended before the search body started',
+      stopwatch,
+    );
+
+    setState(() {
+      _isSearching = false;
+      _isRestoring = false;
+      if (_controller.text.trim().isNotEmpty &&
+          _searchResults.isEmpty &&
+          _totalMatches == null) {
+        _totalMatches = 0;
+        _totalVerses = 0;
+      }
+    });
   }
 
   Future<void> _performStrongsNumberSearch(
@@ -1124,7 +1246,22 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                               : lightPrimaryColor.value,
                           semanticLabel: 'Clear Search Query',
                         ),
-                        onPressed: () => _controller.clear(),
+                        onPressed: () {
+                          _activeSearchId++;
+                          setState(() {
+                            _controller.clear();
+                            _searchResults = [];
+                            _foundStrongsNumbers = {};
+                            _phraseSummary = {};
+                            _totalMatches = null;
+                            _totalVerses = null;
+                            _searchType = null;
+                            _isRestoring = false;
+                            _isSearching = false;
+                          });
+                          unawaited(_persistSearchState(''));
+                          unawaited(_saveScrollOffset(0.0));
+                        },
                         iconSize: 32,
                       ),
                     ),
@@ -1148,6 +1285,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                               ? null
                               : () async {
                                   if (_isResetting) return;
+                                  _activeSearchId++;
                                   setState(() => _isResetting = true);
                                   setState(() {
                                     _controller.clear();
@@ -1161,6 +1299,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                     _isRestoring = false;
                                     _isSearching = false;
                                   });
+                                  unawaited(_persistSearchState(''));
+                                  unawaited(_saveScrollOffset(0.0));
 
                                   Future.delayed(const Duration(seconds: 3),
                                       () {
