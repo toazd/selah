@@ -952,14 +952,6 @@
       ]
     },
     {
-      "name": "cross_file",
-      "version": "0.3.5+3",
-      "dependencies": [
-        "meta",
-        "web"
-      ]
-    },
-    {
       "name": "rxdart",
       "version": "0.28.0",
       "dependencies": []
@@ -1018,6 +1010,14 @@
       "version": "3.0.7",
       "dependencies": [
         "typed_data"
+      ]
+    },
+    {
+      "name": "cross_file",
+      "version": "0.3.5+4",
+      "dependencies": [
+        "meta",
+        "web"
       ]
     },
     {

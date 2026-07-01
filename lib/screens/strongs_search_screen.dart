@@ -47,6 +47,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     with AutomaticKeepAliveClientMixin {
   static const double _phraseSummaryColumnHorizontalPadding = 16.0;
   static const double _phraseSummaryWidthBuffer = 4.0;
+  static const Duration _manualSearchStartDelay = Duration(milliseconds: 32);
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
@@ -339,10 +340,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
               searchId, 'not starting stale/unmounted task', stopwatch);
           return;
         }
-        if (showLoading) {
-          _debugSearchLifecycle(searchId, 'waiting for busy frame', stopwatch);
-          await _waitForNextFrame();
-        }
         if (!mounted || searchId != _activeSearchId) {
           _debugSearchLifecycle(
               searchId, 'task became stale before start', stopwatch);
@@ -384,7 +381,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
 
     _debugSearchLifecycle(searchId, 'scheduled task', stopwatch);
-    unawaited(runTask());
+    if (showLoading) {
+      Timer(_manualSearchStartDelay, () {
+        if (!mounted || searchId != _activeSearchId) {
+          _debugSearchLifecycle(
+              searchId, 'delayed manual task became stale', stopwatch);
+          return;
+        }
+        unawaited(runTask());
+      });
+    } else {
+      unawaited(runTask());
+    }
   }
 
   void _debugSearchLifecycle(
@@ -1028,10 +1036,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     if (!mounted) return;
     _onSearch(showLoading: false, resetScroll: false);
     await _loadScrollOffset();
-  }
-
-  Future<void> _waitForNextFrame() async {
-    await _waitForFrames(1);
   }
 
   Future<void> _waitForFrames(int frameCount) async {
