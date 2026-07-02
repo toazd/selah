@@ -1403,10 +1403,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                         //         : lightPrimaryColor.value,
                                         //   ),
                                         // ),
-                                        const SizedBox(height: 16),
+                                        //const SizedBox(height: 16),
                                         Text('Searching...',
                                             style: TextStyle(
-                                                fontSize: uiFontSize + 2,
+                                                fontSize: uiFontSize + 4,
                                                 fontFamily: uiFontFamily,
                                                 color: getAdaptiveTextColor(
                                                     context))),
@@ -1418,7 +1418,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                         child: Text(
                                             'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
                                             style: TextStyle(
-                                                fontSize: uiFontSize,
+                                                fontSize: uiFontSize + 4,
                                                 fontFamily: uiFontFamily,
                                                 color: getAdaptiveTextColor(
                                                     context))))

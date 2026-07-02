@@ -2761,10 +2761,10 @@ class _SearchScreenState extends State<SearchScreen>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     CircularProgressIndicator(),
-                                    const SizedBox(height: 16),
-                                    Text('Searching 🔎',
+                                    //const SizedBox(height: 16),
+                                    Text('Searching...',
                                         style: TextStyle(
-                                            fontSize: uiFontSize + 8,
+                                            fontSize: uiFontSize + 4,
                                             fontFamily: uiFontFamily,
                                             color:
                                                 getAdaptiveTextColor(context))),
@@ -2779,7 +2779,7 @@ class _SearchScreenState extends State<SearchScreen>
                                     child: Text(
                                         'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
                                         style: TextStyle(
-                                            fontSize: uiFontSize,
+                                            fontSize: uiFontSize + 4,
                                             fontFamily: uiFontFamily,
                                             color:
                                                 getAdaptiveTextColor(context))))
