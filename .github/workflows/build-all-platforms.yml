@@ -372,12 +372,13 @@ jobs:
 
           ### 🍎 iOS
           - iOS app
-            - Unsigned for sideloading (Sideloadly)
+            - Untested build. Need feedback!
+            - Unsigned for sideloading (Sideloadly, etc.)
             - `Selah-${{ needs.extract-version.outputs.app_version }}-${{ github.run_number }}.ipa`
 
           ### 🍎 macOS
           - Disk image installer
-            - Untested builds. Need feedback!
+            - Untested build. Need feedback!
             - `Selah-${{ needs.extract-version.outputs.app_version }}.dmg`
 
           ### 🌐 Web
