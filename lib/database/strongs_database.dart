@@ -418,7 +418,7 @@ class StrongsDatabase {
     bool isSuperscription = false,
   }) {
     for (final association in _parsePhraseAssociations(text)) {
-      if (!association.containsWord(wordPattern)) continue;
+      if (!association.hasTrailingWord(wordPattern)) continue;
 
       for (final strongsNum in association.regularStrongsNumbers) {
         result.putIfAbsent(strongsNum, () {
@@ -607,7 +607,7 @@ class StrongsDatabase {
     final wordPattern = _wordBoundaryRegex(searchWord);
 
     for (final association in _parsePhraseAssociations(verseText)) {
-      if (!association.containsWord(wordPattern)) continue;
+      if (!association.hasTrailingWord(wordPattern)) continue;
 
       for (final strongsNum in association.regularStrongsNumbers) {
         result.add(strongsNum);
@@ -651,7 +651,11 @@ class _StrongsPhraseAssociation {
   Iterable<String> get regularStrongsNumbers =>
       tags.where((tag) => !tag.isTvm).map((tag) => tag.number);
 
-  bool containsWord(RegExp wordPattern) => wordPattern.hasMatch(phrase);
+  bool hasTrailingWord(RegExp wordPattern) {
+    final words = StrongsDatabase._englishWordRegex.allMatches(phrase);
+    if (words.isEmpty) return false;
+    return wordPattern.hasMatch(words.last.group(0)!);
+  }
 
   bool containsStrongsNumber(
     String strongsNumber, {

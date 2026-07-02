@@ -118,6 +118,9 @@ void main() {
 
     expect(find.text('Restoring search results...'), findsOneWidget);
     expect(find.text('Phrase Summary'), findsNothing);
+    final resetButton = tester
+        .widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Reset'));
+    expect(resetButton.onPressed, isNull);
 
     await _waitForFinder(tester, find.text('Phrase Summary'));
   });

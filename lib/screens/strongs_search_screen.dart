@@ -74,6 +74,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
 
+  bool get _canResetSearch => !_isResetting && !_isSearching && !_isRestoring;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -1005,6 +1007,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   }
 
   Future<void> _restoreSearchState() async {
+    final restoreStartSearchId = _activeSearchId;
     final prefs = await SharedPreferences.getInstance();
     final lastSearch = prefs.getString(_lastSearchTermKey);
     if (!mounted) return;
@@ -1026,14 +1029,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
 
     await _waitForRouteTransition();
-    if (!mounted) return;
+    if (!mounted || _activeSearchId != restoreStartSearchId || _isResetting) {
+      return;
+    }
     setState(() {
       _controller.text = lastSearch;
       _isRestoring = true;
       _isSearching = false;
     });
     await _waitForFrames(2);
-    if (!mounted) return;
+    if (!mounted || _activeSearchId != restoreStartSearchId || _isResetting) {
+      return;
+    }
     _onSearch(showLoading: false, resetScroll: false);
     await _loadScrollOffset();
   }
@@ -1285,10 +1292,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       runAlignment: WrapAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: _isResetting || _isSearching
-                              ? null
-                              : () async {
-                                  if (_isResetting) return;
+                          onPressed: _canResetSearch
+                              ? () {
+                                  if (!_canResetSearch) return;
                                   _activeSearchId++;
                                   setState(() => _isResetting = true);
                                   setState(() {
@@ -1312,7 +1318,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                       setState(() => _isResetting = false);
                                     }
                                   });
-                                },
+                                }
+                              : null,
                           style: ButtonStyle(
                             backgroundColor:
                                 WidgetStateProperty.resolveWith<Color>(

@@ -27,7 +27,7 @@ void main() {
       expect(strongs, isNot(contains('G1161')));
     });
 
-    test('matches words within a tagged phrase', () {
+    test('matches only the word immediately before a Strong tag', () {
       final strongs = StrongsDatabase.findStrongsNumbersForWordInVerse(
         'Mat',
         27,
@@ -35,8 +35,20 @@ void main() {
         'yielded',
       );
 
-      expect(strongs, contains('G863'));
+      expect(strongs, isNot(contains('G863')));
       expect(strongs, isNot(contains('G5656')));
+    });
+
+    test('does not collect a later word tag for Samuel', () {
+      final strongs = StrongsDatabase.findStrongsNumbersForWordInVerse(
+        '1Sa',
+        9,
+        24,
+        'Samuel',
+      );
+
+      expect(strongs, contains('H8050'));
+      expect(strongs, isNot(contains('H559')));
     });
 
     test('excludes tags separated from words by punctuation only', () {

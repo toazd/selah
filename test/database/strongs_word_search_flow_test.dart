@@ -19,4 +19,12 @@ void main() {
     expect(results, hasLength(2));
     expect(phraseSummary, {'an ambassage': 1, 'a message': 1});
   });
+
+  test('combined word search only collects numbers attached to Samuel', () {
+    final wordData = StrongsDatabase.searchByWordWithStrongsNumbers('samuel');
+
+    expect(wordData.foundStrongsNumbers.keys, containsAll(['H8050', 'G4545']));
+    expect(wordData.foundStrongsNumbers.keys, isNot(contains('H559')));
+    expect(wordData.foundStrongsNumbers.keys, isNot(contains('H1696')));
+  });
 }
