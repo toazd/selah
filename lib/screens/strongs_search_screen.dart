@@ -55,7 +55,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   final ScrollController _resultsScrollController = ScrollController();
   final List<TapGestureRecognizer> _verseReferenceRecognizers = [];
 
-  bool _isResetting = false;
   bool _isRestoring = false;
   int _verseReferenceRecognizerIndex = 0;
   int? _verseReferenceRecognizerCleanupExpectedCount;
@@ -74,7 +73,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
 
-  bool get _canResetSearch => !_isResetting && !_isSearching && !_isRestoring;
+  bool get _canResetSearch => !_isSearching && !_isRestoring;
 
   @override
   bool get wantKeepAlive => true;
@@ -299,7 +298,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       debugPrint(
           '[_onSearch#$searchId] setup failed before task start: $error');
     }
-    if (mounted && searchId == _activeSearchId && !_isResetting) {
+    if (mounted && searchId == _activeSearchId) {
       setState(() {
         _searchResults = [];
         _foundStrongsNumbers = {};
@@ -353,7 +352,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _debugSearchLifecycle(searchId, 'task body returned', stopwatch);
       } catch (e) {
         _debugSearchLifecycle(searchId, 'task threw: $e', stopwatch);
-        if (mounted && searchId == _activeSearchId && !_isResetting) {
+        if (mounted && searchId == _activeSearchId) {
           setState(() {
             _searchResults = [];
             _foundStrongsNumbers = {};
@@ -402,12 +401,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     if (!kDebugMode) return;
     debugPrint(
         '[StrongsSearch#$searchId] $message after ${stopwatch.elapsedMilliseconds}ms '
-        '(active=$_activeSearchId, searching=$_isSearching, restoring=$_isRestoring, resetting=$_isResetting)');
+        '(active=$_activeSearchId, searching=$_isSearching, restoring=$_isRestoring)');
   }
 
   void _clearBusyStateIfTaskReturned(
       int searchId, Stopwatch stopwatch, bool taskStarted) {
-    if (!mounted || searchId != _activeSearchId || _isResetting) return;
+    if (!mounted || searchId != _activeSearchId) return;
     if (!_isSearching && !_isRestoring) return;
 
     _debugSearchLifecycle(
@@ -440,7 +439,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     try {
       final searchResult = runStrongsNumberSearch(strongsNumber);
       if (!mounted) return;
-      if (_isResetting) return;
       if (searchId != _activeSearchId) return;
       final results = searchResult.searchResults;
       final phraseSummary = searchResult.phraseSummary;
@@ -480,14 +478,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       });
     } catch (e) {
       if (mounted) {
-        if (!_isResetting) {
-          if (searchId != _activeSearchId) return;
-          setState(() {
-            _isRestoring = false;
-            _isSearching = false;
-          });
-          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
-        }
+        if (searchId != _activeSearchId) return;
+        setState(() {
+          _isRestoring = false;
+          _isSearching = false;
+        });
+        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
       }
     }
   }
@@ -504,7 +500,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             '[_performWordSearch] Word search done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
       }
       if (!mounted) return;
-      if (_isResetting) return;
       if (searchId != _activeSearchId) return;
 
       final foundStrongs = wordSearchResult.foundStrongsNumbers;
@@ -563,14 +558,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         debugPrint('[_performWordSearch] ERROR: $e');
       }
       if (mounted) {
-        if (!_isResetting) {
-          if (searchId != _activeSearchId) return;
-          setState(() {
-            _isRestoring = false;
-            _isSearching = false;
-          });
-          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
-        }
+        if (searchId != _activeSearchId) return;
+        setState(() {
+          _isRestoring = false;
+          _isSearching = false;
+        });
+        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
       }
     }
   }
@@ -589,7 +582,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
             '[_performReferenceSearch] Reference search done: error=${result.error}, strongsNumbers=${result.strongsNumbers}');
       }
       if (!mounted) return;
-      if (_isResetting) return;
       if (searchId != _activeSearchId) return;
 
       // Check for errors
@@ -649,14 +641,12 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         debugPrint('[_performReferenceSearch] ERROR: $e');
       }
       if (mounted) {
-        if (!_isResetting) {
-          if (searchId != _activeSearchId) return;
-          setState(() {
-            _isRestoring = false;
-            _isSearching = false;
-          });
-          showStyledSnackBar(context, 'Search failed: ${e.toString()}');
-        }
+        if (searchId != _activeSearchId) return;
+        setState(() {
+          _isRestoring = false;
+          _isSearching = false;
+        });
+        showStyledSnackBar(context, 'Search failed: ${e.toString()}');
       }
     }
   }
@@ -1029,7 +1019,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
 
     await _waitForRouteTransition();
-    if (!mounted || _activeSearchId != restoreStartSearchId || _isResetting) {
+    if (!mounted || _activeSearchId != restoreStartSearchId) {
       return;
     }
     setState(() {
@@ -1038,7 +1028,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       _isSearching = false;
     });
     await _waitForFrames(2);
-    if (!mounted || _activeSearchId != restoreStartSearchId || _isResetting) {
+    if (!mounted || _activeSearchId != restoreStartSearchId) {
       return;
     }
     _onSearch(showLoading: false, resetScroll: false);
@@ -1296,7 +1286,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                               ? () {
                                   if (!_canResetSearch) return;
                                   _activeSearchId++;
-                                  setState(() => _isResetting = true);
                                   setState(() {
                                     _controller.clear();
                                     _searchResults = [];
@@ -1311,13 +1300,6 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                   });
                                   unawaited(_persistSearchState(''));
                                   unawaited(_saveScrollOffset(0.0));
-
-                                  Future.delayed(const Duration(seconds: 3),
-                                      () {
-                                    if (mounted) {
-                                      setState(() => _isResetting = false);
-                                    }
-                                  });
                                 }
                               : null,
                           style: ButtonStyle(

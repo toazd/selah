@@ -98,6 +98,31 @@ void main() {
     await _waitForFinder(tester, find.text('Phrase Summary'));
   });
 
+  testWidgets('search started immediately after reset can complete',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: StrongsSearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Reset'));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextField), 'G2411');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    expect(find.text('Searching...'), findsOneWidget);
+
+    await _waitForFinder(tester, find.text('Phrase Summary'));
+
+    expect(find.text('Searching...'), findsNothing);
+  });
+
   testWidgets('saved search shows restoring state before replaying results',
       (tester) async {
     SharedPreferences.setMockInitialValues({
