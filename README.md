@@ -17,7 +17,7 @@ Selah is a cross-platform, touch-friendly Bible study application built with <a 
 - **Highlight System** - Support for word-level highlighting with customizeable colors
 - **TSK Cross references** - Optionally show TSK (Treasury of Scripture Knowledge) references below each verse
 - **Strong's numbers** - Optionally show Strong's numbers (click or tap any Strong's number to show it's definition).
-- **Unique Strongs search** - Search by word, reference, or Strong's numbers to reveal everywhere in the Bible those Strong's numbers appear. When doing a word search it first finds all the Strong's numbers associated with that word and then it searches the entire Bible for every verse that contains those Strong's number(s).
+- **Unique Strongs search** - Search by word, reference, or Strong's numbers to reveal everywhere in the Bible those Strong's numbers appear. When doing a word search it first finds all the Strong's numbers associated with that word and then it searches the entire Bible for every verse that contains those Strong's number(s). A reference search (eg. gen 3:6 pleasant) is similar to a word search but it focuses only on the Strong's numbers associated with the given reference and word.
 - **Strong's definitions** - An extra dialog on the Strong's search screen that allows quickly browsing Strong's definitions.
 - **Verse History** - Track and revisit previously viewed verses
 - **Simple/Advanced Search** - Find verses by keywords or phrases, with or without using advanced modes (Regular expressions; Nearby mode searches for two or more supplied words within three verses of eachother)
