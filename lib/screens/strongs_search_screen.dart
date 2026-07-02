@@ -1368,7 +1368,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                             ? Center(
                                 child: Text('Restoring search results...',
                                     style: TextStyle(
-                                        fontSize: uiFontSize,
+                                        fontSize: uiFontSize + 4,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
                             : _isSearching
