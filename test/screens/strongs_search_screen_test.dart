@@ -77,6 +77,68 @@ void main() {
     expect(find.textContaining('Maximum search time exceeded'), findsNothing);
   });
 
+  testWidgets('summary reference dialog goto verse returns a verse location',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    Map<String, dynamic>? navigationResult;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              navigationResult =
+                  await Navigator.of(context).push<Map<String, dynamic>>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const StrongsSearchScreen(sourceScreenIndex: 2),
+                ),
+              );
+            },
+            child: const Text('Open Strong Search'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Strong Search'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'ambassage');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('2 matches in 2 verses'));
+    await _waitForFinder(tester, find.text('Luk 14:32'));
+
+    await tester.tap(find.text('Luk 14:32'));
+    await _waitForFinder(tester, find.text('Luke 14'));
+    final verse32TextFinder = find.text('32', findRichText: true);
+    await _waitForFinder(tester, verse32TextFinder);
+    final verse32Finder = verse32TextFinder.first;
+
+    await tester.ensureVisible(verse32Finder);
+    await tester.pump();
+    await tester.tap(verse32Finder);
+    await _waitForFinder(tester, find.text('Goto Verse 32'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Goto Verse 32'));
+    await tester.pumpAndSettle();
+
+    expect(
+      navigationResult,
+      {
+        'verseLocation': {
+          'book': 'Luk',
+          'chapter': 14,
+          'verse': 32,
+        },
+        'targetScreenIndex': 2,
+      },
+    );
+  });
+
   testWidgets('manual search shows inline busy state before direct search',
       (tester) async {
     SharedPreferences.setMockInitialValues({});

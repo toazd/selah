@@ -2777,7 +2777,7 @@ class _SearchScreenState extends State<SearchScreen>
                                         0)
                                 ? Center(
                                     child: Text(
-                                        'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
+                                        'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check search options',
                                         style: TextStyle(
                                             fontSize: uiFontSize + 4,
                                             fontFamily: uiFontFamily,

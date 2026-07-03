@@ -753,7 +753,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       context,
       'v://$book/$chapter/$verse',
       referenceText,
-      navigateToVerse: null,
+      navigateToVerse: _gotoVerse,
       onVerseLinkRecursion: null,
       onNoteIconTap: null,
       onNoteEditTap: null,
