@@ -479,7 +479,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
 
   Widget _buildBookColophonWidget(bool isDark, bool showStrongsNumbers) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 22.0, 16.0),
+      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 22.0, 0.0),
       child: RichText(
         textAlign: TextAlign.left,
         text: VerseTextParser.parseVerseText(
@@ -721,6 +721,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                               if (showBookColophon)
                                                 _buildBookColophonWidget(
                                                     isDark, showDialogStrongs),
+                                              const SizedBox(height: 16.0),
                                             ];
                                             return ScrollConfiguration(
                                               behavior: ScrollConfiguration.of(
