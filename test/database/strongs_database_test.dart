@@ -51,6 +51,38 @@ void main() {
       expect(strongs, isNot(contains('H559')));
     });
 
+    test('phrase fallback is opt-in for reference lookups', () {
+      final strict = StrongsDatabase.findStrongsNumbersForWordInVerse(
+        'Exo',
+        34,
+        10,
+        'terrible',
+      );
+      final fallback = StrongsDatabase.findStrongsNumbersForWordInVerse(
+        'Exo',
+        34,
+        10,
+        'terrible',
+        usePhraseFallback: true,
+      );
+
+      expect(strict, isEmpty);
+      expect(fallback, ['H3372']);
+    });
+
+    test('phrase fallback keeps direct matches when available', () {
+      final strongs = StrongsDatabase.findStrongsNumbersForWordInVerse(
+        '1Sa',
+        9,
+        24,
+        'Samuel',
+        usePhraseFallback: true,
+      );
+
+      expect(strongs, contains('H8050'));
+      expect(strongs, isNot(contains('H559')));
+    });
+
     test('excludes tags separated from words by punctuation only', () {
       final strongs = StrongsDatabase.findStrongsNumbersForWordInVerse(
         'Rom',

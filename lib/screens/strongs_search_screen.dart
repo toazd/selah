@@ -155,6 +155,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               Text(
+                  '    Word search only collects Strong\'s numbers directly attached to the word.',
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      fontStyle: FontStyle.italic,
+                      color: getAdaptiveTextColor(context))),
+              const SizedBox(height: 8),
+              Text(
                   '2. Strong\'s number search - Enter a Strong\'s number (e.g. H1285 or G1242) to find all verses containing that specific Strong\'s number.',
                   style: TextStyle(
                       fontSize: uiFontSize,
@@ -166,6 +174,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                   style: TextStyle(
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
+              const SizedBox(height: 8),
+              Text(
+                  '    If the word is not directly tagged in that verse, reference search uses the next Strong\'s tag to the right within the same phrase.',
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      fontStyle: FontStyle.italic,
                       color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               Text(

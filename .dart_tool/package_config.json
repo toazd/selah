@@ -801,31 +801,31 @@
     },
     {
       "name": "screen_retriever",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever-0.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever-0.2.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "screen_retriever_linux",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_linux-0.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_linux-0.2.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "screen_retriever_macos",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_macos-0.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_macos-0.2.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "screen_retriever_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_platform_interface-0.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_platform_interface-0.2.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "screen_retriever_windows",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_windows-0.2.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/screen_retriever_windows-0.2.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -1119,7 +1119,7 @@
     },
     {
       "name": "window_manager",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/window_manager-0.5.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/window_manager-0.5.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },

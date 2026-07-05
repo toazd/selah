@@ -596,7 +596,12 @@ class StrongsDatabase {
   /// Finds Strong's numbers for a specific word in a specific verse.
   /// Returns a list of Strong's numbers found, or empty list if word not found.
   static List<String> findStrongsNumbersForWordInVerse(
-      String book, int chapter, int verse, String word) {
+    String book,
+    int chapter,
+    int verse,
+    String word, {
+    bool usePhraseFallback = false,
+  }) {
     final verseText = getVerseText(book, chapter, verse);
     if (verseText == null) return [];
 
@@ -605,12 +610,23 @@ class StrongsDatabase {
 
     final result = <String>{};
     final wordPattern = _wordBoundaryRegex(searchWord);
+    final associations = _parsePhraseAssociations(verseText);
 
-    for (final association in _parsePhraseAssociations(verseText)) {
+    for (final association in associations) {
       if (!association.hasTrailingWord(wordPattern)) continue;
 
       for (final strongsNum in association.regularStrongsNumbers) {
         result.add(strongsNum);
+      }
+    }
+
+    if (result.isEmpty && usePhraseFallback) {
+      for (final association in associations) {
+        if (!association.containsWord(wordPattern)) continue;
+
+        for (final strongsNum in association.regularStrongsNumbers) {
+          result.add(strongsNum);
+        }
       }
     }
 
@@ -656,6 +672,8 @@ class _StrongsPhraseAssociation {
     if (words.isEmpty) return false;
     return wordPattern.hasMatch(words.last.group(0)!);
   }
+
+  bool containsWord(RegExp wordPattern) => wordPattern.hasMatch(phrase);
 
   bool containsStrongsNumber(
     String strongsNumber, {

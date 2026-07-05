@@ -137,6 +137,7 @@ ReferenceSearchResult runReferenceSearch(ReferenceSearchTaskData data) {
     data.chapter,
     data.verse,
     data.word,
+    usePhraseFallback: true,
   );
   if (strongsNumbers.isEmpty) {
     if (kDebugMode) {

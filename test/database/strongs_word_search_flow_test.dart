@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:selah/database/strongs_database.dart';
+import 'package:selah/services/strongs_search_worker.dart';
 
 void main() {
   test('combined word search resolves ambassage to G4242 only', () {
@@ -26,5 +27,19 @@ void main() {
     expect(wordData.foundStrongsNumbers.keys, containsAll(['H8050', 'G4545']));
     expect(wordData.foundStrongsNumbers.keys, isNot(contains('H559')));
     expect(wordData.foundStrongsNumbers.keys, isNot(contains('H1696')));
+  });
+
+  test('reference search falls back to the nearest phrase tag on the right',
+      () {
+    final result = runReferenceSearch(const ReferenceSearchTaskData(
+      book: 'Exo',
+      chapter: 34,
+      verse: 10,
+      word: 'terrible',
+    ));
+
+    expect(result.error, isNull);
+    expect(result.strongsNumbers, ['H3372']);
+    expect(result.searchResults, isNotEmpty);
   });
 }
