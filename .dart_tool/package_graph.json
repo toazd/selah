@@ -1512,7 +1512,7 @@
     },
     {
       "name": "video_player_platform_interface",
-      "version": "6.8.0",
+      "version": "6.9.0",
       "dependencies": [
         "flutter",
         "plugin_platform_interface"

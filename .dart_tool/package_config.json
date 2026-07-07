@@ -1071,7 +1071,7 @@
     },
     {
       "name": "video_player_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.8.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.9.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -1157,6 +1157,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.4",
+  "flutterVersion": "3.44.5",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }
