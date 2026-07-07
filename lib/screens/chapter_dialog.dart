@@ -468,6 +468,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
               color: isDark ? darkTextColor.value : lightTextColor.value,
             ),
             showStrongsNumbers: showStrongsNumbers,
+            expandStrongsTapTarget: true,
             strongsColor:
                 isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onStrongsTap: _showStrongsDefinitionDialog,
@@ -498,6 +499,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
             color: isDark ? darkTextColor.value : lightTextColor.value,
           ),
           showStrongsNumbers: showStrongsNumbers,
+          expandStrongsTapTarget: true,
           strongsColor:
               isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
           onStrongsTap: _showStrongsDefinitionDialog,
@@ -715,6 +717,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                                     lightTextColor.value,
                                                     darkTextColor.value,
                                                     _showStrongsDefinitionDialog,
+                                                    expandStrongsTapTarget:
+                                                        true,
                                                   ),
                                                 );
                                               }),

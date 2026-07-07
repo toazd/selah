@@ -42,6 +42,7 @@ Widget buildVerseDisplayWidget({
   Color? customBackgroundColor,
   bool displayVerseNumber = true,
   bool showStrongsNumbers = false,
+  bool expandStrongsTapTarget = false,
   void Function(String strongsNumber)? onStrongsTap,
 }) {
   // Determine whether it's a dark theme or not
@@ -110,6 +111,7 @@ Widget buildVerseDisplayWidget({
     lightModeTextColor,
     darkModeTextColor,
     showStrongsNumbers: showStrongsNumbers,
+    expandStrongsTapTarget: expandStrongsTapTarget,
     onStrongsTap: onStrongsTap,
   );
   rightSpans.addAll(highlightedSpans);
@@ -197,6 +199,7 @@ List<InlineSpan> applyHighlightsToText(
   Color lightModeTextColor,
   Color darkModeTextColor, {
   bool showStrongsNumbers = false,
+  bool expandStrongsTapTarget = false,
   void Function(String strongsNumber)? onStrongsTap,
 }) {
   final displayVerseText = _removePilcrowMarkup(rawVerseText);
@@ -205,6 +208,7 @@ List<InlineSpan> applyHighlightsToText(
   if (highlights.isEmpty) {
     return VerseTextParser.parseVerseText(displayVerseText, baseStyle,
                 showStrongsNumbers: showStrongsNumbers,
+                expandStrongsTapTarget: expandStrongsTapTarget,
                 onStrongsTap: onStrongsTap)
             .children ??
         [];
@@ -213,7 +217,9 @@ List<InlineSpan> applyHighlightsToText(
   // Parse the raw verse text to get spans with markup removed from visible text.
   final parsedVerseText = VerseTextParser.parseVerseText(
       displayVerseText, baseStyle,
-      showStrongsNumbers: showStrongsNumbers, onStrongsTap: onStrongsTap);
+      showStrongsNumbers: showStrongsNumbers,
+      expandStrongsTapTarget: expandStrongsTapTarget,
+      onStrongsTap: onStrongsTap);
   final originalSpans = parsedVerseText.children ?? [];
 
   final adjustedHighlights = <Map<String, dynamic>>[];
@@ -517,8 +523,9 @@ Widget buildVerseWidgetFromData(
   Function(int, String?)? onNoteEditTap,
   Color lightHighlightTextColor,
   Color darkHighlightTextColor,
-  void Function(String strongsNumber)? onStrongsTap,
-) {
+  void Function(String strongsNumber)? onStrongsTap, {
+  bool expandStrongsTapTarget = false,
+}) {
   final widgets = <Widget>[];
 
   // Add paragraph break if needed
@@ -547,6 +554,7 @@ Widget buildVerseWidgetFromData(
     verseNumberWidth: data.verseNumberWidth,
     customBackgroundColor: data.customBackgroundColor,
     showStrongsNumbers: data.showStrongsNumbers,
+    expandStrongsTapTarget: expandStrongsTapTarget,
     onStrongsTap: onStrongsTap,
   );
 

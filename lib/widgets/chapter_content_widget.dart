@@ -206,6 +206,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                                   : lightTextColor.value,
                             ),
                             showStrongsNumbers: widget.showStrongsNumbers,
+                            expandStrongsTapTarget: true,
                             strongsColor: isDark
                                 ? darkPrimaryColor.value
                                 : lightPrimaryColor.value,
@@ -256,6 +257,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                       lightTextColor.value,
                       darkTextColor.value,
                       widget.onStrongsTap,
+                      expandStrongsTapTarget: true,
                     );
                     //);
                   }).toList(),

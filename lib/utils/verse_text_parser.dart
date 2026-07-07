@@ -19,6 +19,8 @@ class VerseTextParser {
   /// [showStrongsNumbers] - If true, Strong's numbers are rendered as superscripts.
   /// [strongsColor] - Color for regular Strong's number superscripts.
   /// [tvmColor] - Color for TVM code superscripts.
+  /// [expandStrongsTapTarget] - If true, whitespace below superscripts also
+  /// triggers the Strong's tap handler.
   /// [onStrongsTap] - Optional callback when a Strong's number is tapped.
   static TextSpan parseVerseText(
     String text,
@@ -26,6 +28,7 @@ class VerseTextParser {
     bool showStrongsNumbers = false,
     Color strongsColor = Colors.blue,
     Color tvmColor = const Color(0xFF8B4513),
+    bool expandStrongsTapTarget = false,
     void Function(String strongsNumber)? onStrongsTap,
   }) {
     final displayText =
@@ -68,6 +71,7 @@ class VerseTextParser {
           tvmColor: tvmColor,
           onStrongsTap: onStrongsTap,
           baseFontSize: baseStyle.fontSize ?? 22.0,
+          expandTapTarget: expandStrongsTapTarget,
         ));
         previousInlineStrong = true;
       }
@@ -91,6 +95,7 @@ class VerseTextParser {
     required Color highlightColor,
     required Color strongsColor,
     Color tvmColor = const Color(0xFF8B4513),
+    bool expandStrongsTapTarget = false,
     void Function(String strongsNumber)? onStrongsTap,
   }) {
     if (matchedStrongs.isEmpty) {
@@ -128,6 +133,7 @@ class VerseTextParser {
         tvmColor: tvmColor,
         onStrongsTap: onStrongsTap,
         baseFontSize: baseStyle.fontSize ?? 22.0,
+        expandTapTarget: expandStrongsTapTarget,
       ));
     }
 
@@ -202,10 +208,12 @@ class VerseTextParser {
     required Color tvmColor,
     required void Function(String strongsNumber)? onStrongsTap,
     required double baseFontSize,
+    bool expandTapTarget = false,
   }) {
     final isTvm = token.startsWith('{{');
     final strongsNumber = token.replaceAll(RegExp(r'[{}]'), '').toUpperCase();
     final color = isTvm ? tvmColor : strongsColor;
+    final superscriptOffset = baseFontSize * 0.5;
     final text = Text(
       strongsNumber,
       style: TextStyle(
@@ -214,18 +222,28 @@ class VerseTextParser {
       ),
     );
 
-    final child = Transform.translate(
-      offset: Offset(0, -baseFontSize * 0.5),
-      child: onStrongsTap == null
-          ? text
-          : MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () => onStrongsTap(strongsNumber),
-                child: text,
-              ),
-            ),
+    Widget child = Transform.translate(
+      offset: Offset(0, -superscriptOffset),
+      child: text,
     );
+    if (expandTapTarget) {
+      child = Padding(
+        padding: EdgeInsets.only(top: superscriptOffset),
+        child: child,
+      );
+    }
+    if (onStrongsTap != null) {
+      child = MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          behavior: expandTapTarget
+              ? HitTestBehavior.opaque
+              : HitTestBehavior.deferToChild,
+          onTap: () => onStrongsTap(strongsNumber),
+          child: child,
+        ),
+      );
+    }
 
     return WidgetSpan(
       alignment: PlaceholderAlignment.baseline,
