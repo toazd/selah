@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:selah/screens/strongs_search_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+bool get _expectsProgressDialog => !kIsWeb;
 
 Future<void> _waitForFinder(
   WidgetTester tester,
@@ -34,6 +37,19 @@ Future<void> _pumpUntilFinder(
   }
 
   fail('Timed out waiting for $finder');
+}
+
+Future<void> _pumpUntilGone(
+  WidgetTester tester,
+  Finder finder, {
+  int maxPumps = 20,
+}) async {
+  for (int i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 16));
+    if (finder.evaluate().isEmpty) return;
+  }
+
+  fail('Timed out waiting for $finder to disappear');
 }
 
 void main() {
@@ -139,7 +155,7 @@ void main() {
     );
   });
 
-  testWidgets('manual search shows inline busy state before direct search',
+  testWidgets('manual search shows busy state before search work',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
 
@@ -154,10 +170,18 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
     await tester.pump();
 
-    expect(find.text('Searching...'), findsOneWidget);
-    expect(find.byType(AlertDialog), findsNothing);
+    if (_expectsProgressDialog) {
+      expect(find.text('Searching...'), findsNothing);
+      await _pumpUntilFinder(tester, find.byType(AlertDialog), maxPumps: 20);
+      expect(find.text('Searching...'), findsOneWidget);
+    } else {
+      expect(find.text('Searching...'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+    }
 
     await _waitForFinder(tester, find.text('Phrase Summary'));
+    await _pumpUntilGone(tester, find.byType(AlertDialog), maxPumps: 30);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('search started immediately after reset can complete',
@@ -178,11 +202,20 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
     await tester.pump();
 
-    expect(find.text('Searching...'), findsOneWidget);
+    if (_expectsProgressDialog) {
+      expect(find.text('Searching...'), findsNothing);
+      await _pumpUntilFinder(tester, find.byType(AlertDialog), maxPumps: 20);
+      expect(find.text('Searching...'), findsOneWidget);
+    } else {
+      expect(find.text('Searching...'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+    }
 
     await _waitForFinder(tester, find.text('Phrase Summary'));
+    await _pumpUntilGone(tester, find.byType(AlertDialog), maxPumps: 30);
 
     expect(find.text('Searching...'), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('saved search shows restoring state before replaying results',
@@ -210,6 +243,8 @@ void main() {
     expect(resetButton.onPressed, isNull);
 
     await _waitForFinder(tester, find.text('Phrase Summary'));
+    await _pumpUntilGone(tester, find.byType(AlertDialog), maxPumps: 30);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('saved search waits for route transition before restoring',
@@ -257,6 +292,8 @@ void main() {
     expect(find.text('Phrase Summary'), findsNothing);
 
     await _waitForFinder(tester, find.text('Phrase Summary'));
+    await _pumpUntilGone(tester, find.byType(AlertDialog), maxPumps: 30);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('phrase summary does not wrap when the phrase has enough width',

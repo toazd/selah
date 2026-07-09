@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
 import '../database/strongs_database.dart';
 import '../database/history_database.dart';
 import '../utils/error_handler.dart';
@@ -67,13 +68,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   String? _searchType;
   //String? _searchTerm;
   bool _isSearching = false;
+  bool _isNativeProgressDialogVisible = false;
   Timer? _scrollOffsetSaveTimer;
+  BuildContext? _nativeProgressDialogContext;
+  int? _nativeProgressDialogSearchId;
   int _activeSearchId = 0;
 
   static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
 
   bool get _canResetSearch => !_isSearching && !_isRestoring;
+
+  bool get _usesNativeSearchWorker => !kIsWeb;
 
   @override
   bool get wantKeepAlive => true;
@@ -214,7 +220,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     );
   }
 
-  void _onSearch({bool showLoading = true, bool resetScroll = true}) {
+  Future<void> _onSearch(
+      {bool showLoading = true, bool resetScroll = true}) async {
     final input = _controller.text.trim();
     final searchId = ++_activeSearchId;
     if (kDebugMode) {
@@ -233,7 +240,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         _isRestoring = false;
         _isSearching = false;
       });
-      _persistSearchState('');
+      unawaited(_persistSearchState(''));
       return;
     }
 
@@ -251,7 +258,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     });
 
     try {
-      _persistSearchState(input);
+      unawaited(_persistSearchState(input));
 
       if (resetScroll && _resultsScrollController.hasClients) {
         _resultsScrollController.jumpTo(0.0);
@@ -263,7 +270,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         if (kDebugMode) {
           debugPrint('[_onSearch#$searchId] Parsed as REFERENCE search');
         }
-        _startSearchTask(
+        await _startSearchTask(
           searchId: searchId,
           showLoading: showLoading,
           task: () => _performReferenceSearch(referenceSearch, searchId),
@@ -293,7 +300,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         }
       }
 
-      _startSearchTask(
+      await _startSearchTask(
         searchId: searchId,
         showLoading: showLoading,
         task: () {
@@ -343,14 +350,15 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     ));
   }
 
-  void _startSearchTask({
+  Future<void> _startSearchTask({
     required int searchId,
     required bool showLoading,
     required Future<void> Function() task,
-  }) {
+  }) async {
     final stopwatch = Stopwatch()..start();
     Future<void> runTask() async {
       var taskStarted = false;
+      var nativeProgressShown = false;
       try {
         if (!mounted || searchId != _activeSearchId) {
           _debugSearchLifecycle(
@@ -361,6 +369,16 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           _debugSearchLifecycle(
               searchId, 'task became stale before start', stopwatch);
           return;
+        }
+        if (_usesNativeSearchWorker && (_isSearching || _isRestoring)) {
+          nativeProgressShown = true;
+          await _showNativeProgressDialog(searchId, _nativeProgressMessage);
+          await _waitForFrames(1);
+          if (!mounted || searchId != _activeSearchId) {
+            _debugSearchLifecycle(
+                searchId, 'task became stale after progress dialog', stopwatch);
+            return;
+          }
         }
         taskStarted = true;
         _debugSearchLifecycle(searchId, 'starting task body', stopwatch);
@@ -393,23 +411,139 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
           },
         ));
       } finally {
+        if (nativeProgressShown) {
+          _dismissNativeProgressDialog(searchId);
+        }
         _clearBusyStateIfTaskReturned(searchId, stopwatch, taskStarted);
       }
     }
 
     _debugSearchLifecycle(searchId, 'scheduled task', stopwatch);
     if (showLoading) {
-      Timer(_manualSearchStartDelay, () {
-        if (!mounted || searchId != _activeSearchId) {
-          _debugSearchLifecycle(
-              searchId, 'delayed manual task became stale', stopwatch);
-          return;
-        }
-        unawaited(runTask());
-      });
+      await Future<void>.delayed(_manualSearchStartDelay);
+      if (!mounted || searchId != _activeSearchId) {
+        _debugSearchLifecycle(
+            searchId, 'delayed manual task became stale', stopwatch);
+        return;
+      }
+      await runTask();
     } else {
-      unawaited(runTask());
+      await runTask();
     }
+  }
+
+  String get _nativeProgressMessage =>
+      _isRestoring ? 'Restoring search results...' : 'Searching...';
+
+  Future<void> _showNativeProgressDialog(int searchId, String message) async {
+    if (!_usesNativeSearchWorker || !mounted) return;
+    if (_nativeProgressDialogSearchId == searchId &&
+        _isNativeProgressDialogVisible) {
+      return;
+    }
+
+    _nativeProgressDialogSearchId = searchId;
+    _isNativeProgressDialogVisible = true;
+    _nativeProgressDialogContext = null;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final progressColor =
+        isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
+    final dialogReady = Completer<void>();
+
+    unawaited(showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        if (_nativeProgressDialogSearchId == searchId) {
+          _nativeProgressDialogContext = dialogContext;
+        }
+        if (!dialogReady.isCompleted) {
+          dialogReady.complete();
+        }
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            backgroundColor: bgColor,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  strokeWidth: 7.0,
+                  strokeCap: StrokeCap.round,
+                  constraints: BoxConstraints.tight(const Size(72, 72)),
+                  semanticsLabel: message,
+                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ).whenComplete(() {
+      if (_nativeProgressDialogSearchId == searchId) {
+        _nativeProgressDialogSearchId = null;
+        _nativeProgressDialogContext = null;
+        _isNativeProgressDialogVisible = false;
+      }
+    }));
+
+    await dialogReady.future.timeout(
+      const Duration(milliseconds: 250),
+      onTimeout: () {},
+    );
+  }
+
+  void _dismissNativeProgressDialog(int searchId) {
+    if (_nativeProgressDialogSearchId != searchId ||
+        !_isNativeProgressDialogVisible) {
+      return;
+    }
+
+    final dialogContext = _nativeProgressDialogContext;
+    _nativeProgressDialogSearchId = null;
+    _nativeProgressDialogContext = null;
+    _isNativeProgressDialogVisible = false;
+
+    if (dialogContext != null && dialogContext.mounted) {
+      Navigator.of(dialogContext, rootNavigator: true).pop();
+    }
+  }
+
+  Future<StrongsNumberSearchResult> _runStrongsNumberSearchTask(
+      String strongsNumber) {
+    if (_usesNativeSearchWorker) {
+      return compute(runStrongsNumberSearch, strongsNumber);
+    }
+    return Future<StrongsNumberSearchResult>.value(
+        runStrongsNumberSearch(strongsNumber));
+  }
+
+  Future<WordSearchResult> _runWordSearchTask(String word) {
+    if (_usesNativeSearchWorker) {
+      return compute(runWordSearch, word);
+    }
+    return Future<WordSearchResult>.value(runWordSearch(word));
+  }
+
+  Future<ReferenceSearchResult> _runReferenceSearchTask(
+      ReferenceSearchTaskData refSearch) {
+    if (_usesNativeSearchWorker) {
+      return compute(runReferenceSearch, refSearch);
+    }
+    return Future<ReferenceSearchResult>.value(runReferenceSearch(refSearch));
   }
 
   void _debugSearchLifecycle(
@@ -453,7 +587,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final searchResult = runStrongsNumberSearch(strongsNumber);
+      final searchResult = await _runStrongsNumberSearchTask(strongsNumber);
       if (!mounted) return;
       if (searchId != _activeSearchId) return;
       final results = searchResult.searchResults;
@@ -510,7 +644,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField(); // Don't wait or it flashes for a split second
     try {
-      final wordSearchResult = runWordSearch(word);
+      final wordSearchResult = await _runWordSearchTask(word);
       if (kDebugMode) {
         debugPrint(
             '[_performWordSearch] Word search done: ${wordSearchResult.wordVerseCount} word verses, ${wordSearchResult.foundStrongsNumbers.length} Strong\'s numbers, ${wordSearchResult.searchResults.length} result verses');
@@ -592,7 +726,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     _unfocusSearchField();
     try {
-      final result = runReferenceSearch(refSearch);
+      final result = await _runReferenceSearchTask(refSearch);
       if (kDebugMode) {
         debugPrint(
             '[_performReferenceSearch] Reference search done: error=${result.error}, strongsNumbers=${result.strongsNumbers}');
@@ -1000,6 +1134,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
 
   @override
   void dispose() {
+    final activeNativeDialogSearchId = _nativeProgressDialogSearchId;
+    if (activeNativeDialogSearchId != null) {
+      _dismissNativeProgressDialog(activeNativeDialogSearchId);
+    }
     _disposeVerseReferenceRecognizers();
     _searchButtonFocusNode.dispose();
     _persistSearchState(_controller.text.trim());
@@ -1048,7 +1186,10 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     if (!mounted || _activeSearchId != restoreStartSearchId) {
       return;
     }
-    _onSearch(showLoading: false, resetScroll: false);
+    await _onSearch(showLoading: false, resetScroll: false);
+    if (!mounted || _controller.text.trim() != lastSearch.trim()) {
+      return;
+    }
     await _loadScrollOffset();
   }
 
@@ -1139,6 +1280,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final showStrongNumbersTable =
         (_searchType == 'word' || _searchType == 'reference') &&
             _foundStrongsNumbers.isNotEmpty;
+    final showInlineBusyStatus = !_usesNativeSearchWorker;
     if (!showStrongNumbersTable) {
       _resetVerseReferenceRecognizers();
       _scheduleVerseReferenceRecognizerCleanup(0);
@@ -1285,8 +1427,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     ),
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) {
-                      if (!_isSearching) {
-                        _onSearch();
+                      if (!_isSearching && !_isRestoring) {
+                        unawaited(_onSearch());
                       }
                     },
                     style: TextStyle(
@@ -1359,7 +1501,9 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                         const SizedBox(width: 8),
                         ElevatedButton(
                           focusNode: _searchButtonFocusNode,
-                          onPressed: _isSearching ? null : () => _onSearch(),
+                          onPressed: (_isSearching || _isRestoring)
+                              ? null
+                              : () => unawaited(_onSearch()),
                           child: Text('Search',
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,
@@ -1381,14 +1525,14 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                         //           fontFamily: uiFontFamily,
                         //           color: getAdaptiveTextColor(context),
                         //         )))
-                        : _isRestoring
+                        : _isRestoring && showInlineBusyStatus
                             ? Center(
                                 child: Text('Restoring search results...',
                                     style: TextStyle(
                                         fontSize: uiFontSize + 4,
                                         fontFamily: uiFontFamily,
                                         color: getAdaptiveTextColor(context))))
-                            : _isSearching
+                            : _isSearching && showInlineBusyStatus
                                 ? Center(
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,

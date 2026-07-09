@@ -39,7 +39,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "0.8.11";
+final appVersion = "0.9.0";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
