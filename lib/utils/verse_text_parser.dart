@@ -225,7 +225,7 @@ class VerseTextParser {
       // larger than the verse text
       textScaler: TextScaler.noScaling,
       style: baseStyle.copyWith(
-        fontSize: baseFontSize * 0.5,
+        fontSize: baseFontSize * 0.8,
         color: color,
       ),
     );

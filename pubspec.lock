@@ -245,10 +245,10 @@ packages:
     dependency: transitive
     description:
       name: dev_build
-      sha256: "21df3f741f0f5fc7c45f618e68e206b9f021b1adf83db4004dfaa032996cb0c1"
+      sha256: f639b36c1cf845c11b506b562e162eca84f2cb368cf9cca48117069f881d4be8
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.8+2"
+    version: "1.1.8+3"
   diff_match_patch:
     dependency: transitive
     description:
