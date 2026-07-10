@@ -542,7 +542,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               ValueListenableBuilder<bool>(
                 valueListenable: showDialogTskNotifier,
                 builder: (context, showDialogTsk, _) {
@@ -603,9 +603,11 @@ class _ChapterDialogState extends State<ChapterDialog> {
           borderRadius: dialogBorderRadius,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final drawerWidth = constraints.maxWidth <= 304
-                  ? constraints.maxWidth
-                  : (constraints.maxWidth * 0.5).clamp(304.0, 380.0).toDouble();
+              // final drawerWidth = constraints.maxWidth <= 304
+              //     ? constraints.maxWidth
+              //     : (constraints.maxWidth * 0.5).clamp(304.0, 380.0).toDouble();
+              final drawerWidth =
+                  constraints.maxWidth < 265 ? constraints.maxWidth : 265.0;
 
               return Stack(
                 clipBehavior: Clip.hardEdge,

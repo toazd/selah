@@ -39,19 +39,22 @@ WordSearchResult runWordSearch(String word) {
     debugPrint('[runWordSearch] START: word="$word"');
   }
 
-  final wordData = StrongsDatabase.searchByWordWithStrongsNumbers(word);
+  final wordData = StrongsDatabase.searchByWordWithStrongsNumbers(
+    word,
+    includeWordVerses: false,
+  );
   final foundStrongs = wordData.foundStrongsNumbers;
   if (kDebugMode) {
     debugPrint(
-        '[runWordSearch] word scan finished in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
+        '[runWordSearch] word scan finished in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerseCount} word verses, ${foundStrongs.length} Strong\'s numbers');
   }
-  if (wordData.wordVerses.isEmpty || foundStrongs.isEmpty) {
+  if (wordData.wordVerseCount == 0 || foundStrongs.isEmpty) {
     if (kDebugMode) {
       debugPrint(
-          '[runWordSearch] DONE in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers');
+          '[runWordSearch] DONE in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerseCount} word verses, ${foundStrongs.length} Strong\'s numbers');
     }
     return WordSearchResult(
-      wordVerseCount: wordData.wordVerses.length,
+      wordVerseCount: wordData.wordVerseCount,
       foundStrongsNumbers: foundStrongs,
       searchResults: const [],
       phraseSummary: const {},
@@ -59,22 +62,22 @@ WordSearchResult runWordSearch(String word) {
   }
 
   final strongsList = foundStrongs.keys.toList();
-  final results = StrongsDatabase.searchByStrongsNumbers(strongsList);
+  final strongsSearch =
+      StrongsDatabase.searchByStrongsNumbersWithPhraseSummary(strongsList);
+  final results = strongsSearch.searchResults;
+  final phraseSummary = strongsSearch.phraseSummary;
   if (kDebugMode) {
     debugPrint(
         '[runWordSearch] Strong\'s scan finished in ${stopwatch.elapsedMilliseconds}ms: ${results.length} result verses');
   }
-  final phraseSummary = results.isEmpty
-      ? <String, int>{}
-      : StrongsDatabase.extractPhraseSummary(results, strongsList);
 
   if (kDebugMode) {
     debugPrint(
-        '[runWordSearch] DONE in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerses.length} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
+        '[runWordSearch] DONE in ${stopwatch.elapsedMilliseconds}ms: ${wordData.wordVerseCount} word verses, ${foundStrongs.length} Strong\'s numbers, ${results.length} result verses, ${phraseSummary.length} phrases');
   }
 
   return WordSearchResult(
-    wordVerseCount: wordData.wordVerses.length,
+    wordVerseCount: wordData.wordVerseCount,
     foundStrongsNumbers: foundStrongs,
     searchResults: results,
     phraseSummary: phraseSummary,
@@ -159,14 +162,14 @@ ReferenceSearchResult runReferenceSearch(ReferenceSearchTaskData data) {
     };
   }
 
-  final results = StrongsDatabase.searchByStrongsNumbers(strongsNumbers);
+  final strongsSearch =
+      StrongsDatabase.searchByStrongsNumbersWithPhraseSummary(strongsNumbers);
+  final results = strongsSearch.searchResults;
+  final phraseSummary = strongsSearch.phraseSummary;
   if (kDebugMode) {
     debugPrint(
         '[runReferenceSearch] Strong\'s scan finished in ${stopwatch.elapsedMilliseconds}ms: ${results.length} result verses');
   }
-  final phraseSummary = results.isEmpty
-      ? <String, int>{}
-      : StrongsDatabase.extractPhraseSummary(results, strongsNumbers);
 
   if (kDebugMode) {
     debugPrint(

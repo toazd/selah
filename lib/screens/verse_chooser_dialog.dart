@@ -495,7 +495,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
             color: getAdaptiveTextColor(context)),
         controller: _quickJumpController,
         decoration: InputDecoration(
-          hintText: 'eg. Sos 2:3',
+          hintText: '',
           counterText: "",
           contentPadding: const EdgeInsets.only(top: 22),
           //labelText: 'Quick Jump',

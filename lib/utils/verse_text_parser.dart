@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:selah/utils/preferences_constants.dart';
 
 class VerseTextParser {
   static final RegExp _markupTokenRegex = RegExp(
@@ -70,7 +71,8 @@ class VerseTextParser {
           strongsColor: strongsColor,
           tvmColor: tvmColor,
           onStrongsTap: onStrongsTap,
-          baseFontSize: baseStyle.fontSize ?? 22.0,
+          baseStyle: baseStyle,
+          baseFontSize: baseStyle.fontSize ?? defaultFontSize,
           expandTapTarget: expandStrongsTapTarget,
         ));
         previousInlineStrong = true;
@@ -132,7 +134,8 @@ class VerseTextParser {
         strongsColor: strongsColor,
         tvmColor: tvmColor,
         onStrongsTap: onStrongsTap,
-        baseFontSize: baseStyle.fontSize ?? 22.0,
+        baseStyle: baseStyle,
+        baseFontSize: baseStyle.fontSize ?? defaultFontSize,
         expandTapTarget: expandStrongsTapTarget,
       ));
     }
@@ -207,6 +210,7 @@ class VerseTextParser {
     required Color strongsColor,
     required Color tvmColor,
     required void Function(String strongsNumber)? onStrongsTap,
+    required TextStyle baseStyle,
     required double baseFontSize,
     bool expandTapTarget = false,
   }) {
@@ -216,8 +220,12 @@ class VerseTextParser {
     final superscriptOffset = baseFontSize * 0.5;
     final text = Text(
       strongsNumber,
-      style: TextStyle(
-        fontSize: baseFontSize * 0.8,
+      // Without the following, system font scaling above 1.00 causes the strongs
+      // numbers to receive "duplicate" scaling and they become disproportionately
+      // larger than the verse text
+      textScaler: TextScaler.noScaling,
+      style: baseStyle.copyWith(
+        fontSize: baseFontSize * 0.5,
         color: color,
       ),
     );

@@ -88,7 +88,7 @@ Widget buildVerseDisplayWidget({
               ? () => onNoteIconTap(verseNumber, noteForVerse['note_text'])
               : null,
           child: Icon(
-            applyTextScaling: true,
+            applyTextScaling: false,
             Icons.text_snippet_outlined,
             size: FontSizeAdjustments.getAdjustedSize(
                 fontFamilyNotifier.value, fontSizeNotifier.value),

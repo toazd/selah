@@ -1529,7 +1529,7 @@
     },
     {
       "name": "video_player_avfoundation",
-      "version": "2.10.0",
+      "version": "2.11.0",
       "dependencies": [
         "flutter",
         "meta",

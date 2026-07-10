@@ -826,6 +826,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final baseStyle = TextStyle(
       fontSize: FontSizeAdjustments.getAdjustedSize(
           fontFamilyNotifier.value, fontSize),
+      fontFamily: fontFamilyNotifier.value,
       color: isDark ? darkTextColor.value : lightTextColor.value,
     );
     final highlightColor = _getHighlightColor(context);

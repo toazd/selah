@@ -5,11 +5,23 @@ import "../utils/verse_reference_detector.dart";
 
 class StrongsWordSearchData {
   final List<Map<String, dynamic>> wordVerses;
+  final int wordVerseCount;
   final Map<String, Map<String, dynamic>> foundStrongsNumbers;
 
   const StrongsWordSearchData({
     required this.wordVerses,
+    required this.wordVerseCount,
     required this.foundStrongsNumbers,
+  });
+}
+
+class StrongsBulkSearchData {
+  final List<Map<String, dynamic>> searchResults;
+  final Map<String, int> phraseSummary;
+
+  const StrongsBulkSearchData({
+    required this.searchResults,
+    required this.phraseSummary,
   });
 }
 
@@ -22,25 +34,27 @@ class StrongsDatabase {
   static final RegExp _redLetterTagRegex =
       RegExp(r"</?r>", caseSensitive: false);
   static final RegExp _extraSpacesRegex = RegExp(r" +");
+  static final RegExp _whitespaceRegex = RegExp(r"\s+");
   static final RegExp _phraseBoundaryRegex = RegExp(r"[.,:;?!¶]+");
   static final RegExp _wordEndingRegex = RegExp(r"[A-Za-z0-9'\-]$");
   static final RegExp _englishWordRegex = RegExp(r"[A-Za-z0-9][A-Za-z0-9'\-]*");
+  static final RegExp _strongsNumberInputRegex = RegExp(r"^[HhGg]\d+$");
+  static final RegExp _removedMarkupBetweenWordCharactersRegex = RegExp(
+    r"[A-Za-z0-9'\-](?:(?:\{\{?[A-Za-z]\d+\}\}?|</?r>))+(?=[A-Za-z0-9'\-])",
+    caseSensitive: false,
+  );
+  static const int _rawTagPrefilterLimit = 8;
   static bool get _verboseSearchLogging => false;
 
   /// Validates if the input is a Strong's number (HXXXX or GXXXX format)
   /// Returns the normalized Strong's number (uppercase) or null
   static String? validateStrongsNumber(String input) {
     final trimmed = input.trim();
-    final match = RegExp(r"^[HhGg]\d+$").firstMatch(trimmed);
+    final match = _strongsNumberInputRegex.firstMatch(trimmed);
     if (match != null) {
       return match.group(0)!.toUpperCase();
     }
     return null;
-  }
-
-  static bool _textContainsStrong(String text, String strongsNumber) {
-    final normalized = strongsNumber.toUpperCase();
-    return text.contains("{$normalized}") || text.contains("{{$normalized}}");
   }
 
   static RegExp _wordBoundaryRegex(String word) {
@@ -61,84 +75,94 @@ class StrongsDatabase {
     );
   }
 
-  static List<String> _extractStrongsNumbers(
-    String text, {
-    bool includeTvm = true,
-  }) {
-    return _strongTagRegex
-        .allMatches(text)
-        .map(_parseStrongTag)
-        .whereType<_ParsedStrongsTag>()
-        .where((tag) => includeTvm || !tag.isTvm)
-        .map((tag) => tag.number)
-        .toList();
-  }
-
   static String _plainSearchText(String text) {
-    var result = stripAllStrongsTags(text);
+    var result = text.replaceAll(_strongTagRegex, "");
     result = result.replaceAll(_redLetterTagRegex, "");
     result = result.replaceAll("¶", " ");
     result = result.replaceAll(_extraSpacesRegex, " ");
     return result.trim();
   }
 
+  static bool _plainTextContainsWord(String text, RegExp wordPattern) {
+    final rawMatch = wordPattern.hasMatch(text);
+    if (!rawMatch && !_removedMarkupBetweenWordCharactersRegex.hasMatch(text)) {
+      return false;
+    }
+    return wordPattern.hasMatch(_plainSearchText(text));
+  }
+
   static String _extractTrailingPhrase(String textBeforeTagGroup) {
     var text = textBeforeTagGroup.replaceAll(_redLetterTagRegex, " ");
     text = text.replaceAll("¶", " ¶ ");
-    text = text.replaceAll(RegExp(r"\s+"), " ");
+    text = text.replaceAll(_whitespaceRegex, " ");
 
     final trimmedRight = text.trimRight();
     if (trimmedRight.isEmpty || !_wordEndingRegex.hasMatch(trimmedRight)) {
       return "";
     }
 
-    final phraseSegment = trimmedRight.split(_phraseBoundaryRegex).last;
-    final words = _englishWordRegex
+    var phraseStart = 0;
+    for (final boundary in _phraseBoundaryRegex.allMatches(trimmedRight)) {
+      phraseStart = boundary.end;
+    }
+    final phraseSegment = trimmedRight.substring(phraseStart);
+    return _englishWordRegex
         .allMatches(phraseSegment)
         .map((match) => match.group(0)!)
-        .toList();
-    return words.join(" ").trim();
+        .join(" ")
+        .trim();
   }
 
   static List<_StrongsPhraseAssociation> _parsePhraseAssociations(String text) {
     final associations = <_StrongsPhraseAssociation>[];
+    _visitPhraseAssociations(text, associations.add);
+    return associations;
+  }
+
+  static void _visitPhraseAssociations(
+    String text,
+    void Function(_StrongsPhraseAssociation association) visitor, {
+    Set<String>? targetStrongsNumbers,
+    bool includeTvm = true,
+  }) {
     final tagMatches = _strongTagRegex.allMatches(text).toList();
     var searchStart = 0;
     var index = 0;
 
     while (index < tagMatches.length) {
       final firstTagMatch = tagMatches[index];
-      final groupMatches = <RegExpMatch>[firstTagMatch];
+      final groupTags = <_ParsedStrongsTag>[];
+      final firstTag = _parseStrongTag(firstTagMatch);
+      if (firstTag != null) groupTags.add(firstTag);
       var groupEnd = firstTagMatch.end;
       index++;
 
       while (index < tagMatches.length) {
         final betweenTags = text.substring(groupEnd, tagMatches[index].start);
         if (betweenTags.trim().isNotEmpty) break;
-        groupMatches.add(tagMatches[index]);
+        final tag = _parseStrongTag(tagMatches[index]);
+        if (tag != null) groupTags.add(tag);
         groupEnd = tagMatches[index].end;
         index++;
       }
 
-      final phrase = _extractTrailingPhrase(
-          text.substring(searchStart, firstTagMatch.start));
-      if (phrase.isNotEmpty) {
-        final tags = groupMatches
-            .map(_parseStrongTag)
-            .whereType<_ParsedStrongsTag>()
-            .toList();
-        if (tags.isNotEmpty) {
-          associations.add(_StrongsPhraseAssociation(
+      final containsTarget = targetStrongsNumbers == null ||
+          groupTags.any((tag) =>
+              (includeTvm || !tag.isTvm) &&
+              targetStrongsNumbers.contains(tag.number));
+      if (containsTarget && groupTags.isNotEmpty) {
+        final phrase = _extractTrailingPhrase(
+            text.substring(searchStart, firstTagMatch.start));
+        if (phrase.isNotEmpty) {
+          visitor(_StrongsPhraseAssociation(
             phrase: phrase,
-            tags: tags,
+            tags: groupTags,
           ));
         }
       }
 
       searchStart = groupEnd;
     }
-
-    return associations;
   }
 
   static Set<String> _matchingStrongsInText(
@@ -146,23 +170,70 @@ class StrongsDatabase {
     Set<String> strongsNumbers, {
     bool includeTvm = true,
     bool associatedOnly = false,
+    Map<String, int>? phraseCounts,
   }) {
     if (strongsNumbers.isEmpty) return {};
 
     if (associatedOnly) {
       final matched = <String>{};
-      for (final association in _parsePhraseAssociations(text)) {
-        matched.addAll(association.matchingStrongs(
-          strongsNumbers,
-          includeTvm: includeTvm,
-        ));
-      }
+      _visitPhraseAssociations(
+        text,
+        (association) {
+          var matchCount = 0;
+          for (final tag in association.tags) {
+            if (!includeTvm && tag.isTvm) continue;
+            if (!strongsNumbers.contains(tag.number)) continue;
+            matched.add(tag.number);
+            matchCount++;
+          }
+          if (matchCount > 0 && phraseCounts != null) {
+            phraseCounts[association.phrase] =
+                (phraseCounts[association.phrase] ?? 0) + matchCount;
+          }
+        },
+        targetStrongsNumbers: strongsNumbers,
+        includeTvm: includeTvm,
+      );
       return matched;
     }
 
-    final textStrongs =
-        _extractStrongsNumbers(text, includeTvm: includeTvm).toSet();
-    return textStrongs.intersection(strongsNumbers);
+    final matched = <String>{};
+    for (final match in _strongTagRegex.allMatches(text)) {
+      final tag = _parseStrongTag(match);
+      if (tag == null || (!includeTvm && tag.isTvm)) continue;
+      if (strongsNumbers.contains(tag.number)) matched.add(tag.number);
+    }
+    if (matched.isNotEmpty && phraseCounts != null) {
+      _addPhraseCountsForText(
+        text,
+        strongsNumbers,
+        phraseCounts,
+        includeTvm: includeTvm,
+      );
+    }
+    return matched;
+  }
+
+  static void _addPhraseCountsForText(
+    String text,
+    Set<String> strongsNumbers,
+    Map<String, int> phraseCounts, {
+    required bool includeTvm,
+  }) {
+    _visitPhraseAssociations(
+      text,
+      (association) {
+        final matchCount = association.matchingCount(
+          strongsNumbers,
+          includeTvm: includeTvm,
+        );
+        if (matchCount == 0) return;
+        phraseCounts[association.phrase] =
+            (phraseCounts[association.phrase] ?? 0) + matchCount;
+      },
+      targetStrongsNumbers: strongsNumbers,
+      includeTvm: includeTvm,
+    );
   }
 
   static String? _psalmSuperscriptionForChapter(int chapter) {
@@ -200,14 +271,16 @@ class StrongsDatabase {
     }
     final results = <Map<String, dynamic>>[];
     final normalized = strongsNumber.toUpperCase();
+    final tagNeedle = '{$normalized}';
 
-    for (final book in bibleDataStrongs.keys) {
-      final bookData = bibleDataStrongs[book]!;
-      for (final chapter in bookData.keys) {
+    for (final bookEntry in bibleDataStrongs.entries) {
+      final book = bookEntry.key;
+      final bookData = bookEntry.value;
+      for (final chapterEntry in bookData.entries) {
+        final chapter = chapterEntry.key;
         if (book == 'Psa') {
           final superscription = _psalmSuperscriptionForChapter(chapter);
-          if (superscription != null &&
-              _textContainsStrong(superscription, normalized)) {
+          if (superscription != null && superscription.contains(tagNeedle)) {
             results.add(_psalmSuperscriptionResult(
               chapter,
               superscription,
@@ -215,10 +288,10 @@ class StrongsDatabase {
             ));
           }
         }
-        final chapterData = bookData[chapter]!;
-        for (final verse in chapterData.keys) {
-          final text = chapterData[verse]!;
-          if (_textContainsStrong(text, normalized)) {
+        for (final verseEntry in chapterEntry.value.entries) {
+          final verse = verseEntry.key;
+          final text = verseEntry.value;
+          if (text.contains(tagNeedle)) {
             results.add({
               "book": book,
               "chapter": chapter,
@@ -243,16 +316,21 @@ class StrongsDatabase {
   //   return _searchByWordData(
   //     word,
   //     collectStrongNumbers: false,
+  //     collectWordVerses: true,
   //     debugLabel: 'searchByWord',
   //   ).wordVerses;
   // }
 
   /// Searches for literal word matches and collects the Strong's numbers
   /// directly associated with that word during the same Bible scan.
-  static StrongsWordSearchData searchByWordWithStrongsNumbers(String word) {
+  static StrongsWordSearchData searchByWordWithStrongsNumbers(
+    String word, {
+    bool includeWordVerses = true,
+  }) {
     return _searchByWordData(
       word,
       collectStrongNumbers: true,
+      collectWordVerses: includeWordVerses,
       debugLabel: 'searchByWordWithStrongsNumbers',
     );
   }
@@ -260,41 +338,49 @@ class StrongsDatabase {
   static StrongsWordSearchData _searchByWordData(
     String word, {
     required bool collectStrongNumbers,
+    required bool collectWordVerses,
     required String debugLabel,
   }) {
     if (kDebugMode) {
       debugPrint('[_StrongsDatabase] $debugLabel: starting for "$word"');
     }
     final wordVerses = <Map<String, dynamic>>[];
+    var wordVerseCount = 0;
     final foundStrongsNumbers = <String, Map<String, dynamic>>{};
     final searchWord = word.toLowerCase().trim();
     if (searchWord.isEmpty) {
       return StrongsWordSearchData(
         wordVerses: wordVerses,
+        wordVerseCount: wordVerseCount,
         foundStrongsNumbers: foundStrongsNumbers,
       );
     }
     final wordPattern = _wordBoundaryRegex(searchWord);
 
     int bookCount = 0;
-    for (final book in bibleDataStrongs.keys) {
+    for (final bookEntry in bibleDataStrongs.entries) {
       bookCount++;
-      final bookData = bibleDataStrongs[book]!;
+      final book = bookEntry.key;
+      final bookData = bookEntry.value;
       if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
             '[_StrongsDatabase] $debugLabel: scanning book #$bookCount "$book" (${bookData.length} chapters)');
       }
       int chapterCount = 0;
-      for (final chapter in bookData.keys) {
+      for (final chapterEntry in bookData.entries) {
         chapterCount++;
+        final chapter = chapterEntry.key;
         if (book == 'Psa') {
           final superscription = _psalmSuperscriptionForChapter(chapter);
           if (superscription != null &&
-              wordPattern.hasMatch(_plainSearchText(superscription))) {
-            wordVerses.add(_psalmSuperscriptionResult(
-              chapter,
-              superscription,
-            ));
+              _plainTextContainsWord(superscription, wordPattern)) {
+            wordVerseCount++;
+            if (collectWordVerses) {
+              wordVerses.add(_psalmSuperscriptionResult(
+                chapter,
+                superscription,
+              ));
+            }
             if (collectStrongNumbers) {
               _collectAssociatedStrongsForWord(
                 text: superscription,
@@ -308,17 +394,20 @@ class StrongsDatabase {
             }
           }
         }
-        final chapterData = bookData[chapter]!;
-        for (final verse in chapterData.keys) {
-          final text = chapterData[verse]!;
-          if (!wordPattern.hasMatch(_plainSearchText(text))) continue;
+        for (final verseEntry in chapterEntry.value.entries) {
+          final verse = verseEntry.key;
+          final text = verseEntry.value;
+          if (!_plainTextContainsWord(text, wordPattern)) continue;
 
-          wordVerses.add({
-            "book": book,
-            "chapter": chapter,
-            "verse": verse,
-            "text": text,
-          });
+          wordVerseCount++;
+          if (collectWordVerses) {
+            wordVerses.add({
+              "book": book,
+              "chapter": chapter,
+              "verse": verse,
+              "text": text,
+            });
+          }
           if (collectStrongNumbers) {
             _collectAssociatedStrongsForWord(
               text: text,
@@ -333,15 +422,16 @@ class StrongsDatabase {
       }
       if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
-            '[_StrongsDatabase] $debugLabel: book "$book" scanned ($chapterCount chapters, ${wordVerses.length} total matches so far)');
+            '[_StrongsDatabase] $debugLabel: book "$book" scanned ($chapterCount chapters, $wordVerseCount total matches so far)');
       }
     }
     if (kDebugMode) {
       debugPrint(
-          '[_StrongsDatabase] $debugLabel: finished for "$word" — found ${wordVerses.length} verses and ${foundStrongsNumbers.length} Strong\'s numbers across $bookCount books');
+          '[_StrongsDatabase] $debugLabel: finished for "$word" — found $wordVerseCount verses and ${foundStrongsNumbers.length} Strong\'s numbers across $bookCount books');
     }
     return StrongsWordSearchData(
       wordVerses: wordVerses,
+      wordVerseCount: wordVerseCount,
       foundStrongsNumbers: foundStrongsNumbers,
     );
   }
@@ -417,8 +507,8 @@ class StrongsDatabase {
     required int? verse,
     bool isSuperscription = false,
   }) {
-    for (final association in _parsePhraseAssociations(text)) {
-      if (!association.hasTrailingWord(wordPattern)) continue;
+    _visitPhraseAssociations(text, (association) {
+      if (!association.hasTrailingWord(wordPattern)) return;
 
       for (final strongsNum in association.regularStrongsNumbers) {
         result.putIfAbsent(strongsNum, () {
@@ -430,44 +520,91 @@ class StrongsDatabase {
           };
         });
       }
-    }
+    });
   }
 
   /// Returns all verses that contain ANY of the given Strong's numbers.
   /// Returns a list of maps with "book", "chapter", "verse", "text", and "matchedStrongs" keys.
-  static List<Map<String, dynamic>> searchByStrongsNumbers(
+  // static List<Map<String, dynamic>> searchByStrongsNumbers(
+  //   List<String> strongsNumbers, {
+  //   bool includeTvm = false,
+  //   bool associatedOnly = true,
+  // }) {
+  //   return _searchByStrongsNumbersData(
+  //     strongsNumbers,
+  //     includeTvm: includeTvm,
+  //     associatedOnly: associatedOnly,
+  //     includePhraseSummary: false,
+  //   ).searchResults;
+  // }
+
+  /// Searches for all requested Strong's numbers and accumulates the phrase
+  /// summary during the same association traversal.
+  static StrongsBulkSearchData searchByStrongsNumbersWithPhraseSummary(
     List<String> strongsNumbers, {
     bool includeTvm = false,
     bool associatedOnly = true,
+  }) {
+    return _searchByStrongsNumbersData(
+      strongsNumbers,
+      includeTvm: includeTvm,
+      associatedOnly: associatedOnly,
+      includePhraseSummary: true,
+    );
+  }
+
+  static StrongsBulkSearchData _searchByStrongsNumbersData(
+    List<String> strongsNumbers, {
+    required bool includeTvm,
+    required bool associatedOnly,
+    required bool includePhraseSummary,
   }) {
     if (kDebugMode) {
       debugPrint(
           '[_StrongsDatabase] searchByStrongsNumbers: starting for ${strongsNumbers.length} Strong\'s numbers: $strongsNumbers (includeTvm=$includeTvm, associatedOnly=$associatedOnly)');
     }
     final results = <Map<String, dynamic>>[];
+    final phraseSummary = <String, int>{};
     final normalized = strongsNumbers.map((s) => s.toUpperCase()).toSet();
-    if (normalized.isEmpty) return results;
+    if (normalized.isEmpty) {
+      return StrongsBulkSearchData(
+        searchResults: results,
+        phraseSummary: phraseSummary,
+      );
+    }
+
+    final rawTagPrefilter = normalized.length <= _rawTagPrefilterLimit
+        ? RegExp(
+            '\\{\\{?(?:${normalized.map(RegExp.escape).join('|')})\\}\\}?',
+            caseSensitive: false,
+          )
+        : null;
 
     int bookCount = 0;
-    for (final book in bibleDataStrongs.keys) {
+    for (final bookEntry in bibleDataStrongs.entries) {
       bookCount++;
-      final bookData = bibleDataStrongs[book]!;
+      final book = bookEntry.key;
+      final bookData = bookEntry.value;
       if (kDebugMode && _verboseSearchLogging) {
         debugPrint(
             '[_StrongsDatabase] searchByStrongsNumbers: scanning book #$bookCount "$book" (${bookData.length} chapters, ${results.length} results so far)');
       }
       int chapterCount = 0;
       int matchCountThisBook = 0;
-      for (final chapter in bookData.keys) {
+      for (final chapterEntry in bookData.entries) {
         chapterCount++;
+        final chapter = chapterEntry.key;
         if (book == 'Psa') {
           final superscription = _psalmSuperscriptionForChapter(chapter);
-          if (superscription != null) {
+          if (superscription != null &&
+              (rawTagPrefilter == null ||
+                  rawTagPrefilter.hasMatch(superscription))) {
             final matchedStrongs = _matchingStrongsInText(
               superscription,
               normalized,
               includeTvm: includeTvm,
               associatedOnly: associatedOnly,
+              phraseCounts: includePhraseSummary ? phraseSummary : null,
             );
             if (matchedStrongs.isNotEmpty) {
               matchCountThisBook++;
@@ -479,14 +616,18 @@ class StrongsDatabase {
             }
           }
         }
-        final chapterData = bookData[chapter]!;
-        for (final verse in chapterData.keys) {
-          final text = chapterData[verse]!;
+        for (final verseEntry in chapterEntry.value.entries) {
+          final verse = verseEntry.key;
+          final text = verseEntry.value;
+          if (rawTagPrefilter != null && !rawTagPrefilter.hasMatch(text)) {
+            continue;
+          }
           final matchedStrongs = _matchingStrongsInText(
             text,
             normalized,
             includeTvm: includeTvm,
             associatedOnly: associatedOnly,
+            phraseCounts: includePhraseSummary ? phraseSummary : null,
           );
           if (matchedStrongs.isNotEmpty) {
             matchCountThisBook++;
@@ -509,7 +650,10 @@ class StrongsDatabase {
       debugPrint(
           '[_StrongsDatabase] searchByStrongsNumbers: finished — found ${results.length} verses across $bookCount books');
     }
-    return results;
+    return StrongsBulkSearchData(
+      searchResults: results,
+      phraseSummary: phraseSummary,
+    );
   }
 
   /// Extracts all phrase occurrences (word(s) before each matched Strong's number)
@@ -531,18 +675,12 @@ class StrongsDatabase {
 
     for (final verseData in verses) {
       final text = verseData["text"] as String;
-      for (final association in _parsePhraseAssociations(text)) {
-        final matchCount = association.matchingCount(
-          normalizedSet,
-          includeTvm: includeTvm,
-        );
-        if (matchCount == 0) continue;
-
-        final phrase = association.phrase;
-        if (phrase.isNotEmpty) {
-          phraseCounts[phrase] = (phraseCounts[phrase] ?? 0) + matchCount;
-        }
-      }
+      _addPhraseCountsForText(
+        text,
+        normalizedSet,
+        phraseCounts,
+        includeTvm: includeTvm,
+      );
     }
     if (kDebugMode) {
       debugPrint(
@@ -553,12 +691,12 @@ class StrongsDatabase {
 
   /// Strips ALL Strong's number tags from verse text (e.g., {H1285} -> "").
   /// Also collapses multiple spaces left behind from adjacent strongs tags.
-  static String stripAllStrongsTags(String text) {
-    String result = text.replaceAll(_strongTagRegex, "");
-    // Remove extra spaces from adjacent removed tags (e.g., "{H1916} {H7272}" -> "  " -> " ")
-    result = result.replaceAll(_extraSpacesRegex, " ");
-    return result.trim();
-  }
+  // static String stripAllStrongsTags(String text) {
+  //   String result = text.replaceAll(_strongTagRegex, "");
+  //   // Remove extra spaces from adjacent removed tags (e.g., "{H1916} {H7272}" -> "  " -> " ")
+  //   result = result.replaceAll(_extraSpacesRegex, " ");
+  //   return result.trim();
+  // }
 
   /// Returns all valid book names in the bible data.
   static List<String> getAvailableBooks() {
@@ -681,20 +819,6 @@ class _StrongsPhraseAssociation {
   }) {
     return tags.any(
         (tag) => tag.number == strongsNumber && (includeTvm || !tag.isTvm));
-  }
-
-  Set<String> matchingStrongs(
-    Set<String> strongsNumbers, {
-    required bool includeTvm,
-  }) {
-    final matched = <String>{};
-    for (final tag in tags) {
-      if (!includeTvm && tag.isTvm) continue;
-      if (strongsNumbers.contains(tag.number)) {
-        matched.add(tag.number);
-      }
-    }
-    return matched;
   }
 
   int matchingCount(
