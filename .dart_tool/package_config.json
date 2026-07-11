@@ -357,9 +357,9 @@
     },
     {
       "name": "functions_client",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/functions_client-2.6.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/functions_client-2.6.4",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "glob",
@@ -369,9 +369,9 @@
     },
     {
       "name": "gotrue",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/gotrue-2.21.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/gotrue-2.26.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.9"
     },
     {
       "name": "gtk",
@@ -584,6 +584,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "passkeys_platform_interface",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/passkeys_platform_interface-2.8.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "path",
       "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
@@ -705,9 +711,9 @@
     },
     {
       "name": "postgrest",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/postgrest-2.7.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/postgrest-2.8.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "process_run",
@@ -777,9 +783,9 @@
     },
     {
       "name": "realtime_client",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/realtime_client-2.7.4",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/realtime_client-2.11.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.9"
     },
     {
       "name": "record_use",
@@ -939,9 +945,9 @@
     },
     {
       "name": "storage_client",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/storage_client-2.5.6",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/storage_client-2.6.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "stream_channel",
@@ -957,15 +963,15 @@
     },
     {
       "name": "supabase",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/supabase-2.12.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/supabase-2.14.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.9"
     },
     {
       "name": "supabase_flutter",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/supabase_flutter-2.14.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/supabase_flutter-2.16.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.9"
     },
     {
       "name": "synchronized",
@@ -1053,9 +1059,9 @@
     },
     {
       "name": "video_player",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player-2.11.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player-2.12.0",
       "packageUri": "lib/",
-      "languageVersion": "3.10"
+      "languageVersion": "3.12"
     },
     {
       "name": "video_player_android",
@@ -1143,9 +1149,9 @@
     },
     {
       "name": "yet_another_json_isolate",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/yet_another_json_isolate-2.1.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/yet_another_json_isolate-2.1.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "selah",
