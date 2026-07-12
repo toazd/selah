@@ -32673,7 +32673,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'And{G1161} I beseech{G3870}{{G5719}} you{G5209}, brethren{G80}, suffer{G430}{{G5737}} the word{G3056} of exhortation{G3874}: for{G1063}{G2532} I have written a letter{G1989}{{G5656}} unto you{G5213} in{G1223} few words{G1024}.',
       23: 'Know ye{G1097}{{G5719}} that our brother{G80} Timothy{G5095} is set at liberty{G630}{{G5772}}; with{G3326} whom{G3739}, if{G1437} he come{G2064}{{G5741}} shortly{G5032}, I will see{G3700}{{G5695}} you{G5209}.',
       24: 'Salute{G782}{{G5663}} all{G3956} them that have the rule{G2233}{{G5740}} over you{G5216}, and{G2532} all{G3956} the saints{G40}. They of{G575} Italy{G2482} salute{G782}{{G5736}} you{G5209}.',
-      25: 'Grace{G5485} be with{G3326} you{G5216} all{G3956}. Amen{G281}. (Written{G1125}{{G5648}} to the Hebrews from Italy by Timothy.)',
+      25: 'Grace{G5485} be with{G3326} you{G5216} all{G3956}. Amen{G281}.',
     },
   },
   'Jam': {
