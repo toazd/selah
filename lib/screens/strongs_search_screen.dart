@@ -1561,7 +1561,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                                 : (_searchResults.isEmpty && _totalMatches == 0)
                                     ? Center(
                                         child: Text(
-                                            'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check the search options',
+                                            'No matches\n\n‣ Check spelling\n‣ Check search options',
                                             style: TextStyle(
                                                 fontSize: uiFontSize + 4,
                                                 fontFamily: uiFontFamily,

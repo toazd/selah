@@ -677,6 +677,7 @@ class _SearchScreenState extends State<SearchScreen>
   bool _caseSensitive = false;
   //bool _isDisposing = false; // Flag to prevent operations during disposal
   bool _isResetting = false; // Flag to prevent spamming the reset button
+  bool _isOptionsDrawerOpen = false;
 
   // Book filter state
   String _bookFilterType = 'All Books'; // Current selected filter type
@@ -893,6 +894,17 @@ class _SearchScreenState extends State<SearchScreen>
     await _loadSearchOptions();
     await _loadLastSearch();
     await _loadScrollOffset();
+  }
+
+  void _toggleSearchOptionsDrawer() {
+    final scaffoldState = _scaffoldKey.currentState;
+    if (scaffoldState == null) return;
+
+    if (_isOptionsDrawerOpen) {
+      scaffoldState.closeEndDrawer();
+    } else {
+      scaffoldState.openEndDrawer();
+    }
   }
 
   /// Calls the native method channel to show/hide the keyboard on Windows.
@@ -2042,6 +2054,12 @@ class _SearchScreenState extends State<SearchScreen>
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
+      onEndDrawerChanged: (isOpened) {
+        if (_isOptionsDrawerOpen == isOpened) return;
+        setState(() {
+          _isOptionsDrawerOpen = isOpened;
+        });
+      },
       appBar: AppBar(
         scrolledUnderElevation: 0,
         iconTheme: IconThemeData(
@@ -2147,14 +2165,16 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           IconButton(
             icon: Icon(
-              Icons.menu,
+              _isOptionsDrawerOpen ? Icons.menu_open : Icons.menu,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Show Search Options Menu',
+              semanticLabel: _isOptionsDrawerOpen
+                  ? 'Close Search Options Menu'
+                  : 'Show Search Options Menu',
             ),
-            tooltip: 'Search Options',
+            tooltip: _isOptionsDrawerOpen ? 'Close' : 'Search Options',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+            onPressed: _toggleSearchOptionsDrawer,
           ),
         ],
       ),
@@ -2173,11 +2193,27 @@ class _SearchScreenState extends State<SearchScreen>
                     isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
               //title: Text('Search Options', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
-              automaticallyImplyLeading: true,
+              automaticallyImplyLeading: false,
               toolbarHeight: 60,
               backgroundColor: Theme.of(context).brightness == Brightness.dark
                   ? darkBackgroundColor.value
                   : lightBackgroundColor.value,
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    Icons.menu_open,
+                    size: 32,
+                    color: isDark
+                        ? darkPrimaryColor.value
+                        : lightPrimaryColor.value,
+                    semanticLabel: 'Close Search Options Menu',
+                  ),
+                  tooltip: 'Close',
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  onPressed: () => _scaffoldKey.currentState?.closeEndDrawer(),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             SwitchListTile(
@@ -2777,7 +2813,7 @@ class _SearchScreenState extends State<SearchScreen>
                                         0)
                                 ? Center(
                                     child: Text(
-                                        'No results 🤷‍♂️\n\n⚪ Check your spelling\n⚪ Check search options',
+                                        'No matches\n\n‣ Check spelling\n‣ Check search options',
                                         style: TextStyle(
                                             fontSize: uiFontSize + 4,
                                             fontFamily: uiFontFamily,
