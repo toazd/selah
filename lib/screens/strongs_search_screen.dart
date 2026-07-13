@@ -88,8 +88,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   /// Returns a ReferenceSearchTaskData if valid, null otherwise
   ReferenceSearchTaskData? _parseReferenceSearch(String input) {
     // Pattern: Book Chapter:Verse Word
-    // Examples: Gen 2:15 garden, Mat 5:7 merciful
-    final pattern = RegExp(r'^([A-Za-z0-9]+)\s+(\d+):(\d+)\s+(\w+)$');
+    // Examples: Gen 2:15 garden, 1 Thessalonians 5:21 prove
+    final pattern = RegExp(r'^(.+?)\s+(\d+):(\d+)\s+([A-Za-z0-9_]+)$');
     final match = pattern.firstMatch(input.trim());
     if (match == null) return null;
 
@@ -98,7 +98,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     final verseStr = match.group(3)!;
     final word = match.group(4)!;
 
-    // Normalize the book name to support case-insensitive and both short/long names
+    // Normalize the book name to support case-insensitive short, long,
+    // abbreviated, compact, and numbered-book names.
     final normalizedBook = BookNameConverter.normalizeBookName(bookInput);
 
     final chapter = int.tryParse(chapterStr);
@@ -176,7 +177,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                       color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
               Text(
-                  '3. Reference search - Enter a verse reference with a word (e.g. "Gen 2:15 garden") to find the Strong\'s number(s) for that specific word and then show all the verses where that Strong\'s number appears.',
+                  '3. Reference search - Enter a verse reference with a word (e.g. "Gen 2:15 garden" or "1 Thessalonians 5:21 prove") to find the Strong\'s number(s) for that specific word and then show all the verses where that Strong\'s number appears.',
                   style: TextStyle(
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,

@@ -933,9 +933,9 @@
     },
     {
       "name": "sqlite3",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.3.4",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.4.0",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "stack_trace",

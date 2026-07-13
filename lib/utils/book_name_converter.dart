@@ -76,33 +76,168 @@ class BookNameConverter {
   static final Map<String, String> _longToShort =
       _shortToLong.map((key, value) => MapEntry(value, key));
 
-  // --- PRIVATE DEBUG HELPER METHOD ---
-  /// Helper method to extract the function name and simplified location from a raw stack frame.
-  /*
-  static String _extractCallerName(String rawFrame) {
-    // Attempt to capture the function name (Group 1) and the full path (Group 2)
-    final regex = RegExp(r'\s*#\d+\s+([\w.<>]+)\s+\(([^)]+)\)$');
-    final match = regex.firstMatch(rawFrame);
+  static const Map<String, String> _commonBookAliases = {
+    'ge': 'Gen',
+    'gn': 'Gen',
+    'ex': 'Exo',
+    'exod': 'Exo',
+    'le': 'Lev',
+    'lv': 'Lev',
+    'nu': 'Num',
+    'nm': 'Num',
+    'nb': 'Num',
+    'dt': 'Deu',
+    'deut': 'Deu',
+    'josh': 'Jos',
+    'judg': 'Jdg',
+    'jg': 'Jdg',
+    'ru': 'Rth',
+    '1sam': '1Sa',
+    '2sam': '2Sa',
+    '1kgs': '1Ki',
+    '1king': '1Ki',
+    '2kgs': '2Ki',
+    '2king': '2Ki',
+    '1chr': '1Ch',
+    '1chron': '1Ch',
+    '2chr': '2Ch',
+    '2chron': '2Ch',
+    'ps': 'Psa',
+    'pss': 'Psa',
+    'psalm': 'Psa',
+    'prov': 'Pro',
+    'pr': 'Pro',
+    'eccl': 'Ecc',
+    'song': 'Son',
+    'sos': 'Son',
+    'cant': 'Son',
+    'canticles': 'Son',
+    'is': 'Isa',
+    'ezek': 'Eze',
+    'dn': 'Dan',
+    'jl': 'Joe',
+    'am': 'Amo',
+    'ob': 'Oba',
+    'obad': 'Oba',
+    'jnh': 'Jon',
+    'mi': 'Mic',
+    'na': 'Nah',
+    'hbk': 'Hab',
+    'zeph': 'Zep',
+    'zp': 'Zep',
+    'hg': 'Hag',
+    'zech': 'Zec',
+    'zc': 'Zec',
+    'ml': 'Mal',
+    'matt': 'Mat',
+    'mt': 'Mat',
+    'mrk': 'Mar',
+    'mk': 'Mar',
+    'mr': 'Mar',
+    'lk': 'Luk',
+    'lu': 'Luk',
+    'jn': 'Joh',
+    'jhn': 'Joh',
+    'ac': 'Act',
+    'ro': 'Rom',
+    'rm': 'Rom',
+    '1cor': '1Co',
+    '2cor': '2Co',
+    'ga': 'Gal',
+    'ep': 'Eph',
+    'phil': 'Phi',
+    'php': 'Phi',
+    '1thes': '1Th',
+    '1thess': '1Th',
+    '2thes': '2Th',
+    '2thess': '2Th',
+    '1tim': '1Ti',
+    '2tim': '2Ti',
+    'phlm': 'Phm',
+    'philem': 'Phm',
+    'jas': 'Jam',
+    '1pet': '1Pe',
+    '2pet': '2Pe',
+    '1joh': '1Jo',
+    '1jn': '1Jo',
+    '2joh': '2Jo',
+    '2jn': '2Jo',
+    '3joh': '3Jo',
+    '3jn': '3Jo',
+    're': 'Rev',
+  };
 
-    if (match != null && match.groupCount >= 2) {
-      final functionName = match.group(1)!;
-      final location = match.group(2)!;
+  static final Map<String, String> _bookAliases = _buildBookAliases();
 
-      // If it's a project file or non-Flutter library, return function name + file:line
-      if (location.startsWith('package:selah/') || !location.contains('package:flutter/')) {
-        // Extracts the simplified file:line:col part
-        final pathMatch = RegExp(r'([^/]+:\d+:\d+)$').firstMatch(location);
-        final lineInfo = pathMatch != null ? pathMatch.group(1) : location;
-        return '$functionName ($lineInfo)';
+  static Map<String, String> _buildBookAliases() {
+    final aliases = <String, String>{};
+
+    void addAlias(String alias, String shortName) {
+      final key = _bookAliasKey(alias);
+      if (key.isNotEmpty) {
+        aliases[key] = shortName;
       }
-      // For Flutter or Dart internal calls, just return the location path for brevity.
-      return location;
     }
 
-    // Fallback: Use the original raw line if parsing fails.
-    return rawFrame.split('(').first.trim();
+    for (final entry in _shortToLong.entries) {
+      addAlias(entry.key, entry.key);
+      addAlias(entry.value, entry.key);
+    }
+
+    for (final entry in _commonBookAliases.entries) {
+      addAlias(entry.key, entry.value);
+    }
+
+    return aliases;
   }
-  */
+
+  static String _bookAliasKey(String bookName) {
+    final cleaned =
+        bookName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+    if (cleaned.isEmpty) return '';
+
+    final parts =
+        cleaned.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
+    if (parts.isEmpty) return '';
+
+    parts[0] = _normalizeLeadingOrdinal(parts[0]);
+    return parts.join();
+  }
+
+  static String _normalizeLeadingOrdinal(String token) {
+    const ordinalWords = {
+      'first': '1',
+      'second': '2',
+      'third': '3',
+      'i': '1',
+      'ii': '2',
+      'iii': '3',
+    };
+
+    final ordinal = ordinalWords[token];
+    if (ordinal != null) return ordinal;
+
+    final ordinalSuffix = RegExp(r'^([1-3])(?:st|nd|rd)$').firstMatch(token);
+    if (ordinalSuffix != null) return ordinalSuffix.group(1)!;
+
+    final compactOrdinal =
+        RegExp(r'^([1-3])(?:st|nd|rd)([a-z].*)$').firstMatch(token);
+    if (compactOrdinal != null) {
+      return '${compactOrdinal.group(1)!}${compactOrdinal.group(2)!}';
+    }
+
+    for (final entry in const {
+      'first': '1',
+      'second': '2',
+      'third': '3',
+    }.entries) {
+      if (token.startsWith(entry.key) && token.length > entry.key.length) {
+        return '${entry.value}${token.substring(entry.key.length)}';
+      }
+    }
+
+    return token;
+  }
 
   /// Normalizes a short book name string (e.g., 'gEn' or '1co')
   /// to the exact capitalization used as a key in the short-to-long map (e.g., 'Gen' or '1Co').
@@ -113,6 +248,7 @@ class BookNameConverter {
     if ('0123456789'.contains(shortName[0])) {
       final digitPart = shortName[0]; // "1"
       final letterPart = shortName.substring(1); // "co"
+      if (letterPart.isEmpty) return shortName;
       return digitPart +
           letterPart[0].toUpperCase() +
           letterPart.substring(1).toLowerCase();
@@ -140,35 +276,12 @@ class BookNameConverter {
 
   /// Converts a short book name (e.g., 'Gen', '1co', '2sa') to its full name.
   static String shortNameToLongName(String shortName) {
-    // final stackTrace = StackTrace.current;
-    // final frames = stackTrace.toString().split('\n');
-    // debugPrint('--- Call Chain (Last 3 Callers) ---');
-    // debugPrint('Current function shortName: $shortName');
-    // const startFrameIndex = 1;
-    // for (int i = startFrameIndex + 1; i <= startFrameIndex + 3; i++) {
-    //   if (i < frames.length) {
-    //     final callerFrame = frames[i].trim();
-    //     final callerName = _extractCallerName(callerFrame);
-    //     debugPrint('Caller ${i - startFrameIndex}: $callerName');
-    //   } else {
-    //     break;
-    //   }
-    // }
-
     if (shortName.isEmpty) return shortName;
 
     final normalizedShortName = normalizeShortName(shortName);
 
     // Returns the long name or the original input if not found.
     final returnValue = _shortToLong[normalizedShortName];
-
-    // if (kDebugMode) {
-    //   debugPrint('BookNameConverter.shortNameToLongName: "$shortName" => "$returnValue"');
-    // }
-
-    // if (kDebugMode && (returnValue ?? shortName) != shortName && returnValue == null) {
-    //   debugPrint('BookNameConverter.shortNameToLongName returning original (not found): $shortName');
-    // }
 
     return returnValue ?? shortName;
   }
@@ -177,6 +290,11 @@ class BookNameConverter {
   /// Supports both short names (e.g., 'deu', '1co') and long names (e.g., 'deuteronomy', '1 corinthians').
   static String normalizeBookName(String bookName) {
     if (bookName.isEmpty) return bookName;
+
+    final aliasMatch = tryNormalizeBookName(bookName);
+    if (aliasMatch != null) {
+      return aliasMatch;
+    }
 
     // Try normalizing as short name first
     final normalizedShort = normalizeShortName(bookName);
@@ -196,23 +314,15 @@ class BookNameConverter {
     return normalizedShort;
   }
 
+  /// Returns the canonical short book name for recognized long names,
+  /// abbreviations, compact names, and common numbered-book variants.
+  static String? tryNormalizeBookName(String bookName) {
+    if (bookName.trim().isEmpty) return null;
+    return _bookAliases[_bookAliasKey(bookName)];
+  }
+
   /// Converts a full book name (e.g., 'Genesis', '1 Corinthians') back to its short name.
   static String longNameToShortName(String longName) {
-    // final stackTrace = StackTrace.current;
-    // final frames = stackTrace.toString().split('\n');
-    // debugPrint('--- Call Chain (Last 3 Callers) ---');
-    // debugPrint('Current function longName: $longName');
-    // const startFrameIndex = 1;
-    // for (int i = startFrameIndex + 1; i <= startFrameIndex + 3; i++) {
-    //   if (i < frames.length) {
-    //     final callerFrame = frames[i].trim();
-    //     final callerName = _extractCallerName(callerFrame);
-    //     debugPrint('Caller ${i - startFrameIndex}: $callerName');
-    //   } else {
-    //     break;
-    //   }
-    // }
-
     if (longName.isEmpty) return longName;
 
     // Uses the new helper method for consistent capitalization.
@@ -220,14 +330,6 @@ class BookNameConverter {
 
     // Returns the short name or the original input if not found.
     final returnValue = _longToShort[normalizedLongName];
-
-    // if (kDebugMode) {
-    //   debugPrint('BookNameConverter.longNameToShortName: "$longName" => "$returnValue"');
-    // }
-
-    // if (kDebugMode && (returnValue ?? longName) != longName && returnValue == null) {
-    //   debugPrint('BookNameConverter.longNameToShortName returning original (not found): $longName');
-    // }
 
     return returnValue ?? longName;
   }

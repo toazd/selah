@@ -1,4 +1,5 @@
 import '../data/bible_data_strongs.dart';
+import 'book_name_converter.dart';
 
 class VerseReference {
   final String book;
@@ -538,6 +539,11 @@ class VerseReferenceDetector {
   }
 
   static String? normalizeBookName(String bookPart) {
+    final converterMatch = BookNameConverter.tryNormalizeBookName(bookPart);
+    if (converterMatch != null) {
+      return converterMatch;
+    }
+
     final lowerBook = bookPart.toLowerCase().trim();
 
     // Direct lookup

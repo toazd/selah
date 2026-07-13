@@ -104,5 +104,17 @@ void main() {
         '1Pe',
       ]);
     });
+
+    test('detects compact and spaced numbered book names', () {
+      final references = VerseReferenceDetector.detectReferences(
+        'Compare 1thessalonians 5:21 with 1 thess 5:21.',
+      );
+
+      expect(
+        references.map((reference) => reference.originalText),
+        containsAllInOrder(['1thessalonians 5:21', '1 thess 5:21']),
+      );
+      expect(references.map((reference) => reference.book), ['1Th', '1Th']);
+    });
   });
 }

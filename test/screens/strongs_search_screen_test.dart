@@ -93,6 +93,28 @@ void main() {
     expect(find.textContaining('Maximum search time exceeded'), findsNothing);
   });
 
+  testWidgets('reference search accepts spaced numbered book names',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: StrongsSearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(
+        find.byType(TextField), '1 thessalonians 5:21 prove');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('Phrase Summary'));
+
+    expect(find.textContaining('Extra words were ignored'), findsNothing);
+    expect(find.textContaining('Maximum search time exceeded'), findsNothing);
+  });
+
   testWidgets('summary reference dialog goto verse returns a verse location',
       (tester) async {
     SharedPreferences.setMockInitialValues({});

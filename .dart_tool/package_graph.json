@@ -1265,64 +1265,6 @@
       ]
     },
     {
-      "name": "sqlite3",
-      "version": "3.3.4",
-      "dependencies": [
-        "code_assets",
-        "collection",
-        "crypto",
-        "ffi",
-        "hooks",
-        "meta",
-        "native_toolchain_c",
-        "path",
-        "typed_data",
-        "web"
-      ]
-    },
-    {
-      "name": "code_assets",
-      "version": "1.2.1",
-      "dependencies": [
-        "collection",
-        "hooks"
-      ]
-    },
-    {
-      "name": "hooks",
-      "version": "2.0.2",
-      "dependencies": [
-        "collection",
-        "crypto",
-        "logging",
-        "meta",
-        "pub_semver",
-        "record_use",
-        "yaml"
-      ]
-    },
-    {
-      "name": "record_use",
-      "version": "0.6.0",
-      "dependencies": [
-        "collection",
-        "meta",
-        "pub_semver"
-      ]
-    },
-    {
-      "name": "native_toolchain_c",
-      "version": "0.19.2",
-      "dependencies": [
-        "code_assets",
-        "glob",
-        "hooks",
-        "logging",
-        "meta",
-        "pub_semver"
-      ]
-    },
-    {
       "name": "sqflite",
       "version": "2.4.3",
       "dependencies": [
@@ -1415,6 +1357,64 @@
         "ffi",
         "flutter",
         "meta"
+      ]
+    },
+    {
+      "name": "sqlite3",
+      "version": "3.4.0",
+      "dependencies": [
+        "code_assets",
+        "collection",
+        "crypto",
+        "ffi",
+        "hooks",
+        "meta",
+        "native_toolchain_c",
+        "path",
+        "typed_data",
+        "web"
+      ]
+    },
+    {
+      "name": "code_assets",
+      "version": "1.2.1",
+      "dependencies": [
+        "collection",
+        "hooks"
+      ]
+    },
+    {
+      "name": "hooks",
+      "version": "2.0.2",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "logging",
+        "meta",
+        "pub_semver",
+        "record_use",
+        "yaml"
+      ]
+    },
+    {
+      "name": "record_use",
+      "version": "0.6.0",
+      "dependencies": [
+        "collection",
+        "meta",
+        "pub_semver"
+      ]
+    },
+    {
+      "name": "native_toolchain_c",
+      "version": "0.19.2",
+      "dependencies": [
+        "code_assets",
+        "glob",
+        "hooks",
+        "logging",
+        "meta",
+        "pub_semver"
       ]
     },
     {
