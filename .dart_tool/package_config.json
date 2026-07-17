@@ -117,7 +117,7 @@
     },
     {
       "name": "connectivity_plus",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/connectivity_plus-7.2.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/connectivity_plus-7.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -585,9 +585,9 @@
     },
     {
       "name": "passkeys_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/passkeys_platform_interface-2.8.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/passkeys_platform_interface-2.9.0",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.9"
     },
     {
       "name": "path",
@@ -843,7 +843,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.26",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.27",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1047,7 +1047,7 @@
     },
     {
       "name": "uuid",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/uuid-4.5.3",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/uuid-4.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -1059,7 +1059,7 @@
     },
     {
       "name": "video_player",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player-2.12.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player-2.13.0",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1163,6 +1163,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.5",
+  "flutterVersion": "3.44.6",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }

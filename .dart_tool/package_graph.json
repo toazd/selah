@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "selah",
-      "version": "0.7.0",
+      "version": "0.9.6",
       "dependencies": [
         "archive",
         "connectivity_plus",
@@ -345,15 +345,6 @@
       ]
     },
     {
-      "name": "passkeys_platform_interface",
-      "version": "2.8.0",
-      "dependencies": [
-        "flutter",
-        "json_annotation",
-        "plugin_platform_interface"
-      ]
-    },
-    {
       "name": "plugin_platform_interface",
       "version": "2.1.8",
       "dependencies": [
@@ -561,6 +552,15 @@
       "name": "web",
       "version": "1.1.1",
       "dependencies": []
+    },
+    {
+      "name": "passkeys_platform_interface",
+      "version": "2.9.0",
+      "dependencies": [
+        "flutter",
+        "json_annotation",
+        "plugin_platform_interface"
+      ]
     },
     {
       "name": "logging",
@@ -798,35 +798,6 @@
       ]
     },
     {
-      "name": "connectivity_plus",
-      "version": "7.2.0",
-      "dependencies": [
-        "collection",
-        "connectivity_plus_platform_interface",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "nm",
-        "web"
-      ]
-    },
-    {
-      "name": "nm",
-      "version": "0.5.0",
-      "dependencies": [
-        "dbus"
-      ]
-    },
-    {
-      "name": "connectivity_plus_platform_interface",
-      "version": "2.1.0",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
-    },
-    {
       "name": "json_annotation",
       "version": "4.12.0",
       "dependencies": [
@@ -942,6 +913,35 @@
       "dependencies": [
         "flutter",
         "permission_handler_platform_interface"
+      ]
+    },
+    {
+      "name": "connectivity_plus",
+      "version": "7.3.0",
+      "dependencies": [
+        "collection",
+        "connectivity_plus_platform_interface",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "nm",
+        "web"
+      ]
+    },
+    {
+      "name": "nm",
+      "version": "0.5.0",
+      "dependencies": [
+        "dbus"
+      ]
+    },
+    {
+      "name": "connectivity_plus_platform_interface",
+      "version": "2.1.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
       ]
     },
     {
@@ -1106,19 +1106,6 @@
       ]
     },
     {
-      "name": "uuid",
-      "version": "4.5.3",
-      "dependencies": [
-        "crypto",
-        "fixnum"
-      ]
-    },
-    {
-      "name": "fixnum",
-      "version": "1.1.1",
-      "dependencies": []
-    },
-    {
       "name": "url_launcher_macos",
       "version": "3.2.5",
       "dependencies": [
@@ -1171,6 +1158,19 @@
         "async",
         "path"
       ]
+    },
+    {
+      "name": "uuid",
+      "version": "4.6.0",
+      "dependencies": [
+        "crypto",
+        "fixnum"
+      ]
+    },
+    {
+      "name": "fixnum",
+      "version": "1.1.1",
+      "dependencies": []
     },
     {
       "name": "win32",
@@ -1597,8 +1597,27 @@
       ]
     },
     {
+      "name": "path_provider_linux",
+      "version": "2.2.2",
+      "dependencies": [
+        "ffi",
+        "flutter",
+        "path",
+        "path_provider_platform_interface",
+        "xdg_directories"
+      ]
+    },
+    {
+      "name": "xdg_directories",
+      "version": "1.1.0",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
       "name": "video_player",
-      "version": "2.12.0",
+      "version": "2.13.0",
       "dependencies": [
         "collection",
         "flutter",
@@ -1618,7 +1637,7 @@
       ]
     },
     {
-      "name": "video_player_android",
+      "name": "video_player_avfoundation",
       "version": "2.11.0",
       "dependencies": [
         "flutter",
@@ -1627,7 +1646,7 @@
       ]
     },
     {
-      "name": "video_player_avfoundation",
+      "name": "video_player_android",
       "version": "2.11.0",
       "dependencies": [
         "flutter",
@@ -1643,25 +1662,6 @@
         "flutter_web_plugins",
         "video_player_platform_interface",
         "web"
-      ]
-    },
-    {
-      "name": "path_provider_linux",
-      "version": "2.2.2",
-      "dependencies": [
-        "ffi",
-        "flutter",
-        "path",
-        "path_provider_platform_interface",
-        "xdg_directories"
-      ]
-    },
-    {
-      "name": "xdg_directories",
-      "version": "1.1.0",
-      "dependencies": [
-        "meta",
-        "path"
       ]
     },
     {
@@ -1757,7 +1757,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "version": "2.4.26",
+      "version": "2.4.27",
       "dependencies": [
         "flutter",
         "meta",
