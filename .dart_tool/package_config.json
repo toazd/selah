@@ -69,7 +69,7 @@
     },
     {
       "name": "build_config",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/build_config-1.3.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/build_config-1.3.2",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
@@ -117,7 +117,7 @@
     },
     {
       "name": "connectivity_plus",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/connectivity_plus-7.3.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/connectivity_plus-7.3.1",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -206,6 +206,12 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "ffi_leak_tracker",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/ffi_leak_tracker-0.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
       "name": "file",
       "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
@@ -213,9 +219,9 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker-11.0.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker-12.0.0-beta.7",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.10"
     },
     {
       "name": "file_selector_linux",
@@ -470,14 +476,26 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "is_ios_simulator",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/is_ios_simulator-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
       "name": "jni",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/jni-1.0.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/jni-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "jni_flutter",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/jni_flutter-1.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/jni_flutter-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "jni_util",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/jni_util-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
@@ -573,7 +591,7 @@
     },
     {
       "name": "objective_c",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/objective_c-9.4.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/objective_c-9.5.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -705,7 +723,7 @@
     },
     {
       "name": "posix",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/posix-6.5.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/posix-6.5.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -735,21 +753,27 @@
     },
     {
       "name": "quill_native_bridge",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge-11.1.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge-11.2.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.12"
     },
     {
       "name": "quill_native_bridge_android",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_android-0.0.1+2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_android-0.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.12"
+    },
+    {
+      "name": "quill_native_bridge_ios",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_ios-0.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "quill_native_bridge_ios",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_ios-0.0.1",
+      "name": "quill_native_bridge_linux",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_linux-0.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.9"
     },
     {
       "name": "quill_native_bridge_macos",
@@ -771,7 +795,7 @@
     },
     {
       "name": "quill_native_bridge_windows",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.0.2",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -933,7 +957,7 @@
     },
     {
       "name": "sqlite3",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.4.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/sqlite3-3.5.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -975,7 +999,7 @@
     },
     {
       "name": "synchronized",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/synchronized-3.4.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/synchronized-3.4.1+1",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1065,7 +1089,7 @@
     },
     {
       "name": "video_player_android",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_android-2.11.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/video_player_android-2.12.0",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1119,9 +1143,9 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/win32-5.15.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/win32-6.3.0",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "window_manager",
@@ -1163,6 +1187,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.6",
+  "flutterVersion": "3.44.8",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }

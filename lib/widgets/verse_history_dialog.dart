@@ -634,75 +634,82 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
       ),
       actions: _isSelectMode
           ? [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed:
-                        _selectedItemIds.isEmpty ? null : _deleteSelectedItems,
-                    child: Text(
-                      'Delete Selected (${_selectedItemIds.length})',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color:
-                            _selectedItemIds.isEmpty ? Colors.grey : Colors.red,
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    TextButton(
+                      onPressed: _selectedItemIds.isEmpty
+                          ? null
+                          : _deleteSelectedItems,
+                      child: Text(
+                        'Delete Selected (${_selectedItemIds.length})',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: _selectedItemIds.isEmpty
+                              ? Colors.grey
+                              : Colors.red,
+                        ),
                       ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: _toggleSelectMode,
-                    child: Text('Done',
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: getAdaptiveTextColor(context))),
-                  ),
-                ],
+                    TextButton(
+                      onPressed: _toggleSelectMode,
+                      child: Text('Done',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                    ),
+                  ],
+                ),
               ),
             ]
           : [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: _clearHistory,
-                    child: Text('Clear',
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: Colors.red)),
-                  ),
-                  TextButton(
-                    onPressed: _trimHistory,
-                    child: Text('Trim',
-                        style: TextStyle(
-                            fontSize: uiFontSize,
-                            fontFamily: uiFontFamily,
-                            color: Colors.red)),
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: _toggleSelectMode,
-                        child: Text('Select',
-                            style: TextStyle(
-                                fontSize: uiFontSize,
-                                fontFamily: uiFontFamily,
-                                color: getAdaptiveTextColor(context))),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        child: Text('Close',
-                            style: TextStyle(
-                                fontSize: uiFontSize,
-                                fontFamily: uiFontFamily,
-                                color: getAdaptiveTextColor(context))),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ],
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    TextButton(
+                      onPressed: _clearHistory,
+                      child: Text('Clear',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: Colors.red)),
+                    ),
+                    TextButton(
+                      onPressed: _trimHistory,
+                      child: Text('Trim',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: Colors.red)),
+                    ),
+                    TextButton(
+                      onPressed: _toggleSelectMode,
+                      child: Text('Select',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                    ),
+                    TextButton(
+                      child: Text('Close',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
               ),
             ],
     );
