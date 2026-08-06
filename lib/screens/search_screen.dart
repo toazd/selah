@@ -199,6 +199,254 @@ bool _usesUnicodeSearchPatterns(String pattern) {
       pattern.contains('\\p{M}');
 }
 
+class _BibleLookaroundHighlightData {
+  final List<String> patterns;
+  final String remainder;
+
+  const _BibleLookaroundHighlightData({
+    required this.patterns,
+    required this.remainder,
+  });
+}
+
+_BibleLookaroundHighlightData _extractPositiveLookaroundHighlightPatterns(
+    String pattern) {
+  final patterns = <String>[];
+  final remainder = StringBuffer();
+
+  for (var i = 0; i < pattern.length; i++) {
+    final char = pattern[i];
+
+    if (char == '\\') {
+      remainder.write(char);
+      if (i + 1 < pattern.length) {
+        i++;
+        remainder.write(pattern[i]);
+      }
+      continue;
+    }
+
+    if (char == '[') {
+      final end = _findBibleRegexCharacterClassEnd(pattern, i);
+      if (end == -1) {
+        remainder.write(char);
+        continue;
+      }
+      remainder.write(pattern.substring(i, end + 1));
+      i = end;
+      continue;
+    }
+
+    if (pattern.startsWith('(?=', i)) {
+      final end = _findBibleRegexGroupEnd(pattern, i);
+      if (end != -1) {
+        final lookaroundPattern =
+            _trimBibleLookaroundCatchAll(pattern.substring(i + 3, end));
+        if (lookaroundPattern.isNotEmpty) {
+          patterns.add(lookaroundPattern);
+        }
+        i = end;
+        continue;
+      }
+    }
+
+    if (pattern.startsWith('(?<=', i)) {
+      final end = _findBibleRegexGroupEnd(pattern, i);
+      if (end != -1) {
+        final lookaroundPattern =
+            _trimBibleLookaroundCatchAll(pattern.substring(i + 4, end));
+        if (lookaroundPattern.isNotEmpty) {
+          patterns.add(lookaroundPattern);
+        }
+        i = end;
+        continue;
+      }
+    }
+
+    remainder.write(char);
+  }
+
+  return _BibleLookaroundHighlightData(
+    patterns: patterns,
+    remainder: remainder.toString(),
+  );
+}
+
+int _findBibleRegexGroupEnd(String pattern, int openIndex) {
+  var depth = 0;
+  for (var i = openIndex; i < pattern.length; i++) {
+    final char = pattern[i];
+    if (char == '\\') {
+      i++;
+      continue;
+    }
+    if (char == '[') {
+      final end = _findBibleRegexCharacterClassEnd(pattern, i);
+      if (end == -1) return -1;
+      i = end;
+      continue;
+    }
+    if (char == '(') {
+      depth++;
+    } else if (char == ')') {
+      depth--;
+      if (depth == 0) return i;
+    }
+  }
+  return -1;
+}
+
+int _findBibleRegexCharacterClassEnd(String pattern, int openIndex) {
+  for (var i = openIndex + 1; i < pattern.length; i++) {
+    final char = pattern[i];
+    if (char == '\\') {
+      i++;
+      continue;
+    }
+    if (char == ']') return i;
+  }
+  return -1;
+}
+
+String _trimBibleLookaroundCatchAll(String pattern) {
+  var trimmed = pattern.trim();
+  var changed = true;
+  while (changed && trimmed.isNotEmpty) {
+    changed = false;
+    for (final token in const [r'[\s\S]*?', r'[\s\S]*', '.*?', '.*']) {
+      if (trimmed.startsWith(token)) {
+        trimmed = trimmed.substring(token.length).trim();
+        changed = true;
+      }
+      if (trimmed.endsWith(token)) {
+        trimmed = trimmed.substring(0, trimmed.length - token.length).trim();
+        changed = true;
+      }
+    }
+  }
+  return trimmed;
+}
+
+String _removeBibleRegexAnchors(String pattern) {
+  final buffer = StringBuffer();
+  for (var i = 0; i < pattern.length; i++) {
+    final char = pattern[i];
+    if (char == '\\') {
+      buffer.write(char);
+      if (i + 1 < pattern.length) {
+        i++;
+        buffer.write(pattern[i]);
+      }
+      continue;
+    }
+    if (char == '[') {
+      final end = _findBibleRegexCharacterClassEnd(pattern, i);
+      if (end == -1) {
+        buffer.write(char);
+        continue;
+      }
+      buffer.write(pattern.substring(i, end + 1));
+      i = end;
+      continue;
+    }
+    if (char == '^' || char == r'$') continue;
+    buffer.write(char);
+  }
+  return buffer.toString();
+}
+
+bool _isBibleLookaroundFilterRemainder(String remainder) {
+  var normalized = _removeBibleRegexAnchors(remainder).trim();
+  var previous = '';
+  while (normalized != previous) {
+    previous = normalized;
+    normalized = _trimBibleLookaroundCatchAll(normalized);
+  }
+  return normalized.isEmpty;
+}
+
+RegExp? _createBibleLookaroundHighlightRegExp(
+  RegExp regex, {
+  required bool requireFilterPattern,
+}) {
+  final data = _extractPositiveLookaroundHighlightPatterns(regex.pattern);
+  if (data.patterns.isEmpty) return null;
+  if (requireFilterPattern &&
+      !_isBibleLookaroundFilterRemainder(data.remainder)) {
+    return null;
+  }
+
+  final pattern = data.patterns.map((p) => '(?:$p)').join('|');
+  try {
+    return RegExp(
+      pattern,
+      caseSensitive: regex.isCaseSensitive,
+      unicode: regex.isUnicode,
+      multiLine: regex.isMultiLine,
+      dotAll: regex.isDotAll,
+    );
+  } on FormatException {
+    return null;
+  }
+}
+
+bool _hasBibleRegexLookbehind(String pattern) {
+  for (var i = 0; i < pattern.length; i++) {
+    final char = pattern[i];
+    if (char == '\\') {
+      i++;
+      continue;
+    }
+    if (char == '[') {
+      final end = _findBibleRegexCharacterClassEnd(pattern, i);
+      if (end == -1) return false;
+      i = end;
+      continue;
+    }
+    if (pattern.startsWith('(?<=', i) || pattern.startsWith('(?<!', i)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _isBibleHighlightWordCharacter(String char) {
+  if (char.isEmpty) return false;
+  final codeUnit = char.codeUnitAt(0);
+  return (codeUnit >= 0x30 && codeUnit <= 0x39) ||
+      (codeUnit >= 0x41 && codeUnit <= 0x5A) ||
+      codeUnit == 0x5F ||
+      (codeUnit >= 0x61 && codeUnit <= 0x7A) ||
+      codeUnit == 0x27 ||
+      codeUnit == 0x2D;
+}
+
+_BibleHighlightRange _expandBibleHighlightRangeToWord(
+  String text,
+  _BibleHighlightRange range,
+) {
+  var containsWordCharacter = false;
+  for (var i = range.start; i < range.end; i++) {
+    if (_isBibleHighlightWordCharacter(text[i])) {
+      containsWordCharacter = true;
+      break;
+    }
+  }
+  if (!containsWordCharacter) return range;
+
+  var start = range.start;
+  while (start > 0 && _isBibleHighlightWordCharacter(text[start - 1])) {
+    start--;
+  }
+
+  var end = range.end;
+  while (end < text.length && _isBibleHighlightWordCharacter(text[end])) {
+    end++;
+  }
+
+  return _BibleHighlightRange(start, end);
+}
+
 String _extractBibleRedLetterText(String text) {
   final matches = RegExp(r'<r>(.*?)</r>', dotAll: true).allMatches(text);
   return matches
@@ -1521,12 +1769,61 @@ class _SearchScreenState extends State<SearchScreen>
     RegExp regex, {
     int offset = 0,
   }) {
+    final lookaroundFilterRegex = _createBibleLookaroundHighlightRegExp(
+      regex,
+      requireFilterPattern: true,
+    );
+    if (lookaroundFilterRegex != null) {
+      return _getConsumingHighlightRangesInText(
+        text,
+        lookaroundFilterRegex,
+        offset: offset,
+      );
+    }
+
+    final ranges = _getConsumingHighlightRangesInText(
+      text,
+      regex,
+      offset: offset,
+    );
+    if (ranges.isNotEmpty) {
+      return ranges;
+    }
+
+    final zeroWidthLookaroundRegex = _createBibleLookaroundHighlightRegExp(
+      regex,
+      requireFilterPattern: false,
+    );
+    if (zeroWidthLookaroundRegex != null) {
+      return _getConsumingHighlightRangesInText(
+        text,
+        zeroWidthLookaroundRegex,
+        offset: offset,
+      );
+    }
+
+    return ranges;
+  }
+
+  List<_BibleHighlightRange> _getConsumingHighlightRangesInText(
+    String text,
+    RegExp regex, {
+    int offset = 0,
+  }) {
+    final expandLookbehindMatches = _hasBibleRegexLookbehind(regex.pattern);
     return regex
         .allMatches(text)
         .where((match) => match.start < match.end)
-        .map((match) =>
-            _BibleHighlightRange(offset + match.start, offset + match.end))
-        .toList();
+        .map((match) {
+      final range = _BibleHighlightRange(match.start, match.end);
+      final highlightRange = expandLookbehindMatches
+          ? _expandBibleHighlightRangeToWord(text, range)
+          : range;
+      return _BibleHighlightRange(
+        offset + highlightRange.start,
+        offset + highlightRange.end,
+      );
+    }).toList();
   }
 
   TextSpan _applyHighlightRanges(

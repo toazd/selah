@@ -258,6 +258,116 @@ void main() {
     expect(_hasHighlightedText(tester, 'second year of Darius'), isTrue);
   });
 
+  testWidgets('regex lookahead search highlights lookahead terms',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'searchRegex': true});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    final searchField = _searchFieldFinder();
+
+    await tester.enterText(
+      searchField,
+      r'^(?=.*\b(?:buckler|shield)\b)(?=.*\btrust\b)',
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'trust');
+    expect(_hasHighlightedText(tester, 'shield'), isTrue);
+  });
+
+  testWidgets('regex lookahead filter with catch-all highlights terms only',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'searchRegex': true});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    final searchField = _searchFieldFinder();
+
+    await tester.enterText(
+      searchField,
+      r'^(?=.*\bshield\b)(?=.*\btrust\b).*',
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'trust');
+    expect(_hasHighlightedText(tester, 'shield'), isTrue);
+    expect(_hasHighlightedText(tester, 'rock'), isFalse);
+  });
+
+  testWidgets('regex zero-width lookbehind highlights lookbehind terms',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'searchRegex': true});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    final searchField = _searchFieldFinder();
+
+    await tester.enterText(searchField, r'(?<=dark)');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'dark');
+  });
+
+  testWidgets('regex consuming positive lookbehind highlights the whole word',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'searchRegex': true});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    final searchField = _searchFieldFinder();
+
+    await tester.enterText(searchField, r'(?<=dark)ness');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'darkness');
+  });
+
+  testWidgets('regex consuming negative lookbehind highlights the whole word',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'searchRegex': true});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    final searchField = _searchFieldFinder();
+
+    await tester.enterText(searchField, r'(?<!dark)ness');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'likeness');
+    expect(_hasHighlightedText(tester, 'darkness'), isFalse);
+  });
+
   testWidgets('default search does not match Strong numbers', (tester) async {
     SharedPreferences.setMockInitialValues({});
 
