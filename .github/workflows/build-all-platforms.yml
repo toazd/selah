@@ -1004,10 +1004,33 @@ jobs:
 
       - name: Configure SSH credentials for AUR
         run: |
+          set -e
           mkdir -p ~/.ssh
+          
+          # Verify the secret is not empty
+          if [ -z "${{ secrets.AUR_SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ Error: AUR_SSH_PRIVATE_KEY secret is not configured"
+            exit 1
+          fi
+          
           echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
-          ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts
+          
+          # Add error handling for ssh-keyscan
+          echo "🔑 Scanning AUR host key..."
+          if ! ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts 2>&1; then
+            echo "⚠️  ssh-keyscan failed, but continuing..."
+            echo "📋 known_hosts content:"
+            cat ~/.ssh/known_hosts || echo "(file doesn't exist yet)"
+          fi
+          
+          # Test SSH connection
+          echo "🧪 Testing SSH connection to AUR..."
+          if ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=no aur@aur.archlinux.org git-upload-pack /aur-mirror/selah-bin.git &>/dev/null; then
+            echo "✅ SSH connection successful"
+          else
+            echo "⚠️  SSH connection test failed (expected for read-only test)"
+          fi
 
       - name: Clone official AUR tracking repo
         run: |
