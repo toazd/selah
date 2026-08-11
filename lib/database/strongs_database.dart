@@ -758,6 +758,7 @@ class StrongsDatabase {
       }
     }
 
+    // the phrase fallback with grab any
     if (result.isEmpty && usePhraseFallback) {
       for (final association in associations) {
         if (!association.containsWord(wordPattern)) continue;
