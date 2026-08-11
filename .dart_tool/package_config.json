@@ -645,7 +645,7 @@
     },
     {
       "name": "permission_handler",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/permission_handler-13.0.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/permission_handler-13.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -657,7 +657,7 @@
     },
     {
       "name": "permission_handler_apple",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/permission_handler_apple-9.5.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -1175,6 +1175,6 @@
   "generator": "pub",
   "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.44.8",
+  "flutterVersion": "3.44.9",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }
