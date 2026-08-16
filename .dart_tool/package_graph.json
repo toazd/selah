@@ -10,6 +10,7 @@
         "archive",
         "connectivity_plus",
         "cupertino_icons",
+        "cupertino_ui",
         "file_picker",
         "flutter",
         "flutter_html",
@@ -86,6 +87,29 @@
         "stack_trace",
         "stream_channel",
         "test_api",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "cupertino_ui",
+      "version": "1.0.0",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_localizations",
+        "intl"
+      ]
+    },
+    {
+      "name": "material_ui",
+      "version": "1.0.0",
+      "dependencies": [
+        "collection",
+        "cupertino_ui",
+        "flutter",
+        "flutter_localizations",
+        "intl",
+        "material_color_utilities",
         "vector_math"
       ]
     },
@@ -269,6 +293,13 @@
       "dependencies": []
     },
     {
+      "name": "material_color_utilities",
+      "version": "0.13.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
       "name": "list_counter",
       "version": "1.0.2",
       "dependencies": []
@@ -291,13 +322,6 @@
       "name": "sky_engine",
       "version": "0.0.0",
       "dependencies": []
-    },
-    {
-      "name": "material_color_utilities",
-      "version": "0.13.0",
-      "dependencies": [
-        "collection"
-      ]
     },
     {
       "name": "characters",
@@ -1118,29 +1142,6 @@
       "version": "1.0.1",
       "dependencies": [
         "web"
-      ]
-    },
-    {
-      "name": "material_ui",
-      "version": "1.0.0",
-      "dependencies": [
-        "collection",
-        "cupertino_ui",
-        "flutter",
-        "flutter_localizations",
-        "intl",
-        "material_color_utilities",
-        "vector_math"
-      ]
-    },
-    {
-      "name": "cupertino_ui",
-      "version": "1.0.0",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_localizations",
-        "intl"
       ]
     },
     {
