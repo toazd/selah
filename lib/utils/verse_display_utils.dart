@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'dart:math';
 import '../utils/verse_text_parser.dart';
 import '../utils/highlight_text_color_adjustments.dart';

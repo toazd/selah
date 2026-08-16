@@ -1,5 +1,5 @@
 // Custom header component to replace AppBar in BibleScreen
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../main.dart'; // For color notifiers
 import '../utils/book_name_converter.dart'; // For book name conversion
 

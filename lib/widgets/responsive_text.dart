@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A text widget that automatically adjusts its font size to fit within the available width.
 /// Uses TextPainter to measure text dimensions and reduces font size incrementally until

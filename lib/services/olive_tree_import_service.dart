@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:file_picker/file_picker.dart';
 import '../utils/csv_parser.dart';
 import '../models/olive_tree_data.dart';
@@ -75,18 +75,17 @@ class OliveTreeImportService {
 
   /// Let user select and read CSV file
   static Future<String?> _selectAndReadCsvFile() async {
-    final result = await FilePicker.pickFiles(
-      //FilePicker.platform.pickFiles(
+    final selectedFile = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['csv'],
       dialogTitle: 'Select Olive Tree CSV Export File',
     );
 
-    if (result == null || result.files.single.path == null) {
+    if (selectedFile == null || selectedFile.path == null) {
       return null;
     }
 
-    final file = File(result.files.single.path!);
+    final file = File(selectedFile.path!);
     return await file.readAsString();
   }
 

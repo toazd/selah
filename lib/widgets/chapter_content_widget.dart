@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../main.dart'; // For global notifiers and colors
 import '../data/tsk_data.dart';
 import '../utils/verse_display_utils.dart';

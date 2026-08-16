@@ -1,5 +1,5 @@
 // Reusable highlight dialog widget extracted from bible_screen.dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:selah/utils/snackbar_notification.dart';
 import '../main.dart';
 import '../utils/verse_display_utils.dart';

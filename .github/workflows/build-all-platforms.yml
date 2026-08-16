@@ -1,6 +1,6 @@
 name: Build All Platforms
 env:
-  FLUTTER_VERSION: '3.44.9'
+  FLUTTER_VERSION: '3.47.0'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 on:
   workflow_dispatch:
@@ -1006,16 +1006,16 @@ jobs:
         run: |
           set -e
           mkdir -p ~/.ssh
-          
+
           # Verify the secret is not empty
           if [ -z "${{ secrets.AUR_SSH_PRIVATE_KEY }}" ]; then
             echo "❌ Error: AUR_SSH_PRIVATE_KEY secret is not configured"
             exit 1
           fi
-          
+
           echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_key
           chmod 600 ~/.ssh/aur_key
-          
+
           # Add error handling for ssh-keyscan
           echo "🔑 Scanning AUR host key..."
           if ! ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts 2>&1; then
@@ -1023,7 +1023,7 @@ jobs:
             echo "📋 known_hosts content:"
             cat ~/.ssh/known_hosts || echo "(file doesn't exist yet)"
           fi
-          
+
           # Test SSH connection
           echo "🧪 Testing SSH connection to AUR..."
           if ssh -i ~/.ssh/aur_key -o StrictHostKeyChecking=no aur@aur.archlinux.org git-upload-pack /aur-mirror/selah-bin.git &>/dev/null; then

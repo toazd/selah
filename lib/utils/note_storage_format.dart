@@ -1,7 +1,7 @@
 // ignore_for_file: experimental_member_use
 
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart'
     show QuillController, Document, QuillControllerConfig, QuillClipboardConfig;
 import 'package:flutter_quill/quill_delta.dart' show Delta;

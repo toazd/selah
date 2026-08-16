@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Data model for a verse to be rendered with all necessary information.
 /// This allows ListView.builder to lazily build widgets without holding

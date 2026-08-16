@@ -2,9 +2,10 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_config.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    as flutter_localizations;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -39,7 +40,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "0.9.9";
+final appVersion = "1.0.0";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -1073,11 +1074,14 @@ class BibleStudyApp extends StatelessWidget {
                                             return MaterialApp(
                                               title: 'Selah',
                                               localizationsDelegates: const [
-                                                GlobalMaterialLocalizations
+                                                flutter_localizations
+                                                    .GlobalMaterialLocalizations
                                                     .delegate,
-                                                GlobalWidgetsLocalizations
+                                                flutter_localizations
+                                                    .GlobalWidgetsLocalizations
                                                     .delegate,
-                                                GlobalCupertinoLocalizations
+                                                flutter_localizations
+                                                    .GlobalCupertinoLocalizations
                                                     .delegate,
                                                 FlutterQuillLocalizations
                                                     .delegate,

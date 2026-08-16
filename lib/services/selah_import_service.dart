@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/foundation.dart';
 import 'package:selah/database/search_database.dart';
@@ -58,16 +58,15 @@ class SelahImportService {
       }
 
       // Let user choose zip file
-      FilePickerResult? result = await FilePicker.pickFiles(
-        //FilePicker.platform.pickFiles(
+      final selectedFile = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['zip'],
         dialogTitle: 'Select Selah Backup File',
       );
 
-      if (result == null || result.files.single.path == null) return;
+      if (selectedFile == null || selectedFile.path == null) return;
 
-      final zipFilePath = result.files.single.path!;
+      final zipFilePath = selectedFile.path!;
 
       // Show loading dialog
       if (context.mounted) {

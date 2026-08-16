@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../widgets/highlight_dialog.dart';
 import '../screens/multiple_verses_dialog.dart';
 

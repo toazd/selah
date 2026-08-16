@@ -2,7 +2,7 @@
 // with clickable verse reference links
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';

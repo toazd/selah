@@ -8,7 +8,7 @@
 
 import 'package:app_links_web/app_links_web.dart';
 import 'package:connectivity_plus/src/connectivity_plus_web.dart';
-import 'package:file_picker/src/platform/web/file_picker_web.dart';
+import 'package:file_picker_web/file_picker_web.dart';
 import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_web.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:permission_handler_html/permission_handler_html.dart';
