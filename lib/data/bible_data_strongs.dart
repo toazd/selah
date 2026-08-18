@@ -20640,7 +20640,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
     },
     6: {
       1: 'O ye children{H1121} of Benjamin{H1144}, gather yourselves to flee{H5756}{{H8685}} out of the midst{H7130} of Jerusalem{H3389}, and blow{H8628}{{H8798}} the trumpet{H7782} in Tekoa{H8620}, and set up{H5375}{{H8798}} a sign{H4864} of fire in Bethhaccerem{H1021}: for evil{H7451} appeareth{H8259}{{H8738}} out of the north{H6828}, and great{H1419} destruction{H7667}.',
-      2: 'I have likened{H1820}{{H8804}} the daughter{H1323} of Zion{H6726} to a comely{H5116} and delicate{H6026}{{H8794}} woman.',
+      2: 'I have likened{H1819}{{H8804}} the daughter{H1323} of Zion{H6726} to a comely{H5116} and delicate{H6026}{{H8794}} woman.',
       3: 'The shepherds{H7462}{{H8802}} with their flocks{H5739} shall come{H935}{{H8799}} unto her; they shall pitch{H8628}{{H8804}} their tents{H168} against her round about{H5439}; they shall feed{H7462}{{H8804}} every one{H376} in his place{H3027}.',
       4: 'Prepare{H6942}{{H8761}} ye war{H4421} against her; arise{H6965}{{H8798}}, and let us go up{H5927}{{H8799}} at noon{H6672}. Woe{H188} unto us! for the day{H3117} goeth away{H6437}{{H8804}}, for the shadows{H6752} of the evening{H6153} are stretched out{H5186}{{H8735}}.',
       5: 'Arise{H6965}{{H8798}}, and let us go{H5927}{{H8799}} by night{H3915}, and let us destroy{H7843}{{H8686}} her palaces{H759}.',

@@ -1583,20 +1583,20 @@
     },
     {
       "name": "code_assets",
-      "version": "1.2.1",
+      "version": "2.0.0",
       "dependencies": [
         "collection",
-        "hooks"
+        "hooks",
+        "logging"
       ]
     },
     {
       "name": "hooks",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": [
         "collection",
         "crypto",
         "logging",
-        "meta",
         "pub_semver",
         "record_use",
         "yaml"
@@ -1604,7 +1604,7 @@
     },
     {
       "name": "record_use",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "dependencies": [
         "collection",
         "meta",
@@ -1613,14 +1613,24 @@
     },
     {
       "name": "native_toolchain_c",
-      "version": "0.19.3",
+      "version": "0.19.4",
       "dependencies": [
         "code_assets",
         "glob",
         "hooks",
         "logging",
         "meta",
+        "process",
         "pub_semver"
+      ]
+    },
+    {
+      "name": "process",
+      "version": "5.0.5",
+      "dependencies": [
+        "file",
+        "path",
+        "platform"
       ]
     },
     {
@@ -1725,11 +1735,6 @@
       ]
     },
     {
-      "name": "vm_service",
-      "version": "15.2.0",
-      "dependencies": []
-    },
-    {
       "name": "path_provider_windows",
       "version": "2.3.0",
       "dependencies": [
@@ -1789,6 +1794,11 @@
       ]
     },
     {
+      "name": "vm_service",
+      "version": "15.3.0",
+      "dependencies": []
+    },
+    {
       "name": "image_picker_android",
       "version": "0.8.13+19",
       "dependencies": [
@@ -1812,25 +1822,10 @@
     },
     {
       "name": "path_provider_foundation",
-      "version": "2.6.0",
+      "version": "2.5.1",
       "dependencies": [
-        "ffi",
         "flutter",
-        "objective_c",
         "path_provider_platform_interface"
-      ]
-    },
-    {
-      "name": "objective_c",
-      "version": "9.5.0",
-      "dependencies": [
-        "code_assets",
-        "collection",
-        "ffi",
-        "hooks",
-        "logging",
-        "meta",
-        "pub_semver"
       ]
     },
     {
