@@ -1,5 +1,5 @@
 name: selah
-version: 1.0.0
+version: 1.0.1
 description: A cross-platform Bible study app using Flutter and the 1769 King James Version.
 environment:
   sdk: '>=3.0.0 <4.0.0'
