@@ -51,7 +51,7 @@
     },
     {
       "name": "archive",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/archive-4.0.9",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/archive-4.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -447,7 +447,7 @@
     },
     {
       "name": "image",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.8.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.9.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },

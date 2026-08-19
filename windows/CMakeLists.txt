@@ -1,5 +1,8 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+# Warning as failure bypass
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 project(selah LANGUAGES CXX)
 
 # supposed to suppress cmake warning but might need removed if it doesn't
