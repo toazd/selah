@@ -1227,8 +1227,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.13.0",
+  "generatorVersion": "3.13.1",
   "flutterRoot": "file:///home/wmcdannell/flutter",
-  "flutterVersion": "3.47.0",
+  "flutterVersion": "3.47.1",
   "pubCache": "file:///home/wmcdannell/.pub-cache"
 }
