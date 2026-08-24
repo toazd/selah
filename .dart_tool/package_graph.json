@@ -91,29 +91,6 @@
       ]
     },
     {
-      "name": "cupertino_ui",
-      "version": "1.0.0",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_localizations",
-        "intl"
-      ]
-    },
-    {
-      "name": "material_ui",
-      "version": "1.0.0",
-      "dependencies": [
-        "collection",
-        "cupertino_ui",
-        "flutter",
-        "flutter_localizations",
-        "intl",
-        "material_color_utilities",
-        "vector_math"
-      ]
-    },
-    {
       "name": "flutter_html",
       "version": "3.0.0",
       "dependencies": [
@@ -293,13 +270,6 @@
       "dependencies": []
     },
     {
-      "name": "material_color_utilities",
-      "version": "0.13.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
       "name": "list_counter",
       "version": "1.0.2",
       "dependencies": []
@@ -324,9 +294,26 @@
       "dependencies": []
     },
     {
+      "name": "material_color_utilities",
+      "version": "0.13.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
       "name": "characters",
       "version": "1.4.1",
       "dependencies": []
+    },
+    {
+      "name": "cupertino_ui",
+      "version": "1.0.1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_localizations",
+        "intl"
+      ]
     },
     {
       "name": "flutter_quill",
@@ -634,25 +621,6 @@
       ]
     },
     {
-      "name": "dbus",
-      "version": "0.7.14",
-      "dependencies": [
-        "args",
-        "ffi",
-        "meta",
-        "xml"
-      ]
-    },
-    {
-      "name": "xml",
-      "version": "6.6.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "petitparser"
-      ]
-    },
-    {
       "name": "ffi_leak_tracker",
       "version": "0.1.2",
       "dependencies": [
@@ -687,6 +655,19 @@
         "json_annotation",
         "pub_semver",
         "yaml"
+      ]
+    },
+    {
+      "name": "material_ui",
+      "version": "1.1.0",
+      "dependencies": [
+        "collection",
+        "cupertino_ui",
+        "flutter",
+        "flutter_localizations",
+        "intl",
+        "material_color_utilities",
+        "vector_math"
       ]
     },
     {
@@ -966,11 +947,13 @@
       "dependencies": []
     },
     {
-      "name": "petitparser",
-      "version": "7.0.2",
+      "name": "dbus",
+      "version": "0.7.15",
       "dependencies": [
-        "collection",
-        "meta"
+        "args",
+        "ffi",
+        "meta",
+        "xml"
       ]
     },
     {
@@ -994,11 +977,20 @@
       ]
     },
     {
-      "name": "archive",
-      "version": "4.1.0",
+      "name": "xml",
+      "version": "7.0.1",
       "dependencies": [
-        "path",
-        "posix"
+        "collection",
+        "meta",
+        "petitparser"
+      ]
+    },
+    {
+      "name": "petitparser",
+      "version": "7.0.2",
+      "dependencies": [
+        "collection",
+        "meta"
       ]
     },
     {
@@ -1142,6 +1134,14 @@
       "version": "1.0.1",
       "dependencies": [
         "web"
+      ]
+    },
+    {
+      "name": "archive",
+      "version": "4.2.0",
+      "dependencies": [
+        "path",
+        "posix"
       ]
     },
     {
@@ -1557,74 +1557,6 @@
       ]
     },
     {
-      "name": "sqlite3",
-      "version": "3.5.1",
-      "dependencies": [
-        "code_assets",
-        "collection",
-        "crypto",
-        "ffi",
-        "hooks",
-        "meta",
-        "native_toolchain_c",
-        "path",
-        "typed_data",
-        "web"
-      ]
-    },
-    {
-      "name": "code_assets",
-      "version": "2.0.0",
-      "dependencies": [
-        "collection",
-        "hooks",
-        "logging"
-      ]
-    },
-    {
-      "name": "hooks",
-      "version": "2.2.0",
-      "dependencies": [
-        "collection",
-        "crypto",
-        "logging",
-        "pub_semver",
-        "record_use",
-        "yaml"
-      ]
-    },
-    {
-      "name": "record_use",
-      "version": "1.1.1",
-      "dependencies": [
-        "collection",
-        "meta",
-        "pub_semver"
-      ]
-    },
-    {
-      "name": "native_toolchain_c",
-      "version": "0.19.4",
-      "dependencies": [
-        "code_assets",
-        "glob",
-        "hooks",
-        "logging",
-        "meta",
-        "process",
-        "pub_semver"
-      ]
-    },
-    {
-      "name": "process",
-      "version": "5.0.5",
-      "dependencies": [
-        "file",
-        "path",
-        "platform"
-      ]
-    },
-    {
       "name": "image",
       "version": "4.9.2",
       "dependencies": [
@@ -1711,6 +1643,74 @@
         "cross_file",
         "file_selector_platform_interface",
         "flutter"
+      ]
+    },
+    {
+      "name": "sqlite3",
+      "version": "3.5.2",
+      "dependencies": [
+        "code_assets",
+        "collection",
+        "crypto",
+        "ffi",
+        "hooks",
+        "meta",
+        "native_toolchain_c",
+        "path",
+        "typed_data",
+        "web"
+      ]
+    },
+    {
+      "name": "code_assets",
+      "version": "2.0.0",
+      "dependencies": [
+        "collection",
+        "hooks",
+        "logging"
+      ]
+    },
+    {
+      "name": "hooks",
+      "version": "2.2.0",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "logging",
+        "pub_semver",
+        "record_use",
+        "yaml"
+      ]
+    },
+    {
+      "name": "record_use",
+      "version": "1.1.1",
+      "dependencies": [
+        "collection",
+        "meta",
+        "pub_semver"
+      ]
+    },
+    {
+      "name": "native_toolchain_c",
+      "version": "0.19.4",
+      "dependencies": [
+        "code_assets",
+        "glob",
+        "hooks",
+        "logging",
+        "meta",
+        "process",
+        "pub_semver"
+      ]
+    },
+    {
+      "name": "process",
+      "version": "5.0.5",
+      "dependencies": [
+        "file",
+        "path",
+        "platform"
       ]
     },
     {
@@ -1820,10 +1820,25 @@
     },
     {
       "name": "path_provider_foundation",
-      "version": "2.5.1",
+      "version": "2.6.0",
       "dependencies": [
+        "ffi",
         "flutter",
+        "objective_c",
         "path_provider_platform_interface"
+      ]
+    },
+    {
+      "name": "objective_c",
+      "version": "9.6.0",
+      "dependencies": [
+        "code_assets",
+        "collection",
+        "ffi",
+        "hooks",
+        "logging",
+        "meta",
+        "pub_semver"
       ]
     },
     {
