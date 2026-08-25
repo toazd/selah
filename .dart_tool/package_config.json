@@ -15,7 +15,7 @@
     },
     {
       "name": "android_file_picker",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/android_file_picker-1.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/android_file_picker-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -231,13 +231,13 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker-12.0.0",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker-12.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_darwin",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_darwin-1.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_darwin-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -249,13 +249,13 @@
     },
     {
       "name": "file_picker_platform_interface",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_platform_interface-3.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_platform_interface-3.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_web",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_web-3.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/file_picker_web-3.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -1191,7 +1191,7 @@
     },
     {
       "name": "windows_file_picker",
-      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/windows_file_picker-1.0.1",
+      "rootUri": "file:///home/wmcdannell/.pub-cache/hosted/pub.dev/windows_file_picker-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
