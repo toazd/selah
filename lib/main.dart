@@ -24,6 +24,7 @@ import 'utils/preferences_constants.dart';
 import 'utils/snackbar_notification.dart';
 import 'services/supabase_sync_service.dart';
 import 'services/auth_service.dart';
+import 'services/windows_auth_storage.dart';
 import 'services/selah_import_service.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:file_picker/file_picker.dart';
@@ -40,7 +41,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "1.0.1";
+final appVersion = "1.0.2";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -180,38 +181,48 @@ Future<void> _handleAuthenticatedUser(
   User user,
   AuthChangeEvent event,
   int generation,
+  Session? session,
 ) async {
   isSignedIn.value = true;
   currentUser.value = user;
+
+  // Supabase sets the saved session before it asynchronously attempts a
+  // refresh. Keep the UI signed in, but wait for tokenRefreshed before doing
+  // network sync when that initial session is already expired.
+  if (event == AuthChangeEvent.initialSession &&
+      session != null &&
+      session.isExpired) {
+    return;
+  }
 
   final prefs = await SharedPreferences.getInstance();
   if (generation != _authStateGeneration) return;
 
   final lastLoginTime = prefs.getInt('lastLoginTime');
-  final shouldDeferSyncToAuthScreen =
-      event == AuthChangeEvent.signedIn && lastLoginTime == null;
 
   if (lastLoginTime == null) {
     await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
     if (generation != _authStateGeneration) return;
   }
 
-  if (!shouldDeferSyncToAuthScreen) {
+  // AuthScreen shows the sync options and starts the login resync after the
+  // user confirms them. Startup/token refresh events initialize directly.
+  if (event != AuthChangeEvent.signedIn) {
     await SupabaseSyncService().initialize(isLoginResync: true);
   }
 }
 
 Future<void> _handleSignedOutAuthState(int generation) async {
+  if (generation != _authStateGeneration) return;
+
   isSignedIn.value = false;
   currentUser.value = null;
+  SupabaseSyncService().dispose(); // Handles sign-out immediately
 
   final prefs = await SharedPreferences.getInstance();
   if (generation != _authStateGeneration) return;
 
   await prefs.remove('lastLoginTime');
-  if (generation != _authStateGeneration) return;
-
-  SupabaseSyncService().dispose(); // Handles sign-out
 }
 
 Future<void> _handleSupabaseAuthStateChange(AuthState data) async {
@@ -219,7 +230,7 @@ Future<void> _handleSupabaseAuthStateChange(AuthState data) async {
   final user = data.session?.user;
 
   if (user != null) {
-    await _handleAuthenticatedUser(user, data.event, generation);
+    await _handleAuthenticatedUser(user, data.event, generation, data.session);
     return;
   }
 
@@ -611,12 +622,20 @@ void main() async {
   // Initialize sqflite once at startup to prevent memory leaks
   _initializeSqflite();
 
+  // Migrate the username cache before Supabase/auth startup can read or write
+  // user data. The old SQLite table remains as a compatibility source only.
+  await HistoryDatabase.migrateCachedUsernameToPreferences();
+
   // Initialize Supabase
   try {
+    final authOptions = !kIsWeb && Platform.isWindows
+        ? FlutterAuthClientOptions(localStorage: windowsAuthStorage)
+        : const FlutterAuthClientOptions();
     await Supabase.initialize(
       url: SupabaseConfig.supabaseUrl,
       //anonKey: SupabaseConfig.supabaseAnonKey,
       publishableKey: SupabaseConfig.supabaseAnonKey,
+      authOptions: authOptions,
     );
   } catch (e) {
     ErrorHandler.logError(
@@ -645,6 +664,16 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   if (!prefs.containsKey('maxScreens')) {
     await prefs.setInt('maxScreens', maxScreens.value);
+  }
+
+  // Supabase emits initialSession during initialize(), before the app-level
+  // listener above is attached. Reconcile the already-restored session so a
+  // valid upgrade session is reflected in the UI immediately.
+  final initialSession = Supabase.instance.client.auth.currentSession;
+  if (!isSignedIn.value && initialSession != null) {
+    unawaited(_handleSupabaseAuthStateChange(
+      AuthState(AuthChangeEvent.initialSession, initialSession),
+    ));
   }
 
   // Initialize time-based theme switching if needed
@@ -953,64 +982,67 @@ Future<void> _saveAllCurrentPrefs() async {
       themeModeValue = 0; // System
     }
 
-    // Save individual preference keys concurently instead of one at a time
-    // 1. Create a List of Future<bool> objects representing all save operations.
-    List<Future<bool>> saveOperations = [
-      prefs.setInt('themeMode', themeModeValue),
-      prefs.setDouble('fontSize', fontSizeNotifier.value),
-      prefs.setDouble('uiFontSize', uiFontSizeNotifier.value),
-      prefs.setString('fontFamily', fontFamilyNotifier.value),
-      prefs.setString('noteFontFamily', noteFontFamilyNotifier.value),
-      prefs.setString(
+    // Windows writes the whole preferences JSON file for every change. Keep
+    // shutdown writes sequential so one write cannot race another.
+    final saveOperations = <Future<bool> Function()>[
+      () => prefs.setInt('themeMode', themeModeValue),
+      () => prefs.setDouble('fontSize', fontSizeNotifier.value),
+      () => prefs.setDouble('uiFontSize', uiFontSizeNotifier.value),
+      () => prefs.setString('fontFamily', fontFamilyNotifier.value),
+      () => prefs.setString('noteFontFamily', noteFontFamilyNotifier.value),
+      () => prefs.setString(
           'lightPrimaryColor', _colorToHex(lightPrimaryColor.value)),
-      prefs.setString(
-        'lightBackgroundColor',
-        _colorToHex(lightBackgroundColor.value),
-      ),
-      prefs.setString('lightTextColor', _colorToHex(lightTextColor.value)),
-      prefs.setString('darkPrimaryColor', _colorToHex(darkPrimaryColor.value)),
-      prefs.setString(
-        'darkBackgroundColor',
-        _colorToHex(darkBackgroundColor.value),
-      ),
-      prefs.setString('darkTextColor', _colorToHex(darkTextColor.value)),
-      prefs.setString(
-        'lightHighlightColor',
-        _colorToHex(lightHighlightColor.value),
-      ),
-      prefs.setString(
-        'darkHighlightColor',
-        _colorToHex(darkHighlightColor.value),
-      ),
-      prefs.setString(
-        'lightVerseReferenceColor',
-        _colorToHex(lightVerseReferenceColor.value),
-      ),
-      prefs.setString(
-        'darkVerseReferenceColor',
-        _colorToHex(darkVerseReferenceColor.value),
-      ),
-      prefs.setBool('fullscreen', fullscreenNotifier.value),
-      prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
-      prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
-      prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
-      prefs.setBool('showStrongs', showStrongsNotifier.value),
-      prefs.setBool('showDialogStrongs', showDialogStrongsNotifier.value),
-      prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
-      prefs.setInt('maxScreens', maxScreens.value),
-      prefs.setStringList(
-        'highlightColors',
-        highlightColorsNotifier.value
-            .map((c) => c.toARGB32().toString())
-            .toList(),
-      ),
-      prefs.setBool('syncHighlights', syncHighlightsNotifier.value),
-      prefs.setBool('syncNotes', syncNotesNotifier.value),
-      prefs.setBool('syncHistory', syncHistoryNotifier.value),
-      prefs.setBool('syncSearchHistory', syncSearchHistoryNotifier.value),
-      prefs.setBool('isVerticalTile', isVerticalTile.value),
-      prefs.setInt('dayStartHour', dayStartHourNotifier.value),
-      prefs.setInt('nightStartHour', nightStartHourNotifier.value),
+      () => prefs.setString(
+            'lightBackgroundColor',
+            _colorToHex(lightBackgroundColor.value),
+          ),
+      () =>
+          prefs.setString('lightTextColor', _colorToHex(lightTextColor.value)),
+      () => prefs.setString(
+          'darkPrimaryColor', _colorToHex(darkPrimaryColor.value)),
+      () => prefs.setString(
+            'darkBackgroundColor',
+            _colorToHex(darkBackgroundColor.value),
+          ),
+      () => prefs.setString('darkTextColor', _colorToHex(darkTextColor.value)),
+      () => prefs.setString(
+            'lightHighlightColor',
+            _colorToHex(lightHighlightColor.value),
+          ),
+      () => prefs.setString(
+            'darkHighlightColor',
+            _colorToHex(darkHighlightColor.value),
+          ),
+      () => prefs.setString(
+            'lightVerseReferenceColor',
+            _colorToHex(lightVerseReferenceColor.value),
+          ),
+      () => prefs.setString(
+            'darkVerseReferenceColor',
+            _colorToHex(darkVerseReferenceColor.value),
+          ),
+      () => prefs.setBool('fullscreen', fullscreenNotifier.value),
+      () => prefs.setBool('showNotesInline', showNotesInlineNotifier.value),
+      () => prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
+      () =>
+          prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
+      () => prefs.setBool('showStrongs', showStrongsNotifier.value),
+      () => prefs.setBool('showDialogStrongs', showDialogStrongsNotifier.value),
+      () => prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
+      () => prefs.setInt('maxScreens', maxScreens.value),
+      () => prefs.setStringList(
+            'highlightColors',
+            highlightColorsNotifier.value
+                .map((c) => c.toARGB32().toString())
+                .toList(),
+          ),
+      () => prefs.setBool('syncHighlights', syncHighlightsNotifier.value),
+      () => prefs.setBool('syncNotes', syncNotesNotifier.value),
+      () => prefs.setBool('syncHistory', syncHistoryNotifier.value),
+      () => prefs.setBool('syncSearchHistory', syncSearchHistoryNotifier.value),
+      () => prefs.setBool('isVerticalTile', isVerticalTile.value),
+      () => prefs.setInt('dayStartHour', dayStartHourNotifier.value),
+      () => prefs.setInt('nightStartHour', nightStartHourNotifier.value),
     ];
 
     // Only save window state if not mobile and we have valid values
@@ -1018,19 +1050,35 @@ Future<void> _saveAllCurrentPrefs() async {
         !(Platform.isAndroid || Platform.isIOS) &&
         isMaximized != null &&
         size != null) {
-      prefs.setDouble('windowWidth', size.width);
-      prefs.setDouble('windowHeight', size.height);
-      prefs.setBool('windowMaximized', isMaximized);
+      await prefs.setDouble('windowWidth', size.width);
+      await prefs.setDouble('windowHeight', size.height);
+      await prefs.setBool('windowMaximized', isMaximized);
     }
 
-    // 2. Await the completion of ALL operations concurrently.
-    // This line replaces all the individual `await` keywords
-    await Future.wait(saveOperations);
+    for (final saveOperation in saveOperations) {
+      await saveOperation();
+    }
   } catch (e) {
     ErrorHandler.logError(
       e,
       customMessage: '_saveAllCurrentPrefs exception',
       context: {'class': 'main.dart', 'method': '_saveAllCurrentPrefs'},
+    );
+  }
+}
+
+Future<void> _flushWindowsAuthStorage() async {
+  if (kIsWeb || !Platform.isWindows) return;
+
+  try {
+    // Prevent a token refresh from starting while the process is being closed.
+    Supabase.instance.client.auth.stopAutoRefresh();
+    await windowsAuthStorage.flush();
+  } catch (e) {
+    ErrorHandler.logError(
+      e,
+      customMessage: 'Failed to flush Windows auth storage during shutdown',
+      context: {'class': 'main.dart', 'method': '_flushWindowsAuthStorage'},
     );
   }
 }
@@ -1496,6 +1544,7 @@ class _WindowManagerListener extends WindowListener {
         // await windowManager.destroy();
         // await windowManager.setPreventClose(false);
         // windowManager.close();
+        await _flushWindowsAuthStorage();
         try {
           _releaseSingleInstanceLock();
         } catch (_) {}
@@ -1553,6 +1602,10 @@ class _WindowManagerListener extends WindowListener {
 
       // Properly dispose the listeners
       LocalDataChangeNotifier.dispose();
+
+      // Supabase auth persistence is asynchronous. Ensure a just-refreshed
+      // token is on disk before exit so the next launch/install can recover it.
+      await _flushWindowsAuthStorage();
 
       // This only runs after all saving and syncing is complete.
 
@@ -1857,22 +1910,22 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
   Future<void> _saveNavigationbarPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('showNavigationBar', showNavigationBarNotifier.value);
+    await prefs.setBool('showNavigationBar', showNavigationBarNotifier.value);
   }
 
   Future<void> _saveInlineNotesPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('showNotesInline', showNotesInlineNotifier.value);
+    await prefs.setBool('showNotesInline', showNotesInlineNotifier.value);
   }
 
   Future<void> _saveTskReferencesPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('showTskReferences', showTskReferencesNotifier.value);
+    await prefs.setBool('showTskReferences', showTskReferencesNotifier.value);
   }
 
   Future<void> _saveStrongsPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('showStrongs', showStrongsNotifier.value);
+    await prefs.setBool('showStrongs', showStrongsNotifier.value);
   }
 
   void _addView() {
@@ -1914,44 +1967,46 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
   Future<void> _saveTileState() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isVerticalTile', isVerticalTile.value);
+    await prefs.setBool('isVerticalTile', isVerticalTile.value);
   }
 
   Future<void> _saveFontPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setDouble('fontSize', fontSizeNotifier.value);
-    prefs.setDouble('uiFontSize', uiFontSizeNotifier.value);
-    prefs.setString('fontFamily', fontFamilyNotifier.value);
-    prefs.setString('noteFontFamily', noteFontFamilyNotifier.value);
+    await prefs.setDouble('fontSize', fontSizeNotifier.value);
+    await prefs.setDouble('uiFontSize', uiFontSizeNotifier.value);
+    await prefs.setString('fontFamily', fontFamilyNotifier.value);
+    await prefs.setString('noteFontFamily', noteFontFamilyNotifier.value);
   }
 
   Future<void> _saveCustomColors() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('lightPrimaryColor', _colorToHex(lightPrimaryColor.value));
-    prefs.setString(
+    await prefs.setString(
+        'lightPrimaryColor', _colorToHex(lightPrimaryColor.value));
+    await prefs.setString(
       'lightBackgroundColor',
       _colorToHex(lightBackgroundColor.value),
     );
-    prefs.setString('lightTextColor', _colorToHex(lightTextColor.value));
-    prefs.setString('darkPrimaryColor', _colorToHex(darkPrimaryColor.value));
-    prefs.setString(
+    await prefs.setString('lightTextColor', _colorToHex(lightTextColor.value));
+    await prefs.setString(
+        'darkPrimaryColor', _colorToHex(darkPrimaryColor.value));
+    await prefs.setString(
       'darkBackgroundColor',
       _colorToHex(darkBackgroundColor.value),
     );
-    prefs.setString('darkTextColor', _colorToHex(darkTextColor.value));
-    prefs.setString(
+    await prefs.setString('darkTextColor', _colorToHex(darkTextColor.value));
+    await prefs.setString(
       'lightHighlightColor',
       _colorToHex(lightHighlightColor.value),
     );
-    prefs.setString(
+    await prefs.setString(
       'darkHighlightColor',
       _colorToHex(darkHighlightColor.value),
     );
-    prefs.setString(
+    await prefs.setString(
       'lightVerseReferenceColor',
       _colorToHex(lightVerseReferenceColor.value),
     );
-    prefs.setString(
+    await prefs.setString(
       'darkVerseReferenceColor',
       _colorToHex(darkVerseReferenceColor.value),
     );
@@ -1974,7 +2029,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
   Future<void> _saveHighlightColorsPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(
+    await prefs.setStringList(
       'highlightColors',
       highlightColorsNotifier.value
           .map((c) => c.toARGB32().toString())
@@ -1998,7 +2053,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
       themeModeValue = 0; // System
     }
 
-    prefs.setInt('themeMode', themeModeValue);
+    await prefs.setInt('themeMode', themeModeValue);
   }
 
   Future<void> _saveSyncPrefs(String category) async {
@@ -2007,13 +2062,14 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
       switch (category) {
         case 'highlights':
-          prefs.setBool('syncHighlights', syncHighlightsNotifier.value);
+          await prefs.setBool('syncHighlights', syncHighlightsNotifier.value);
         case 'notes':
-          prefs.setBool('syncNotes', syncNotesNotifier.value);
+          await prefs.setBool('syncNotes', syncNotesNotifier.value);
         case 'history':
-          prefs.setBool('syncHistory', syncHistoryNotifier.value);
+          await prefs.setBool('syncHistory', syncHistoryNotifier.value);
         case 'search_history':
-          prefs.setBool('syncSearchHistory', syncSearchHistoryNotifier.value);
+          await prefs.setBool(
+              'syncSearchHistory', syncSearchHistoryNotifier.value);
       }
     }
   }
@@ -2021,7 +2077,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _saveFullscreenPrefs() async {
     final prefs = await SharedPreferences.getInstance();
 
-    prefs.setBool('fullscreen', fullscreenNotifier.value);
+    await prefs.setBool('fullscreen', fullscreenNotifier.value);
   }
 
   void _showHistoryDialog(BuildContext context, int screenIndex) async {
@@ -4800,6 +4856,13 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _clearPreferences({bool preserveSyncQueues = true}) async {
     final prefs = await SharedPreferences.getInstance();
 
+    // The Windows auth session is intentionally outside SharedPreferences, so
+    // reset operations must clear it explicitly just as they cleared the old
+    // shared auth key.
+    if (!kIsWeb && Platform.isWindows) {
+      await windowsAuthStorage.removePersistedSession();
+    }
+
     String? pendingHighlights;
     String? pendingNotes;
     String? pendingHistory;
@@ -4994,6 +5057,9 @@ class _MultiBibleViewState extends State<MultiBibleView>
       try {
         final Map<String, dynamic> newPrefs =
             jsonDecode(controller.text) as Map<String, dynamic>;
+        if (!kIsWeb && Platform.isWindows) {
+          await windowsAuthStorage.removePersistedSession();
+        }
         await prefs.clear();
         for (final entry in newPrefs.entries) {
           final k = entry.key;

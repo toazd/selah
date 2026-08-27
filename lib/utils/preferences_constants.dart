@@ -125,6 +125,10 @@ const bool defaultSyncNotes = true;
 const bool defaultSyncHistory = true;
 const bool defaultSyncSearchHistory = true;
 
+// Stored in SharedPreferences so the cached username is independent of the
+// local history database and survives database migrations.
+const String cachedUsernamePreferenceKey = 'cachedUsername';
+
 // Time-based theme preferences
 const int defaultDayStartHour = 7; // 7 AM
 const int defaultNightStartHour = 18; // 6 PM
