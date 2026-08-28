@@ -429,9 +429,9 @@
     },
     {
       "name": "html",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.7",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.6",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.2"
     },
     {
       "name": "http",

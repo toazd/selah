@@ -17,6 +17,7 @@
         "flutter_quill",
         "flutter_quill_extensions",
         "intl",
+        "material_ui",
         "path",
         "path_provider",
         "permission_handler",
@@ -39,32 +40,10 @@
       ]
     },
     {
-      "name": "cupertino_ui",
-      "version": "1.0.1",
+      "name": "html",
+      "version": "0.15.6",
       "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_localizations",
-        "intl"
-      ]
-    },
-    {
-      "name": "material_ui",
-      "version": "1.1.0",
-      "dependencies": [
-        "collection",
-        "cupertino_ui",
-        "flutter",
-        "flutter_localizations",
-        "intl",
-        "material_color_utilities",
-        "vector_math"
-      ]
-    },
-    {
-      "name": "csslib",
-      "version": "1.0.2",
-      "dependencies": [
+        "csslib",
         "source_span"
       ]
     },
@@ -134,6 +113,19 @@
         "stack_trace",
         "stream_channel",
         "test_api",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "material_ui",
+      "version": "1.1.0",
+      "dependencies": [
+        "collection",
+        "cupertino_ui",
+        "flutter",
+        "flutter_localizations",
+        "intl",
+        "material_color_utilities",
         "vector_math"
       ]
     },
@@ -399,29 +391,19 @@
       ]
     },
     {
-      "name": "collection",
-      "version": "1.19.1",
-      "dependencies": []
-    },
-    {
-      "name": "vector_math",
-      "version": "2.4.2",
-      "dependencies": []
-    },
-    {
-      "name": "material_color_utilities",
-      "version": "0.13.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
       "name": "source_span",
       "version": "1.10.2",
       "dependencies": [
         "collection",
         "path",
         "term_glyph"
+      ]
+    },
+    {
+      "name": "csslib",
+      "version": "1.0.2",
+      "dependencies": [
+        "source_span"
       ]
     },
     {
@@ -570,6 +552,11 @@
       "dependencies": []
     },
     {
+      "name": "collection",
+      "version": "1.19.1",
+      "dependencies": []
+    },
+    {
       "name": "leak_tracker_flutter_testing",
       "version": "3.0.10",
       "dependencies": [
@@ -579,6 +566,11 @@
         "matcher",
         "meta"
       ]
+    },
+    {
+      "name": "vector_math",
+      "version": "2.4.2",
+      "dependencies": []
     },
     {
       "name": "stack_trace",
@@ -627,17 +619,26 @@
       ]
     },
     {
+      "name": "material_color_utilities",
+      "version": "0.13.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "cupertino_ui",
+      "version": "1.0.1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_localizations",
+        "intl"
+      ]
+    },
+    {
       "name": "list_counter",
       "version": "1.0.2",
       "dependencies": []
-    },
-    {
-      "name": "html",
-      "version": "0.15.7",
-      "dependencies": [
-        "csslib",
-        "source_span"
-      ]
     },
     {
       "name": "url_launcher_windows",
