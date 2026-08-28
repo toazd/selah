@@ -29,6 +29,9 @@ dependencies:
   cupertino_icons: ^1.0.9
   flutter_html: ^3.0.0
 
+dependency_overrides:
+  csslib: ^1.0.0
+
   material_ui: ^1.0.0
   cupertino_ui: ^1.0.0
 dev_dependencies:

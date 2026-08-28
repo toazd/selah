@@ -202,7 +202,7 @@ packages:
     source: hosted
     version: "3.0.7"
   csslib:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: csslib
       sha256: "09bad715f418841f976c77db72d5398dc1253c21fb9c0c7f0b0b985860b2d58e"
@@ -218,7 +218,7 @@ packages:
     source: hosted
     version: "1.0.9"
   cupertino_ui:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       name: cupertino_ui
       sha256: "2137c0d41f3b62cc4d3d2495e6c354bd6b6133cd21c6bb155736cc31dbd49a11"
@@ -782,7 +782,7 @@ packages:
     source: hosted
     version: "0.13.0"
   material_ui:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       name: material_ui
       sha256: "7ba1ca315d50a004791dbab290417c52a61466d56db2822fe3c5c2994903110c"
