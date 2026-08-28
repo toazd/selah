@@ -35,6 +35,34 @@ void main() {
       expect(_highlightedText(spans), 'one');
     });
 
+    test('does not count the visual space after a leading Strong number', () {
+      const rawVerseText =
+          '{G1161} There was{G2258}{{G5713}} a man{G444} of{G1537} the Pharisees{G5330}';
+      final plainVerseText =
+          VerseTextParser.toPlainVerseText(rawVerseText, removePilcrow: true);
+      final start = plainVerseText.indexOf('a man');
+
+      final spans = applyHighlightsToText(
+        rawVerseText,
+        plainVerseText,
+        const TextStyle(color: Colors.black, fontSize: 20),
+        1,
+        Colors.white,
+        [
+          {
+            'start': start,
+            'end': start + 'a man'.length,
+            'color': Colors.blue.toARGB32(),
+          },
+        ],
+        Colors.black,
+        Colors.white,
+        showStrongsNumbers: true,
+      );
+
+      expect(_highlightedText(spans), 'a man');
+    });
+
     test('uses existing Gen 2:15 ranges as clean text offsets', () {
       const rawVerseText =
           'And the LORD{H3068} God{H430} took{H3947}{{H8799}} the man{H120}, and put him{H3240}{{H8686}} into the garden{H1588} of Eden{H5731} to dress{H5647}{{H8800}} it and to keep{H8104}{{H8800}} it.';

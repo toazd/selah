@@ -294,7 +294,7 @@ List<InlineSpan> _applyHighlightsToParsedSpans({
       continue;
     }
 
-    final spanText = span.text ?? '';
+    var spanText = span.text ?? '';
     if (spanText.isEmpty) {
       spans.add(span);
       continue;
@@ -303,6 +303,15 @@ List<InlineSpan> _applyHighlightsToParsedSpans({
     if (_isDisplayOnlyStrongsSeparator(originalSpans, spanIndex)) {
       spans.add(span);
       continue;
+    }
+
+    // The parser keeps the leading space in the same TextSpan as the first
+    // word. Preserve it visually, but exclude it from clean-text offsets.
+    if (_hasLeadingStrongsDisplaySpace(originalSpans, spanIndex) &&
+        spanText.startsWith(' ')) {
+      spans.add(TextSpan(text: ' ', style: span.style));
+      spanText = spanText.substring(1);
+      if (spanText.isEmpty) continue;
     }
 
     final spanStart = cleanPosition;
@@ -412,6 +421,19 @@ bool _isDisplayOnlyStrongsSeparator(List<InlineSpan> spans, int index) {
       index < spans.length - 1 &&
       spans[index - 1] is WidgetSpan &&
       spans[index + 1] is WidgetSpan;
+}
+
+/// The cleaned verse text removes the space following leading Strong's tags,
+/// but the parser keeps it so the superscript and the first word are visually
+/// separated. It must not advance the character positions used by highlights.
+bool _hasLeadingStrongsDisplaySpace(List<InlineSpan> spans, int index) {
+  final span = spans[index];
+  if (span is! TextSpan || index == 0) return false;
+
+  for (var i = 0; i < index; i++) {
+    if (spans[i] is! WidgetSpan) return false;
+  }
+  return true;
 }
 
 /// Convert a position in clean text to raw text position
