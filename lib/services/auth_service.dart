@@ -27,7 +27,7 @@ class AuthService {
           return Exception('New account registration is currently disabled.');
         default:
           return Exception(
-              'An authentication error occurred: ${error.message}');
+              'An authentication error occurred (check username and password carefully): ${error.message}');
       }
     } else {
       return Exception('$error');

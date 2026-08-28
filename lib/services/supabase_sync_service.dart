@@ -26,9 +26,6 @@ StreamController<void>? _searchHistoryChangedController;
 final ValueNotifier<SyncStatus> syncStatusNotifier =
     ValueNotifier(SyncStatus.offline);
 
-// Prevent rapid initialize() calls
-bool _isInitialized = false;
-
 const int _remoteSyncPageSize = 500;
 
 enum SyncStatus { offline, connecting, online, syncing, error }
@@ -128,6 +125,12 @@ class SupabaseSyncService {
 
   SyncStatus _syncStatus = SyncStatus.offline;
   bool _isListening = false;
+  bool _isInitialized = false;
+  String? _initializedUserId;
+  String? _initializingUserId;
+  Future<void>? _initializationFuture;
+  Future<void>? _syncAllFuture;
+  int _lifecycleGeneration = 0;
 
   // Last sync timestamps to track changes
   DateTime? _lastHighlightsSync;
@@ -1041,15 +1044,75 @@ class SupabaseSyncService {
     }
   }
 
-  // Initialize the sync service
+  // Initialize the sync service. All callers for the same account share one
+  // initialization future so login, startup recovery, and connectivity
+  // callbacks cannot run competing full syncs at the same time.
   Future<void> initialize({bool isLoginResync = false}) async {
-    if (_isInitialized) {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    if (_isInitialized && _initializedUserId == userId) return;
+
+    final existingInitialization = _initializationFuture;
+    if (existingInitialization != null) {
+      if (_initializingUserId == userId) {
+        try {
+          await existingInitialization;
+        } catch (_) {
+          // The caller that started initialization records the failure.
+        }
+        if (_isInitialized && _initializedUserId == userId) return;
+        if (_currentUserId != userId) return;
+        await initialize(isLoginResync: isLoginResync);
+        return;
+      }
+
+      // A sign-out/account switch invalidates the previous initialization,
+      // but its in-flight network calls cannot be forcibly cancelled. Let it
+      // finish before starting the new account's initialization.
+      try {
+        await existingInitialization;
+      } catch (_) {
+        // The new account still gets its own initialization attempt.
+      }
+      if (_currentUserId != userId) return;
+      await initialize(isLoginResync: isLoginResync);
       return;
     }
 
-    if (_currentUserId == null) {
-      return;
+    final generation = _lifecycleGeneration;
+    final initialization = _initializeInternal(
+      userId: userId,
+      generation: generation,
+      isLoginResync: isLoginResync,
+    );
+    _initializationFuture = initialization;
+    _initializingUserId = userId;
+
+    try {
+      await initialization;
+      if (_isActiveFor(userId, generation)) {
+        _isInitialized = true;
+        _initializedUserId = userId;
+      }
+    } finally {
+      if (identical(_initializationFuture, initialization)) {
+        _initializationFuture = null;
+        _initializingUserId = null;
+      }
     }
+  }
+
+  bool _isActiveFor(String userId, int generation) {
+    return _lifecycleGeneration == generation && _currentUserId == userId;
+  }
+
+  Future<void> _initializeInternal({
+    required String userId,
+    required int generation,
+    required bool isLoginResync,
+  }) async {
+    if (!_isActiveFor(userId, generation)) return;
 
     // Cancel existing first
     _highlightsChannel?.unsubscribe();
@@ -1061,7 +1124,7 @@ class SupabaseSyncService {
     // Check actual connectivity status and set appropriate initial state
     try {
       final hasConnection = await InternetAccessChecker.hasInternetAccess();
-      if (hasConnection && _currentUserId != null) {
+      if (hasConnection && _isActiveFor(userId, generation)) {
         _syncStatus =
             SyncStatus.online; // Connected and have user, assume online
       } else {
@@ -1070,6 +1133,8 @@ class SupabaseSyncService {
     } catch (_) {
       _syncStatus = SyncStatus.offline; // On error, assume offline
     }
+
+    if (!_isActiveFor(userId, generation)) return;
 
     syncStatusNotifier.value = _syncStatus;
     _isListening = false;
@@ -1082,21 +1147,28 @@ class SupabaseSyncService {
 
     // Load persisted last sync timestamps
     await _loadLastSyncTimestamps();
+    if (!_isActiveFor(userId, generation)) return;
 
     // Load persisted change queues
     await _loadPersistedQueues();
+    if (!_isActiveFor(userId, generation)) return;
 
     // Setup listeners and connection monitoring
-    await _checkConnectionAndSetup();
+    await _checkConnectionAndSetup(
+      expectedUserId: userId,
+      expectedGeneration: generation,
+    );
+    if (!_isActiveFor(userId, generation)) return;
 
     // Process any queued operations from offline or retry queues
     if (isOnline) {
       await _flushQueuedOperations();
     }
+    if (!_isActiveFor(userId, generation)) return;
 
     // Perform full sync on login (download all remote + upload local changes)
     // if we are not resuming (switching from paused to resumed state on mobile)
-    if (isLoginResync && _currentUserId != null && isOnline) {
+    if (isLoginResync && _isActiveFor(userId, generation) && isOnline) {
       try {
         // Try to sync all
         await syncAll();
@@ -1135,7 +1207,7 @@ class SupabaseSyncService {
           );
         }
       }
-    } else if (!isLoginResync && _currentUserId != null && isOnline) {
+    } else if (!isLoginResync && _isActiveFor(userId, generation) && isOnline) {
       // App resume - do incremental sync to catch changes while backgrounded
       try {
         await syncRecentChangesOnly();
@@ -1143,6 +1215,8 @@ class SupabaseSyncService {
         // Continue with init even if sync fails
       }
     }
+
+    if (!_isActiveFor(userId, generation)) return;
 
     // Start connection monitoring
     try {
@@ -1155,30 +1229,50 @@ class SupabaseSyncService {
     }
 
     // Cache the username after initialization
-    if (_currentUserId != null) {
+    if (_isActiveFor(userId, generation)) {
       await cacheUsername();
     }
-
-    _isInitialized = true;
   }
 
   // Check connection and setup listeners
-  Future<void> _checkConnectionAndSetup() async {
+  Future<void> _checkConnectionAndSetup({
+    String? expectedUserId,
+    int? expectedGeneration,
+  }) async {
+    bool isActive() {
+      if (expectedUserId == null || expectedGeneration == null) return true;
+      return _isActiveFor(expectedUserId, expectedGeneration);
+    }
+
+    if (!isActive()) return;
+    if (_currentUserId == null) {
+      _syncStatus = SyncStatus.offline;
+      syncStatusNotifier.value = _syncStatus;
+      return;
+    }
     try {
       final wasOnline = _syncStatus == SyncStatus.online;
       final hasConnection = await InternetAccessChecker.hasInternetAccess();
+      if (!isActive()) return;
 
       if (hasConnection) {
         try {
           await _testSupabaseConnection();
-          await _setupRealtimeListeners();
+          if (!isActive()) return;
+          await _setupRealtimeListeners(
+            expectedUserId: expectedUserId,
+            expectedGeneration: expectedGeneration,
+          );
+          if (!isActive()) return;
           _syncStatus = SyncStatus.online;
           syncStatusNotifier.value = _syncStatus;
           await _flushQueuedOperations();
+          if (!isActive()) return;
           if (!wasOnline) {
             await syncRecentChangesOnly();
           }
         } catch (e) {
+          if (!isActive()) return;
           // Connection test or setup failed - go offline but don't crash
           ErrorHandler.logError(
             e,
@@ -1188,10 +1282,12 @@ class SupabaseSyncService {
           syncStatusNotifier.value = _syncStatus;
         }
       } else {
+        if (!isActive()) return;
         _syncStatus = SyncStatus.offline;
         syncStatusNotifier.value = _syncStatus;
       }
     } catch (e) {
+      if (!isActive()) return;
       // Connectivity check failed - assume offline
       ErrorHandler.logError(
         e,
@@ -1313,7 +1409,16 @@ class SupabaseSyncService {
   // }
 
   // Setup realtime listeners for user's data - only when all conditions are met
-  Future<void> _setupRealtimeListeners() async {
+  Future<void> _setupRealtimeListeners({
+    String? expectedUserId,
+    int? expectedGeneration,
+  }) async {
+    bool isActive() {
+      if (expectedUserId == null || expectedGeneration == null) return true;
+      return _isActiveFor(expectedUserId, expectedGeneration);
+    }
+
+    if (!isActive()) return;
     if (_currentUserId == null || _isListening) return;
 
     // Cancel existing listeners before setting up new ones
@@ -1330,6 +1435,10 @@ class SupabaseSyncService {
       final notesEnabled = await _getSyncEnabled('syncNotes');
       final historyEnabled = await _getSyncEnabled('syncHistory');
       final searchHistoryEnabled = await _getSyncEnabled('syncSearchHistory');
+      if (!isActive()) {
+        _isListening = false;
+        return;
+      }
 
       // Listen for highlights changes if enabled
       if (highlightsEnabled) {
@@ -2108,6 +2217,7 @@ class SupabaseSyncService {
           .toList();
 
       // Upload local changes
+      var uploadSucceeded = true;
       if (highlightsToSync.isNotEmpty) {
         // Get remote highlights for comparison
         final remoteHighlights = await _fetchRemoteRows(
@@ -2143,8 +2253,22 @@ class SupabaseSyncService {
         // Upload highlights
         if (highlightsToUpload.isNotEmpty) {
           try {
-            await _batchUploadHighlights(highlightsToUpload);
+            uploadSucceeded = await _batchUploadHighlights(highlightsToUpload);
+            if (!uploadSucceeded) {
+              for (final highlight in highlightsToUpload) {
+                _enqueueFailedOperation(SyncOperation(
+                  id: highlight['created_at'],
+                  type: 'highlight',
+                  operation: 'create',
+                  data: highlight,
+                  timestamp: DateTime.fromMillisecondsSinceEpoch(
+                      highlight['created_at'] as int),
+                  userId: _currentUserId,
+                ));
+              }
+            }
           } catch (e) {
+            uploadSucceeded = false;
             ErrorHandler.logError(
               e,
               customMessage: '_batchUploadHighlights exception',
@@ -2174,18 +2298,21 @@ class SupabaseSyncService {
         greaterThanColumn: 'updated_at',
         greaterThanValue: lastSyncMs,
       );
+      var downloadSucceeded = true;
       if (snapshot.isNotEmpty) {
-        await _downloadHighlights(snapshot);
+        downloadSucceeded = await _downloadHighlights(snapshot);
       }
 
       // Detect remote deletions
       await _detectRemoteDeletions('highlight');
 
       // Always update the sync timestamp after sync operations (both upload and download)
-      _lastHighlightsSync = DateTime.now();
+      if (uploadSucceeded && downloadSucceeded) {
+        _lastHighlightsSync = DateTime.now();
 
-      // Save timestamps to preferences - only for highlights
-      await _saveLastSyncTimestamps('highlights');
+        // Save timestamps to preferences - only for highlights
+        await _saveLastSyncTimestamps('highlights');
+      }
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -2195,7 +2322,7 @@ class SupabaseSyncService {
   }
 
   // Download highlights from Supabase to local database
-  Future<void> _downloadHighlights(List<Map<String, dynamic>> docs) async {
+  Future<bool> _downloadHighlights(List<Map<String, dynamic>> docs) async {
     try {
       bool hasChanges = false;
       int processedCount = 0;
@@ -2288,17 +2415,19 @@ class SupabaseSyncService {
         // Also notify SupabaseSyncService stream listeners (for remote sync notifications)
         _highlightsChangedController?.add(null);
       }
+      return true;
     } catch (e) {
       await ErrorHandler.handleSyncError(e, context: {
         'operation': 'download_highlights_batch',
         'type': 'data_sync',
         'error_type': e.runtimeType.toString(),
       });
+      return false;
     }
   }
 
   // Download notes from Supabase to local database
-  Future<void> _downloadNotes(List<Map<String, dynamic>> docs) async {
+  Future<bool> _downloadNotes(List<Map<String, dynamic>> docs) async {
     try {
       bool hasChanges = false;
       int processedCount = 0;
@@ -2400,17 +2529,19 @@ class SupabaseSyncService {
         // Also notify SupabaseSyncService stream listeners (for remote sync notifications)
         _notesChangedController?.add(null);
       }
+      return true;
     } catch (e) {
       await ErrorHandler.handleSyncError(e, context: {
         'operation': 'download_notes_batch',
         'type': 'data_sync',
         'error_type': e.runtimeType.toString(),
       });
+      return false;
     }
   }
 
   // Download history from Supabase to local database
-  Future<void> _downloadHistory(List<Map<String, dynamic>> docs) async {
+  Future<bool> _downloadHistory(List<Map<String, dynamic>> docs) async {
     try {
       final localHistory = await HistoryDatabase.getHistory();
       final localByTimestamp = <int, Map<String, dynamic>>{
@@ -2474,17 +2605,19 @@ class SupabaseSyncService {
         // Also notify SupabaseSyncService stream listeners (for remote sync notifications)
         _historyChangedController?.add(null);
       }
+      return true;
     } catch (e) {
       await ErrorHandler.handleSyncError(e, context: {
         'operation': 'download_history_batch',
         'type': 'data_sync',
         'error_type': e.runtimeType.toString(),
       });
+      return false;
     }
   }
 
   // Download search history from Supabase to local database
-  Future<void> _downloadSearchHistory(List<Map<String, dynamic>> docs) async {
+  Future<bool> _downloadSearchHistory(List<Map<String, dynamic>> docs) async {
     try {
       final localSearchHistory = await SearchDatabase.getSearchHistory();
       final localByTimestamp = <int, Map<String, dynamic>>{
@@ -2494,6 +2627,7 @@ class SupabaseSyncService {
 
       bool hasChanges = false;
       int processedCount = 0;
+      bool hasFailures = false;
 
       for (final data in docs) {
         // Validate data before processing
@@ -2556,6 +2690,7 @@ class SupabaseSyncService {
             hasChanges = true;
             processedCount++;
           } catch (e) {
+            hasFailures = true;
             ErrorHandler.logError(
               e,
               customMessage:
@@ -2572,12 +2707,14 @@ class SupabaseSyncService {
         // Also notify SupabaseSyncService stream listeners (for remote sync notifications)
         _searchHistoryChangedController?.add(null);
       }
+      return !hasFailures;
     } catch (e) {
       await ErrorHandler.handleSyncError(e, context: {
         'operation': 'download_search_history_batch',
         'type': 'data_sync',
         'error_type': e.runtimeType.toString(),
       });
+      return false;
     }
   }
 
@@ -3046,9 +3183,11 @@ class SupabaseSyncService {
   }
 
   // Batch upload multiple highlights to Supabase
-  Future<void> _batchUploadHighlights(
+  Future<bool> _batchUploadHighlights(
       List<Map<String, dynamic>> highlights) async {
-    if (_currentUserId == null || highlights.isEmpty) return;
+    if (_currentUserId == null || highlights.isEmpty) return true;
+
+    var uploadSucceeded = true;
 
     // Validate all highlights first
     final validHighlights = <Map<String, dynamic>>[];
@@ -3060,7 +3199,7 @@ class SupabaseSyncService {
       }
     }
 
-    if (validHighlights.isEmpty) return;
+    if (validHighlights.isEmpty) return true;
 
     // Separate highlights into two groups:
     // 1. Highlights WITH UUIDs (already synced to Supabase before) - can be upserted
@@ -3095,6 +3234,7 @@ class SupabaseSyncService {
             .upsert(dataToUpsert, onConflict: 'created_at')
             .select('id, created_at');
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadHighlights exception (upsert with UUIDs)',
@@ -3152,6 +3292,7 @@ class SupabaseSyncService {
           }
         }
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage:
@@ -3159,6 +3300,8 @@ class SupabaseSyncService {
         );
       }
     }
+
+    return uploadSucceeded;
   }
 
   // Delete highlight from Supabase
@@ -3269,8 +3412,9 @@ class SupabaseSyncService {
         greaterThanColumn: 'updated_at',
         greaterThanValue: lastSyncMs,
       );
+      var downloadSucceeded = true;
       if (snapshot.isNotEmpty) {
-        await _downloadNotes(snapshot);
+        downloadSucceeded = await _downloadNotes(snapshot);
       }
 
       // Detect remote deletions
@@ -3282,7 +3426,7 @@ class SupabaseSyncService {
         pendingNaturalKeys: _getPendingNaturalKeys('note'),
       );
 
-      if (shouldAdvanceTimestamp) {
+      if (downloadSucceeded && shouldAdvanceTimestamp) {
         _lastNotesSync = DateTime.now();
 
         // Save timestamps to preferences - only for notes
@@ -3518,6 +3662,7 @@ class SupabaseSyncService {
     try {
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
+      var uploadSucceeded = true;
       final baselineTime =
           _lastSearchHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
       final localSearchHistory = await SearchDatabase.getSearchHistory();
@@ -3561,8 +3706,24 @@ class SupabaseSyncService {
         // Upload search history
         if (searchHistoryItemsToUpload.isNotEmpty) {
           try {
-            await _batchUploadSearchHistory(searchHistoryItemsToUpload);
+            uploadSucceeded = await _batchUploadSearchHistory(
+              searchHistoryItemsToUpload,
+            );
+            if (!uploadSucceeded) {
+              for (final searchHistoryItem in searchHistoryItemsToUpload) {
+                _enqueueFailedOperation(SyncOperation(
+                  id: searchHistoryItem['timestamp'],
+                  type: 'search_history',
+                  operation: 'create',
+                  data: searchHistoryItem,
+                  timestamp: DateTime.fromMillisecondsSinceEpoch(
+                      searchHistoryItem['timestamp'] as int),
+                  userId: _currentUserId,
+                ));
+              }
+            }
           } catch (e) {
+            uploadSucceeded = false;
             ErrorHandler.logError(
               e,
               customMessage: '_batchUploadSearchHistory exception',
@@ -3593,18 +3754,21 @@ class SupabaseSyncService {
         greaterThanColumn: 'timestamp',
         greaterThanValue: lastSyncMs,
       );
+      var downloadSucceeded = true;
       if (snapshot.isNotEmpty) {
-        await _downloadSearchHistory(snapshot);
+        downloadSucceeded = await _downloadSearchHistory(snapshot);
       }
 
       // Detect remote deletions
       await _detectRemoteDeletions('search_history');
 
       // Always update the sync timestamp after sync operations (both upload and download)
-      _lastSearchHistorySync = DateTime.now();
+      if (uploadSucceeded && downloadSucceeded) {
+        _lastSearchHistorySync = DateTime.now();
 
-      // Save timestamps to preferences - only for search_history
-      await _saveLastSyncTimestamps('search_history');
+        // Save timestamps to preferences - only for search_history
+        await _saveLastSyncTimestamps('search_history');
+      }
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -3614,9 +3778,11 @@ class SupabaseSyncService {
   }
 
   // Batch upload multiple search history items to Supabase
-  Future<void> _batchUploadSearchHistory(
+  Future<bool> _batchUploadSearchHistory(
       List<Map<String, dynamic>> searchHistoryItems) async {
-    if (_currentUserId == null || searchHistoryItems.isEmpty) return;
+    if (_currentUserId == null || searchHistoryItems.isEmpty) return true;
+
+    var uploadSucceeded = true;
 
     // Validate all search history items first
     final validSearchHistoryItems = <Map<String, dynamic>>[];
@@ -3628,7 +3794,7 @@ class SupabaseSyncService {
       }
     }
 
-    if (validSearchHistoryItems.isEmpty) return;
+    if (validSearchHistoryItems.isEmpty) return true;
 
     // Separate search history items into two groups:
     // 1. Items WITH UUIDs (already synced to Supabase before) - can be upserted
@@ -3675,6 +3841,7 @@ class SupabaseSyncService {
             .upsert(dataToUpsert, onConflict: 'timestamp')
             .select('id, timestamp');
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage:
@@ -3746,6 +3913,7 @@ class SupabaseSyncService {
           }
         }
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage:
@@ -3753,6 +3921,8 @@ class SupabaseSyncService {
         );
       }
     }
+
+    return uploadSucceeded;
   }
 
   // Sync history to Supabase
@@ -3775,6 +3945,7 @@ class SupabaseSyncService {
     try {
       // Always perform bi-directional sync regardless of local changes
       // Upload local changes first
+      var uploadSucceeded = true;
       final baselineTime =
           _lastHistorySync ?? DateTime.fromMillisecondsSinceEpoch(0);
       final localHistory = await HistoryDatabase.getHistory();
@@ -3818,8 +3989,22 @@ class SupabaseSyncService {
         // Upload history
         if (historyItemsToUpload.isNotEmpty) {
           try {
-            await _batchUploadHistory(historyItemsToUpload);
+            uploadSucceeded = await _batchUploadHistory(historyItemsToUpload);
+            if (!uploadSucceeded) {
+              for (final historyItem in historyItemsToUpload) {
+                _enqueueFailedOperation(SyncOperation(
+                  id: historyItem['timestamp'],
+                  type: 'history',
+                  operation: 'create',
+                  data: historyItem,
+                  timestamp: DateTime.fromMillisecondsSinceEpoch(
+                      historyItem['timestamp'] as int),
+                  userId: _currentUserId,
+                ));
+              }
+            }
           } catch (e) {
+            uploadSucceeded = false;
             ErrorHandler.logError(
               e,
               customMessage: '_batchUploadHistory exception',
@@ -3849,18 +4034,21 @@ class SupabaseSyncService {
         greaterThanColumn: 'timestamp',
         greaterThanValue: lastSyncMs,
       );
+      var downloadSucceeded = true;
       if (snapshot.isNotEmpty) {
-        await _downloadHistory(snapshot);
+        downloadSucceeded = await _downloadHistory(snapshot);
       }
 
       // Detect remote deletions
       await _detectRemoteDeletions('history');
 
       // Always update the sync timestamp after sync operations (both upload and download)
-      _lastHistorySync = DateTime.now();
+      if (uploadSucceeded && downloadSucceeded) {
+        _lastHistorySync = DateTime.now();
 
-      // Save timestamps to preferences - only for history
-      await _saveLastSyncTimestamps('history');
+        // Save timestamps to preferences - only for history
+        await _saveLastSyncTimestamps('history');
+      }
     } catch (e) {
       ErrorHandler.logError(
         e,
@@ -3933,9 +4121,11 @@ class SupabaseSyncService {
   }
 
   // Batch upload multiple history items to Supabase
-  Future<void> _batchUploadHistory(
+  Future<bool> _batchUploadHistory(
       List<Map<String, dynamic>> historyItems) async {
-    if (_currentUserId == null || historyItems.isEmpty) return;
+    if (_currentUserId == null || historyItems.isEmpty) return true;
+
+    var uploadSucceeded = true;
 
     // Validate all history items first
     final validHistoryItems = <Map<String, dynamic>>[];
@@ -3947,7 +4137,7 @@ class SupabaseSyncService {
       }
     }
 
-    if (validHistoryItems.isEmpty) return;
+    if (validHistoryItems.isEmpty) return true;
 
     // Separate history items into two groups:
     // 1. Items WITH UUIDs (already synced to Supabase before) - can be upserted
@@ -3978,6 +4168,7 @@ class SupabaseSyncService {
             .upsert(dataToUpsert, onConflict: 'timestamp')
             .select('id, timestamp');
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadHistory exception (upsert with UUIDs)',
@@ -4027,12 +4218,15 @@ class SupabaseSyncService {
           }
         }
       } catch (e) {
+        uploadSucceeded = false;
         ErrorHandler.logError(
           e,
           customMessage: '_batchUploadHistory exception (insert new items)',
         );
       }
     }
+
+    return uploadSucceeded;
   }
 
   // Sync only recent remote changes since last local sync (app resume scenario)
@@ -4059,9 +4253,11 @@ class SupabaseSyncService {
         );
 
         if (snapshot.isNotEmpty) {
-          await _downloadHighlights(snapshot);
-          _lastHighlightsSync = DateTime.now();
-          await _saveLastSyncTimestamps('highlights');
+          final downloadSucceeded = await _downloadHighlights(snapshot);
+          if (downloadSucceeded) {
+            _lastHighlightsSync = DateTime.now();
+            await _saveLastSyncTimestamps('highlights');
+          }
         }
         // Detect remote deletions
         await _detectRemoteDeletions('highlight');
@@ -4080,13 +4276,15 @@ class SupabaseSyncService {
           greaterThanValue: lastSyncMs,
         );
 
+        var downloadSucceeded = true;
         if (snapshot.isNotEmpty) {
-          await _downloadNotes(snapshot);
+          downloadSucceeded = await _downloadNotes(snapshot);
         }
         // Detect remote deletions
         await _detectRemoteDeletions('note');
 
         if (snapshot.isNotEmpty &&
+            downloadSucceeded &&
             shouldAdvanceSyncTimestamp(
               failedRecoveryActions: failedRecoveryActions,
               failedUploadNaturalKeys: const <int>{},
@@ -4108,9 +4306,11 @@ class SupabaseSyncService {
         );
 
         if (snapshot.isNotEmpty) {
-          await _downloadHistory(snapshot);
-          _lastHistorySync = DateTime.now();
-          await _saveLastSyncTimestamps('history');
+          final downloadSucceeded = await _downloadHistory(snapshot);
+          if (downloadSucceeded) {
+            _lastHistorySync = DateTime.now();
+            await _saveLastSyncTimestamps('history');
+          }
         }
         // Detect remote deletions
         await _detectRemoteDeletions('history');
@@ -4128,9 +4328,11 @@ class SupabaseSyncService {
         );
 
         if (snapshot.isNotEmpty) {
-          await _downloadSearchHistory(snapshot);
-          _lastSearchHistorySync = DateTime.now();
-          await _saveLastSyncTimestamps('search_history');
+          final downloadSucceeded = await _downloadSearchHistory(snapshot);
+          if (downloadSucceeded) {
+            _lastSearchHistorySync = DateTime.now();
+            await _saveLastSyncTimestamps('search_history');
+          }
         }
         // Detect remote deletions
         await _detectRemoteDeletions('search_history');
@@ -4144,7 +4346,20 @@ class SupabaseSyncService {
   }
 
   // Sync all data types
-  Future<void> syncAll() async {
+  Future<void> syncAll() {
+    final existingSync = _syncAllFuture;
+    if (existingSync != null) return existingSync;
+
+    final sync = _syncAllInternal();
+    _syncAllFuture = sync;
+    return sync.whenComplete(() {
+      if (identical(_syncAllFuture, sync)) {
+        _syncAllFuture = null;
+      }
+    });
+  }
+
+  Future<void> _syncAllInternal() async {
     if (_currentUserId == null) {
       return;
     }
@@ -4806,25 +5021,40 @@ class SupabaseSyncService {
           .eq('id', _currentUserId!)
           .single();
       final username = response['username'] as String?;
-      await HistoryDatabase.setCachedUsername(username ?? 'Unknown');
+      if (username != null && username.isNotEmpty) {
+        final preferences = await SharedPreferences.getInstance();
+        await preferences.setString(cachedUsernamePreferenceKey, username);
+      }
     } catch (e) {
-      await HistoryDatabase.setCachedUsername('Unknown');
+      // Keep the last known username when the profile request fails. A
+      // temporary network or auth error must not erase the offline display.
+      ErrorHandler.logError(
+        e,
+        customMessage: 'cacheUsername exception',
+      );
     }
   }
 
   // Set cached username (for manual updates)
   Future<void> setCachedUsername(String username) async {
-    await HistoryDatabase.setCachedUsername(username);
+    final preferences = await SharedPreferences.getInstance();
+    if (username.isEmpty || username == 'Unknown') {
+      await preferences.remove(cachedUsernamePreferenceKey);
+    } else {
+      await preferences.setString(cachedUsernamePreferenceKey, username);
+    }
   }
 
   // Clear cached username (called on sign out)
   Future<void> clearCachedUsername() async {
-    await HistoryDatabase.setCachedUsername('Unknown');
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(cachedUsernamePreferenceKey);
   }
 
   // Get cached username (for main.dart display)
   static Future<String?> getCachedUsername() async {
-    return await HistoryDatabase.getCachedUsername();
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(cachedUsernamePreferenceKey);
   }
 
   // Upload single search history item to Supabase
@@ -5021,6 +5251,13 @@ class SupabaseSyncService {
 
   // Cleanup - called when user signs out or app is terminated
   void dispose() {
+    // Invalidate every in-flight initialization before releasing resources.
+    // Network calls cannot be cancelled, but their continuations will no
+    // longer be allowed to restore listeners or mark the service initialized.
+    _lifecycleGeneration++;
+    _isInitialized = false;
+    _initializedUserId = null;
+
     // Move any remaining retry operations to persistent queues before cleanup
     if (_currentUserId != null && _retryQueue.isNotEmpty) {
       for (final operation in _retryQueue) {
@@ -5045,14 +5282,17 @@ class SupabaseSyncService {
 
     // Properly cleanup stream controllers
     _cleanupStreamControllers();
-
-    _isInitialized = false;
   }
 
   // Prepare for sign-out - clean up listeners and reset state
   Future<void> prepareForSignOut(
       {bool preservePendingOperations = true}) async {
     final currentUserId = _currentUserId;
+
+    // Invalidate initialization immediately, before the first await.
+    _lifecycleGeneration++;
+    _isInitialized = false;
+    _initializedUserId = null;
 
     if (preservePendingOperations && currentUserId != null) {
       for (final operation in _retryQueue) {

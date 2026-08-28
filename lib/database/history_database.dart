@@ -7,6 +7,8 @@ import '../utils/data_validation.dart';
 import 'package:flutter/foundation.dart';
 import '../utils/platform_paths.dart';
 import '../utils/error_handler.dart';
+import '../utils/preferences_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryDatabase {
   static Database? _database;
@@ -464,45 +466,43 @@ class HistoryDatabase {
     return deletedCount;
   }
 
-  // Cache username in database
-  static Future<void> setCachedUsername(String username) async {
+  /// Migrate the username cache from older releases into SharedPreferences.
+  ///
+  /// The old table is intentionally retained so opening an old database is
+  /// harmless, but all new reads and writes use SharedPreferences.
+  static Future<void> migrateCachedUsernameToPreferences() async {
     try {
-      Database db = await getDatabase();
-      await db.insert(
-        userCacheTable,
-        {colKey: 'username', colValue: username},
-        conflictAlgorithm: ConflictAlgorithm.replace,
+      final preferences = await SharedPreferences.getInstance();
+      if (preferences.containsKey(cachedUsernamePreferenceKey)) return;
+
+      final db = await getDatabase();
+      final table = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        [userCacheTable],
       );
+      if (table.isEmpty) return;
+
+      final result = await db.query(
+        userCacheTable,
+        where: '$colKey = ?',
+        whereArgs: ['username'],
+        limit: 1,
+      );
+      if (result.isEmpty) return;
+
+      final username = result.first[colValue] as String?;
+      if (username != null && username.isNotEmpty) {
+        await preferences.setString(cachedUsernamePreferenceKey, username);
+      }
     } catch (e) {
       ErrorHandler.logError(
         e,
-        customMessage: 'setCachedUsername exception',
+        customMessage: 'migrateCachedUsernameToPreferences exception',
         context: {
           'class': 'HistoryDatabase',
-          'method': 'setCachedUsername',
-          'username': username
+          'method': 'migrateCachedUsernameToPreferences',
         },
       );
     }
   }
-
-  // Get cached username from database
-  static Future<String?> getCachedUsername() async {
-    Database db = await getDatabase();
-    List<Map<String, dynamic>> result = await db.query(
-      userCacheTable,
-      where: '$colKey = ?',
-      whereArgs: ['username'],
-    );
-    if (result.isNotEmpty) {
-      return result.first[colValue] as String?;
-    }
-    return null;
-  }
-
-  // // Clear user cache
-  // static Future<void> clearUserCache() async {
-  //   Database db = await getDatabase();
-  //   await db.delete(userCacheTable);
-  // }
 }
