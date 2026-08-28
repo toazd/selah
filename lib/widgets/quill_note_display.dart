@@ -39,7 +39,7 @@ class QuillNoteDisplay extends StatefulWidget {
 }
 
 class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
-  static const String _strongsLinkPrefix = 'strongs://';
+  static const String _strongsLinkPrefix = 's://';
 
   late QuillController _controller;
   late FocusNode _focusNode;
@@ -84,8 +84,10 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
 
     Document document;
     if (NoteStorageFormat.isDeltaFormat(noteText)) {
-      final decoded = jsonDecode(noteText);
-      final normalizedDeltaJson = _ensureDeltaHasTrailingNewline(decoded);
+      final normalizedNoteText =
+          NoteStorageFormat.normalizeLegacyStrongsLinks(noteText);
+      final normalizedDeltaJson =
+          _ensureDeltaHasTrailingNewline(jsonDecode(normalizedNoteText));
       final delta = Delta.fromJson(normalizedDeltaJson);
       document = Document.fromDelta(delta);
     } else {
@@ -173,8 +175,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
     String? strongsNumber;
     if (normalizedLink.startsWith(_strongsLinkPrefix)) {
       strongsNumber = normalizedLink.substring(_strongsLinkPrefix.length);
-    } else if (normalizedLink.startsWith('strongs:')) {
-      strongsNumber = normalizedLink.substring('strongs:'.length);
+    } else if (normalizedLink.startsWith('strongs://')) {
+      strongsNumber = normalizedLink.substring('strongs://'.length);
     }
 
     if (strongsNumber == null) {
@@ -312,9 +314,7 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   : FlutterQuillEmbeds.editorBuilders(),
               customLinkPrefixes: const [
                 'v://',
-                'v:',
-                'strongs://',
-                'strongs:',
+                's://',
               ],
               onLaunchUrl: _handleLinkTap,
               customStyles: DefaultStyles(

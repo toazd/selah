@@ -4,6 +4,7 @@ import 'dart:io';
 import '../services/supabase_sync_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../utils/data_validation.dart';
+import '../utils/note_storage_format.dart';
 import 'package:flutter/foundation.dart';
 import '../utils/platform_paths.dart';
 
@@ -198,6 +199,7 @@ class NotesDatabase {
     String? uuid,
   }) async {
     final db = await getDatabase();
+    noteText = NoteStorageFormat.normalizeLegacyStrongsLinks(noteText);
 
     // Check if note exists
     final existing = await getNoteForVerse(book, chapter, verse);

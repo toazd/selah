@@ -9,7 +9,7 @@ import 'verse_reference_detector.dart';
 class VerseReferenceLinker {
   static final RegExp _strongsReferencePattern =
       RegExp(r'(^|[^A-Za-z0-9])([HhGg]\d{1,4})(?![A-Za-z0-9])');
-  static const String _strongsLinkPrefix = 'strongs://';
+  static const String _strongsLinkPrefix = 's://';
 
   static bool textMightContainAutomaticLinks(String text) {
     return text.contains(':') || _strongsReferencePattern.hasMatch(text);
@@ -252,12 +252,12 @@ class VerseReferenceLinker {
         ? linkValue.substring('unsafe:'.length)
         : linkValue;
 
+    //link.startsWith('v:') ||
+    //link.startsWith('verse://') ||
+    //link.startsWith('verse:') ||
     return link.startsWith('v://') ||
-        link.startsWith('v:') ||
-        link.startsWith('verse://') ||
-        link.startsWith('verse:') ||
         link.startsWith(_strongsLinkPrefix) ||
-        link.startsWith('strongs:');
+        link.startsWith('strongs://');
   }
 }
 

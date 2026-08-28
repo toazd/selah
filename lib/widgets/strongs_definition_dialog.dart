@@ -15,7 +15,7 @@ class StrongsDefinitionDialog {
   static final RegExp _htmlTagPattern = RegExp(r'<[^>]+>');
   static final RegExp _strongsReferencePattern =
       RegExp(r'(^|[^A-Za-z0-9])([GH]\d{1,4})(?![A-Za-z0-9])');
-  static const String _strongsLinkPrefix = 'strongs://';
+  static const String _strongsLinkPrefix = 's://';
 
   static Future<void> show(
     BuildContext context,

@@ -97,7 +97,8 @@ class NoteStorageFormat {
 
     if (isDeltaFormat(noteText)) {
       // Load Delta format directly
-      final delta = Delta.fromJson(jsonDecode(noteText));
+      final normalizedText = normalizeLegacyStrongsLinks(noteText);
+      final delta = Delta.fromJson(jsonDecode(normalizedText));
       return QuillController(
         document: Document.fromDelta(delta),
         selection: const TextSelection.collapsed(offset: 0),
@@ -123,6 +124,35 @@ class NoteStorageFormat {
   /// Converts a Delta document to JSON string for storage
   static String deltaToJsonString(Document document) {
     return jsonEncode(document.toDelta().toJson());
+  }
+
+  /// Converts legacy Strong's link attributes to the canonical scheme.
+  static String normalizeLegacyStrongsLinks(String text) {
+    final deltaText = ensureDeltaFormat(text);
+    if (!isDeltaFormat(deltaText)) {
+      return deltaText;
+    }
+
+    final operations = (jsonDecode(deltaText) as List)
+        .map((operation) => Map<String, dynamic>.from(operation as Map))
+        .toList();
+    var changed = false;
+
+    for (final operation in operations) {
+      final attributes = operation['attributes'];
+      if (attributes is! Map) continue;
+
+      final link = attributes['link'];
+      if (link is String && link.startsWith('strongs://')) {
+        operation['attributes'] = {
+          ...Map<String, dynamic>.from(attributes),
+          'link': 's://${link.substring('strongs://'.length)}',
+        };
+        changed = true;
+      }
+    }
+
+    return changed ? jsonEncode(operations) : deltaText;
   }
 
   /// Ensures text is in Delta JSON format

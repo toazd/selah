@@ -2464,8 +2464,11 @@ class SupabaseSyncService {
         final book = data['book'] as String;
         final chapter = data['chapter'] as int;
         final verse = data['verse'] as int;
-        final noteText =
+        final deltaText =
             NoteStorageFormat.ensureDeltaFormat(data['note_text'] as String);
+        final noteText =
+            NoteStorageFormat.normalizeLegacyStrongsLinks(deltaText);
+        final hasLegacyStrongsLinks = noteText != deltaText;
         final createdAt = data['created_at'] as int;
         final remoteUuid = data['id'] as String?;
         final verseKey = '$book:$chapter:$verse';
@@ -2519,6 +2522,19 @@ class SupabaseSyncService {
           };
           hasChanges = true;
           processedCount++;
+
+          if (hasLegacyStrongsLinks && shouldApplyRemote) {
+            try {
+              await _uploadNote(noteToPersist);
+            } catch (_) {
+              await _queuePersistentOperation(
+                'note_${noteToPersist['created_at']}',
+                'note',
+                'update',
+                noteToPersist,
+              );
+            }
+          }
         }
       }
 
@@ -3441,25 +3457,30 @@ class SupabaseSyncService {
   Future<void> _uploadNote(Map<String, dynamic> note) async {
     if (_currentUserId == null) return;
 
+    final normalizedNote = Map<String, dynamic>.from(note)
+      ..['note_text'] = NoteStorageFormat.normalizeLegacyStrongsLinks(
+          note['note_text'] as String);
+
     // Validate data before uploading to prevent sending corrupt data to Supabase
-    final isValid = await DataValidation.validateBeforeUpload(note, 'note');
+    final isValid =
+        await DataValidation.validateBeforeUpload(normalizedNote, 'note');
     if (!isValid) {
       throw StateError('Invalid note data for upload');
     }
 
     final dataToInsert = {
       'user_id': _currentUserId,
-      'book': note['book'],
-      'chapter': note['chapter'],
-      'verse': note['verse'],
-      'note_text': note['note_text'],
-      'created_at': note['created_at'],
-      'updated_at': note['updated_at'],
+      'book': normalizedNote['book'],
+      'chapter': normalizedNote['chapter'],
+      'verse': normalizedNote['verse'],
+      'note_text': normalizedNote['note_text'],
+      'created_at': normalizedNote['created_at'],
+      'updated_at': normalizedNote['updated_at'],
     };
 
     // Include UUID if it exists to preserve the same record ID across syncs
-    if (note['uuid'] != null && note['uuid'].isNotEmpty) {
-      dataToInsert['id'] = note['uuid'];
+    if (normalizedNote['uuid'] != null && normalizedNote['uuid'].isNotEmpty) {
+      dataToInsert['id'] = normalizedNote['uuid'];
     }
 
     try {
@@ -3474,12 +3495,12 @@ class SupabaseSyncService {
       if (supabaseUuid != null &&
           (note['uuid'] == null || note['uuid'].isEmpty)) {
         await NotesDatabase.upsertNoteFromSync(
-          book: note['book'] as String,
-          chapter: note['chapter'] as int,
-          verse: note['verse'] as int,
-          noteText: note['note_text'] as String,
-          createdAt: note['created_at'] as int,
-          updatedAt: note['updated_at'] as int,
+          book: normalizedNote['book'] as String,
+          chapter: normalizedNote['chapter'] as int,
+          verse: normalizedNote['verse'] as int,
+          noteText: normalizedNote['note_text'] as String,
+          createdAt: normalizedNote['created_at'] as int,
+          updatedAt: normalizedNote['updated_at'] as int,
           uuid: supabaseUuid,
         );
       }
