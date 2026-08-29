@@ -666,8 +666,7 @@ void main() async {
     await prefs.setInt('maxScreens', maxScreens.value);
   }
 
-  // Supabase emits initialSession during initialize(), before the app-level
-  // listener above is attached. Reconcile the already-restored session so a
+  // Reconcile the already-restored session so a
   // valid upgrade session is reflected in the UI immediately.
   final initialSession = Supabase.instance.client.auth.currentSession;
   if (!isSignedIn.value && initialSession != null) {

@@ -10,13 +10,6 @@ import '../supabase_config.dart';
 import '../utils/platform_paths.dart';
 
 /// Windows session storage that is isolated from the app's preferences file.
-///
-/// The default Supabase Flutter storage uses SharedPreferences. On Windows,
-/// SharedPreferences is one JSON file containing every app preference, and
-/// writes replace that file in its entirety. Auth recovery, token refreshes,
-/// shutdown saves, and settings changes can therefore overwrite one another.
-/// Keeping the session in its own file prevents those unrelated writes from
-/// logging a user out after an installer upgrade.
 class WindowsAuthStorage extends LocalStorage {
   static const String _sessionFileName = 'supabase_auth.json';
 
