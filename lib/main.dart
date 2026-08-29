@@ -41,7 +41,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "1.0.4";
+final appVersion = "1.0.5";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -2613,7 +2613,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 _colorPickerRow('Background', lightBackgroundColor),
                 _colorPickerRow('Text', lightTextColor),
                 _colorPickerRow('Search Highlight', lightHighlightColor),
-                _colorPickerRow('Verse References', lightVerseReferenceColor),
+                _colorPickerRow('Note References', lightVerseReferenceColor),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -2633,7 +2633,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 _colorPickerRow('Background', darkBackgroundColor),
                 _colorPickerRow('Text', darkTextColor),
                 _colorPickerRow('Search Highlight', darkHighlightColor),
-                _colorPickerRow('Verse Reference', darkVerseReferenceColor),
+                _colorPickerRow('Note References', darkVerseReferenceColor),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
