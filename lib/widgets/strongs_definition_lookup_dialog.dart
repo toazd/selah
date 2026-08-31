@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/strongs_definitions.dart';
 import '../database/strongs_definitions_database.dart';
 import '../main.dart';
+import '../screens/strongs_search_screen.dart';
 import '../utils/preferences_constants.dart';
 import '../utils/snackbar_notification.dart';
 import 'strongs_definition_dialog.dart';
@@ -436,13 +437,6 @@ class _StrongsDefinitionLookupDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () => _lookup(_controller.text),
-          child: Text(
-            'Lookup',
-            style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
-          ),
-        ),
-        TextButton(
           onPressed: () {
             final plain =
                 '${_currentStrongsNumber ?? ''}\n${_currentDefinition != null ? StrongsDefinitionsDatabase.stripHtml(_currentDefinition!) : ''}';
@@ -451,6 +445,29 @@ class _StrongsDefinitionLookupDialogState
           },
           child: Text(
             'Copy',
+            style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
+          ),
+        ),
+        TextButton(
+          onPressed: _currentStrongsNumber == null
+              ? null
+              : () async {
+                  final navigator = Navigator.of(context);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString(
+                      strongsSearchTermPreferenceKey, _currentStrongsNumber!);
+                  if (!mounted) return;
+                  navigator.pop();
+                  await navigator.push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const StrongsSearchScreen(
+                        searchImmediately: true,
+                      ),
+                    ),
+                  );
+                },
+          child: Text(
+            'Search',
             style: StrongsDefinitionDialog.textStyle(context, uiFontSize),
           ),
         ),

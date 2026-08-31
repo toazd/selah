@@ -34,10 +34,12 @@ Color _adjustBarColor(Color backgroundColor) {
 
 class StrongsSearchScreen extends StatefulWidget {
   final int? sourceScreenIndex;
+  final bool searchImmediately;
 
   const StrongsSearchScreen({
     super.key,
     this.sourceScreenIndex,
+    this.searchImmediately = false,
   });
 
   @override
@@ -74,7 +76,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
   int? _nativeProgressDialogSearchId;
   int _activeSearchId = 0;
 
-  static const String _lastSearchTermKey = 'lastStrongsSearchTerm';
+  static const String _lastSearchTermKey = strongsSearchTermPreferenceKey;
   static const String _scrollOffsetKey = 'strongsSearchScrollOffset';
 
   bool get _canResetSearch => !_isSearching && !_isRestoring;
@@ -221,8 +223,11 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     );
   }
 
-  Future<void> _onSearch(
-      {bool showLoading = true, bool resetScroll = true}) async {
+  Future<void> _onSearch({
+    bool showLoading = true,
+    bool resetScroll = true,
+    bool markAsSearching = false,
+  }) async {
     final input = _controller.text.trim();
     final searchId = ++_activeSearchId;
     if (kDebugMode) {
@@ -255,7 +260,7 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       if (showLoading) {
         _isRestoring = false;
       }
-      _isSearching = showLoading;
+      _isSearching = showLoading || markAsSearching;
     });
 
     try {
@@ -1181,14 +1186,18 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
     }
     setState(() {
       _controller.text = lastSearch;
-      _isRestoring = true;
-      _isSearching = false;
+      _isRestoring = !widget.searchImmediately;
+      _isSearching = widget.searchImmediately;
     });
     await _waitForFrames(2);
     if (!mounted || _activeSearchId != restoreStartSearchId) {
       return;
     }
-    await _onSearch(showLoading: false, resetScroll: false);
+    await _onSearch(
+      showLoading: false,
+      resetScroll: false,
+      markAsSearching: widget.searchImmediately,
+    );
     if (!mounted || _controller.text.trim() != lastSearch.trim()) {
       return;
     }

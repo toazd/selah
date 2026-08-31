@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "selah",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "dependencies": [
         "archive",
         "connectivity_plus",

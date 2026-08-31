@@ -2,9 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/strongs_definitions_database.dart';
 import '../main.dart';
+import '../screens/strongs_search_screen.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
@@ -78,6 +80,23 @@ class StrongsDefinitionDialog {
               );
             },
             child: Text('Copy', style: textStyle(dialogContext, uiFontSize)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString(
+                  strongsSearchTermPreferenceKey, strongsNumber);
+              if (!context.mounted) return;
+              Navigator.of(dialogContext).pop();
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => const StrongsSearchScreen(
+                    searchImmediately: true,
+                  ),
+                ),
+              );
+            },
+            child: Text('Search', style: textStyle(dialogContext, uiFontSize)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),

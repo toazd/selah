@@ -127,6 +127,7 @@ const bool defaultSyncSearchHistory = true;
 
 // Moved to SharedPreferences so the cached username is independent of the local history database.
 const String cachedUsernamePreferenceKey = 'cachedUsername';
+const String strongsSearchTermPreferenceKey = 'lastStrongsSearchTerm';
 
 // Time-based theme preferences
 const int defaultDayStartHour = 7; // 7 AM

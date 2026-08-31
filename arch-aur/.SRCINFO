@@ -1,6 +1,6 @@
 pkgbase = selah-bin
 	pkgdesc = A cross-platform Bible study app using Flutter and the 1769 King James Version
-	pkgver = 1.0.5
+	pkgver = 1.0.6
 	pkgrel = 1
 	url = https://github.com/toazd/selah
 	arch = x86_64

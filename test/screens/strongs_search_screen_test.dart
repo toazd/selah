@@ -269,6 +269,28 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
+  testWidgets('definition launch shows searching state while replaying results',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'lastStrongsSearchTerm': 'G2411',
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: StrongsSearchScreen(searchImmediately: true),
+      ),
+    );
+
+    await _pumpUntilFinder(tester, find.text('Searching...'));
+
+    expect(find.text('Restoring search results...'), findsNothing);
+    expect(find.text('Searching...'), findsOneWidget);
+
+    await _waitForFinder(tester, find.text('Phrase Summary'));
+    await _pumpUntilGone(tester, find.byType(AlertDialog), maxPumps: 30);
+    expect(find.byType(AlertDialog), findsNothing);
+  });
+
   testWidgets('saved search waits for route transition before restoring',
       (tester) async {
     SharedPreferences.setMockInitialValues({
