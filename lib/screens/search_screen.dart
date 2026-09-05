@@ -17,6 +17,7 @@ import '../database/history_database.dart'; // Import for history tracking
 import '../database/search_database.dart'; // Import for search history database
 import 'package:flutter/services.dart'; // <-- added to request on-screen keyboard
 import '../utils/preferences_constants.dart';
+import '../utils/highlight_text_color_adjustments.dart';
 import '../../utils/snackbar_notification.dart';
 import '../widgets/responsive_text.dart';
 import '../services/local_data_change_notifier.dart';
@@ -1892,10 +1893,24 @@ class _SearchScreenState extends State<SearchScreen>
         ));
       }
       if (highlightEnd > highlightStart) {
+        final effectiveHighlightBackground =
+            color.withValues(alpha: defaultHighlightAlpha);
+        final originalTextColor = effectiveStyle?.color ??
+            spanStyle?.color ??
+            (Theme.of(context).brightness == Brightness.dark
+                ? darkTextColor.value
+                : lightTextColor.value);
+        final adjustedTextColor = adjustTextColorForHighlight(
+          originalTextColor,
+          effectiveHighlightBackground,
+          darkTextColor.value,
+          lightTextColor.value,
+        );
         spans.add(TextSpan(
           text: text.substring(highlightStart, highlightEnd),
           style: (effectiveStyle ?? spanStyle ?? const TextStyle()).copyWith(
-            backgroundColor: color,
+            backgroundColor: effectiveHighlightBackground,
+            color: adjustedTextColor,
             fontWeight: FontWeight.bold,
           ),
         ));

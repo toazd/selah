@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:selah/utils/highlight_text_color_adjustments.dart';
 import 'package:selah/utils/preferences_constants.dart';
 
 class VerseTextParser {
@@ -95,6 +96,8 @@ class VerseTextParser {
     required TextStyle baseStyle,
     required Set<String> matchedStrongs,
     required Color highlightColor,
+    required Color lightModeTextColor,
+    required Color darkModeTextColor,
     required Color strongsColor,
     Color tvmColor = const Color(0xFF8B4513),
     bool expandStrongsTapTarget = false,
@@ -108,6 +111,22 @@ class VerseTextParser {
         matchedStrongs.map((sn) => sn.toUpperCase()).toSet();
     final spans = <InlineSpan>[];
     final redStyle = baseStyle.copyWith(color: Colors.red);
+    final effectiveHighlightBackground =
+        highlightColor.withValues(alpha: defaultHighlightAlpha);
+
+    TextStyle highlightedStyle(TextStyle sourceStyle) {
+      final adjustedTextColor = adjustTextColorForHighlight(
+        sourceStyle.color ?? baseStyle.color ?? Colors.black,
+        effectiveHighlightBackground,
+        darkModeTextColor,
+        lightModeTextColor,
+      );
+      return sourceStyle.copyWith(
+        backgroundColor: effectiveHighlightBackground,
+        color: adjustedTextColor,
+      );
+    }
+
     final tokenPattern = RegExp(
       r"([A-Za-z'\-]+(?:\s+[A-Za-z'\-]+)*)"
       r"((?:\s*(?:\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}))+)"
@@ -155,9 +174,7 @@ class VerseTextParser {
         if (anyMatched) {
           spans.add(TextSpan(
             text: wordsGroup,
-            style: (isRed ? redStyle : baseStyle).copyWith(
-              backgroundColor: highlightColor,
-            ),
+            style: highlightedStyle(isRed ? redStyle : baseStyle),
           ));
           for (var i = 0; i < tags.length; i++) {
             if (i > 0) {
@@ -176,7 +193,11 @@ class VerseTextParser {
         final strongTag = _parseStrongTag(token);
         if (strongTag != null) {
           if (normalizedMatched.contains(strongTag.strongsNumber)) {
-            _highlightPreviousTextSpan(spans, baseStyle, highlightColor);
+            _highlightPreviousTextSpan(
+              spans,
+              baseStyle,
+              highlightedStyle,
+            );
             addStrongTag(strongTag);
           }
         } else {
@@ -317,7 +338,7 @@ class VerseTextParser {
   static void _highlightPreviousTextSpan(
     List<InlineSpan> spans,
     TextStyle baseStyle,
-    Color highlightColor,
+    TextStyle Function(TextStyle) highlightedStyle,
   ) {
     for (var i = spans.length - 1; i >= 0; i--) {
       final span = spans[i];
@@ -329,9 +350,7 @@ class VerseTextParser {
 
       spans[i] = TextSpan(
         text: span.text,
-        style: (span.style ?? baseStyle).copyWith(
-          backgroundColor: highlightColor,
-        ),
+        style: highlightedStyle(span.style ?? baseStyle),
       );
 
       if (i + 1 < spans.length) {

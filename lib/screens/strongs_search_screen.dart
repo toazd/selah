@@ -846,6 +846,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
       baseStyle: baseStyle,
       matchedStrongs: matchedStrongs.toSet(),
       highlightColor: highlightColor,
+      lightModeTextColor: lightTextColor.value,
+      darkModeTextColor: darkTextColor.value,
       strongsColor: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
       expandStrongsTapTarget: true,
       onStrongsTap: (strongsNumber) =>

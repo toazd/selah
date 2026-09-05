@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:selah/utils/highlight_text_color_adjustments.dart';
+import 'package:selah/utils/preferences_constants.dart';
 import 'package:selah/utils/verse_text_parser.dart';
 
 void main() {
@@ -46,6 +48,60 @@ void main() {
           .join();
 
       expect(visibleText, ' Know ye not');
+    });
+  });
+
+  group('Strong search highlights', () {
+    const baseStyle = TextStyle(color: Colors.black, fontSize: 20);
+    const highlightColor = Colors.yellow;
+
+    TextSpan parse(String text) {
+      return VerseTextParser.parseMatchedStrongsVerseText(
+        text: text,
+        baseStyle: baseStyle,
+        matchedStrongs: {'G1'},
+        highlightColor: highlightColor,
+        lightModeTextColor: Colors.black,
+        darkModeTextColor: Colors.white,
+        strongsColor: Colors.blue,
+      );
+    }
+
+    void expectReadableHighlight(TextSpan span, {String? text}) {
+      TextSpan? highlighted;
+
+      void visit(InlineSpan candidate) {
+        if (candidate is! TextSpan) return;
+        if ((text == null || candidate.text == text) &&
+            candidate.style?.backgroundColor != null) {
+          highlighted = candidate;
+          return;
+        }
+        for (final child in candidate.children ?? const <InlineSpan>[]) {
+          visit(child);
+          if (highlighted != null) return;
+        }
+      }
+
+      visit(span);
+      expect(highlighted, isNotNull);
+      final style = highlighted!.style!;
+      final background =
+          highlightColor.withValues(alpha: defaultHighlightAlpha);
+
+      expect(style.backgroundColor, background);
+      expect(
+        calculateContrastRatio(style.color!, background),
+        greaterThanOrEqualTo(4.5),
+      );
+    }
+
+    test('adjusts the matched word foreground color', () {
+      expectReadableHighlight(parse('word{G1}'), text: 'word');
+    });
+
+    test('adjusts the previous word when the tag follows punctuation', () {
+      expectReadableHighlight(parse('word,{G1}'));
     });
   });
 }
