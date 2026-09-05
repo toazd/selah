@@ -15,7 +15,7 @@
     },
     {
       "name": "android_file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/android_file_picker-1.0.3",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/android_file_picker-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -75,7 +75,7 @@
     },
     {
       "name": "build_config",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/build_config-1.3.2",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/build_config-1.3.3",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
@@ -165,7 +165,7 @@
     },
     {
       "name": "cupertino_ui",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_ui-1.0.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_ui-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -231,31 +231,31 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-12.1.2",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-12.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_darwin",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_darwin-1.0.4",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_darwin-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_linux",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_linux-1.0.2",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_linux-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_platform_interface",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_platform_interface-3.2.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_platform_interface-3.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_web",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_web-3.0.3",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_web-3.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -459,7 +459,7 @@
     },
     {
       "name": "image_picker_android",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.13+21",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.13+22",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -525,7 +525,7 @@
     },
     {
       "name": "jni_flutter",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/jni_flutter-1.0.2",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/jni_flutter-1.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
@@ -597,7 +597,7 @@
     },
     {
       "name": "material_ui",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/material_ui-1.1.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/material_ui-1.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -687,13 +687,13 @@
     },
     {
       "name": "permission_handler",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-13.0.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-13.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
     {
       "name": "permission_handler_android",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-14.0.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-14.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -711,7 +711,7 @@
     },
     {
       "name": "permission_handler_platform_interface",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-4.4.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-4.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     },
@@ -1125,13 +1125,13 @@
     },
     {
       "name": "video_player_android",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_android-2.12.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_android-2.12.2",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
     {
       "name": "video_player_avfoundation",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_avfoundation-2.11.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/video_player_avfoundation-2.12.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -1191,7 +1191,7 @@
     },
     {
       "name": "windows_file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/windows_file_picker-1.1.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/windows_file_picker-1.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -1227,8 +1227,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.13.1",
+  "generatorVersion": "3.13.2",
   "flutterRoot": "file:///C:/Users/wmcdannell/Documents/Flutter/flutter",
-  "flutterVersion": "3.47.1",
+  "flutterVersion": "3.47.2",
   "pubCache": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache"
 }

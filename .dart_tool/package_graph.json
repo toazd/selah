@@ -118,7 +118,7 @@
     },
     {
       "name": "material_ui",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "dependencies": [
         "collection",
         "cupertino_ui",
@@ -224,7 +224,7 @@
     },
     {
       "name": "permission_handler",
-      "version": "13.0.1",
+      "version": "13.0.2",
       "dependencies": [
         "flutter",
         "meta",
@@ -284,7 +284,7 @@
     },
     {
       "name": "file_picker",
-      "version": "12.1.2",
+      "version": "12.2.0",
       "dependencies": [
         "android_file_picker",
         "cross_file",
@@ -483,7 +483,7 @@
     },
     {
       "name": "build_config",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "dependencies": [
         "checked_yaml",
         "json_annotation",
@@ -627,7 +627,7 @@
     },
     {
       "name": "cupertino_ui",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "dependencies": [
         "collection",
         "flutter",
@@ -885,7 +885,7 @@
     },
     {
       "name": "permission_handler_platform_interface",
-      "version": "4.4.0",
+      "version": "4.4.1",
       "dependencies": [
         "flutter",
         "meta",
@@ -921,7 +921,7 @@
     },
     {
       "name": "permission_handler_android",
-      "version": "14.0.0",
+      "version": "14.1.0",
       "dependencies": [
         "flutter",
         "permission_handler_platform_interface"
@@ -1032,7 +1032,7 @@
     },
     {
       "name": "file_picker_web",
-      "version": "3.0.3",
+      "version": "3.1.0",
       "dependencies": [
         "cross_file",
         "file_picker_platform_interface",
@@ -1045,7 +1045,7 @@
     },
     {
       "name": "windows_file_picker",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "dependencies": [
         "cross_file",
         "ffi",
@@ -1058,7 +1058,7 @@
     },
     {
       "name": "file_picker_linux",
-      "version": "1.0.2",
+      "version": "1.1.0",
       "dependencies": [
         "cross_file",
         "dbus",
@@ -1069,7 +1069,7 @@
     },
     {
       "name": "file_picker_darwin",
-      "version": "1.0.4",
+      "version": "1.1.0",
       "dependencies": [
         "cross_file",
         "file_picker_platform_interface",
@@ -1079,7 +1079,7 @@
     },
     {
       "name": "android_file_picker",
-      "version": "1.0.3",
+      "version": "1.1.0",
       "dependencies": [
         "cross_file",
         "file_picker_platform_interface",
@@ -1089,7 +1089,7 @@
     },
     {
       "name": "file_picker_platform_interface",
-      "version": "3.2.0",
+      "version": "3.3.0",
       "dependencies": [
         "cross_file",
         "flutter",
@@ -1485,7 +1485,7 @@
     },
     {
       "name": "image_picker_android",
-      "version": "0.8.13+21",
+      "version": "0.8.13+22",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
@@ -1513,7 +1513,7 @@
     },
     {
       "name": "video_player_avfoundation",
-      "version": "2.11.1",
+      "version": "2.12.0",
       "dependencies": [
         "flutter",
         "meta",
@@ -1522,7 +1522,7 @@
     },
     {
       "name": "video_player_android",
-      "version": "2.12.1",
+      "version": "2.12.2",
       "dependencies": [
         "flutter",
         "meta",
@@ -1772,7 +1772,7 @@
     },
     {
       "name": "jni_flutter",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": [
         "flutter",
         "jni"

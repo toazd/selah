@@ -1911,7 +1911,7 @@ class _SearchScreenState extends State<SearchScreen>
           style: (effectiveStyle ?? spanStyle ?? const TextStyle()).copyWith(
             backgroundColor: effectiveHighlightBackground,
             color: adjustedTextColor,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.normal,
           ),
         ));
       }
