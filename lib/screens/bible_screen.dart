@@ -677,6 +677,8 @@ class _BibleScreenState extends State<BibleScreen> {
     final cleanVerseText = VerseTextParser.toPlainVerseText(verseText);
     final bookName = BookNameConverter.shortNameToLongName(_selectedBook!);
     final copyText = '$bookName ${_selectedChapter!}:$vn\n$cleanVerseText';
+    final copyTextWithStrongs = '$bookName ${_selectedChapter!}:$vn\n'
+        '${VerseTextParser.toStrongsAnnotatedVerseText(verseText)}';
 
     showModalBottomSheet(
         context: context,
@@ -727,6 +729,32 @@ class _BibleScreenState extends State<BibleScreen> {
                       await Clipboard.setData(ClipboardData(text: copyText));
                       if (context.mounted) {
                         showStyledSnackBar(context, 'Verse Copied');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        showStyledSnackBar(context, 'Copy failed',
+                            isError: true);
+                      }
+                    }
+                  },
+                ),
+                ListTile(
+                  title: Center(
+                      child: Text(
+                    "Copy Verse $vn (with Strong's)",
+                    style: TextStyle(
+                        fontFamily: fontFamilyNotifier.value,
+                        fontSize: uiFontSize + 8,
+                        color: getAdaptiveTextColor(context)),
+                  )),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    try {
+                      await Clipboard.setData(
+                          ClipboardData(text: copyTextWithStrongs));
+                      if (context.mounted) {
+                        showStyledSnackBar(
+                            context, "Verse Copied with Strong's Numbers");
                       }
                     } catch (e) {
                       if (context.mounted) {

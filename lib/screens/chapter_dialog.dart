@@ -814,6 +814,8 @@ class _ChapterDialogState extends State<ChapterDialog> {
     final bookName = bookLongName;
     final copyText =
         '$bookName ${widget.chapter}:$verseNumber\n$cleanVerseText';
+    final copyTextWithStrongs = '$bookName ${widget.chapter}:$verseNumber\n'
+        '${VerseTextParser.toStrongsAnnotatedVerseText(verseText)}';
 
     showModalBottomSheet(
         context: context,
@@ -869,6 +871,32 @@ class _ChapterDialogState extends State<ChapterDialog> {
                       await Clipboard.setData(ClipboardData(text: copyText));
                       if (context.mounted) {
                         showStyledSnackBar(context, 'Verse Copied');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        showStyledSnackBar(context, 'Copy failed',
+                            isError: true);
+                      }
+                    }
+                  },
+                ),
+                ListTile(
+                  title: Center(
+                      child: Text(
+                    "Copy Verse $verseNumber (with Strong's)",
+                    style: TextStyle(
+                        fontFamily: uiFontFamily,
+                        fontSize: uiFontSize + 8,
+                        color: getAdaptiveTextColor(context)),
+                  )),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    try {
+                      await Clipboard.setData(
+                          ClipboardData(text: copyTextWithStrongs));
+                      if (context.mounted) {
+                        showStyledSnackBar(
+                            context, "Verse Copied with Strong's Numbers");
                       }
                     } catch (e) {
                       if (context.mounted) {

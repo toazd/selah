@@ -937,6 +937,8 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
         ? 'Psalm $chapter Superscription'
         : '$bookName $chapter:$verseNum';
     final copyText = '$referenceText\n$cleanVerseText';
+    final copyTextWithStrongs = '$referenceText\n'
+        '${VerseTextParser.toStrongsAnnotatedVerseText(rawVerseText)}';
 
     showModalBottomSheet(
       context: context,
@@ -990,6 +992,26 @@ class _StrongsSearchScreenState extends State<StrongsSearchScreen>
                     isSuperscription
                         ? 'Superscription copied to clipboard'
                         : 'Verse copied to clipboard');
+                Navigator.of(context).pop();
+              });
+            },
+          ),
+          ListTile(
+            title: Center(
+                child: Text(
+              isSuperscription
+                  ? "Copy Superscription (with Strong's)"
+                  : "Copy Verse $verseNum (with Strong's)",
+              style: TextStyle(
+                  fontFamily: fontFamilyNotifier.value,
+                  fontSize: uiFontSize + 8,
+                  color: getAdaptiveTextColor(context)),
+            )),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: copyTextWithStrongs))
+                  .then((_) {
+                if (!context.mounted) return;
+                showStyledSnackBar(context, "Copied with Strong's Numbers");
                 Navigator.of(context).pop();
               });
             },

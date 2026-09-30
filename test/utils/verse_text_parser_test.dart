@@ -104,4 +104,88 @@ void main() {
       expectReadableHighlight(parse('word,{G1}'));
     });
   });
+
+  group('Strong annotated copy text', () {
+    test('inlines Strong and TVM numbers after each word', () {
+      // Matthew 28:16
+      const text =
+          '¶ Then{G1161} the eleven{G1733} disciples{G3101} went away{G4198}{{G5675}} into{G1519} Galilee{G1056}, into{G1519} a mountain{G3735} where{G3757} Jesus{G2424} had appointed{G5021}{{G5668}} them{G846}.';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'Then G1161 the eleven G1733 disciples G3101 went away G4198 G5675 '
+        'into G1519 Galilee G1056, into G1519 a mountain G3735 where G3757 '
+        'Jesus G2424 had appointed G5021 G5668 them G846.',
+      );
+    });
+
+    test('hoists a leading Strong number in front of the verse', () {
+      const text =
+          '{G1161} <r>It hath been said{G4483}{G3754}{{G5681}}, Whosoever{G3739}{G302} shall put away{G630}{{G5661}} his{G846} wife{G1135}.</r>';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'G1161 It hath been said G4483 G3754 G5681, Whosoever G3739 G302 '
+        'shall put away G630 G5661 his G846 wife G1135.',
+      );
+    });
+
+    test('hoists a leading Strong number that follows a pilcrow', () {
+      const text =
+          '¶ {G1161} Jesus{G2424}, when he had cried{G2896}{{G5660}} again{G3825} with a loud{G3173} voice{G5456}, yielded up{G863}{{G5656}} the ghost{G4151}.';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'G1161 Jesus G2424, when he had cried G2896 G5660 again G3825 with a '
+        'loud G3173 voice G5456, yielded up G863 G5656 the ghost G4151.',
+      );
+    });
+
+    test('hoists contiguous leading Strong and TVM tags', () {
+      const text = '{G2228}{{G5719}} Know ye not{G50}{{G5719}}, that so{G3754} many of us';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'G2228 G5719 Know ye not G50 G5719, that so G3754 many of us',
+      );
+    });
+
+    test('handles Hebrew numbers', () {
+      // Genesis 1:1
+      const text =
+          'In the beginning{H7225} God{H430} created{H1254}{H853}{{H8804}} the heaven{H8064} and{H853} the earth{H776}.';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'In the beginning H7225 God H430 created H1254 H853 H8804 the heaven '
+        'H8064 and H853 the earth H776.',
+      );
+    });
+
+    test('leaves text without Strong tags untouched', () {
+      const text = 'Then the eleven disciples went away into Galilee.';
+
+      expect(VerseTextParser.toStrongsAnnotatedVerseText(text), text);
+    });
+
+    test('hoists leading tags per line when perLine is set', () {
+      // Mirrors how nearby search results bundle verses into one string.
+      const text = '28 And{G1161} he{G846} came.\n29 {G1161} And{G2532} he{G846} went{G4198}.';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text, perLine: true),
+        '28 And G1161 he G846 came.\n29 G1161 And G2532 he G846 went G4198.',
+      );
+    });
+
+    test('does not introduce a double space at the start of the text', () {
+      const text =
+          '{G1161} It hath been said{G4483}, Whosoever shall put away his wife.';
+
+      expect(
+        VerseTextParser.toStrongsAnnotatedVerseText(text),
+        'G1161 It hath been said G4483, Whosoever shall put away his wife.',
+      );
+    });
+  });
 }

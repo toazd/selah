@@ -226,6 +226,74 @@ class VerseTextParser {
     return trim ? result.trim() : result;
   }
 
+  /// Formats a verse for copying, inserting each Strong's number after the word
+  /// it annotates, e.g. `Then{G1161} the eleven{G1733}` becomes
+  /// `Then G1161 the eleven G1733`.
+  ///
+  /// TVM codes (e.g. `{{G5675}}`) are included alongside the regular Strong's
+  /// numbers, while red letter tags and the pilcrow are removed.
+  ///
+  /// [perLine] - When true, leading Strong's tags are hoisted per
+  /// newline-separated line instead of only at the start of [text]. Use this
+  /// for multi-verse payloads (e.g. nearby search results) where a verse can
+  /// begin in the middle of the string.
+  static String toStrongsAnnotatedVerseText(
+    String text, {
+    bool perLine = false,
+  }) {
+    var result = stripRedLetterTags(text);
+    result = result.replaceAll('¶ ', '').replaceAll('¶', '');
+
+    if (perLine) {
+      return result
+          .split('\n')
+          .map(_annotateVerseNumberPrefixedLine)
+          .join('\n');
+    }
+    return _annotateStrongsInLine(result);
+  }
+
+  /// Annotates a single line that carries a leading verse number, such as the
+  /// `28 ` prefix used on every line of a nearby search result. The prefix is
+  /// kept in front of the line so a verse's leading Strong's tags stay attached
+  /// to their own verse rather than to the previous one.
+  static String _annotateVerseNumberPrefixedLine(String line) {
+    final prefix = _verseNumberPrefixRegex.firstMatch(line);
+    if (prefix == null) return _annotateStrongsInLine(line);
+    return prefix.group(0)! +
+        _annotateStrongsInLine(line.substring(prefix.end));
+  }
+
+  /// Matches a leading verse number plus its trailing space, e.g. `28 `.
+  static final RegExp _verseNumberPrefixRegex = RegExp(r'^\d+\s+');
+
+  /// Inlines Strong's numbers into a single line of verse text.
+  static String _annotateStrongsInLine(String text) {
+    // Strong's tags that precede the first word annotate the verse as a whole,
+    // so hoist them in front of it rather than gluing them onto that word.
+    final leadingTags = StringBuffer();
+    var body = text.trimLeft();
+    var match = _strongTagRegex.matchAsPrefix(body);
+    while (match != null) {
+      leadingTags.write('${_normalizeStrongsToken(match.group(0)!)} ');
+      body = body.substring(match.end).trimLeft();
+      match = _strongTagRegex.matchAsPrefix(body);
+    }
+
+    final annotated = body.replaceAllMapped(
+      _strongTagRegex,
+      (match) => ' ${_normalizeStrongsToken(match.group(0)!)}',
+    );
+
+    return '$leadingTags$annotated'.trim();
+  }
+
+  /// Converts a Strong's tag token (`{G1161}` or `{{G5675}}`) to its display
+  /// number (`G1161` / `G5675`).
+  static String _normalizeStrongsToken(String token) {
+    return token.replaceAll(RegExp(r'[{}]'), '').toUpperCase();
+  }
+
   static WidgetSpan _buildStrongsSuperscript({
     required String token,
     required Color strongsColor,
@@ -236,7 +304,7 @@ class VerseTextParser {
     bool expandTapTarget = false,
   }) {
     final isTvm = token.startsWith('{{');
-    final strongsNumber = token.replaceAll(RegExp(r'[{}]'), '').toUpperCase();
+    final strongsNumber = _normalizeStrongsToken(token);
     final color = isTvm ? tvmColor : strongsColor;
     final superscriptOffset = baseFontSize * 0.5;
     final text = Text(
@@ -331,7 +399,7 @@ class VerseTextParser {
 
   static _StrongTag? _parseStrongTag(String token) {
     if (!_strongTagRegex.hasMatch(token)) return null;
-    final strongsNumber = token.replaceAll(RegExp(r'[{}]'), '').toUpperCase();
+    final strongsNumber = _normalizeStrongsToken(token);
     return _StrongTag(rawTag: token, strongsNumber: strongsNumber);
   }
 

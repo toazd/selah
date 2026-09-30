@@ -2184,6 +2184,10 @@ class _SearchScreenState extends State<SearchScreen>
         ? '$chapter:$verseNum-$endVerseNum'
         : '$chapter:$verseNum';
     final copyText = '$bookName $verseRef\n$cleanVerseText';
+    // Nearby results bundle several verses into a single string, so a verse can
+    // begin mid-string and its leading Strong's tags must be hoisted per line.
+    final copyTextWithStrongs = '$bookName $verseRef\n'
+        '${VerseTextParser.toStrongsAnnotatedVerseText(rawVerseText, perLine: isNearbyResult)}';
 
     showModalBottomSheet(
       context: context,
@@ -2232,6 +2236,26 @@ class _SearchScreenState extends State<SearchScreen>
                 if (!context.mounted) return;
                 showStyledSnackBar(context,
                     '${isNearbyResult ? 'Verses' : 'Verse'} copied to clipboard');
+                Navigator.of(context).pop();
+              });
+            },
+          ),
+          ListTile(
+            title: Center(
+                child: Text(
+              isNearbyResult
+                  ? "Copy Verses $verseNum-$endVerseNum (with Strong's)"
+                  : "Copy Verse $verseNum (with Strong's)",
+              style: TextStyle(
+                  fontFamily: fontFamilyNotifier.value,
+                  fontSize: uiFontSize + 8,
+                  color: getAdaptiveTextColor(context)),
+            )),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: copyTextWithStrongs))
+                  .then((_) {
+                if (!context.mounted) return;
+                showStyledSnackBar(context, "Copied with Strong's Numbers");
                 Navigator.of(context).pop();
               });
             },

@@ -602,7 +602,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
       );
     }
 
-    final copyText = '$bookName $chapter:$verse\n$verseText';
+    final cleanVerseText = VerseTextParser.toPlainVerseText(verseText);
+    final copyText = '$bookName $chapter:$verse\n$cleanVerseText';
+    final copyTextWithStrongs = '$bookName $chapter:$verse\n'
+        '${VerseTextParser.toStrongsAnnotatedVerseText(verseText)}';
 
     if (context.mounted) {
       showModalBottomSheet(
@@ -627,7 +630,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
             ListTile(
               title: Center(
                   child: Text(
-                'Copy Verse',
+                'Copy Verse $verse',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
                     fontSize: uiFontSize + 8,
@@ -637,6 +640,24 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 Clipboard.setData(ClipboardData(text: copyText)).then((_) {
                   if (!context.mounted) return;
                   showStyledSnackBar(context, 'Verse copied to clipboard');
+                  Navigator.of(context).pop();
+                });
+              },
+            ),
+            ListTile(
+              title: Center(
+                  child: Text(
+                "Copy Verse $verse (with Strong's)",
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 8,
+                    color: getAdaptiveTextColor(context)),
+              )),
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: copyTextWithStrongs))
+                    .then((_) {
+                  if (!context.mounted) return;
+                  showStyledSnackBar(context, "Copied with Strong's Numbers");
                   Navigator.of(context).pop();
                 });
               },
