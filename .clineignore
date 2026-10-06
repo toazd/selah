@@ -1,1 +1,8 @@
 # files that cline will not have access to
+android/
+ios/
+windows/
+linux/
+macos/
+.dart_tool/
+build/

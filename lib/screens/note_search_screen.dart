@@ -22,6 +22,7 @@ import '../utils/font_size_adjustments.dart';
 import '../utils/note_storage_format.dart';
 import '../utils/bible_utils.dart';
 import '../screens/note_screen.dart';
+import '../screens/chapter_dialog.dart'; // Import for ChapterDialog
 import '../utils/error_handler.dart';
 import '../utils/verse_text_parser.dart';
 
@@ -630,6 +631,48 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
             ListTile(
               title: Center(
                   child: Text(
+                'Show Context',
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 8,
+                    color: getAdaptiveTextColor(context)),
+              )),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showContextDialog(book, chapter, verse);
+              },
+            ),
+            ListTile(
+              title: Center(
+                  child: Text(
+                'Edit Note',
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 8,
+                    color: getAdaptiveTextColor(context)),
+              )),
+              onTap: () {
+                Navigator.of(context).pop();
+                _editNoteFromSearch(result);
+              },
+            ),
+            ListTile(
+              title: Center(
+                  child: Text(
+                'Delete Note',
+                style: TextStyle(
+                    fontFamily: fontFamilyNotifier.value,
+                    fontSize: uiFontSize + 8,
+                    color: Colors.red),
+              )),
+              onTap: () {
+                Navigator.of(context).pop();
+                _deleteNoteFromSearch(result);
+              },
+            ),
+            ListTile(
+              title: Center(
+                  child: Text(
                 'Copy Verse $verse',
                 style: TextStyle(
                     fontFamily: fontFamilyNotifier.value,
@@ -666,6 +709,170 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         ),
       );
     }
+  }
+
+  // Show context dialog with chapter dialog (mirrors search_screen.dart)
+  Future<void> _showContextDialog(
+      String? book, int? chapter, int? verseNum) async {
+    if (book == null || chapter == null || verseNum == null) return;
+
+    // Convert database book name to display key for ChapterDialog
+    final normalizedShortBookName = BookNameConverter.normalizeShortName(book);
+    // Create reference text to highlight the target verse
+    final fullBookName =
+        BookNameConverter.shortNameToLongName(normalizedShortBookName);
+    final referenceText = '$fullBookName $chapter:$verseNum';
+
+    // Show ChapterDialog with target verse highlighted
+    showDialog(
+      context: context,
+      builder: (context) => ChapterDialog(
+        book: normalizedShortBookName,
+        chapter: chapter,
+        verse: verseNum, // Focus on the target verse
+        referenceText: referenceText, // Highlight the target verse
+        onNavigateToVerse: (verse) => _gotoVerse(
+            normalizedShortBookName, chapter, verse), // Navigate to the verse
+        onNoteIconTap: (int verse, String? noteText) => _openNoteFromSearch(
+            normalizedShortBookName, chapter, verse, noteText),
+        onNoteEditTap: (int verse, String? noteText) => _openNoteFromSearch(
+            normalizedShortBookName, chapter, verse, noteText),
+        onVerseLink: (link, referenceText) => handleVerseLink(
+          context,
+          link,
+          referenceText,
+          navigateToVerse: _gotoVerse,
+          onVerseLinkRecursion: null, // Infinite recursion enabled by default
+          onNoteIconTap: _openNoteFromSearch,
+          onNoteEditTap: _openNoteFromSearch,
+        ),
+      ),
+    );
+  }
+
+  // Open the note editor for a search result (same behavior as bible screen's
+  // Edit Note) and refresh the result row once the editor closes
+  Future<void> _editNoteFromSearch(Map<String, dynamic> result) async {
+    final book = result['book'] as String;
+    final chapter = result['chapter'] as int;
+    final verse = result['verse'] as int;
+    await _openNoteFromSearch(
+        book, chapter, verse, result['note_text'] as String?);
+    await _refreshResultAfterEdit(result);
+  }
+
+  // Refresh a result row after the note editor closes. If the note was
+  // deleted while editing, remove the result since it is no longer valid.
+  Future<void> _refreshResultAfterEdit(Map<String, dynamic> result) async {
+    final book = result['book'] as String;
+    final chapter = result['chapter'] as int;
+    final verse = result['verse'] as int;
+    try {
+      final updated = await NotesDatabase.getNoteForVerse(book, chapter, verse);
+      if (!mounted) return;
+      if (updated == null) {
+        setState(() {
+          _searchResults.removeWhere((r) => r['id'] == result['id']);
+          _recalculateTotals();
+        });
+      } else if (updated['note_text'] != result['note_text']) {
+        setState(() {
+          result['note_text'] = updated['note_text'];
+        });
+      }
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage: '_refreshResultAfterEdit exception',
+        context: {
+          'class': 'NoteSearchScreen',
+          'method': '_refreshResultAfterEdit',
+          'book': book,
+          'chapter': chapter,
+          'verse': verse
+        },
+      );
+    }
+  }
+
+  // Delete a note from a search result (same confirmation flow as bible
+  // screen's Delete Note). On success the result is immediately removed from
+  // the search results because it is no longer a valid result.
+  Future<void> _deleteNoteFromSearch(Map<String, dynamic> result) async {
+    final noteId = result['id'] as int?;
+    if (noteId == null) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        constraints: const BoxConstraints(maxWidth: 400),
+        content: Text(
+            'Are you sure you want to delete this note? This action cannot be undone.',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Delete',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    try {
+      await NotesDatabase.deleteNote(noteId);
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage: '_deleteNoteFromSearch exception',
+        context: {
+          'class': 'NoteSearchScreen',
+          'method': '_deleteNoteFromSearch',
+          'noteId': noteId
+        },
+      );
+      if (mounted) {
+        showStyledSnackBar(context, 'Failed to delete note', isError: true);
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _searchResults.removeWhere((r) => r['id'] == noteId);
+      _recalculateTotals();
+    });
+    showStyledSnackBar(context, 'Note deleted');
+  }
+
+  // Recalculate the match and note totals after results have changed
+  void _recalculateTotals() {
+    int noteCount = _searchResults.length;
+    int matchCount = 0;
+    final regex = _currentRegex;
+    if (regex != null) {
+      for (final note in _searchResults) {
+        String text = _getSearchText(note['note_text'] as String);
+        matchCount += regex.allMatches(text).length;
+      }
+    }
+    _setTotals(matchCount, noteCount);
   }
 
   // Navigate to verse in the source bible screen
@@ -1408,6 +1615,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                 noteText: result[
                                                                         'note_text']
                                                                     as String,
+                                                                onTap: () => _editNoteFromSearch(result),
                                                                 highlightRegex:
                                                                     _currentRegex,
                                                                 highlightColor:
