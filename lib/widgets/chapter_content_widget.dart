@@ -16,8 +16,6 @@ class ChapterContentWidget extends StatefulWidget {
   final Map<int, Map<String, dynamic>> notes;
   final Map<int, List<Map<String, dynamic>>> highlights;
   final String? bookTitle;
-  final String? bookColophon;
-  final bool isLastChapter;
   final bool showNotesInline;
   final bool showTskReferences;
   final bool showStrongsNumbers;
@@ -40,8 +38,6 @@ class ChapterContentWidget extends StatefulWidget {
     required this.notes,
     required this.highlights,
     this.bookTitle,
-    this.bookColophon,
-    this.isLastChapter = false,
     required this.showNotesInline,
     required this.showTskReferences,
     this.showStrongsNumbers = false,
@@ -264,7 +260,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                 ),
               ),
             ),
-            // Footer sliver for colophon
+            // Footer sliver for bottom padding
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.only(
@@ -275,26 +271,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.bookColophon != null &&
-                        widget.bookColophon!.isNotEmpty &&
-                        widget.isLastChapter)
-                      Text(
-                        widget.bookColophon!,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontSize: FontSizeAdjustments.getAdjustedSize(
-                            fontFamilyNotifier.value,
-                            fontSizeNotifier.value - 1,
-                          ),
-                          fontFamily: fontFamilyNotifier.value,
-                          color: isDark
-                              ? darkTextColor.value
-                              : lightTextColor.value,
-                        ),
-                      ),
-                  ],
+                  children: [],
                 ),
               ),
             ),

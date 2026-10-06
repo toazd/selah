@@ -4,7 +4,12 @@ import 'package:selah/utils/preferences_constants.dart';
 
 class VerseTextParser {
   static final RegExp _markupTokenRegex = RegExp(
-    r'<r>|</r>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
+    r'<r>|</r>|<i>|</i>|\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}',
+    caseSensitive: false,
+  );
+
+  static final RegExp _italicsTagRegex = RegExp(
+    r'</?i>',
     caseSensitive: false,
   );
 
@@ -12,6 +17,13 @@ class VerseTextParser {
   static String stripRedLetterTags(String text) {
     if (!text.contains('<r>')) return text;
     return text.replaceAll('<r>', '').replaceAll('</r>', '');
+  }
+
+  /// Strips all italics tags from the text, returning plain text.
+  /// Tags are removed without adding spaces so highlight offsets stay stable.
+  static String stripItalicsTags(String text) {
+    if (!_italicsTagRegex.hasMatch(text)) return text;
+    return text.replaceAll(_italicsTagRegex, '');
   }
 
   /// Parses verse text handling red-letter tags and optionally Strong's numbers.
@@ -36,7 +48,9 @@ class VerseTextParser {
     final displayText =
         showStrongsNumbers ? text : _removeSpaceAfterLeadingStrongsTags(text);
 
-    if (!displayText.contains('<r>') && !hasStrongsTags(displayText)) {
+    if (!displayText.contains('<r>') &&
+        !displayText.contains('<i>') &&
+        !hasStrongsTags(displayText)) {
       return TextSpan(
         children: [TextSpan(text: displayText, style: baseStyle)],
       );
@@ -46,11 +60,18 @@ class VerseTextParser {
     final redStyle = baseStyle.copyWith(color: Colors.red);
     var lastEnd = 0;
     var isRed = false;
+    var isItalic = false;
     var previousInlineStrong = false;
+
+    TextStyle currentStyle() {
+      var style = isRed ? redStyle : baseStyle;
+      if (isItalic) style = style.copyWith(fontStyle: FontStyle.italic);
+      return style;
+    }
 
     void addText(String value) {
       if (value.isEmpty) return;
-      spans.add(TextSpan(text: value, style: isRed ? redStyle : baseStyle));
+      spans.add(TextSpan(text: value, style: currentStyle()));
       previousInlineStrong = false;
     }
 
@@ -63,6 +84,10 @@ class VerseTextParser {
         isRed = true;
       } else if (lowerToken == '</r>') {
         isRed = false;
+      } else if (lowerToken == '<i>') {
+        isItalic = true;
+      } else if (lowerToken == '</i>') {
+        isItalic = false;
       } else if (showStrongsNumbers) {
         if (previousInlineStrong) {
           spans.add(TextSpan(text: ' ', style: baseStyle));
@@ -131,7 +156,7 @@ class VerseTextParser {
       r"([A-Za-z'\-]+(?:\s+[A-Za-z'\-]+)*)"
       r"((?:\s*(?:\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}))+)"
       r"|"
-      r"<r>|</r>"
+      r"<r>|</r>|<i>|</i>"
       r"|"
       r"\{\{[GH]\d{1,4}\}\}|\{[GH]\d{1,4}\}"
       r"|"
@@ -140,11 +165,18 @@ class VerseTextParser {
     );
 
     var isRed = false;
+    var isItalic = false;
     var lastEnd = 0;
+
+    TextStyle currentStyle() {
+      var style = isRed ? redStyle : baseStyle;
+      if (isItalic) style = style.copyWith(fontStyle: FontStyle.italic);
+      return style;
+    }
 
     void addText(String value) {
       if (value.isEmpty) return;
-      spans.add(TextSpan(text: value, style: isRed ? redStyle : baseStyle));
+      spans.add(TextSpan(text: value, style: currentStyle()));
     }
 
     void addStrongTag(_StrongTag tag) {
@@ -174,7 +206,7 @@ class VerseTextParser {
         if (anyMatched) {
           spans.add(TextSpan(
             text: wordsGroup,
-            style: highlightedStyle(isRed ? redStyle : baseStyle),
+            style: highlightedStyle(currentStyle()),
           ));
           for (var i = 0; i < tags.length; i++) {
             if (i > 0) {
@@ -189,6 +221,10 @@ class VerseTextParser {
         isRed = true;
       } else if (lowerToken == '</r>') {
         isRed = false;
+      } else if (lowerToken == '<i>') {
+        isItalic = true;
+      } else if (lowerToken == '</i>') {
+        isItalic = false;
       } else {
         final strongTag = _parseStrongTag(token);
         if (strongTag != null) {
@@ -220,6 +256,7 @@ class VerseTextParser {
   }) {
     var result = stripStrongsTags(text);
     result = stripRedLetterTags(result);
+    result = stripItalicsTags(result);
     if (removePilcrow) {
       result = result.replaceAll('¶ ', '').replaceAll('¶', '');
     }
@@ -242,6 +279,7 @@ class VerseTextParser {
     bool perLine = false,
   }) {
     var result = stripRedLetterTags(text);
+    result = stripItalicsTags(result);
     result = result.replaceAll('¶ ', '').replaceAll('¶', '');
 
     if (perLine) {

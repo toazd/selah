@@ -52,8 +52,6 @@ class _ChapterData {
   final Map<int, Map<String, dynamic>> notes;
   final Map<int, List<Map<String, dynamic>>> highlights;
   final String? bookTitle;
-  final String? bookColophon;
-  final bool isLastChapter;
 
   const _ChapterData({
     required this.book,
@@ -62,8 +60,6 @@ class _ChapterData {
     required this.notes,
     required this.highlights,
     this.bookTitle,
-    this.bookColophon,
-    this.isLastChapter = false,
   });
 
   /// Creates a copy with updated fields
@@ -78,8 +74,6 @@ class _ChapterData {
       notes: notes ?? this.notes,
       highlights: highlights ?? this.highlights,
       bookTitle: bookTitle,
-      bookColophon: bookColophon,
-      isLastChapter: isLastChapter,
     );
   }
 }
@@ -339,22 +333,14 @@ class _BibleScreenState extends State<BibleScreen> {
 
     // Load metadata
     String? title;
-    String? colophon;
     if (book == 'Psa') {
       final metadata =
           await BibleDatabase.getBookMetadata(book, chapter: chapter);
       title = metadata?['title'] as String?;
-      colophon = metadata?['colophon'] as String?;
     } else {
       final metadata = await BibleDatabase.getBookMetadata(book);
       title = metadata?['title'] as String?;
-      colophon = metadata?['colophon'] as String?;
     }
-
-    // Determine if this is the last chapter of the book
-    final bookChapters = await BibleDatabase.getChapters(book);
-    final isLastChapter =
-        bookChapters.isNotEmpty && chapter == bookChapters.last;
 
     final chapterData = _ChapterData(
       book: book,
@@ -363,8 +349,6 @@ class _BibleScreenState extends State<BibleScreen> {
       notes: notes,
       highlights: highlights,
       bookTitle: title,
-      bookColophon: colophon,
-      isLastChapter: isLastChapter,
     );
 
     _chapterCache[index] = chapterData;
@@ -1030,10 +1014,6 @@ class _BibleScreenState extends State<BibleScreen> {
                                                       chapterData.highlights,
                                                   bookTitle:
                                                       chapterData.bookTitle,
-                                                  bookColophon:
-                                                      chapterData.bookColophon,
-                                                  isLastChapter:
-                                                      chapterData.isLastChapter,
                                                   showNotesInline:
                                                       showNotesInline,
                                                   showTskReferences:

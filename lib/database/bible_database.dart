@@ -55,7 +55,7 @@ class BibleDatabase {
     return results;
   }
 
-  // Get book metadata (title, colophon)
+  // Get book metadata (title)
   static Future<Map<String, dynamic>?> getBookMetadata(String bookShortName,
       {int? chapter}) async {
     // Try the specific Psalm lookup first if chapter is provided and book starts with 'Psa'
@@ -66,7 +66,6 @@ class BibleDatabase {
         return {
           'book': bookShortName,
           'title': psalmMetadata['title'],
-          'colophon': psalmMetadata['colophon'],
         };
       }
       return null;
@@ -79,7 +78,6 @@ class BibleDatabase {
     return {
       'book': bookShortName,
       'title': metadata['title'],
-      'colophon': metadata['colophon'],
     };
   }
 }

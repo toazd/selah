@@ -9,6 +9,7 @@ import '../database/notes_database.dart';
 import '../data/bible_data_strongs.dart';
 import '../widgets/olive_tree_import_dialogs.dart';
 import '../utils/note_storage_format.dart';
+import '../utils/verse_text_parser.dart';
 import '../services/local_data_change_notifier.dart';
 import '../services/supabase_sync_service.dart';
 
@@ -495,28 +496,32 @@ class OliveTreeImportService {
     final verseText = chapterData[highlight.verseReference!.verse];
     if (verseText == null) return null;
 
+    // Match against the visible verse text (markup stripped) since highlight
+    // ranges are stored against cleaned text everywhere else in the app.
+    final cleanVerseText = VerseTextParser.toPlainVerseText(verseText);
+
     // Handle whole verse highlights (empty highlightedText)
     if (highlight.highlightedText.isEmpty) {
-      return _HighlightPosition(start: 0, end: verseText.length);
+      return _HighlightPosition(start: 0, end: cleanVerseText.length);
     }
 
     // First try whole-word matching using regex word boundaries
     final wordRegex =
         RegExp(r'\b' + RegExp.escape(highlight.highlightedText) + r'\b');
-    final wordMatch = wordRegex.firstMatch(verseText);
+    final wordMatch = wordRegex.firstMatch(cleanVerseText);
     if (wordMatch != null) {
       return _HighlightPosition(start: wordMatch.start, end: wordMatch.end);
     }
 
     // Fallback to substring matching if whole-word match fails
-    int highlightIndex = verseText.indexOf(highlight.highlightedText);
+    int highlightIndex = cleanVerseText.indexOf(highlight.highlightedText);
     int highlightLength = highlight.highlightedText.length;
     if (highlightIndex == -1) {
       // Try stripping leading verse number (e.g., "11 ") from highlightedText for single verse highlights
       final strippedHighlightedText = highlight.highlightedText
           .replaceFirst(RegExp(r'^\d+ '), '')
           .replaceAll('\n', ' ');
-      highlightIndex = verseText.indexOf(strippedHighlightedText);
+      highlightIndex = cleanVerseText.indexOf(strippedHighlightedText);
       if (highlightIndex != -1) {
         highlightLength = strippedHighlightedText.length;
       } else {

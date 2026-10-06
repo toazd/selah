@@ -97,8 +97,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
   // Cached long name for the book
   late final String bookLongName;
   String? _bookTitle;
-  String? _bookColophon;
-  bool _isLastChapter = false;
 
   String get _normalizedBook =>
       BookNameConverter.normalizeShortName(widget.book);
@@ -107,9 +105,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
       _bookTitle != null &&
       _bookTitle!.isNotEmpty &&
       (widget.chapter == 1 || _normalizedBook == 'Psa');
-
-  bool get _shouldShowBookColophon =>
-      _bookColophon != null && _bookColophon!.isNotEmpty && _isLastChapter;
 
   int? get _initialScrollVerse {
     if (widget.verse != null && widget.verse! > 0) {
@@ -285,11 +280,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
             )
           : await BibleDatabase.getBookMetadata(normalizedBook);
       _bookTitle = metadata?['title'] as String?;
-      _bookColophon = metadata?['colophon'] as String?;
-
-      final bookChapters = await BibleDatabase.getChapters(normalizedBook);
-      _isLastChapter =
-          bookChapters.isNotEmpty && widget.chapter == bookChapters.last;
 
       // Create keys for verse scrolling
       _verseKeys.clear();
@@ -478,36 +468,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
     );
   }
 
-  Widget _buildBookColophonWidget(bool isDark, bool showStrongsNumbers) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 22.0, 0.0),
-      child: RichText(
-        textAlign: TextAlign.left,
-        text: VerseTextParser.parseVerseText(
-          _bookColophon!,
-          TextStyle(
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.normal,
-            fontSize: FontSizeAdjustments.getAdjustedSize(
-              fontFamilyNotifier.value,
-              fontSizeNotifier.value - 1,
-            ),
-            fontFamily: fontFamilyNotifier.value,
-            height: showStrongsNumbers
-                ? lineHeightNotifier.value + 0.35
-                : lineHeightNotifier.value,
-            color: isDark ? darkTextColor.value : lightTextColor.value,
-          ),
-          showStrongsNumbers: showStrongsNumbers,
-          expandStrongsTapTarget: true,
-          strongsColor:
-              isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-          onStrongsTap: _showStrongsDefinitionDialog,
-        ),
-      ),
-    );
-  }
-
   Widget _buildOptionsDrawer(Color bgColor, Color primaryColor) {
     final textStyle = TextStyle(
       fontSize: uiFontSize,
@@ -684,8 +644,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                             _rebuildVerseDataList();
                                             final showBookTitle =
                                                 _shouldShowBookTitle;
-                                            final showBookColophon =
-                                                _shouldShowBookColophon;
                                             final children = <Widget>[
                                               if (showBookTitle)
                                                 _buildBookTitleWidget(
@@ -724,9 +682,6 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                                   ),
                                                 );
                                               }),
-                                              if (showBookColophon)
-                                                _buildBookColophonWidget(
-                                                    isDark, showDialogStrongs),
                                               const SizedBox(height: 16.0),
                                             ];
                                             return ScrollConfiguration(

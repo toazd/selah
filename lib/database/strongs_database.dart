@@ -33,6 +33,8 @@ class StrongsDatabase {
   );
   static final RegExp _redLetterTagRegex =
       RegExp(r"</?r>", caseSensitive: false);
+  static final RegExp _italicsTagRegex =
+      RegExp(r"</?i>", caseSensitive: false);
   static final RegExp _extraSpacesRegex = RegExp(r" +");
   static final RegExp _whitespaceRegex = RegExp(r"\s+");
   static final RegExp _phraseBoundaryRegex = RegExp(r"[.,:;?!¶]+");
@@ -40,7 +42,7 @@ class StrongsDatabase {
   static final RegExp _englishWordRegex = RegExp(r"[A-Za-z0-9][A-Za-z0-9'\-]*");
   static final RegExp _strongsNumberInputRegex = RegExp(r"^[HhGg]\d+$");
   static final RegExp _removedMarkupBetweenWordCharactersRegex = RegExp(
-    r"[A-Za-z0-9'\-](?:(?:\{\{?[A-Za-z]\d+\}\}?|</?r>))+(?=[A-Za-z0-9'\-])",
+    r"[A-Za-z0-9'\-](?:(?:\{\{?[A-Za-z]\d+\}\}?|</?r>|</?i>))+(?=[A-Za-z0-9'\-])",
     caseSensitive: false,
   );
   static const int _rawTagPrefilterLimit = 8;
@@ -78,6 +80,7 @@ class StrongsDatabase {
   static String _plainSearchText(String text) {
     var result = text.replaceAll(_strongTagRegex, "");
     result = result.replaceAll(_redLetterTagRegex, "");
+    result = result.replaceAll(_italicsTagRegex, "");
     result = result.replaceAll("¶", " ");
     result = result.replaceAll(_extraSpacesRegex, " ");
     return result.trim();
@@ -93,6 +96,7 @@ class StrongsDatabase {
 
   static String _extractTrailingPhrase(String textBeforeTagGroup) {
     var text = textBeforeTagGroup.replaceAll(_redLetterTagRegex, " ");
+    text = text.replaceAll(_italicsTagRegex, " ");
     text = text.replaceAll("¶", " ¶ ");
     text = text.replaceAll(_whitespaceRegex, " ");
 
