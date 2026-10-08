@@ -1185,29 +1185,6 @@
       ]
     },
     {
-      "name": "material_ui",
-      "version": "1.5.0",
-      "dependencies": [
-        "collection",
-        "cupertino_ui",
-        "flutter",
-        "flutter_localizations",
-        "intl",
-        "material_color_utilities",
-        "vector_math"
-      ]
-    },
-    {
-      "name": "cupertino_ui",
-      "version": "1.1.1",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "flutter_localizations",
-        "intl"
-      ]
-    },
-    {
       "name": "watcher",
       "version": "1.2.1",
       "dependencies": [
@@ -1266,6 +1243,29 @@
       "dependencies": [
         "app_links_platform_interface",
         "flutter"
+      ]
+    },
+    {
+      "name": "material_ui",
+      "version": "1.6.0",
+      "dependencies": [
+        "collection",
+        "cupertino_ui",
+        "flutter",
+        "flutter_localizations",
+        "intl",
+        "material_color_utilities",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "cupertino_ui",
+      "version": "1.1.2",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "flutter_localizations",
+        "intl"
       ]
     },
     {

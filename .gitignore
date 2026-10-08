@@ -9,3 +9,4 @@ linux/flutter/ephemeral
 android/.gradle
 *.lock
 *.kate-swp
+.flutter-plugins-dependencies

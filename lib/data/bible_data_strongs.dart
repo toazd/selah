@@ -14957,7 +14957,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'Kiss{H5401}{{H8761}} the Son{H1248}, lest he be angry{H599}{{H8799}}, and ye perish{H6}{{H8799}} <i>from</i> the way{H1870}, when his wrath{H639} is kindled{H1197}{{H8799}} but a little{H4592}. Blessed{H835} <i>are</i> all they that put their trust{H2620}{{H8802}} in him.',
     },
     3: {
-      1: '(A Psalm{H4210} of David{H1732}, when he fled{H1272}{{H8800}} from{H6440} Absalom{H53} his son{H1121}.) LORD{H3068}, how are they increased{H7231}{{H8804}} that trouble{H6862} me! many{H7227} <i>are</i> they that rise up{H6965}{{H8801}} against me.',
+      1: 'LORD{H3068}, how are they increased{H7231}{{H8804}} that trouble{H6862} me! many{H7227} <i>are</i> they that rise up{H6965}{{H8801}} against me.',
       2: 'Many{H7227} <i>there be</i> which say{H559}{{H8802}} of my soul{H5315}, <i>There is</i> no help{H3444} for him in God{H430}. Selah{H5542}.',
       3: 'But thou, O LORD{H3068}, <i>art</i> a shield{H4043} for me; my glory{H3519}, and the lifter up{H7311}{{H8688}} of mine head{H7218}.',
       4: 'I cried{H7121}{{H8799}} unto the LORD{H3068} with my voice{H6963}, and he heard{H6030}{{H8799}} me out of his holy{H6944} hill{H2022}. Selah{H5542}.',
@@ -14967,7 +14967,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'Salvation{H3444} <i>belongeth</i> unto the LORD{H3068}: thy blessing{H1293} <i>is</i> upon thy people{H5971}. Selah{H5542}.',
     },
     4: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} of David{H1732}.) Hear{H6030}{{H8798}} me when I call{H7121}{{H8800}}, O God{H430} of my righteousness{H6664}: thou hast enlarged{H7337}{{H8689}} me <i>when I was</i> in distress{H6862}; have mercy{H2603}{{H8798}} upon me, and hear{H8085}{{H8798}} my prayer{H8605}.',
+      1: 'Hear{H6030}{{H8798}} me when I call{H7121}{{H8800}}, O God{H430} of my righteousness{H6664}: thou hast enlarged{H7337}{{H8689}} me <i>when I was</i> in distress{H6862}; have mercy{H2603}{{H8798}} upon me, and hear{H8085}{{H8798}} my prayer{H8605}.',
       2: 'O ye sons{H1121} of men{H376}, how long{H5704} <i>will ye turn</i> my glory{H3519} into shame{H3639}? <i>how long</i> will ye love{H157}{{H8799}} vanity{H7385}, <i>and</i> seek{H1245}{{H8762}} after leasing{H3577}? Selah{H5542}.',
       3: 'But know{H3045}{{H8798}} that the LORD{H3068} hath set apart{H6395}{{H8689}} him that is godly{H2623} for himself: the LORD{H3068} will hear{H8085}{{H8799}} when I call{H7121}{{H8800}} unto him.',
       4: 'Stand in awe{H7264}{{H8798}}, and sin{H2398}{{H8799}} not: commune{H559}{{H8798}} with your own heart{H3824} upon your bed{H4904}, and be still{H1826}{{H8798}}. Selah{H5542}.',
@@ -14977,7 +14977,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'I will both{H3162} lay me down{H7901}{{H8799}} in peace{H7965}, and sleep{H3462}{{H8799}}: for thou, LORD{H3068}, only{H910} makest me dwell{H3427}{{H8686}} in safety{H983}.',
     },
     5: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Nehiloth{H5155}, A Psalm{H4210} of David{H1732}.) Give ear{H238}{{H8685}} to my words{H561}, O LORD{H3068}, consider{H995}{{H8798}} my meditation{H1901}.',
+      1: 'Give ear{H238}{{H8685}} to my words{H561}, O LORD{H3068}, consider{H995}{{H8798}} my meditation{H1901}.',
       2: 'Hearken{H7181}{{H8685}} unto the voice{H6963} of my cry{H7773}, my King{H4428}, and my God{H430}: for unto thee will I pray{H6419}{{H8691}}.',
       3: 'My voice{H6963} shalt thou hear{H8085}{{H8799}} in the morning{H1242}, O LORD{H3068}; in the morning{H1242} will I direct{H6186}{{H8799}} <i>my prayer</i> unto thee, and will look up{H6822}{{H8762}}.',
       4: 'For thou <i>art</i> not a God{H410} that hath pleasure{H2655} in wickedness{H7562}: neither shall evil{H7451} dwell{H1481}{{H8799}} with thee.',
@@ -14991,7 +14991,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'For thou, LORD{H3068}, wilt bless{H1288}{{H8762}} the righteous{H6662}; with favour{H7522} wilt thou compass{H5849}{{H8799}} him as <i>with</i> a shield{H6793}.',
     },
     6: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058} upon Sheminith{H8067}, A Psalm{H4210} of David{H1732}.) O LORD{H3068}, rebuke{H3198}{{H8686}} me not in thine anger{H639}, neither chasten{H3256}{{H8762}} me in thy hot displeasure{H2534}.',
+      1: 'O LORD{H3068}, rebuke{H3198}{{H8686}} me not in thine anger{H639}, neither chasten{H3256}{{H8762}} me in thy hot displeasure{H2534}.',
       2: 'Have mercy{H2603}{{H8798}} upon me, O LORD{H3068}; for I <i>am</i> weak{H536}: O LORD{H3068}, heal{H7495}{{H8798}} me; for my bones{H6106} are vexed{H926}{{H8738}}.',
       3: 'My soul{H5315} is also sore{H3966} vexed{H926}{{H8738}}: but thou, O LORD{H3068}, how long?',
       4: 'Return{H7725}{{H8798}}, O LORD{H3068}, deliver{H2502}{{H8761}} my soul{H5315}: oh save{H3467}{{H8685}} me for thy mercies\'{H2617} sake.',
@@ -15003,7 +15003,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       10: 'Let all mine enemies{H341}{{H8802}} be ashamed{H954}{{H8799}} and sore{H3966} vexed{H926}{{H8735}}: let them return{H7725}{{H8799}} <i>and</i> be ashamed{H954}{{H8799}} suddenly{H7281}.',
     },
     7: {
-      1: '(Shiggaion{H7692} of David{H1732}, which he sang{H7891}{{H8804}} unto the LORD{H3068}, concerning the words{H1697} of Cush{H3568} the Benjamite{H1121}{H1145}.) O LORD{H3068} my God{H430}, in thee do I put my trust{H2620}{{H8804}}: save{H3467}{{H8685}} me from all them that persecute{H7291}{{H8802}} me, and deliver{H5337}{{H8685}} me:',
+      1: 'O LORD{H3068} my God{H430}, in thee do I put my trust{H2620}{{H8804}}: save{H3467}{{H8685}} me from all them that persecute{H7291}{{H8802}} me, and deliver{H5337}{{H8685}} me:',
       2: 'Lest he tear{H2963}{{H8799}} my soul{H5315} like a lion{H738}, rending <i>it</i> in pieces{H6561}{{H8802}}, while <i>there is</i> none to deliver{H5337}{{H8688}}.',
       3: 'O LORD{H3068} my God{H430}, if I have done{H6213}{{H8804}} this; if there be{H3426} iniquity{H5766} in my hands{H3709};',
       4: 'If I have rewarded{H1580}{{H8804}} evil{H7451} unto him that was at peace{H7999}{{H8802}} with me; (yea, I have delivered{H2502}{{H8762}} him that without cause{H7387} is mine enemy{H6887}{{H8802}}:)',
@@ -15022,7 +15022,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       17: 'I will praise{H3034}{{H8686}} the LORD{H3068} according to his righteousness{H6664}: and will sing praise{H2167}{{H8762}} to the name{H8034} of the LORD{H3068} most high{H5945}.',
     },
     8: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, A Psalm{H4210} of David{H1732}.) O LORD{H3068} our Lord{H113}, how excellent{H117} <i>is</i> thy name{H8034} in all the earth{H776}! who hast set{H5414}{{H8798}} thy glory{H1935} above the heavens{H8064}.',
+      1: 'O LORD{H3068} our Lord{H113}, how excellent{H117} <i>is</i> thy name{H8034} in all the earth{H776}! who hast set{H5414}{{H8798}} thy glory{H1935} above the heavens{H8064}.',
       2: 'Out of the mouth{H6310} of babes{H5768} and sucklings{H3243}{{H8802}} hast thou ordained{H3245}{{H8765}} strength{H5797} because of thine enemies{H6887}{{H8802}}, that thou mightest still{H7673}{{H8687}} the enemy{H341}{{H8802}} and the avenger{H5358}{{H8693}}.',
       3: 'When I consider{H7200}{{H8799}} thy heavens{H8064}, the work{H4639} of thy fingers{H676}, the moon{H3394} and the stars{H3556}, which thou hast ordained{H3559}{{H8790}};',
       4: 'What is man{H582}, that thou art mindful{H2142}{{H8799}} of him? and the son{H1121} of man{H120}, that thou visitest{H6485}{{H8799}} him?',
@@ -15033,7 +15033,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'O LORD{H3068} our Lord{H113}, how excellent{H117} <i>is</i> thy name{H8034} in all the earth{H776}!',
     },
     9: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Muth-labben{H4192}{H1121}, A Psalm{H4210} of David{H1732}.) I will praise{H3034}{{H8686}} <i>thee</i>, O LORD{H3068}, with my whole heart{H3820}; I will shew forth{H5608}{{H8762}} all thy marvellous works{H6381}{{H8737}}.',
+      1: 'I will praise{H3034}{{H8686}} <i>thee</i>, O LORD{H3068}, with my whole heart{H3820}; I will shew forth{H5608}{{H8762}} all thy marvellous works{H6381}{{H8737}}.',
       2: 'I will be glad{H8055}{{H8799}} and rejoice{H5970}{{H8799}} in thee: I will sing praise{H2167}{{H8762}} to thy name{H8034}, O thou most High{H5945}.',
       3: 'When mine enemies{H341}{{H8802}} are turned{H7725}{{H8800}} back{H268}, they shall fall{H3782}{{H8735}} and perish{H6}{{H8799}} at thy presence{H6440}.',
       4: 'For thou hast maintained{H6213}{{H8804}} my right{H4941} and my cause{H1779}; thou satest{H3427}{{H8804}} in the throne{H3678} judging{H8199}{{H8802}} right{H6664}.',
@@ -15075,7 +15075,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       18: 'To judge{H8199}{{H8800}} the fatherless{H3490} and the oppressed{H1790}, that the man{H582} of the earth{H776} may no more{H3254}{{H8686}} oppress{H6206}{{H8800}}.',
     },
     11: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}.) In the LORD{H3068} put I my trust{H2620}{{H8804}}: how say{H559}{{H8799}} ye to my soul{H5315}, Flee{H5110}{{H8798}} <i>as</i> a bird{H6833} to your mountain{H2022}?',
+      1: 'In the LORD{H3068} put I my trust{H2620}{{H8804}}: how say{H559}{{H8799}} ye to my soul{H5315}, Flee{H5110}{{H8798}} <i>as</i> a bird{H6833} to your mountain{H2022}?',
       2: 'For, lo, the wicked{H7563} bend{H1869}{{H8799}} <i>their</i> bow{H7198}, they make ready{H3559}{{H8790}} their arrow{H2671} upon the string{H3499}, that they may privily{H652}{H1119}{{H8676}} shoot{H3384}{{H8800}} at the upright{H3477} in heart{H3820}.',
       3: 'If the foundations{H8356} be destroyed{H2040}{{H8735}}, what can the righteous{H6662} do{H6466}{{H8804}}?',
       4: 'The LORD{H3068} <i>is</i> in his holy{H6944} temple{H1964}, the LORD\'s{H3068} throne{H3678} <i>is</i> in heaven{H8064}: his eyes{H5869} behold{H2372}{{H8799}}, his eyelids{H6079} try{H974}{{H8799}}, the children{H1121} of men{H120}.',
@@ -15084,7 +15084,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'For the righteous{H6662} LORD{H3068} loveth{H157}{{H8804}} righteousness{H6666}; his countenance{H6440} doth behold{H2372}{{H8799}} the upright{H3477}.',
     },
     12: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Sheminith{H8067}, A Psalm{H4210} of David{H1732}.) Help{H3467}{{H8685}}, LORD{H3068}; for the godly man{H2623} ceaseth{H1584}{{H8804}}; for the faithful{H539}{{H8803}} fail{H6461}{{H8804}} from among the children{H1121} of men{H120}.',
+      1: 'Help{H3467}{{H8685}}, LORD{H3068}; for the godly man{H2623} ceaseth{H1584}{{H8804}}; for the faithful{H539}{{H8803}} fail{H6461}{{H8804}} from among the children{H1121} of men{H120}.',
       2: 'They speak{H1696}{{H8762}} vanity{H7723} every one{H376} with his neighbour{H7453}: <i>with</i> flattering{H2513} lips{H8193} <i>and</i> with a double{H3820} heart{H3820} do they speak{H1696}{{H8762}}.',
       3: 'The LORD{H3068} shall cut off{H3772}{{H8686}} all flattering{H2513} lips{H8193}, <i>and</i> the tongue{H3956} that speaketh{H1696}{{H8764}} proud{H1419} things:',
       4: 'Who have said{H559}{{H8804}}, With our tongue{H3956} will we prevail{H1396}{{H8686}}; our lips{H8193} <i>are</i> our own: who <i>is</i> lord{H113} over us?',
@@ -15094,7 +15094,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'The wicked{H7563} walk{H1980}{{H8691}} on every side{H5439}, when the vilest{H2149} men{H1121}{H120} are exalted{H7311}{{H8800}}.',
     },
     13: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) How long wilt thou forget{H7911}{{H8799}} me, O LORD{H3068}? for ever{H5331}? how long wilt thou hide{H5641}{{H8686}} thy face{H6440} from me?',
+      1: 'How long wilt thou forget{H7911}{{H8799}} me, O LORD{H3068}? for ever{H5331}? how long wilt thou hide{H5641}{{H8686}} thy face{H6440} from me?',
       2: 'How long shall I take{H7896}{{H8799}} counsel{H6098} in my soul{H5315}, <i>having</i> sorrow{H3015} in my heart{H3824} daily{H3119}? how long shall mine enemy{H341}{{H8802}} be exalted{H7311}{{H8799}} over me?',
       3: 'Consider{H5027}{{H8685}} <i>and</i> hear{H6030}{{H8798}} me, O LORD{H3068} my God{H430}: lighten{H215}{{H8685}} mine eyes{H5869}, lest I sleep{H3462}{{H8799}} the <i>sleep of</i> death{H4194};',
       4: 'Lest mine enemy{H341}{{H8802}} say{H559}{{H8799}}, I have prevailed{H3201}{{H8804}} against him; <i>and</i> those that trouble{H6862} me rejoice{H1523}{{H8799}} when I am moved{H4131}{{H8735}}.',
@@ -15102,7 +15102,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       6: 'I will sing{H7891}{{H8799}} unto the LORD{H3068}, because he hath dealt bountifully{H1580}{{H8804}} with me.',
     },
     14: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}.) The fool{H5036} hath said{H559}{{H8804}} in his heart{H3820}, <i>There is</i> no God{H430}. They are corrupt{H7843}{{H8689}}, they have done abominable{H8581}{{H8689}} works{H5949}, <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}.',
+      1: 'The fool{H5036} hath said{H559}{{H8804}} in his heart{H3820}, <i>There is</i> no God{H430}. They are corrupt{H7843}{{H8689}}, they have done abominable{H8581}{{H8689}} works{H5949}, <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}.',
       2: 'The LORD{H3068} looked down{H8259}{{H8689}} from heaven{H8064} upon the children{H1121} of men{H120}, to see{H7200}{{H8800}} if there{H3426} were any that did understand{H7919}{{H8688}}, <i>and</i> seek{H1875}{{H8802}} God{H430}.',
       3: 'They are all gone aside{H5493}{{H8804}}, they are <i>all</i> together{H3162} become filthy{H444}{{H8738}}: <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}, no, not one{H259}.',
       4: 'Have all the workers{H6466}{{H8802}} of iniquity{H205} no knowledge{H3045}{{H8804}}? who eat up{H398}{{H8802}} my people{H5971} <i>as</i> they eat{H398}{{H8804}} bread{H3899}, and call{H7121}{{H8804}} not upon the LORD{H3068}.',
@@ -15111,14 +15111,14 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'Oh that{H5414}{{H8799}} the salvation{H3444} of Israel{H3478} <i>were come</i> out of Zion{H6726}! when the LORD{H3068} bringeth back{H7725}{{H8800}} the captivity{H7622} of his people{H5971}, Jacob{H3290} shall rejoice{H1523}{{H8799}}, <i>and</i> Israel{H3478} shall be glad{H8055}{{H8799}}.',
     },
     15: {
-      1: '(A Psalm{H4210} of David{H1732}.) LORD{H3068}, who shall abide{H1481}{{H8799}} in thy tabernacle{H168}? who shall dwell{H7931}{{H8799}} in thy holy{H6944} hill{H2022}?',
+      1: 'LORD{H3068}, who shall abide{H1481}{{H8799}} in thy tabernacle{H168}? who shall dwell{H7931}{{H8799}} in thy holy{H6944} hill{H2022}?',
       2: 'He that walketh{H1980}{{H8802}} uprightly{H8549}, and worketh{H6466}{{H8802}} righteousness{H6664}, and speaketh{H1696}{{H8802}} the truth{H571} in his heart{H3824}.',
       3: '<i>He that</i> backbiteth{H7270}{{H8804}} not with his tongue{H3956}, nor doeth{H6213}{{H8804}} evil{H7451} to his neighbour{H7453}, nor taketh up{H5375}{{H8804}} a reproach{H2781} against his neighbour{H7138}.',
       4: 'In whose eyes{H5869} a vile person{H3988}{{H8737}} is contemned{H959}{{H8737}}; but he honoureth{H3513}{{H8762}} them that fear{H3373} the LORD{H3068}. <i>He that</i> sweareth{H7650}{{H8738}} to <i>his own</i> hurt{H7489}{{H8687}}, and changeth{H4171}{{H8686}} not.',
       5: '<i>He that</i> putteth not out{H5414}{{H8804}} his money{H3701} to usury{H5392}, nor taketh{H3947}{{H8804}} reward{H7810} against the innocent{H5355}. He that doeth{H6213}{{H8802}} these <i>things</i> shall never{H5769} be moved{H4131}{{H8735}}.',
     },
     16: {
-      1: '(Michtam{H4387} of David{H1732}.) Preserve{H8104}{{H8798}} me, O God{H410}: for in thee do I put my trust{H2620}{{H8804}}.',
+      1: 'Preserve{H8104}{{H8798}} me, O God{H410}: for in thee do I put my trust{H2620}{{H8804}}.',
       2: '<i>O my soul</i>, thou hast said{H559}{{H8804}} unto the LORD{H3068}, Thou <i>art</i> my Lord{H136}: my goodness{H2896} <i>extendeth</i> not to thee;',
       3: '<i>But</i> to the saints{H6918} that{H1992} <i>are</i> in the earth{H776}, and <i>to</i> the excellent{H117}, in whom <i>is</i> all my delight{H2656}.',
       4: 'Their sorrows{H6094} shall be multiplied{H7235}{{H8799}} <i>that</i> hasten{H4116}{{H8804}} <i>after</i> another{H312} <i>god</i>: their drink offerings{H5262} of blood{H1818} will I not offer{H5258}{{H8686}}, nor{H1077} take up{H5375}{{H8799}} their names{H8034} into my lips{H8193}.',
@@ -15131,7 +15131,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'Thou wilt shew{H3045}{{H8686}} me the path{H734} of life{H2416}: in thy presence{H6440} <i>is</i> fulness{H7648} of joy{H8057}; at thy right hand{H3225} <i>there are</i> pleasures{H5273} for evermore{H5331}.',
     },
     17: {
-      1: '(A Prayer{H8605} of David{H1732}.) Hear{H8085}{{H8798}} the right{H6664}, O LORD{H3068}, attend{H7181}{{H8685}} unto my cry{H7440}, give ear{H238}{{H8685}} unto my prayer{H8605}, <i>that goeth</i> not{H3808} out of feigned{H4820} lips{H8193}.',
+      1: 'Hear{H8085}{{H8798}} the right{H6664}, O LORD{H3068}, attend{H7181}{{H8685}} unto my cry{H7440}, give ear{H238}{{H8685}} unto my prayer{H8605}, <i>that goeth</i> not{H3808} out of feigned{H4820} lips{H8193}.',
       2: 'Let my sentence{H4941} come forth{H3318}{{H8799}} from thy presence{H6440}; let thine eyes{H5869} behold{H2372}{{H8799}} the things that are equal{H4339}.',
       3: 'Thou hast proved{H974}{{H8804}} mine heart{H3820}; thou hast visited{H6485}{{H8804}} <i>me</i> in the night{H3915}; thou hast tried{H6884}{{H8804}} me, <i>and</i> shalt find{H4672}{{H8799}} nothing; I am purposed{H2161}{{H8800}} <i>that</i> my mouth{H6310} shall not transgress{H5674}{{H8799}}.',
       4: 'Concerning the works{H6468} of men{H120}, by the word{H1697} of thy lips{H8193} I have kept{H8104}{{H8804}} <i>me from</i> the paths{H734} of the destroyer{H6530}.',
@@ -15148,7 +15148,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       15: 'As for me, I will behold{H2372}{{H8799}} thy face{H6440} in righteousness{H6664}: I shall be satisfied{H7646}{{H8799}}, when I awake{H6974}{{H8687}}, with thy likeness{H8544}.',
     },
     18: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}, the servant{H5650} of the LORD{H3068}, who spake{H1696}{{H8765}} unto the LORD{H3068} the words{H1697} of this song{H7892} in the day{H3117} <i>that</i> the LORD{H3068} delivered{H5337}{{H8689}} him from the hand{H3709} of all his enemies{H341}{{H8802}}, and from the hand{H3027} of Saul){H7586}: And he said{H559}{{H8799}}, I will love{H7355}{{H8799}} thee, O LORD{H3068}, my strength{H2391}.',
+      1: 'I will love{H7355}{{H8799}} thee, O LORD{H3068}, my strength{H2391}.',
       2: 'The LORD{H3068} <i>is</i> my rock{H5553}, and my fortress{H4686}, and my deliverer{H6403}{{H8764}}; my God{H410}, my strength{H6697}, in whom I will trust{H2620}{{H8799}}; my buckler{H4043}, and the horn{H7161} of my salvation{H3468}, <i>and</i> my high tower{H4869}.',
       3: 'I will call{H7121}{{H8799}} upon the LORD{H3068}, <i>who is worthy</i> to be praised{H1984}{{H8794}}: so shall I be saved{H3467}{{H8735}} from mine enemies{H341}{{H8802}}.',
       4: 'The sorrows{H2256} of death{H4194} compassed{H661}{{H8804}} me, and the floods{H5158} of ungodly men{H1100} made me afraid{H1204}{{H8762}}.',
@@ -15200,7 +15200,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       50: 'Great{H1431}{{H8688}} deliverance{H3444} giveth he to his king{H4428}; and sheweth{H6213}{{H8802}} mercy{H2617} to his anointed{H4899}, to David{H1732}, and to his seed{H2233} for{H5704} evermore{H5769}.',
     },
     19: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) The heavens{H8064} declare{H5608}{{H8764}} the glory{H3519} of God{H410}; and the firmament{H7549} sheweth his{H5046}{{H8688}} handywork{H4639}{H3027}.',
+      1: 'The heavens{H8064} declare{H5608}{{H8764}} the glory{H3519} of God{H410}; and the firmament{H7549} sheweth his{H5046}{{H8688}} handywork{H4639}{H3027}.',
       2: 'Day{H3117} unto day{H3117} uttereth{H5042}{{H8686}} speech{H562}, and night{H3915} unto night{H3915} sheweth{H2331}{{H8762}} knowledge{H1847}.',
       3: '<i>There is</i> no speech{H562} nor language{H1697}, <i>where</i> their voice{H6963} is not heard{H8085}{{H8738}}.',
       4: 'Their line{H6957} is gone out{H3318}{{H8804}} through all the earth{H776}, and their words{H4405} to the end{H7097} of the world{H8398}. In them hath he set{H7760}{{H8804}} a tabernacle{H168} for the sun{H8121},',
@@ -15216,7 +15216,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       14: 'Let the words{H561} of my mouth{H6310}, and the meditation{H1902} of my heart{H3820}, be acceptable{H7522} in thy sight{H6440}, O LORD{H3068}, my strength{H6697}, and my redeemer{H1350}{{H8802}}.',
     },
     20: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) The LORD{H3068} hear{H6030}{{H8799}} thee in the day{H3117} of trouble{H6869}; the name{H8034} of the God{H430} of Jacob{H3290} defend{H7682}{{H8762}} thee;',
+      1: 'The LORD{H3068} hear{H6030}{{H8799}} thee in the day{H3117} of trouble{H6869}; the name{H8034} of the God{H430} of Jacob{H3290} defend{H7682}{{H8762}} thee;',
       2: 'Send{H7971}{{H8799}} thee help{H5828} from the sanctuary{H6944}, and strengthen{H5582}{{H8799}} thee out of Zion{H6726};',
       3: 'Remember{H2142}{{H8799}} all thy offerings{H4503}, and accept{H1878}{{H8762}} thy burnt sacrifice{H5930}; Selah{H5542}.',
       4: 'Grant{H5414}{{H8799}} thee according to thine own heart{H3824}, and fulfil{H4390}{{H8762}} all thy counsel{H6098}.',
@@ -15227,7 +15227,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'Save{H3467}{{H8685}}, LORD{H3068}: let the king{H4428} hear{H6030}{{H8799}} us when{H3117} we call{H7121}{{H8800}}.',
     },
     21: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) The king{H4428} shall joy{H8055}{{H8799}} in thy strength{H5797}, O LORD{H3068}; and in thy salvation{H3444} how greatly{H3966} shall he rejoice{H1523}{{H8799}}!',
+      1: 'The king{H4428} shall joy{H8055}{{H8799}} in thy strength{H5797}, O LORD{H3068}; and in thy salvation{H3444} how greatly{H3966} shall he rejoice{H1523}{{H8799}}!',
       2: 'Thou hast given{H5414}{{H8804}} him his heart\'s{H3820} desire{H8378}, and hast not withholden{H4513}{{H8804}} the request{H782} of his lips{H8193}. Selah{H5542}.',
       3: 'For thou preventest{H6923}{{H8762}} him with the blessings{H1293} of goodness{H2896}: thou settest{H7896}{{H8799}} a crown{H5850} of pure gold{H6337} on his head{H7218}.',
       4: 'He asked{H7592}{{H8804}} life{H2416} of thee, <i>and</i> thou gavest{H5414}{{H8804}} <i>it</i> him, <i>even</i> length{H753} of days{H3117} for ever{H5769} and ever{H5703}.',
@@ -15242,7 +15242,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'Be thou exalted{H7311}{{H8798}}, LORD{H3068}, in thine own strength{H5797}: <i>so</i> will we sing{H7891}{{H8799}} and praise{H2167}{{H8762}} thy power{H1369}.',
     },
     22: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Aijeleth{H365} Shahar{H7837}, A Psalm{H4210} of David{H1732}.) My God{H410}, my God{H410}, why hast thou forsaken{H5800}{{H8804}} me? <i>why art thou so</i> far{H7350} from helping{H3444} me, <i>and from</i> the words{H1697} of my roaring{H7581}?',
+      1: 'My God{H410}, my God{H410}, why hast thou forsaken{H5800}{{H8804}} me? <i>why art thou so</i> far{H7350} from helping{H3444} me, <i>and from</i> the words{H1697} of my roaring{H7581}?',
       2: 'O my God{H430}, I cry{H7121}{{H8799}} in the daytime{H3119}, but thou hearest{H6030}{{H8799}} not; and in the night season{H3915}, and am not silent{H1747}.',
       3: 'But thou <i>art</i> holy{H6918}, <i>O thou</i> that inhabitest{H3427}{{H8802}} the praises{H8416} of Israel{H3478}.',
       4: 'Our fathers{H1} trusted{H982}{{H8804}} in thee: they trusted{H982}{{H8804}}, and thou didst deliver{H6403}{{H8762}} them.',
@@ -15275,7 +15275,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       31: 'They shall come{H935}{{H8799}}, and shall declare{H5046}{{H8686}} his righteousness{H6666} unto a people{H5971} that shall be born{H3205}{{H8737}}, that he hath done{H6213}{{H8804}} <i>this</i>.',
     },
     23: {
-      1: '(A Psalm{H4210} of David{H1732}.) The LORD{H3068} <i>is</i> my shepherd{H7462}{{H8802}}; I shall not want{H2637}{{H8799}}.',
+      1: 'The LORD{H3068} <i>is</i> my shepherd{H7462}{{H8802}}; I shall not want{H2637}{{H8799}}.',
       2: 'He maketh me to lie down{H7257}{{H8686}} in green{H1877} pastures{H4999}: he leadeth{H5095}{{H8762}} me beside the still{H4496} waters{H4325}.',
       3: 'He restoreth{H7725}{{H8787}} my soul{H5315}: he leadeth{H5148}{{H8686}} me in the paths{H4570} of righteousness{H6664} for his name\'s{H8034} sake.',
       4: 'Yea, though I walk{H3212}{{H8799}} through the valley{H1516} of the shadow of death{H6757}, I will fear{H3372}{{H8799}} no evil{H7451}: for thou <i>art</i> with me; thy rod{H7626} and thy staff{H4938} they comfort{H5162}{{H8762}} me.',
@@ -15283,7 +15283,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       6: 'Surely goodness{H2896} and mercy{H2617} shall follow{H7291}{{H8799}} me all the days{H3117} of my life{H2416}: and I will dwell{H3427}{{H8804}} in the house{H1004} of the LORD{H3068} for ever{H753}{H3117}.',
     },
     24: {
-      1: '(A Psalm{H4210} of David{H1732}.) The earth{H776} <i>is</i> the LORD\'s{H3068}, and the fulness{H4393} thereof; the world{H8398}, and they that dwell{H3427}{{H8802}} therein.',
+      1: 'The earth{H776} <i>is</i> the LORD\'s{H3068}, and the fulness{H4393} thereof; the world{H8398}, and they that dwell{H3427}{{H8802}} therein.',
       2: 'For he hath founded{H3245}{{H8804}} it upon the seas{H3220}, and established{H3559}{{H8787}} it upon the floods{H5104}.',
       3: 'Who shall ascend{H5927}{{H8799}} into the hill{H2022} of the LORD{H3068}? or who shall stand{H6965}{{H8799}} in his holy{H6944} place{H4725}?',
       4: 'He that hath clean{H5355} hands{H3709}, and a pure{H1249} heart{H3824}; who hath not lifted up{H5375}{{H8804}} his soul{H5315} unto vanity{H7723}, nor sworn{H7650}{{H8738}} deceitfully{H4820}.',
@@ -15295,7 +15295,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       10: 'Who is this King{H4428} of glory{H3519}? The LORD{H3068} of hosts{H6635}, he <i>is</i> the King{H4428} of glory{H3519}. Selah{H5542}.',
     },
     25: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Unto thee, O LORD{H3068}, do I lift up{H5375}{{H8799}} my soul{H5315}.',
+      1: 'Unto thee, O LORD{H3068}, do I lift up{H5375}{{H8799}} my soul{H5315}.',
       2: 'O my God{H430}, I trust{H982}{{H8804}} in thee: let me not be ashamed{H954}{{H8799}}, let not mine enemies{H341}{{H8802}} triumph{H5970}{{H8799}} over me.',
       3: 'Yea, let none that wait{H6960}{{H8802}} on thee be ashamed{H954}{{H8799}}: let them be ashamed{H954}{{H8799}} which transgress{H898}{{H8802}} without cause{H7387}.',
       4: 'Shew{H3045}{{H8685}} me thy ways{H1870}, O LORD{H3068}; teach{H3925}{{H8761}} me thy paths{H734}.',
@@ -15319,7 +15319,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'Redeem{H6299}{{H8798}} Israel{H3478}, O God{H430}, out of all his troubles{H6869}.',
     },
     26: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Judge{H8199}{{H8798}} me, O LORD{H3068}; for I have walked{H1980}{{H8804}} in mine integrity{H8537}: I have trusted{H982}{{H8804}} also in the LORD{H3068}; <i>therefore</i> I shall not slide{H4571}{{H8799}}.',
+      1: 'Judge{H8199}{{H8798}} me, O LORD{H3068}; for I have walked{H1980}{{H8804}} in mine integrity{H8537}: I have trusted{H982}{{H8804}} also in the LORD{H3068}; <i>therefore</i> I shall not slide{H4571}{{H8799}}.',
       2: 'Examine{H974}{{H8798}} me, O LORD{H3068}, and prove{H5254}{{H8761}} me; try{H6884}{{H8798}} my reins{H3629} and my heart{H3820}.',
       3: 'For thy lovingkindness{H2617} <i>is</i> before mine eyes{H5869}: and I have walked{H1980}{{H8694}} in thy truth{H571}.',
       4: 'I have not sat{H3427}{{H8804}} with vain{H7723} persons{H4962}, neither will I go in{H935}{{H8799}} with dissemblers{H5956}{{H8737}}.',
@@ -15333,7 +15333,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'My foot{H7272} standeth{H5975}{{H8804}} in an even place{H4334}: in the congregations{H4721} will I bless{H1288}{{H8762}} the LORD{H3068}.',
     },
     27: {
-      1: '(<i>A Psalm</i> of David{H1732}.) The LORD{H3068} <i>is</i> my light{H216} and my salvation{H3468}; whom shall I fear{H3372}{{H8799}}? the LORD{H3068} <i>is</i> the strength{H4581} of my life{H2416}; of whom shall I be afraid{H6342}{{H8799}}?',
+      1: 'The LORD{H3068} <i>is</i> my light{H216} and my salvation{H3468}; whom shall I fear{H3372}{{H8799}}? the LORD{H3068} <i>is</i> the strength{H4581} of my life{H2416}; of whom shall I be afraid{H6342}{{H8799}}?',
       2: 'When the wicked{H7489}{{H8688}}, <i>even</i> mine enemies{H6862} and my foes{H341}{{H8802}}, came{H7126}{{H8800}} upon me to eat up{H398}{{H8800}} my flesh{H1320}, they stumbled{H3782}{{H8804}} and fell{H5307}{{H8804}}.',
       3: 'Though an host{H4264} should encamp{H2583}{{H8799}} against me, my heart{H3820} shall not fear{H3372}{{H8799}}: though war{H4421} should rise{H6965}{{H8799}} against me, in this <i>will</i> I <i>be</i> confident{H982}{{H8802}}.',
       4: 'One{H259} <i>thing</i> have I desired{H7592}{{H8804}} of the LORD{H3068}, that will I seek{H1245}{{H8762}} after; that I may dwell{H3427}{{H8800}} in the house{H1004} of the LORD{H3068} all the days{H3117} of my life{H2416}, to behold{H2372}{{H8800}} the beauty{H5278} of the LORD{H3068}, and to enquire{H1239}{{H8763}} in his temple{H1964}.',
@@ -15349,7 +15349,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       14: 'Wait{H6960}{{H8761}} on the LORD{H3068}: be of good courage{H2388}{{H8798}}, and he shall strengthen{H553}{{H8686}} thine heart{H3820}: wait{H6960}{{H8761}}, I say, on the LORD{H3068}.',
     },
     28: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Unto thee will I cry{H7121}{{H8799}}, O LORD{H3068} my rock{H6697}; be not silent{H2814}{{H8799}} to me: lest, <i>if</i> thou be silent{H2790}{{H8799}} to me, I become{H4911}{{H8738}} like them that go down{H3381}{{H8802}} into the pit{H953}.',
+      1: 'Unto thee will I cry{H7121}{{H8799}}, O LORD{H3068} my rock{H6697}; be not silent{H2814}{{H8799}} to me: lest, <i>if</i> thou be silent{H2790}{{H8799}} to me, I become{H4911}{{H8738}} like them that go down{H3381}{{H8802}} into the pit{H953}.',
       2: 'Hear{H8085}{{H8798}} the voice{H6963} of my supplications{H8469}, when I cry{H7768}{{H8763}} unto thee, when I lift up{H5375}{{H8800}} my hands{H3027} toward thy holy{H6944} oracle{H1687}.',
       3: 'Draw me not away{H4900}{{H8799}} with the wicked{H7563}, and with the workers{H6466}{{H8802}} of iniquity{H205}, which speak{H1696}{{H8802}} peace{H7965} to their neighbours{H7453}, but mischief{H7451} <i>is</i> in their hearts{H3824}.',
       4: 'Give{H5414}{{H8798}} them according to their deeds{H6467}, and according to the wickedness{H7455} of their endeavours{H4611}: give{H5414}{{H8798}} them after the work{H4639} of their hands{H3027}; render{H7725}{{H8685}} to them their desert{H1576}.',
@@ -15360,7 +15360,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'Save{H3467}{{H8685}} thy people{H5971}, and bless{H1288}{{H8761}} thine inheritance{H5159}: feed{H7462}{{H8798}} them also, and lift them up{H5375}{{H8761}} for ever{H5769}.',
     },
     29: {
-      1: '(A Psalm{H4210} of David{H1732}.) Give{H3051}{{H8798}} unto the LORD{H3068}, O ye mighty{H1121}{H410}, give{H3051}{{H8798}} unto the LORD{H3068} glory{H3519} and strength{H5797}.',
+      1: 'Give{H3051}{{H8798}} unto the LORD{H3068}, O ye mighty{H1121}{H410}, give{H3051}{{H8798}} unto the LORD{H3068} glory{H3519} and strength{H5797}.',
       2: 'Give{H3051}{{H8798}} unto the LORD{H3068} the glory{H3519} due unto his name{H8034}; worship{H7812}{{H8690}} the LORD{H3068} in the beauty{H1927} of holiness{H6944}.',
       3: 'The voice{H6963} of the LORD{H3068} <i>is</i> upon the waters{H4325}: the God{H410} of glory{H3519} thundereth{H7481}{{H8689}}: the LORD{H3068} <i>is</i> upon many{H7227} waters{H4325}.',
       4: 'The voice{H6963} of the LORD{H3068} <i>is</i> powerful{H3581}; the voice{H6963} of the LORD{H3068} <i>is</i> full of majesty{H1926}.',
@@ -15373,7 +15373,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'The LORD{H3068} will give{H5414}{{H8799}} strength{H5797} unto his people{H5971}; the LORD{H3068} will bless{H1288}{{H8762}} his people{H5971} with peace{H7965}.',
     },
     30: {
-      1: '(A Psalm{H4210} <i>and</i> Song{H7892} <i>at</i> the dedication{H2598} of the house{H1004} of David{H1732}.) I will extol{H7311}{{H8787}} thee, O LORD{H3068}; for thou hast lifted me up{H1802}{{H8765}}, and hast not made my foes{H341}{{H8802}} to rejoice{H8055}{{H8765}} over me.',
+      1: 'I will extol{H7311}{{H8787}} thee, O LORD{H3068}; for thou hast lifted me up{H1802}{{H8765}}, and hast not made my foes{H341}{{H8802}} to rejoice{H8055}{{H8765}} over me.',
       2: 'O LORD{H3068} my God{H430}, I cried{H7768}{{H8765}} unto thee, and thou hast healed{H7495}{{H8799}} me.',
       3: 'O LORD{H3068}, thou hast brought up{H5927}{{H8689}} my soul{H5315} from the grave{H7585}: thou hast kept me alive{H2421}{{H8765}}, that I should not go down{H3381}{{H8800}}{H3381}{{H8675}}{{H8802}} to the pit{H953}.',
       4: 'Sing{H2167}{{H8761}} unto the LORD{H3068}, O ye saints{H2623} of his, and give thanks{H3034}{{H8685}} at the remembrance{H2143} of his holiness{H6944}.',
@@ -15387,7 +15387,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'To the end that <i>my</i> glory{H3519} may sing{H2167}{{H8762}} praise to thee, and not be silent{H1826}{{H8799}}. O LORD{H3068} my God{H430}, I will give thanks{H3034}{{H8686}} unto thee for ever{H5769}.',
     },
     31: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) In thee, O LORD{H3068}, do I put my trust{H2620}{{H8804}}; let me never{H408}{H5769} be ashamed{H954}{{H8799}}: deliver{H6403}{{H8761}} me in thy righteousness{H6666}.',
+      1: 'In thee, O LORD{H3068}, do I put my trust{H2620}{{H8804}}; let me never{H408}{H5769} be ashamed{H954}{{H8799}}: deliver{H6403}{{H8761}} me in thy righteousness{H6666}.',
       2: 'Bow down{H5186}{{H8685}} thine ear{H241} to me; deliver{H5337}{{H8685}} me speedily{H4120}: be thou my strong{H4581} rock{H6697}, for an house{H1004} of defence{H4686} to save{H3467}{{H8687}} me.',
       3: 'For thou <i>art</i> my rock{H5553} and my fortress{H4686}; therefore for thy name\'s{H8034} sake lead{H5148}{{H8686}} me, and guide{H5095}{{H8762}} me.',
       4: 'Pull me out{H3318}{{H8686}} of the net{H7568} that{H2098} they have laid privily{H2934}{{H8804}} for me: for thou <i>art</i> my strength{H4581}.',
@@ -15413,7 +15413,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       24: 'Be of good courage{H2388}{{H8798}}, and he shall strengthen{H553}{{H8686}} your heart{H3824}, all ye that hope{H3176}{{H8764}} in the LORD{H3068}.',
     },
     32: {
-      1: '(<i>A</i> <i>Psalm</i> of David){H1732}, Maschil{H4905}{{H8688}}. Blessed{H835} <i>is he whose</i> transgression{H6588} <i>is</i> forgiven{H5375}{{H8803}}, <i>whose</i> sin{H2401} <i>is</i> covered{H3680}{{H8803}}.',
+      1: 'Blessed{H835} <i>is he whose</i> transgression{H6588} <i>is</i> forgiven{H5375}{{H8803}}, <i>whose</i> sin{H2401} <i>is</i> covered{H3680}{{H8803}}.',
       2: 'Blessed{H835} <i>is</i> the man{H120} unto whom the LORD{H3068} imputeth{H2803}{{H8799}} not iniquity{H5771}, and in whose spirit{H7307} <i>there is</i> no guile{H7423}.',
       3: 'When I kept silence{H2790}{{H8689}}, my bones{H6106} waxed old{H1086}{{H8804}} through my roaring{H7581} all the day{H3117} long.',
       4: 'For day{H3119} and night{H3915} thy hand{H3027} was heavy{H3513}{{H8799}} upon me: my moisture{H3955} is turned{H2015}{{H8738}} into the drought{H2725} of summer{H7019}. Selah{H5542}.',
@@ -15450,7 +15450,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'Let thy mercy{H2617}, O LORD{H3068}, be upon us, according as we hope{H3176}{{H8765}} in thee.',
     },
     34: {
-      1: '(<i>A Psalm</i> of David{H1732}, when he changed{H8138}{{H8763}} his behaviour{H2940} before{H6440} Abimelech{H40}; who drove him away{H1644}{{H8762}}, and he departed{H3212}{{H8799}}.) I will bless{H1288}{{H8762}} the LORD{H3068} at all times{H6256}: his praise{H8416} <i>shall</i> continually{H8548} <i>be</i> in my mouth{H6310}.',
+      1: 'I will bless{H1288}{{H8762}} the LORD{H3068} at all times{H6256}: his praise{H8416} <i>shall</i> continually{H8548} <i>be</i> in my mouth{H6310}.',
       2: 'My soul{H5315} shall make her boast{H1984}{{H8691}} in the LORD{H3068}: the humble{H6035} shall hear{H8085}{{H8799}} <i>thereof</i>, and be glad{H8055}{{H8799}}.',
       3: 'O magnify{H1431}{{H8761}} the LORD{H3068} with me, and let us exalt{H7311}{{H8787}} his name{H8034} together{H3162}.',
       4: 'I sought{H1875}{{H8804}} the LORD{H3068}, and he heard{H6030}{{H8804}} me, and delivered{H5337}{{H8689}} me from all my fears{H4035}.',
@@ -15474,7 +15474,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'The LORD{H3068} redeemeth{H6299}{{H8802}} the soul{H5315} of his servants{H5650}: and none of them that trust{H2620}{{H8802}} in him shall be desolate{H816}{{H8799}}.',
     },
     35: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Plead{H7378}{{H8798}} <i>my cause</i>, O LORD{H3068}, with them that strive{H3401} with me: fight{H3898}{{H8798}} against them that fight{H3898}{{H8802}} against me.',
+      1: 'Plead{H7378}{{H8798}} <i>my cause</i>, O LORD{H3068}, with them that strive{H3401} with me: fight{H3898}{{H8798}} against them that fight{H3898}{{H8802}} against me.',
       2: 'Take hold{H2388}{{H8685}} of shield{H4043} and buckler{H6793}, and stand up{H6965}{{H8798}} for mine help{H5833}.',
       3: 'Draw out{H7324}{{H8685}} also the spear{H2595}, and stop{H5462}{{H8798}} <i>the way</i> against{H7125}{{H8800}} them that persecute{H7291}{{H8802}} me: say{H559}{{H8798}} unto my soul{H5315}, I <i>am</i> thy salvation{H3444}.',
       4: 'Let them be confounded{H954}{{H8799}} and put to shame{H3637}{{H8735}} that seek{H1245}{{H8764}} after my soul{H5315}: let them be turned{H5472}{{H8735}} back{H268} and brought to confusion{H2659}{{H8799}} that devise{H2803}{{H8802}} my hurt{H7451}.',
@@ -15504,7 +15504,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       28: 'And my tongue{H3956} shall speak{H1897}{{H8799}} of thy righteousness{H6664} <i>and</i> of thy praise{H8416} all the day{H3117} long.',
     },
     36: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732} the servant{H5650} of the LORD{H3068}.) The transgression{H6588} of the wicked{H7563} saith{H5002}{{H8803}} within{H7130} my heart{H3820}, <i>that there is</i> no fear{H6343} of God{H430} before his eyes{H5869}.',
+      1: 'The transgression{H6588} of the wicked{H7563} saith{H5002}{{H8803}} within{H7130} my heart{H3820}, <i>that there is</i> no fear{H6343} of God{H430} before his eyes{H5869}.',
       2: 'For he flattereth{H2505}{{H8689}} himself in his own eyes{H5869}, until his iniquity{H5771} be found{H4672}{{H8800}} to be hateful{H8130}{{H8800}}.',
       3: 'The words{H1697} of his mouth{H6310} <i>are</i> iniquity{H205} and deceit{H4820}: he hath left off{H2308}{{H8804}} to be wise{H7919}{{H8687}}, <i>and</i> to do good{H3190}{{H8687}}.',
       4: 'He deviseth{H2803}{{H8799}} mischief{H205} upon his bed{H4904}; he setteth{H3320}{{H8691}} himself in a way{H1870} <i>that is</i> not good{H2896}; he abhorreth{H3988}{{H8799}} not evil{H7451}.',
@@ -15518,7 +15518,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'There are the workers{H6466}{{H8802}} of iniquity{H205} fallen{H5307}{{H8804}}: they are cast down{H1760}{{H8795}}, and shall not be able{H3201}{{H8804}} to rise{H6965}{{H8800}}.',
     },
     37: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Fret{H2734}{{H8691}} not thyself because of evildoers{H7489}{{H8688}}, neither be thou envious{H7065}{{H8762}} against the workers{H6213}{{H8802}} of iniquity{H5766}.',
+      1: 'Fret{H2734}{{H8691}} not thyself because of evildoers{H7489}{{H8688}}, neither be thou envious{H7065}{{H8762}} against the workers{H6213}{{H8802}} of iniquity{H5766}.',
       2: 'For they shall soon{H4120} be cut down{H5243}{{H8799}} like the grass{H2682}, and wither{H5034}{{H8799}} as the green{H3418} herb{H1877}.',
       3: 'Trust{H982}{{H8798}} in the LORD{H3068}, and do{H6213}{{H8798}} good{H2896}; <i>so</i> shalt thou dwell{H7931}{{H8798}} in the land{H776}, and verily{H530} thou shalt be fed{H7462}{{H8798}}.',
       4: 'Delight{H6026}{{H8690}} thyself also in the LORD{H3068}; and he shall give{H5414}{{H8799}} thee the desires{H4862} of thine heart{H3820}.',
@@ -15560,7 +15560,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       40: 'And the LORD{H3068} shall help{H5826}{{H8799}} them, and deliver{H6403}{{H8762}} them: he shall deliver{H6403}{{H8762}} them from the wicked{H7563}, and save{H3467}{{H8686}} them, because they trust{H2620}{{H8804}} in him.',
     },
     38: {
-      1: '(A Psalm{H4210} of David{H1732}, to bring to remembrance{H2142}{{H8687}}.) O LORD{H3068}, rebuke{H3198}{{H8686}} me not in thy wrath{H7110}: neither chasten{H3256}{{H8762}} me in thy hot displeasure{H2534}.',
+      1: 'O LORD{H3068}, rebuke{H3198}{{H8686}} me not in thy wrath{H7110}: neither chasten{H3256}{{H8762}} me in thy hot displeasure{H2534}.',
       2: 'For thine arrows{H2671} stick fast{H5181}{{H8738}} in me, and thy hand{H3027} presseth me sore{H5181}{{H8799}}.',
       3: '<i>There is</i> no soundness{H4974} in my flesh{H1320} because{H6440} of thine anger{H2195}; neither <i>is there any</i> rest{H7965} in my bones{H6106} because{H6440} of my sin{H2403}.',
       4: 'For mine iniquities{H5771} are gone over{H5674}{{H8804}} mine head{H7218}: as an heavy{H3515} burden{H4853} they are too heavy{H3513}{{H8799}} for me.',
@@ -15584,7 +15584,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       22: 'Make haste{H2363}{{H8798}} to help{H5833} me, O Lord{H136} my salvation{H8668}.',
     },
     39: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>even</i> to Jeduthun{H3038}, A Psalm{H4210} of David{H1732}.) I said{H559}{{H8804}}, I will take heed{H8104}{{H8799}} to my ways{H1870}, that I sin{H2398}{{H8800}} not with my tongue{H3956}: I will keep{H8104}{{H8799}} my mouth{H6310} with a bridle{H4269}, while the wicked{H7563} is before me.',
+      1: 'I said{H559}{{H8804}}, I will take heed{H8104}{{H8799}} to my ways{H1870}, that I sin{H2398}{{H8800}} not with my tongue{H3956}: I will keep{H8104}{{H8799}} my mouth{H6310} with a bridle{H4269}, while the wicked{H7563} is before me.',
       2: 'I was dumb{H481}{{H8738}} with silence{H1747}, I held my peace{H2814}{{H8689}}, <i>even</i> from good{H2896}; and my sorrow{H3511} was stirred{H5916}{{H8738}}.',
       3: 'My heart{H3820} was hot{H2552}{{H8804}} within{H7130} me, while I was musing{H1901} the fire{H784} burned{H1197}{{H8799}}: <i>then</i>{H227} spake{H1696}{{H8765}} I with my tongue{H3956},',
       4: 'LORD{H3068}, make me to know{H3045}{{H8685}} mine end{H7093}, and the measure{H4060} of my days{H3117}, what it <i>is; that</i> I may know{H3045}{{H8799}} how frail{H2310} I <i>am</i>.',
@@ -15599,7 +15599,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'O spare{H8159}{{H8685}} me, that I may recover strength{H1082}{{H8686}}, before I go hence{H3212}{{H8799}}, and be no more.',
     },
     40: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) I waited{H6960}{{H8765}} patiently{H6960}{{H8763}} for the LORD{H3068}; and he inclined{H5186}{{H8799}} unto me, and heard{H8085}{{H8799}} my cry{H7775}.',
+      1: 'I waited{H6960}{{H8765}} patiently{H6960}{{H8763}} for the LORD{H3068}; and he inclined{H5186}{{H8799}} unto me, and heard{H8085}{{H8799}} my cry{H7775}.',
       2: 'He brought me up{H5927}{{H8686}} also out of an horrible{H7588} pit{H953}, out of the miry{H3121} clay{H2916}, and set{H6965}{{H8686}} my feet{H7272} upon a rock{H5553}, <i>and</i> established{H3559}{{H8790}} my goings{H838}.',
       3: 'And he hath put{H5414}{{H8799}} a new{H2319} song{H7892} in my mouth{H6310}, <i>even</i> praise{H8416} unto our God{H430}: many{H7227} shall see{H7200}{{H8799}} <i>it</i>, and fear{H3372}{{H8799}}, and shall trust{H982}{{H8799}} in the LORD{H3068}.',
       4: 'Blessed{H835} <i>is</i> that man{H1397} that maketh{H7760}{{H8804}} the LORD{H3068} his trust{H4009}, and respecteth{H6437}{{H8804}} not the proud{H7295}, nor such as turn aside{H7750}{{H8802}} to lies{H3577}.',
@@ -15618,7 +15618,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       17: 'But I <i>am</i> poor{H6041} and needy{H34}; <i>yet</i> the Lord{H136} thinketh{H2803}{{H8799}} upon me: thou <i>art</i> my help{H5833} and my deliverer{H6403}{{H8764}}; make no tarrying{H309}{{H8762}}, O my God{H430}.',
     },
     41: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) Blessed{H835} <i>is</i> he that considereth{H7919}{{H8688}} the poor{H1800}: the LORD{H3068} will deliver{H4422}{{H8762}} him in time{H3117} of trouble{H7451}.',
+      1: 'Blessed{H835} <i>is</i> he that considereth{H7919}{{H8688}} the poor{H1800}: the LORD{H3068} will deliver{H4422}{{H8762}} him in time{H3117} of trouble{H7451}.',
       2: 'The LORD{H3068} will preserve{H8104}{{H8799}} him, and keep him alive{H2421}{{H8762}}; <i>and</i> he shall be blessed{H833}{{H8795}} upon the earth{H776}: and thou wilt not deliver{H5414}{{H8799}} him unto the will{H5315} of his enemies{H341}{{H8802}}.',
       3: 'The LORD{H3068} will strengthen{H5582}{{H8799}} him upon the bed{H6210} of languishing{H1741}: thou wilt make{H2015}{{H8804}} all his bed{H4904} in his sickness{H2483}.',
       4: 'I said{H559}{{H8804}}, LORD{H3068}, be merciful{H2603}{{H8798}} unto me: heal{H7495}{{H8798}} my soul{H5315}; for I have sinned{H2398}{{H8804}} against thee.',
@@ -15633,7 +15633,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'Blessed{H1288}{{H8803}} <i>be</i> the LORD{H3068} God{H430} of Israel{H3478} from everlasting{H5769}, and to everlasting{H5769}. Amen{H543}, and Amen{H543}.',
     },
     42: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Maschil{H4905}{{H8688}}, for the sons{H1121} of Korah{H7141}.) As the hart{H354} panteth{H6165}{{H8799}} after the water{H4325} brooks{H650}, so panteth{H6165}{{H8799}} my soul{H5315} after thee, O God{H430}.',
+      1: 'As the hart{H354} panteth{H6165}{{H8799}} after the water{H4325} brooks{H650}, so panteth{H6165}{{H8799}} my soul{H5315} after thee, O God{H430}.',
       2: 'My soul{H5315} thirsteth{H6770}{{H8804}} for God{H430}, for the living{H2416} God{H410}: when shall I come{H935}{{H8799}} and appear{H7200}{{H8735}} before{H6440} God{H430}?',
       3: 'My tears{H1832} have been my meat{H3899} day{H3119} and night{H3915}, while they continually{H3117} say{H559}{{H8800}} unto me, Where <i>is</i> thy God{H430}?',
       4: 'When I remember{H2142}{{H8799}} these <i>things</i>, I pour out{H8210}{{H8799}} my soul{H5315} in me: for I had gone{H5674}{{H8799}} with the multitude{H5519}, I went{H1718}{{H8691}} with them to the house{H1004} of God{H430}, with the voice{H6963} of joy{H7440} and praise{H8426}, with a multitude{H1995} that kept holyday{H2287}{{H8802}}.',
@@ -15653,7 +15653,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       5: 'Why art thou cast down{H7817}{{H8709}}, O my soul{H5315}? and why art thou disquieted{H1993}{{H8799}} within me? hope{H3176}{{H8685}} in God{H430}: for I shall yet praise{H3034}{{H8686}} him, <i>who is</i> the health{H3444} of my countenance{H6440}, and my God{H430}.',
     },
     44: {
-      1: '(To the chief Musician{H5329}{{H8764}} for the sons{H1121} of Korah{H7141}, Maschil{H4905}{{H8688}}.) We have heard{H8085}{{H8804}} with our ears{H241}, O God{H430}, our fathers{H1} have told{H5608}{{H8765}} us, <i>what</i> work{H6467} thou didst{H6466}{{H8804}} in their days{H3117}, in the times{H3117} of old{H6924}.',
+      1: 'We have heard{H8085}{{H8804}} with our ears{H241}, O God{H430}, our fathers{H1} have told{H5608}{{H8765}} us, <i>what</i> work{H6467} thou didst{H6466}{{H8804}} in their days{H3117}, in the times{H3117} of old{H6924}.',
       2: '<i>How</i> thou didst drive out{H3423}{{H8689}} the heathen{H1471} with thy hand{H3027}, and plantedst{H5193}{{H8799}} them; <i>how</i> thou didst afflict{H7489}{{H8686}} the people{H3816}, and cast them out{H7971}{{H8762}}.',
       3: 'For they got{H3423} not the land{H776} in possession{H3423}{{H8804}} by their own sword{H2719}, neither did their own arm{H2220} save{H3467}{{H8689}} them: but thy right hand{H3225}, and thine arm{H2220}, and the light{H216} of thy countenance{H6440}, because thou hadst a favour{H7521}{{H8804}} unto them.',
       4: 'Thou art my King{H4428}, O God{H430}: command{H6680}{{H8761}} deliverances{H3444} for Jacob{H3290}.',
@@ -15681,7 +15681,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       26: 'Arise{H6965}{{H8798}} for our help{H5833}, and redeem{H6299}{{H8798}} us for thy mercies\'{H2617} sake.',
     },
     45: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Shoshannim{H7799}, for the sons{H1121} of Korah{H7141}, Maschil{H4905}{{H8688}}, A Song{H7892} of loves{H3039}.) My heart{H3820} is inditing{H7370}{{H8804}} a good{H2896} matter{H1697}: I speak{H559}{{H8802}} of the things which I have made{H4639} touching the king{H4428}: my tongue{H3956} <i>is</i> the pen{H5842} of a ready{H4106} writer{H5608}{{H8802}}.',
+      1: 'My heart{H3820} is inditing{H7370}{{H8804}} a good{H2896} matter{H1697}: I speak{H559}{{H8802}} of the things which I have made{H4639} touching the king{H4428}: my tongue{H3956} <i>is</i> the pen{H5842} of a ready{H4106} writer{H5608}{{H8802}}.',
       2: 'Thou art fairer{H3302}{{H8795}} than the children{H1121} of men{H120}: grace{H2580} is poured{H3332}{{H8717}} into thy lips{H8193}: therefore God{H430} hath blessed{H1288}{{H8765}} thee for ever{H5769}.',
       3: 'Gird{H2296}{{H8798}} thy sword{H2719} upon <i>thy</i> thigh{H3409}, O <i>most</i> mighty{H1368}, with thy glory{H1935} and thy majesty{H1926}.',
       4: 'And in thy majesty{H1926} ride{H7392}{{H8798}} prosperously{H6743}{{H8798}} because{H1697} of truth{H571} and meekness{H6037} <i>and</i> righteousness{H6664}; and thy right hand{H3225} shall teach{H3384}{{H8686}} thee terrible things{H3372}{{H8737}}.',
@@ -15700,7 +15700,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       17: 'I will make thy name{H8034} to be remembered{H2142}{{H8686}} in all{H1755} generations{H1755}: therefore shall the people{H5971} praise{H3034}{{H8686}} thee for ever{H5769} and ever{H5703}.',
     },
     46: {
-      1: '(To the chief Musician{H5329}{{H8764}} for the sons{H1121} of Korah{H7141}, A Song{H7892} upon Alamoth{H5961}.) God{H430} <i>is</i> our refuge{H4268} and strength{H5797}, a very{H3966} present{H4672}{{H8738}} help{H5833} in trouble{H6869}.',
+      1: 'God{H430} <i>is</i> our refuge{H4268} and strength{H5797}, a very{H3966} present{H4672}{{H8738}} help{H5833} in trouble{H6869}.',
       2: 'Therefore will not we fear{H3372}{{H8799}}, though the earth{H776} be removed{H4171}{{H8687}}, and though the mountains{H2022} be carried{H4131}{{H8800}} into the midst{H3820} of the sea{H3220};',
       3: '<i>Though</i> the waters{H4325} thereof roar{H1993}{{H8799}} <i>and</i> be troubled{H2560}{{H8799}}, <i>though</i> the mountains{H2022} shake{H7493}{{H8799}} with the swelling{H1346} thereof. Selah{H5542}.',
       4: '<i>There is</i> a river{H5104}, the streams{H6388} whereof shall make glad{H8055}{{H8762}} the city{H5892} of God{H430}, the holy{H6918} <i>place</i> of the tabernacles{H4908} of the most High{H5945}.',
@@ -15713,7 +15713,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'The LORD{H3068} of hosts{H6635} <i>is</i> with us; the God{H430} of Jacob{H3290} <i>is</i> our refuge{H4869}. Selah{H5542}.',
     },
     47: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.) O clap{H8628}{{H8798}} your hands{H3709}, all ye people{H5971}; shout{H7321}{{H8685}} unto God{H430} with the voice{H6963} of triumph{H7440}.',
+      1: 'O clap{H8628}{{H8798}} your hands{H3709}, all ye people{H5971}; shout{H7321}{{H8685}} unto God{H430} with the voice{H6963} of triumph{H7440}.',
       2: 'For the LORD{H3068} most high{H5945} <i>is</i> terrible{H3372}{{H8737}}; <i>he is</i> a great{H1419} King{H4428} over all the earth{H776}.',
       3: 'He shall subdue{H1696}{{H8686}} the people{H5971} under us, and the nations{H3816} under our feet{H7272}.',
       4: 'He shall choose{H977}{{H8799}} our inheritance{H5159} for us, the excellency{H1347} of Jacob{H3290} whom he loved{H157}{{H8804}}. Selah{H5542}.',
@@ -15724,7 +15724,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'The princes{H5081} of the people{H5971} are gathered together{H622}{{H8738}}, <i>even</i> the people{H5971} of the God{H430} of Abraham{H85}: for the shields{H4043} of the earth{H776} <i>belong</i> unto God{H430}: he is greatly{H3966} exalted{H5927}{{H8738}}.',
     },
     48: {
-      1: '(A Song{H7892} <i>and</i> Psalm{H4210} for the sons{H1121} of Korah{H7141}.) Great{H1419} <i>is</i> the LORD{H3068}, and greatly{H3966} to be praised{H1984}{{H8794}} in the city{H5892} of our God{H430}, <i>in</i> the mountain{H2022} of his holiness{H6944}.',
+      1: 'Great{H1419} <i>is</i> the LORD{H3068}, and greatly{H3966} to be praised{H1984}{{H8794}} in the city{H5892} of our God{H430}, <i>in</i> the mountain{H2022} of his holiness{H6944}.',
       2: 'Beautiful{H3303} for situation{H5131}, the joy{H4885} of the whole earth{H776}, <i>is</i> mount{H2022} Zion{H6726}, <i>on</i> the sides{H3411} of the north{H6828}, the city{H7151} of the great{H7227} King{H4428}.',
       3: 'God{H430} is known{H3045}{{H8738}} in her palaces{H759} for a refuge{H4869}.',
       4: 'For, lo, the kings{H4428} were assembled{H3259}{{H8738}}, they passed by{H5674}{{H8804}} together{H3162}.',
@@ -15740,7 +15740,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       14: 'For this God{H430} <i>is</i> our God{H430} for ever{H5769} and ever{H5703}: he will be our guide{H5090}{{H8762}} <i>even</i> unto death{H4192}.',
     },
     49: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.) Hear{H8085}{{H8798}} this, all <i>ye</i> people{H5971}; give ear{H238}{{H8685}}, all <i>ye</i> inhabitants{H3427}{{H8802}} of the world{H2465}:',
+      1: 'Hear{H8085}{{H8798}} this, all <i>ye</i> people{H5971}; give ear{H238}{{H8685}}, all <i>ye</i> inhabitants{H3427}{{H8802}} of the world{H2465}:',
       2: 'Both low{H1121}{H120} and high{H1121}{H376}, rich{H6223} and poor{H34}, together{H3162}.',
       3: 'My mouth{H6310} shall speak{H1696}{{H8762}} of wisdom{H2454}; and the meditation{H1900} of my heart{H3820} <i>shall be</i> of understanding{H8394}.',
       4: 'I will incline{H5186}{{H8686}} mine ear{H241} to a parable{H4912}: I will open{H6605}{{H8799}} my dark saying{H2420} upon the harp{H3658}.',
@@ -15762,7 +15762,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       20: 'Man{H120} <i>that is</i> in honour{H3366}, and understandeth{H995}{{H8799}} not, is like{H4911}{{H8738}} the beasts{H929} <i>that</i> perish{H1820}{{H8738}}.',
     },
     50: {
-      1: '(A Psalm{H4210} of Asaph{H623}.) The mighty{H410} God{H430}, <i>even</i> the LORD{H3068}, hath spoken{H1696}{{H8765}}, and called{H7121}{{H8799}} the earth{H776} from the rising{H4217} of the sun{H8121} unto the going down{H3996} thereof.',
+      1: 'The mighty{H410} God{H430}, <i>even</i> the LORD{H3068}, hath spoken{H1696}{{H8765}}, and called{H7121}{{H8799}} the earth{H776} from the rising{H4217} of the sun{H8121} unto the going down{H3996} thereof.',
       2: 'Out of Zion{H6726}, the perfection{H4359} of beauty{H3308}, God{H430} hath shined{H3313}{{H8689}}.',
       3: 'Our God{H430} shall come{H935}{{H8799}}, and shall not keep silence{H2790}{{H8799}}: a fire{H784} shall devour{H398}{{H8799}} before{H6440} him, and it shall be very{H3966} tempestuous{H8175}{{H8738}} round about{H5439} him.',
       4: 'He shall call{H7121}{{H8799}} to the heavens{H8064} from above{H5920}, and to the earth{H776}, that he may judge{H1777}{{H8800}} his people{H5971}.',
@@ -15787,7 +15787,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       23: 'Whoso offereth{H2076}{{H8802}} praise{H8426} glorifieth{H3513}{{H8762}} me: and to him that ordereth{H7760}{{H8804}} <i>his</i> conversation{H1870} <i>aright</i> will I shew{H7200}{{H8686}} the salvation{H3468} of God{H430}.',
     },
     51: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}, when Nathan{H5416} the prophet{H5030} came{H935}{{H8800}} unto him, after he had gone in{H935}{{H8804}} to Bath-sheba{H1339}.) Have mercy{H2603}{{H8798}} upon me, O God{H430}, according to thy lovingkindness{H2617}: according unto the multitude{H7230} of thy tender mercies{H7356} blot out{H4229}{{H8798}} my transgressions{H6588}.',
+      1: 'Have mercy{H2603}{{H8798}} upon me, O God{H430}, according to thy lovingkindness{H2617}: according unto the multitude{H7230} of thy tender mercies{H7356} blot out{H4229}{{H8798}} my transgressions{H6588}.',
       2: 'Wash{H3526}{{H8761}} me throughly{H7235}{{H8685}} from mine iniquity{H5771}, and cleanse{H2891}{{H8761}} me from my sin{H2403}.',
       3: 'For I acknowledge{H3045}{{H8799}} my transgressions{H6588}: and my sin{H2403} <i>is</i> ever{H8548} before me.',
       4: 'Against thee, thee only, have I sinned{H2398}{{H8804}}, and done{H6213}{{H8804}} <i>this</i> evil{H7451} in thy sight{H5869}: that thou mightest be justified{H6663}{{H8799}} when thou speakest{H1696}{{H8800}}, <i>and</i> be clear{H2135}{{H8799}} when thou judgest{H8199}{{H8800}}.',
@@ -15808,7 +15808,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       19: 'Then shalt thou be pleased{H2654}{{H8799}} with the sacrifices{H2077} of righteousness{H6664}, with burnt offering{H5930} and whole{H3632} burnt offering{H5930}: then shall they offer{H5927}{{H8686}} bullocks{H6499} upon thine altar{H4196}.',
     },
     52: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}, when Doeg{H1673} the Edomite{H130} came{H935}{{H8800}} and told{H5046}{{H8686}} Saul{H7586}, and said{H559}{{H8799}} unto him, David{H1732} is come{H935}{{H8804}} to the house{H1004} of Ahimelech{H288}.) Why boastest{H1984}{{H8691}} thou thyself in mischief{H7451}, O mighty{H1368} man? the goodness{H2617} of God{H410} <i>endureth</i> continually{H3117}.',
+      1: 'Why boastest{H1984}{{H8691}} thou thyself in mischief{H7451}, O mighty{H1368} man? the goodness{H2617} of God{H410} <i>endureth</i> continually{H3117}.',
       2: 'Thy tongue{H3956} deviseth{H2803}{{H8799}} mischiefs{H1942}; like a sharp{H3913}{{H8794}} rasor{H8593}, working{H6213}{{H8802}} deceitfully{H7423}.',
       3: 'Thou lovest{H157}{{H8804}} evil{H7451} more than good{H2896}; <i>and</i> lying{H8267} rather than to speak{H1696}{{H8763}} righteousness{H6664}. Selah{H5542}.',
       4: 'Thou lovest{H157}{{H8804}} all devouring{H1105} words{H1697}, O <i>thou</i> deceitful{H4820} tongue{H3956}.',
@@ -15819,7 +15819,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'I will praise{H3034}{{H8686}} thee for ever{H5769}, because thou hast done{H6213}{{H8804}} <i>it</i>: and I will wait{H6960}{{H8762}} on thy name{H8034}; for <i>it is</i> good{H2896} before thy saints{H2623}.',
     },
     53: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Mahalath{H4257}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}.) The fool{H5036} hath said{H559}{{H8804}} in his heart{H3820}, <i>There is</i> no God{H430}. Corrupt{H7843}{{H8689}} are they, and have done abominable{H8581}{{H8689}} iniquity{H5766}: <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}.',
+      1: 'The fool{H5036} hath said{H559}{{H8804}} in his heart{H3820}, <i>There is</i> no God{H430}. Corrupt{H7843}{{H8689}} are they, and have done abominable{H8581}{{H8689}} iniquity{H5766}: <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}.',
       2: 'God{H430} looked down{H8259}{{H8689}} from heaven{H8064} upon the children{H1121} of men{H120}, to see{H7200}{{H8800}} if there were{H3426} <i>any</i> that did understand{H7919}{{H8688}}, that did seek{H1875}{{H8802}} God{H430}.',
       3: 'Every one of them is gone back{H5472}{{H8804}}: they are altogether{H3162} become filthy{H444}{{H8738}}; <i>there is</i> none that doeth{H6213}{{H8802}} good{H2896}, no, not one{H259}.',
       4: 'Have the workers{H6466}{{H8802}} of iniquity{H205} no knowledge{H3045}{{H8804}}? who eat up{H398}{{H8802}} my people{H5971} <i>as</i> they eat{H398}{{H8804}} bread{H3899}: they have not called{H7121}{{H8804}} upon God{H430}.',
@@ -15827,7 +15827,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       6: 'Oh that{H5414}{{H8799}} the salvation{H3444} of Israel{H3478} <i>were come</i> out of Zion{H6726}! When God{H430} bringeth back{H7725}{{H8800}} the captivity{H7622} of his people{H5971}, Jacob{H3290} shall rejoice{H1523}{{H8799}}, <i>and</i> Israel{H3478} shall be glad{H8055}{{H8799}}.',
     },
     54: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}, when the Ziphims{H2130} came{H935}{{H8800}} and said{H559}{{H8799}} to Saul{H7586}, Doth not David{H1732} hide{H5641}{{H8693}} himself with us?) Save{H3467}{{H8685}} me, O God{H430}, by thy name{H8034}, and judge{H1777}{{H8799}} me by thy strength{H1369}.',
+      1: 'Save{H3467}{{H8685}} me, O God{H430}, by thy name{H8034}, and judge{H1777}{{H8799}} me by thy strength{H1369}.',
       2: 'Hear{H8085}{{H8798}} my prayer{H8605}, O God{H430}; give ear{H238}{{H8685}} to the words{H561} of my mouth{H6310}.',
       3: 'For strangers{H2114}{{H8801}} are risen up{H6965}{{H8804}} against me, and oppressors{H6184} seek{H1245}{{H8765}} after my soul{H5315}: they have not set{H7760}{{H8804}} God{H430} before them. Selah{H5542}.',
       4: 'Behold, God{H430} <i>is</i> mine helper{H5826}{{H8802}}: the Lord{H136} <i>is</i> with them that uphold{H5564}{{H8802}} my soul{H5315}.',
@@ -15836,7 +15836,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'For he hath delivered{H5337}{{H8689}} me out of all trouble{H6869}: and mine eye{H5869} hath seen{H7200}{{H8804}} <i>his desire</i> upon mine enemies{H341}{{H8802}}.',
     },
     55: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}.) Give ear{H238}{{H8685}} to my prayer{H8605}, O God{H430}; and hide{H5956}{{H8691}} not thyself from my supplication{H8467}.',
+      1: 'Give ear{H238}{{H8685}} to my prayer{H8605}, O God{H430}; and hide{H5956}{{H8691}} not thyself from my supplication{H8467}.',
       2: 'Attend{H7181}{{H8685}} unto me, and hear{H6030}{{H8798}} me: I mourn{H7300}{{H8686}} in my complaint{H7879}, and make a noise{H1949}{{H8686}};',
       3: 'Because of the voice{H6963} of the enemy{H341}{{H8802}}, because{H6440} of the oppression{H6125} of the wicked{H7563}: for they cast{H4131}{{H8686}} iniquity{H205} upon me, and in wrath{H639} they hate{H7852}{{H8799}} me.',
       4: 'My heart{H3820} is sore pained{H2342}{{H8799}} within{H7130} me: and the terrors{H367} of death{H4194} are fallen{H5307}{{H8804}} upon me.',
@@ -15861,7 +15861,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       23: 'But thou, O God{H430}, shalt bring them down{H3381}{{H8686}} into the pit{H875} of destruction{H7845}: bloody{H1818} and deceitful{H4820} men{H582} shall not live out half{H2673}{{H8799}} their days{H3117}; but I will trust{H982}{{H8799}} in thee.',
     },
     56: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Jonath-elem-rechokim{H3128}, Michtam{H4387} of David{H1732}, when the Philistines{H6430} took{H270}{{H8800}} him in Gath{H1661}.) Be merciful{H2603}{{H8798}} unto me, O God{H430}: for man{H582} would swallow me up{H7602}{{H8804}}; he fighting{H3898}{{H8802}} daily{H3117} oppresseth{H3905}{{H8799}} me.',
+      1: 'Be merciful{H2603}{{H8798}} unto me, O God{H430}: for man{H582} would swallow me up{H7602}{{H8804}}; he fighting{H3898}{{H8802}} daily{H3117} oppresseth{H3905}{{H8799}} me.',
       2: 'Mine enemies{H8324}{{H8802}} would daily{H3117} swallow{H7602}{{H8804}} <i>me</i> up: for <i>they be</i> many{H7227} that fight{H3898}{{H8802}} against me, O thou most High{H4791}.',
       3: 'What time{H3117} I am afraid{H3372}{{H8799}}, I will trust{H982}{{H8799}} in thee.',
       4: 'In God{H430} I will praise{H1984}{{H8762}} his word{H1697}, in God{H430} I have put my trust{H982}{{H8804}}; I will not fear{H3372}{{H8799}} what flesh{H1320} can do{H6213}{{H8799}} unto me.',
@@ -15876,7 +15876,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'For thou hast delivered{H5337}{{H8689}} my soul{H5315} from death{H4194}: <i>wilt</i> not <i>thou deliver</i> my feet{H7272} from falling{H1762}, that I may walk{H1980}{{H8692}} before{H6440} God{H430} in the light{H216} of the living{H2416}?',
     },
     57: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}, when he fled{H1272}{{H8800}} from{H6440} Saul{H7586} in the cave{H4631}.) Be merciful{H2603}{{H8798}} unto me, O God{H430}, be merciful{H2603}{{H8798}} unto me: for my soul{H5315} trusteth{H2620}{{H8804}} in thee: yea, in the shadow{H6738} of thy wings{H3671} will I make my refuge{H2620}{{H8799}}, until <i>these</i> calamities{H1942} be overpast{H5674}{{H8799}}.',
+      1: 'Be merciful{H2603}{{H8798}} unto me, O God{H430}, be merciful{H2603}{{H8798}} unto me: for my soul{H5315} trusteth{H2620}{{H8804}} in thee: yea, in the shadow{H6738} of thy wings{H3671} will I make my refuge{H2620}{{H8799}}, until <i>these</i> calamities{H1942} be overpast{H5674}{{H8799}}.',
       2: 'I will cry{H7121}{{H8799}} unto God{H430} most high{H5945}; unto God{H410} that performeth{H1584}{{H8802}} <i>all things</i> for me.',
       3: 'He shall send{H7971}{{H8799}} from heaven{H8064}, and save{H3467}{{H8686}} me <i>from</i> the reproach{H2778}{{H8765}} of him that would swallow me up{H7602}{{H8802}}. Selah{H5542}. God{H430} shall send forth{H7971}{{H8799}} his mercy{H2617} and his truth{H571}.',
       4: 'My soul{H5315} <i>is</i> among{H8432} lions{H3833}: <i>and</i> I lie{H7901}{{H8799}} <i>even among</i> them that are set on fire{H3857}{{H8802}}, <i>even</i> the sons{H1121} of men{H120}, whose teeth{H8127} <i>are</i> spears{H2595} and arrows{H2671}, and their tongue{H3956} a sharp{H2299} sword{H2719}.',
@@ -15889,7 +15889,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'Be thou exalted{H7311}{{H8798}}, O God{H430}, above the heavens{H8064}: <i>let</i> thy glory{H3519} <i>be</i> above all the earth{H776}.',
     },
     58: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}.) Do ye indeed{H552} speak{H1696}{{H8762}} righteousness{H6664}, O congregation{H482}? do ye judge{H8199}{{H8799}} uprightly{H4339}, O ye sons{H1121} of men{H120}?',
+      1: 'Do ye indeed{H552} speak{H1696}{{H8762}} righteousness{H6664}, O congregation{H482}? do ye judge{H8199}{{H8799}} uprightly{H4339}, O ye sons{H1121} of men{H120}?',
       2: 'Yea, in heart{H3820} ye work{H6466}{{H8799}} wickedness{H5766}; ye weigh{H6424}{{H8762}} the violence{H2555} of your hands{H3027} in the earth{H776}.',
       3: 'The wicked{H7563} are estranged{H2114}{{H8804}} from the womb{H7358}: they go astray{H8582}{{H8804}} as soon as they be born{H990}, speaking{H1696}{{H8802}} lies{H3577}.',
       4: 'Their poison{H2534} <i>is</i> like{H1823} the poison{H2534} of a serpent{H5175}: <i>they are</i> like the deaf{H2795} adder{H6620} <i>that</i> stoppeth{H331}{{H8686}} her ear{H241};',
@@ -15902,7 +15902,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'So that a man{H120} shall say{H559}{{H8799}}, Verily <i>there is</i> a reward{H6529} for the righteous{H6662}: verily he is{H3426} a God{H430} that judgeth{H8199}{{H8802}} in the earth{H776}.',
     },
     59: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}; when Saul{H7586} sent{H7971}{{H8800}}, and they watched{H8104}{{H8799}} the house){H1004} to kill him{H4191}{{H8687}}. Deliver{H5337}{{H8685}} me from mine enemies{H341}{{H8802}}, O my God{H430}: defend{H7682}{{H8762}} me from them that rise up{H6965}{{H8693}} against me.',
+      1: 'Deliver{H5337}{{H8685}} me from mine enemies{H341}{{H8802}}, O my God{H430}: defend{H7682}{{H8762}} me from them that rise up{H6965}{{H8693}} against me.',
       2: 'Deliver{H5337}{{H8685}} me from the workers{H6466}{{H8802}} of iniquity{H205}, and save{H3467}{{H8685}} me from bloody{H1818} men{H582}.',
       3: 'For, lo, they lie in wait{H693}{{H8804}} for my soul{H5315}: the mighty{H5794} are gathered{H1481}{{H8799}} against me; not <i>for</i> my transgression{H6588}, nor <i>for</i> my sin{H2403}, O LORD{H3068}.',
       4: 'They run{H7323}{{H8799}} and prepare{H3559}{{H8709}} themselves without <i>my</i> fault{H5771}: awake{H5782}{{H8798}} to help{H7125}{{H8800}} me, and behold{H7200}{{H8798}}.',
@@ -15921,7 +15921,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       17: 'Unto thee, O my strength{H5797}, will I sing{H2167}{{H8762}}: for God{H430} <i>is</i> my defence{H4869}, <i>and</i> the God{H430} of my mercy{H2617}.',
     },
     60: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Shushan-eduth{H7802}, Michtam{H4387} of David{H1732}, to teach{H3925}{{H8763}}; when he strove{H5327}{{H8687}} with Aram-naharaim{H763}{H5104} and with Aram-zobah{H760}, when Joab{H3097} returned{H7725}{{H8799}}, and smote{H5221}{{H8686}} of Edom{H123} in the valley{H1516} of salt{H4417} twelve{H8147}{H6240} thousand{H505}.) O God{H430}, thou hast cast us off{H2186}{{H8804}}, thou hast scattered{H6555}{{H8804}} us, thou hast been displeased{H599}{{H8804}}; O turn thyself to us again{H7725}{{H8787}}.',
+      1: 'O God{H430}, thou hast cast us off{H2186}{{H8804}}, thou hast scattered{H6555}{{H8804}} us, thou hast been displeased{H599}{{H8804}}; O turn thyself to us again{H7725}{{H8787}}.',
       2: 'Thou hast made the earth{H776} to tremble{H7493}{{H8689}}; thou hast broken{H6480}{{H8804}} it: heal{H7495}{{H8798}} the breaches{H7667} thereof; for it shaketh{H4131}{{H8804}}.',
       3: 'Thou hast shewed{H7200}{{H8689}} thy people{H5971} hard things{H7186}: thou hast made us to drink{H8248}{{H8689}} the wine{H3196} of astonishment{H8653}.',
       4: 'Thou hast given{H5414}{{H8804}} a banner{H5251} to them that fear{H3373} thee, that it may be displayed{H5127}{{H8710}} because{H6440} of the truth{H7189}. Selah{H5542}.',
@@ -15935,7 +15935,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'Through God{H430} we shall do{H6213}{{H8799}} valiantly{H2428}: for he <i>it is that</i> shall tread down{H947}{{H8799}} our enemies{H6862}.',
     },
     61: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Neginah{H5058}, <i>A Psalm</i> of David{H1732}.) Hear{H8085}{{H8798}} my cry{H7440}, O God{H430}; attend{H7181}{{H8685}} unto my prayer{H8605}.',
+      1: 'Hear{H8085}{{H8798}} my cry{H7440}, O God{H430}; attend{H7181}{{H8685}} unto my prayer{H8605}.',
       2: 'From the end{H7097} of the earth{H776} will I cry{H7121}{{H8799}} unto thee, when my heart{H3820} is overwhelmed{H5848}{{H8800}}: lead{H5148}{{H8686}} me to the rock{H6697} <i>that</i> is higher{H7311}{{H8799}} than I.',
       3: 'For thou hast been a shelter{H4268} for me, <i>and</i> a strong{H5797} tower{H4026} from{H6440} the enemy{H341}{{H8802}}.',
       4: 'I will abide{H1481}{{H8799}} in thy tabernacle{H168} for ever{H5769}: I will trust{H2620}{{H8799}} in the covert{H5643} of thy wings{H3671}. Selah{H5542}.',
@@ -15945,7 +15945,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'So will I sing{H2167}{{H8762}} praise unto thy name{H8034} for ever{H5703}, that I may daily{H3117}{H3117} perform{H7999}{{H8763}} my vows{H5088}.',
     },
     62: {
-      1: '(To the chief Musician{H5329}{{H8764}}, to Jeduthun{H3038}, A Psalm{H4210} of David{H1732}.) Truly my soul{H5315} waiteth{H1747} upon God{H430}: from him <i>cometh</i> my salvation{H3444}.',
+      1: 'Truly my soul{H5315} waiteth{H1747} upon God{H430}: from him <i>cometh</i> my salvation{H3444}.',
       2: 'He only <i>is</i> my rock{H6697} and my salvation{H3444}; <i>he is</i> my defence{H4869}; I shall not be greatly{H7227} moved{H4131}{{H8735}}.',
       3: 'How long will ye imagine mischief{H2050}{{H8779}} against a man{H376}? ye shall be slain{H7523}{{H8792}} all of you: as a bowing{H5186}{{H8803}} wall{H7023} <i>shall ye be, and as</i> a tottering{H1760}{{H8803}} fence{H1447}.',
       4: 'They only consult{H3289}{{H8804}} to cast <i>him</i> down{H5080}{{H8687}} from his excellency{H7613}: they delight{H7521}{{H8799}} in lies{H3577}: they bless{H1288}{{H8762}} with their mouth{H6310}, but they curse{H7043}{{H8762}} inwardly{H7130}. Selah{H5542}.',
@@ -15959,7 +15959,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'Also unto thee, O Lord{H136}, <i>belongeth</i> mercy{H2617}: for thou renderest{H7999}{{H8762}} to every man{H376} according to his work{H4639}.',
     },
     63: {
-      1: '(A Psalm{H4210} of David{H1732}, when he was in the wilderness{H4057} of Judah{H3063}.) O God{H430}, thou <i>art</i> my God{H410}; early will I seek{H7836}{{H8762}} thee: my soul{H5315} thirsteth{H6770}{{H8804}} for thee, my flesh{H1320} longeth{H3642}{{H8804}} for thee in a dry{H6723} and thirsty{H5889} land{H776}, where no{H1097} water{H4325} is;',
+      1: 'O God{H430}, thou <i>art</i> my God{H410}; early will I seek{H7836}{{H8762}} thee: my soul{H5315} thirsteth{H6770}{{H8804}} for thee, my flesh{H1320} longeth{H3642}{{H8804}} for thee in a dry{H6723} and thirsty{H5889} land{H776}, where no{H1097} water{H4325} is;',
       2: 'To see{H7200}{{H8800}} thy power{H5797} and thy glory{H3519}, so <i>as</i> I have seen{H2372}{{H8804}} thee in the sanctuary{H6944}.',
       3: 'Because thy lovingkindness{H2617} <i>is</i> better{H2896} than life{H2416}, my lips{H8193} shall praise{H7623}{{H8762}} thee.',
       4: 'Thus will I bless{H1288}{{H8762}} thee while I live{H2416}: I will lift up{H5375}{{H8799}} my hands{H3709} in thy name{H8034}.',
@@ -15972,7 +15972,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       11: 'But the king{H4428} shall rejoice{H8055}{{H8799}} in God{H430}; every one that sweareth{H7650}{{H8737}} by him shall glory{H1984}{{H8691}}: but the mouth{H6310} of them that speak{H1696}{{H8802}} lies{H8267} shall be stopped{H5534}{{H8735}}.',
     },
     64: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) Hear{H8085}{{H8798}} my voice{H6963}, O God{H430}, in my prayer{H7879}: preserve{H5341}{{H8799}} my life{H2416} from fear{H6343} of the enemy{H341}{{H8802}}.',
+      1: 'Hear{H8085}{{H8798}} my voice{H6963}, O God{H430}, in my prayer{H7879}: preserve{H5341}{{H8799}} my life{H2416} from fear{H6343} of the enemy{H341}{{H8802}}.',
       2: 'Hide{H5641}{{H8686}} me from the secret counsel{H5475} of the wicked{H7489}{{H8688}}; from the insurrection{H7285} of the workers{H6466}{{H8802}} of iniquity{H205}:',
       3: 'Who whet{H8150}{{H8804}} their tongue{H3956} like a sword{H2719}, <i>and</i> bend{H1869}{{H8804}} <i>their bows to shoot</i> their arrows{H2671}, <i>even</i> bitter{H4751} words{H1697}:',
       4: 'That they may shoot{H3384}{{H8800}} in secret{H4565} at the perfect{H8535}: suddenly{H6597} do they shoot{H3384}{{H8686}} at him, and fear{H3372}{{H8799}} not.',
@@ -15984,7 +15984,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       10: 'The righteous{H6662} shall be glad{H8055}{{H8799}} in the LORD{H3068}, and shall trust{H2620}{{H8804}} in him; and all the upright{H3477} in heart{H3820} shall glory{H1984}{{H8691}}.',
     },
     65: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} <i>and</i> Song{H7892} of David{H1732}.) Praise{H8416} waiteth{H1747} for thee, O God{H430}, in Sion{H6726}: and unto thee shall the vow{H5088} be performed{H7999}{{H8792}}.',
+      1: 'Praise{H8416} waiteth{H1747} for thee, O God{H430}, in Sion{H6726}: and unto thee shall the vow{H5088} be performed{H7999}{{H8792}}.',
       2: 'O thou that hearest{H8085}{{H8802}} prayer{H8605}, unto thee shall all flesh{H1320} come{H935}{{H8799}}.',
       3: 'Iniquities{H1697}{H5771} prevail{H1396}{{H8804}} against me: <i>as for</i> our transgressions{H6588}, thou shalt purge them away{H3722}{{H8762}}.',
       4: 'Blessed{H835} <i>is the man whom</i> thou choosest{H977}{{H8799}}, and causest to approach{H7126}{{H8762}} <i>unto thee, that</i> he may dwell{H7931}{{H8799}} in thy courts{H2691}: we shall be satisfied{H7646}{{H8799}} with the goodness{H2898} of thy house{H1004}, <i>even</i> of thy holy{H6918} temple{H1964}.',
@@ -15999,7 +15999,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'The pastures{H3733} are clothed{H3847}{{H8804}} with flocks{H6629}; the valleys{H6010} also are covered over{H5848}{{H8799}} with corn{H1250}; they shout for joy{H7321}{{H8709}}, they also sing{H7891}{{H8799}}.',
     },
     66: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Song{H7892} <i>or</i> Psalm{H4210}.) Make a joyful noise{H7321}{{H8685}} unto God{H430}, all ye lands{H776}:',
+      1: 'Make a joyful noise{H7321}{{H8685}} unto God{H430}, all ye lands{H776}:',
       2: 'Sing forth{H2167}{{H8761}} the honour{H3519} of his name{H8034}: make{H7760}{{H8798}} his praise{H8416} glorious{H3519}.',
       3: 'Say{H559}{{H8798}} unto God{H430}, How terrible{H3372}{{H8737}} <i>art thou in</i> thy works{H4639}! through the greatness{H7230} of thy power{H5797} shall thine enemies{H341}{{H8802}} submit{H3584}{{H8762}} themselves unto thee.',
       4: 'All the earth{H776} shall worship{H7812}{{H8691}} thee, and shall sing{H2167}{{H8762}} unto thee; they shall sing{H2167}{{H8762}} <i>to</i> thy name{H8034}. Selah{H5542}.',
@@ -16021,7 +16021,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       20: 'Blessed{H1288}{{H8803}} <i>be</i> God{H430}, which hath not turned away{H5493}{{H8689}} my prayer{H8605}, nor his mercy{H2617} from me.',
     },
     67: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} <i>or</i> Song{H7892}.) God{H430} be merciful{H2603}{{H8799}} unto us, and bless{H1288}{{H8762}} us; <i>and</i> cause his face{H6440} to shine{H215}{{H8686}} upon us; Selah{H5542}.',
+      1: 'God{H430} be merciful{H2603}{{H8799}} unto us, and bless{H1288}{{H8762}} us; <i>and</i> cause his face{H6440} to shine{H215}{{H8686}} upon us; Selah{H5542}.',
       2: 'That thy way{H1870} may be known{H3045}{{H8800}} upon earth{H776}, thy saving health{H3444} among all nations{H1471}.',
       3: 'Let the people{H5971} praise{H3034}{{H8686}} thee, O God{H430}; let all the people{H5971} praise{H3034}{{H8686}} thee.',
       4: 'O let the nations{H3816} be glad{H8055}{{H8799}} and sing for joy{H7442}{{H8762}}: for thou shalt judge{H8199}{{H8799}} the people{H5971} righteously{H4334}, and govern{H5148}{{H8686}} the nations{H3816} upon earth{H776}. Selah{H5542}.',
@@ -16030,7 +16030,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'God{H430} shall bless{H1288}{{H8762}} us; and all the ends{H657} of the earth{H776} shall fear{H3372}{{H8799}} him.',
     },
     68: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} <i>or</i> Song{H7892} of David{H1732}.) Let God{H430} arise{H6965}{{H8799}}, let his enemies{H341}{{H8802}} be scattered{H6327}{{H8799}}: let them also that hate{H8130}{{H8764}} him flee{H5127}{{H8799}} before{H6440} him.',
+      1: 'Let God{H430} arise{H6965}{{H8799}}, let his enemies{H341}{{H8802}} be scattered{H6327}{{H8799}}: let them also that hate{H8130}{{H8764}} him flee{H5127}{{H8799}} before{H6440} him.',
       2: 'As smoke{H6227} is driven away{H5086}{{H8736}}, <i>so</i> drive <i>them</i> away{H5086}{{H8799}}: as wax{H1749} melteth{H4549}{{H8736}} before{H6440} the fire{H784}, <i>so</i> let the wicked{H7563} perish{H6}{{H8799}} at the presence{H6440} of God{H430}.',
       3: 'But let the righteous{H6662} be glad{H8055}{{H8799}}; let them rejoice{H5970}{{H8799}} before{H6440} God{H430}: yea, let them exceedingly{H8057} rejoice{H7797}{{H8799}}.',
       4: 'Sing{H7891}{{H8798}} unto God{H430}, sing praises{H2167}{{H8761}} to his name{H8034}: extol{H5549}{{H8798}} him that rideth{H7392}{{H8802}} upon the heavens{H6160} by his name{H8034} JAH{H3050}, and rejoice{H5937}{{H8798}} before{H6440} him.',
@@ -16067,7 +16067,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       35: 'O God{H430}, <i>thou art</i> terrible{H3372}{{H8737}} out of thy holy places{H4720}: the God{H410} of Israel{H3478} <i>is</i> he that giveth{H5414}{{H8802}} strength{H5797} and power{H8592} unto <i>his</i> people{H5971}. Blessed{H1288}{{H8803}} <i>be</i> God{H430}.',
     },
     69: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Shoshannim{H7799}, <i>A Psalm</i> of David{H1732}.) Save{H3467}{{H8685}} me, O God{H430}; for the waters{H4325} are come{H935}{{H8804}} in unto <i>my</i> soul{H5315}.',
+      1: 'Save{H3467}{{H8685}} me, O God{H430}; for the waters{H4325} are come{H935}{{H8804}} in unto <i>my</i> soul{H5315}.',
       2: 'I sink{H2883}{{H8804}} in deep{H4688} mire{H3121}, where <i>there is</i> no standing{H4613}: I am come{H935}{{H8804}} into deep{H4615} waters{H4325}, where the floods{H7641} overflow{H7857}{{H8804}} me.',
       3: 'I am weary{H3021}{{H8804}} of my crying{H7121}{{H8800}}: my throat{H1627} is dried{H2787}{{H8738}}: mine eyes{H5869} fail{H3615}{{H8804}} while I wait{H3176}{{H8764}} for my God{H430}.',
       4: 'They that hate{H8130}{{H8802}} me without a cause{H2600} are more{H7231}{{H8804}} than the hairs{H8185} of mine head{H7218}: they that would destroy{H6789}{{H8688}} me, <i>being</i> mine enemies{H341}{{H8802}} wrongfully{H8267}, are mighty{H6105}{{H8804}}: then I restored{H7725}{{H8686}} <i>that</i> which I took not away{H1497}{{H8804}}.',
@@ -16105,7 +16105,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       36: 'The seed{H2233} also of his servants{H5650} shall inherit{H5157}{{H8799}} it: and they that love{H157}{{H8802}} his name{H8034} shall dwell{H7931}{{H8799}} therein.',
     },
     70: {
-      1: '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}, to bring to remembrance{H2142}{{H8687}}.) <i>Make haste</i>, O God{H430}, to deliver{H5337}{{H8687}} me; make haste{H2363}{{H8798}} to help{H5833} me, O LORD{H3068}.',
+      1: '<i>Make haste</i>, O God{H430}, to deliver{H5337}{{H8687}} me; make haste{H2363}{{H8798}} to help{H5833} me, O LORD{H3068}.',
       2: 'Let them be ashamed{H954}{{H8799}} and confounded{H2659}{{H8799}} that seek{H1245}{{H8764}} after my soul{H5315}: let them be turned{H5472}{{H8735}} backward{H268}, and put to confusion{H3637}{{H8735}}, that desire{H2655} my hurt{H7451}.',
       3: 'Let them be turned back{H7725}{{H8799}} for a reward{H6118} of their shame{H1322} that say{H559}{{H8802}}, Aha{H1889}, aha{H1889}.',
       4: 'Let all those that seek{H1245}{{H8764}} thee rejoice{H7797}{{H8799}} and be glad{H8055}{{H8799}} in thee: and let such as love{H157}{{H8802}} thy salvation{H3444} say{H559}{{H8799}} continually{H8548}, Let God{H430} be magnified{H1431}{{H8799}}.',
@@ -16138,7 +16138,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       24: 'My tongue{H3956} also shall talk{H1897}{{H8799}} of thy righteousness{H6666} all the day{H3117} long: for they are confounded{H954}{{H8804}}, for they are brought unto shame{H2659}{{H8804}}, that seek{H1245}{{H8764}} my hurt{H7451}.',
     },
     72: {
-      1: '(<i>A Psalm</i> for Solomon{H8010}.) Give{H5414}{{H8798}} the king{H4428} thy judgments{H4941}, O God{H430}, and thy righteousness{H6666} unto the king\'s{H4428} son{H1121}.',
+      1: 'Give{H5414}{{H8798}} the king{H4428} thy judgments{H4941}, O God{H430}, and thy righteousness{H6666} unto the king\'s{H4428} son{H1121}.',
       2: 'He shall judge{H1777}{{H8799}} thy people{H5971} with righteousness{H6664}, and thy poor{H6041} with judgment{H4941}.',
       3: 'The mountains{H2022} shall bring{H5375}{{H8799}} peace{H7965} to the people{H5971}, and the little hills{H1389}, by righteousness{H6666}.',
       4: 'He shall judge{H8199}{{H8799}} the poor{H6041} of the people{H5971}, he shall save{H3467}{{H8686}} the children{H1121} of the needy{H34}, and shall break in pieces{H1792}{{H8762}} the oppressor{H6231}{{H8802}}.',
@@ -16160,7 +16160,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       20: 'The prayers{H8605} of David{H1732} the son{H1121} of Jesse{H3448} are ended{H3615}{{H8795}}.',
     },
     73: {
-      1: '(A Psalm{H4210} of Asaph{H623}.) Truly God{H430} <i>is</i> good{H2896} to Israel{H3478}, <i>even</i> to such as are of a clean{H1249} heart{H3824}.',
+      1: 'Truly God{H430} <i>is</i> good{H2896} to Israel{H3478}, <i>even</i> to such as are of a clean{H1249} heart{H3824}.',
       2: 'But as for me, my feet{H7272} were almost{H4592} gone{H5186}{{H8804}}{H5186}{{H8675}}{{H8803}}; my steps{H838} had well nigh{H369} slipped{H8210}{{H8795}}.',
       3: 'For I was envious{H7065}{{H8765}} at the foolish{H1984}{{H8802}}, <i>when</i> I saw{H7200}{{H8799}} the prosperity{H7965} of the wicked{H7563}.',
       4: 'For <i>there are</i> no bands{H2784} in their death{H4194}: but their strength{H193} <i>is</i> firm{H1277}.',
@@ -16190,7 +16190,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       28: 'But{H589} <i>it is</i> good{H2896} for me to draw near{H7132} to God{H430}: I have put{H7896}{{H8804}} my trust{H4268} in the Lord{H136} GOD{H3069}, that I may declare{H5608}{{H8763}} all thy works{H4399}.',
     },
     74: {
-      1: '(Maschil{H4905}{{H8688}} of Asaph{H623}.) O God{H430}, why hast thou cast <i>us</i> off{H2186}{{H8804}} for ever{H5331}? <i>why</i> doth thine anger{H639} smoke{H6225}{{H8799}} against the sheep{H6629} of thy pasture{H4830}?',
+      1: 'O God{H430}, why hast thou cast <i>us</i> off{H2186}{{H8804}} for ever{H5331}? <i>why</i> doth thine anger{H639} smoke{H6225}{{H8799}} against the sheep{H6629} of thy pasture{H4830}?',
       2: 'Remember{H2142}{{H8798}} thy congregation{H5712}, <i>which</i> thou hast purchased{H7069}{{H8804}} of old{H6924}; the rod{H7626} of thine inheritance{H5159}, <i>which</i> thou hast redeemed{H1350}{{H8804}}; this mount{H2022} Zion{H6726}, wherein thou hast dwelt{H7931}{{H8804}}.',
       3: 'Lift up{H7311}{{H8685}} thy feet{H6471} unto the perpetual{H5331} desolations{H4876}; <i>even</i> all <i>that</i> the enemy{H341}{{H8802}} hath done wickedly{H7489}{{H8689}} in the sanctuary{H6944}.',
       4: 'Thine enemies{H6887}{{H8802}} roar{H7580}{{H8804}} in the midst{H7130} of thy congregations{H4150}; they set up{H7760}{{H8804}} their ensigns{H226} <i>for</i> signs{H226}.',
@@ -16215,7 +16215,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       23: 'Forget{H7911}{{H8799}} not the voice{H6963} of thine enemies{H6887}{{H8802}}: the tumult{H7588} of those that rise up{H6965}{{H8801}} against thee increaseth{H5927}{{H8802}} continually{H8548}.',
     },
     75: {
-      1: '(To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, A Psalm{H4210} <i>or</i> Song{H7892} of Asaph{H623}.) Unto thee, O God{H430}, do we give thanks{H3034}{{H8689}}, <i>unto thee</i> do we give thanks{H3034}{{H8689}}: for <i>that</i> thy name{H8034} is near{H7138} thy wondrous works{H6381}{{H8737}} declare{H5608}{{H8765}}.',
+      1: 'Unto thee, O God{H430}, do we give thanks{H3034}{{H8689}}, <i>unto thee</i> do we give thanks{H3034}{{H8689}}: for <i>that</i> thy name{H8034} is near{H7138} thy wondrous works{H6381}{{H8737}} declare{H5608}{{H8765}}.',
       2: 'When I shall receive{H3947}{{H8799}} the congregation{H4150} I will judge{H8199}{{H8799}} uprightly{H4339}.',
       3: 'The earth{H776} and all the inhabitants{H3427}{{H8802}} thereof are dissolved{H4127}{{H8737}}: I bear up{H8505}{{H8765}} the pillars{H5982} of it. Selah{H5542}.',
       4: 'I said{H559}{{H8804}} unto the fools{H1984}{{H8802}}, Deal not foolishly{H1984}{{H8799}}: and to the wicked{H7563}, Lift not up{H7311}{{H8686}} the horn{H7161}:',
@@ -16227,7 +16227,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       10: 'All the horns{H7161} of the wicked{H7563} also will I cut off{H1438}{{H8762}}; <i>but</i> the horns{H7161} of the righteous{H6662} shall be exalted{H7311}{{H8783}}.',
     },
     76: {
-      1: '(To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} <i>or</i> Song{H7892} of Asaph{H623}.) In Judah{H3063} <i>is</i> God{H430} known{H3045}{{H8737}}: his name{H8034} <i>is</i> great{H1419} in Israel{H3478}.',
+      1: 'In Judah{H3063} <i>is</i> God{H430} known{H3045}{{H8737}}: his name{H8034} <i>is</i> great{H1419} in Israel{H3478}.',
       2: 'In Salem{H8004} also is his tabernacle{H5520}, and his dwelling place{H4585} in Zion{H6726}.',
       3: 'There brake{H7665}{{H8765}} he the arrows{H7565} of the bow{H7198}, the shield{H4043}, and the sword{H2719}, and the battle{H4421}. Selah{H5542}.',
       4: 'Thou <i>art</i> more glorious{H215}{{H8737}} <i>and</i> excellent{H117} than the mountains{H2042} of prey{H2964}.',
@@ -16241,7 +16241,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'He shall cut off{H1219}{{H8799}} the spirit{H7307} of princes{H5057}: <i>he is</i> terrible{H3372}{{H8737}} to the kings{H4428} of the earth{H776}.',
     },
     77: {
-      1: '(To the chief Musician{H5329}{{H8764}}, to Jeduthun{H3038}, A Psalm{H4210} of Asaph{H623}.) I cried{H6817}{{H8799}} unto God{H430} with my voice{H6963}, <i>even</i> unto God{H430} with my voice{H6963}; and he gave ear{H238}{{H8689}} unto me.',
+      1: 'I cried{H6817}{{H8799}} unto God{H430} with my voice{H6963}, <i>even</i> unto God{H430} with my voice{H6963}; and he gave ear{H238}{{H8689}} unto me.',
       2: 'In the day{H3117} of my trouble{H6869} I sought{H1875}{{H8804}} the Lord{H136}: my sore{H3027} ran{H5064}{{H8738}} in the night{H3915}, and ceased{H6313}{{H8799}} not: my soul{H5315} refused{H3985}{{H8765}} to be comforted{H5162}{{H8736}}.',
       3: 'I remembered{H2142}{{H8799}} God{H430}, and was troubled{H1993}{{H8799}}: I complained{H7878}{{H8799}}, and my spirit{H7307} was overwhelmed{H5848}{{H8691}}. Selah{H5542}.',
       4: 'Thou holdest{H270}{{H8804}} mine eyes{H5869} waking{H8109}: I am so troubled{H6470}{{H8738}} that I cannot speak{H1696}{{H8762}}.',
@@ -16263,7 +16263,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       20: 'Thou leddest{H5148}{{H8804}} thy people{H5971} like a flock{H6629} by the hand{H3027} of Moses{H4872} and Aaron{H175}.',
     },
     78: {
-      1: '(Maschil{H4905}{{H8688}} of Asaph{H623}.) Give ear{H238}{{H8685}}, O my people{H5971}, <i>to</i> my law{H8451}: incline{H5186}{{H8685}} your ears{H241} to the words{H561} of my mouth{H6310}.',
+      1: 'Give ear{H238}{{H8685}}, O my people{H5971}, <i>to</i> my law{H8451}: incline{H5186}{{H8685}} your ears{H241} to the words{H561} of my mouth{H6310}.',
       2: 'I will open{H6605}{{H8799}} my mouth{H6310} in a parable{H4912}: I will utter{H5042}{{H8686}} dark sayings{H2420} of old{H6924}:',
       3: 'Which we have heard{H8085}{{H8804}} and known{H3045}{{H8799}}, and our fathers{H1} have told{H5608}{{H8765}} us.',
       4: 'We will not hide{H3582}{{H8762}} <i>them</i> from their children{H1121}, shewing{H5608}{{H8764}} to the generation{H1755} to come{H314} the praises{H8416} of the LORD{H3068}, and his strength{H5807}, and his wonderful works{H6381}{{H8737}} that he hath done{H6213}{{H8804}}.',
@@ -16337,7 +16337,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       72: 'So he fed{H7462}{{H8686}} them according to the integrity{H8537} of his heart{H3824}; and guided{H5148}{{H8686}} them by the skilfulness{H8394} of his hands{H3709}.',
     },
     79: {
-      1: '(A Psalm{H4210} of Asaph{H623}.) O God{H430}, the heathen{H1471} are come{H935}{{H8804}} into thine inheritance{H5159}; thy holy{H6944} temple{H1964} have they defiled{H2930}{{H8765}}; they have laid{H7760}{{H8804}} Jerusalem{H3389} on heaps{H5856}.',
+      1: 'O God{H430}, the heathen{H1471} are come{H935}{{H8804}} into thine inheritance{H5159}; thy holy{H6944} temple{H1964} have they defiled{H2930}{{H8765}}; they have laid{H7760}{{H8804}} Jerusalem{H3389} on heaps{H5856}.',
       2: 'The dead bodies{H5038} of thy servants{H5650} have they given{H5414}{{H8804}} <i>to be</i> meat{H3978} unto the fowls{H5775} of the heaven{H8064}, the flesh{H1320} of thy saints{H2623} unto the beasts{H2416} of the earth{H776}.',
       3: 'Their blood{H1818} have they shed{H8210}{{H8804}} like water{H4325} round about{H5439} Jerusalem{H3389}; and <i>there was</i> none to bury{H6912}{{H8802}} <i>them</i>.',
       4: 'We are become a reproach{H2781} to our neighbours{H7934}, a scorn{H3933} and derision{H7047} to them that are round about{H5439} us.',
@@ -16352,7 +16352,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'So we thy people{H5971} and sheep{H6629} of thy pasture{H4830} will give thee thanks{H3034}{{H8686}} for ever{H5769}: we will shew forth{H5608}{{H8762}} thy praise{H8416} to all{H1755} generations{H1755}.',
     },
     80: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Shoshannim-Eduth{H7802}, A Psalm{H4210} of Asaph{H623}.) Give ear{H238}{{H8685}}, O Shepherd{H7462}{{H8802}} of Israel{H3478}, thou that leadest{H5090}{{H8802}} Joseph{H3130} like a flock{H6629}; thou that dwellest{H3427}{{H8802}} <i>between</i> the cherubims{H3742}, shine forth{H3313}{{H8685}}.',
+      1: 'Give ear{H238}{{H8685}}, O Shepherd{H7462}{{H8802}} of Israel{H3478}, thou that leadest{H5090}{{H8802}} Joseph{H3130} like a flock{H6629}; thou that dwellest{H3427}{{H8802}} <i>between</i> the cherubims{H3742}, shine forth{H3313}{{H8685}}.',
       2: 'Before{H6440} Ephraim{H669} and Benjamin{H1144} and Manasseh{H4519} stir up{H5782}{{H8786}} thy strength{H1369}, and come{H3212}{{H8798}} <i>and</i> save{H3444} us.',
       3: 'Turn us again{H7725}{{H8685}}, O God{H430}, and cause thy face{H6440} to shine{H215}{{H8685}}; and we shall be saved{H3467}{{H8735}}.',
       4: 'O LORD{H3068} God{H430} of hosts{H6635}, how long wilt thou be angry{H6225}{{H8804}} against the prayer{H8605} of thy people{H5971}?',
@@ -16373,7 +16373,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       19: 'Turn us again{H7725}{{H8685}}, O LORD{H3068} God{H430} of hosts{H6635}, cause thy face{H6440} to shine{H215}{{H8685}}; and we shall be saved{H3467}{{H8735}}.',
     },
     81: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, <i>A Psalm</i> of Asaph{H623}.) Sing aloud{H7442}{{H8685}} unto God{H430} our strength{H5797}: make a joyful noise{H7321}{{H8685}} unto the God{H430} of Jacob{H3290}.',
+      1: 'Sing aloud{H7442}{{H8685}} unto God{H430} our strength{H5797}: make a joyful noise{H7321}{{H8685}} unto the God{H430} of Jacob{H3290}.',
       2: 'Take{H5375}{{H8798}} a psalm{H2172}, and bring{H5414}{{H8798}} hither the timbrel{H8596}, the pleasant{H5273} harp{H3658} with the psaltery{H5035}.',
       3: 'Blow up{H8628}{{H8798}} the trumpet{H7782} in the new moon{H2320}, in the time appointed{H3677}, on our solemn feast{H2282} day{H3117}.',
       4: 'For this <i>was</i> a statute{H2706} for Israel{H3478}, <i>and</i> a law{H4941} of the God{H430} of Jacob{H3290}.',
@@ -16391,7 +16391,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       16: 'He should have fed{H398}{{H8686}} them also with the finest{H2459} of the wheat{H2406}: and with honey{H1706} out of the rock{H6697} should I have satisfied{H7646}{{H8686}} thee.',
     },
     82: {
-      1: '(A Psalm{H4210} of Asaph{H623}.) God{H430} standeth{H5324}{{H8737}} in the congregation{H5712} of the mighty{H410}; he judgeth{H8199}{{H8799}} among{H7130} the gods{H430}.',
+      1: 'God{H430} standeth{H5324}{{H8737}} in the congregation{H5712} of the mighty{H410}; he judgeth{H8199}{{H8799}} among{H7130} the gods{H430}.',
       2: 'How long will ye judge{H8199}{{H8799}} unjustly{H5766}, and accept{H5375}{{H8799}} the persons{H6440} of the wicked{H7563}? Selah{H5542}.',
       3: 'Defend{H8199}{{H8798}} the poor{H1800} and fatherless{H3490}: do justice{H6663}{{H8685}} to the afflicted{H6041} and needy{H7326}{{H8802}}.',
       4: 'Deliver{H6403}{{H8761}} the poor{H1800} and needy{H34}: rid{H5337}{{H8685}} <i>them</i> out of the hand{H3027} of the wicked{H7563}.',
@@ -16401,7 +16401,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'Arise{H6965}{{H8798}}, O God{H430}, judge{H8199}{{H8798}} the earth{H776}: for thou shalt inherit{H5157}{{H8799}} all nations{H1471}.',
     },
     83: {
-      1: '(A Song{H7892} <i>or</i> Psalm{H4210} of Asaph{H623}.) Keep not thou silence{H1824}, O God{H430}: hold not thy peace{H2790}{{H8799}}, and be not still{H8252}{{H8799}}, O God{H410}.',
+      1: 'Keep not thou silence{H1824}, O God{H430}: hold not thy peace{H2790}{{H8799}}, and be not still{H8252}{{H8799}}, O God{H410}.',
       2: 'For, lo, thine enemies{H341}{{H8802}} make a tumult{H1993}{{H8799}}: and they that hate{H8130}{{H8764}} thee have lifted up{H5375}{{H8804}} the head{H7218}.',
       3: 'They have taken crafty{H6191}{{H8686}} counsel{H5475} against thy people{H5971}, and consulted{H3289}{{H8691}} against thy hidden ones{H6845}{{H8803}}.',
       4: 'They have said{H559}{{H8804}}, Come{H3212}{{H8798}}, and let us cut them off{H3582}{{H8686}} from <i>being</i> a nation{H1471}; that the name{H8034} of Israel{H3478} may be no more in remembrance{H2142}{{H8735}}.',
@@ -16421,7 +16421,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       18: 'That <i>men</i> may know{H3045}{{H8799}} that thou, whose name{H8034} alone <i>is</i> JEHOVAH{H3068}, <i>art</i> the most high{H5945} over all the earth{H776}.',
     },
     84: {
-      1: '(To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.) How amiable{H3039} <i>are</i> thy tabernacles{H4908}, O LORD{H3068} of hosts{H6635}!',
+      1: 'How amiable{H3039} <i>are</i> thy tabernacles{H4908}, O LORD{H3068} of hosts{H6635}!',
       2: 'My soul{H5315} longeth{H3700}{{H8738}}, yea, even fainteth{H3615}{{H8804}} for the courts{H2691} of the LORD{H3068}: my heart{H3820} and my flesh{H1320} crieth out{H7442}{{H8762}} for the living{H2416} God{H410}.',
       3: 'Yea, the sparrow{H6833} hath found{H4672}{{H8804}} an house{H1004}, and the swallow{H1866} a nest{H7064} for herself, where she may lay{H7896}{{H8804}} her young{H667}, <i>even</i> thine altars{H4196}, O LORD{H3068} of hosts{H6635}, my King{H4428}, and my God{H430}.',
       4: 'Blessed{H835} <i>are</i> they that dwell{H3427}{{H8802}} in thy house{H1004}: they will be still praising{H1984}{{H8762}} thee. Selah{H5542}.',
@@ -16435,7 +16435,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'O LORD{H3068} of hosts{H6635}, blessed{H835} <i>is</i> the man{H120} that trusteth{H982}{{H8802}} in thee.',
     },
     85: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.) LORD{H3068}, thou hast been favourable{H7521}{{H8804}} unto thy land{H776}: thou hast brought back{H7725}{{H8804}} the captivity{H7622}{H7622}{{H8675}} of Jacob{H3290}.',
+      1: 'LORD{H3068}, thou hast been favourable{H7521}{{H8804}} unto thy land{H776}: thou hast brought back{H7725}{{H8804}} the captivity{H7622}{H7622}{{H8675}} of Jacob{H3290}.',
       2: 'Thou hast forgiven{H5375}{{H8804}} the iniquity{H5771} of thy people{H5971}, thou hast covered{H3680}{{H8765}} all their sin{H2403}. Selah{H5542}.',
       3: 'Thou hast taken away{H622}{{H8804}} all thy wrath{H5678}: thou hast turned{H7725}{{H8689}} <i>thyself</i> from the fierceness{H2740} of thine anger{H639}.',
       4: 'Turn{H7725}{{H8798}} us, O God{H430} of our salvation{H3468}, and cause thine anger{H3708} toward us to cease{H6565}{{H8685}}.',
@@ -16450,7 +16450,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'Righteousness{H6664} shall go{H1980}{{H8762}} before{H6440} him; and shall set{H7760}{{H8799}} <i>us</i> in the way{H1870} of his steps{H6471}.',
     },
     86: {
-      1: '(A Prayer{H8605} of David{H1732}.) Bow down{H5186}{{H8685}} thine ear{H241}, O LORD{H3068}, hear{H6030}{{H8798}} me: for I <i>am</i> poor{H6041} and needy{H34}.',
+      1: 'Bow down{H5186}{{H8685}} thine ear{H241}, O LORD{H3068}, hear{H6030}{{H8798}} me: for I <i>am</i> poor{H6041} and needy{H34}.',
       2: 'Preserve{H8104}{{H8798}} my soul{H5315}; for I <i>am</i> holy{H2623}: O thou my God{H430}, save{H3467}{{H8685}} thy servant{H5650} that trusteth{H982}{{H8802}} in thee.',
       3: 'Be merciful{H2603}{{H8798}} unto me, O Lord{H136}: for I cry{H7121}{{H8799}} unto thee daily{H3117}.',
       4: 'Rejoice{H8055}{{H8761}} the soul{H5315} of thy servant{H5650}: for unto thee, O Lord{H136}, do I lift up{H5375}{{H8799}} my soul{H5315}.',
@@ -16469,7 +16469,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       17: 'Shew{H6213}{{H8798}} me a token{H226} for good{H2896}; that they which hate{H8130}{{H8802}} me may see{H7200}{{H8799}} <i>it</i>, and be ashamed{H954}{{H8799}}: because thou, LORD{H3068}, hast holpen{H5826}{{H8804}} me, and comforted{H5162}{{H8765}} me.',
     },
     87: {
-      1: '(A Psalm{H4210} <i>or</i> Song{H7892} for the sons{H1121} of Korah{H7141}.) His foundation{H3248} <i>is</i> in the holy{H6944} mountains{H2042}.',
+      1: 'His foundation{H3248} <i>is</i> in the holy{H6944} mountains{H2042}.',
       2: 'The LORD{H3068} loveth{H157}{{H8802}} the gates{H8179} of Zion{H6726} more than all the dwellings{H4908} of Jacob{H3290}.',
       3: 'Glorious things{H3513}{{H8737}} are spoken{H1696}{{H8794}} of thee, O city{H5892} of God{H430}. Selah{H5542}.',
       4: 'I will make mention{H2142}{{H8686}} of Rahab{H7294} and Babylon{H894} to them that know{H3045}{{H8802}} me: behold Philistia{H6429}, and Tyre{H6865}, with Ethiopia{H3568}; this <i>man</i> was born{H3205}{{H8795}} there.',
@@ -16478,7 +16478,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'As well the singers{H7891}{{H8802}} as the players{H2490}{{H8802}} on instruments <i>shall be there</i>: all my springs{H4599} <i>are</i> in thee.',
     },
     88: {
-      1: '(A Song{H7892} <i>or</i> Psalm{H4210} for the sons{H1121} of Korah{H7141}, to the chief Musician{H5329}{{H8764}} upon Mahalath{H4257} Leannoth{H6031}{{H8763}}, Maschil{H4905}{{H8688}} of Heman{H1968} the Ezrahite{H250}.) O LORD{H3068} God{H430} of my salvation{H3444}, I have cried{H6817}{{H8804}} day{H3117} <i>and</i> night{H3915} before thee:',
+      1: 'O LORD{H3068} God{H430} of my salvation{H3444}, I have cried{H6817}{{H8804}} day{H3117} <i>and</i> night{H3915} before thee:',
       2: 'Let my prayer{H8605} come{H935}{{H8799}} before{H6440} thee: incline{H5186}{{H8685}} thine ear{H241} unto my cry{H7440};',
       3: 'For my soul{H5315} is full{H7646}{{H8804}} of troubles{H7451}: and my life{H2416} draweth nigh{H5060}{{H8689}} unto the grave{H7585}.',
       4: 'I am counted{H2803}{{H8738}} with them that go down{H3381}{{H8802}} into the pit{H953}: I am as a man{H1397} <i>that hath</i> no strength{H353}:',
@@ -16498,7 +16498,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       18: 'Lover{H157}{{H8802}} and friend{H7453} hast thou put far{H7368}{{H8689}} from me, <i>and</i> mine acquaintance{H3045}{{H8794}} into darkness{H4285}.',
     },
     89: {
-      1: '(Maschil{H4905}{{H8688}} of Ethan{H387} the Ezrahite{H250}.) I will sing{H7891}{{H8799}} of the mercies{H2617} of the LORD{H3068} for ever{H5769}: with my mouth{H6310} will I make known{H3045}{{H8686}} thy faithfulness{H530} to all{H1755} generations{H1755}.',
+      1: 'I will sing{H7891}{{H8799}} of the mercies{H2617} of the LORD{H3068} for ever{H5769}: with my mouth{H6310} will I make known{H3045}{{H8686}} thy faithfulness{H530} to all{H1755} generations{H1755}.',
       2: 'For I have said{H559}{{H8804}}, Mercy{H2617} shall be built up{H1129}{{H8735}} for ever{H5769}: thy faithfulness{H530} shalt thou establish{H3559}{{H8686}} in the very heavens{H8064}.',
       3: 'I have made{H3772}{{H8804}} a covenant{H1285} with my chosen{H972}, I have sworn{H7650}{{H8738}} unto David{H1732} my servant{H5650},',
       4: 'Thy seed{H2233} will I establish{H3559}{{H8686}} for{H5704} ever{H5769}, and build up{H1129}{{H8804}} thy throne{H3678} to all{H1755} generations{H1755}. Selah{H5542}.',
@@ -16552,7 +16552,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       52: 'Blessed{H1288}{{H8803}} <i>be</i> the LORD{H3068} for evermore{H5769}. Amen{H543}, and Amen{H543}.',
     },
     90: {
-      1: '(A Prayer{H8605} of Moses{H4872} the man{H376} of God{H430}.) Lord{H136}, thou hast been our dwelling place{H4583} in all{H1755} generations{H1755}.',
+      1: 'Lord{H136}, thou hast been our dwelling place{H4583} in all{H1755} generations{H1755}.',
       2: 'Before the mountains{H2022} were brought forth{H3205}{{H8795}}, or ever thou hadst formed{H2342}{{H8787}} the earth{H776} and the world{H8398}, even from everlasting{H5769} to{H5704} everlasting{H5769}, thou <i>art</i> God{H410}.',
       3: 'Thou turnest{H7725}{{H8686}} man{H582} to destruction{H1793}; and sayest{H559}{{H8799}}, Return{H7725}{{H8798}}, ye children{H1121} of men{H120}.',
       4: 'For a thousand{H505} years{H8141} in thy sight{H5869} <i>are but</i> as{H3117} yesterday{H865} when it is past{H5674}{{H8799}}, and <i>as</i> a watch{H821} in the night{H3915}.',
@@ -16589,7 +16589,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       16: 'With long{H753} life{H3117} will I satisfy{H7646}{{H8686}} him, and shew{H7200}{{H8686}} him my salvation{H3444}.',
     },
     92: {
-      1: '(A Psalm{H4210} <i>or</i> Song{H7892} for the sabbath{H7676} day{H3117}.) <i>It is a</i> good{H2896} <i>thing</i> to give thanks{H3034}{{H8687}} unto the LORD{H3068}, and to sing praises{H2167}{{H8763}} unto thy name{H8034}, O most High{H5945}:',
+      1: '<i>It is a</i> good{H2896} <i>thing</i> to give thanks{H3034}{{H8687}} unto the LORD{H3068}, and to sing praises{H2167}{{H8763}} unto thy name{H8034}, O most High{H5945}:',
       2: 'To shew forth{H5046}{{H8687}} thy lovingkindness{H2617} in the morning{H1242}, and thy faithfulness{H530} every night{H3915},',
       3: 'Upon an instrument of ten strings{H6218}, and upon the psaltery{H5035}; upon the harp{H3658} with a solemn sound{H1902}.',
       4: 'For thou, LORD{H3068}, hast made me glad{H8055}{{H8765}} through thy work{H6467}: I will triumph{H7442}{{H8762}} in the works{H4639} of thy hands{H3027}.',
@@ -16680,7 +16680,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'Rejoice{H8055}{{H8798}} in the LORD{H3068}, ye righteous{H6662}; and give thanks{H3034}{{H8685}} at the remembrance{H2143} of his holiness{H6944}.',
     },
     98: {
-      1: '(A Psalm{H4210}.) O sing{H7891}{{H8798}} unto the LORD{H3068} a new{H2319} song{H7892}; for he hath done{H6213}{{H8804}} marvellous things{H6381}{{H8737}}: his right hand{H3225}, and his holy{H6944} arm{H2220}, hath gotten him the victory{H3467}{{H8689}}.',
+      1: 'O sing{H7891}{{H8798}} unto the LORD{H3068} a new{H2319} song{H7892}; for he hath done{H6213}{{H8804}} marvellous things{H6381}{{H8737}}: his right hand{H3225}, and his holy{H6944} arm{H2220}, hath gotten him the victory{H3467}{{H8689}}.',
       2: 'The LORD{H3068} hath made known{H3045}{{H8689}} his salvation{H3444}: his righteousness{H6666} hath he openly shewed{H1540}{{H8765}} in the sight{H5869} of the heathen{H1471}.',
       3: 'He hath remembered{H2142}{{H8804}} his mercy{H2617} and his truth{H530} toward the house{H1004} of Israel{H3478}: all the ends{H657} of the earth{H776} have seen{H7200}{{H8804}} the salvation{H3444} of our God{H430}.',
       4: 'Make a joyful noise{H7321}{{H8685}} unto the LORD{H3068}, all the earth{H776}: make a loud noise{H6476}{{H8798}}, and rejoice{H7442}{{H8761}}, and sing{H2167}{{H8761}} praise.',
@@ -16702,14 +16702,14 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'Exalt{H7311}{{H8786}} the LORD{H3068} our God{H430}, and worship{H7812}{{H8690}} at his holy{H6944} hill{H2022}; for the LORD{H3068} our God{H430} <i>is</i> holy{H6918}.',
     },
     100: {
-      1: '(A Psalm{H4210} of praise{H8426}.) Make a joyful noise{H7321}{{H8685}} unto the LORD{H3068}, all ye lands{H776}.',
+      1: 'Make a joyful noise{H7321}{{H8685}} unto the LORD{H3068}, all ye lands{H776}.',
       2: 'Serve{H5647}{{H8798}} the LORD{H3068} with gladness{H8057}: come{H935}{{H8798}} before his presence{H6440} with singing{H7445}.',
       3: 'Know{H3045}{{H8798}} ye that the LORD{H3068} he <i>is</i> God{H430}: <i>it is</i> he <i>that</i> hath made{H6213}{{H8804}} us, and not we ourselves; <i>we are</i> his people{H5971}, and the sheep{H6629} of his pasture{H4830}.',
       4: 'Enter{H935}{{H8798}} into his gates{H8179} with thanksgiving{H8426}, <i>and</i> into his courts{H2691} with praise{H8416}: be thankful{H3034}{{H8685}} unto him, <i>and</i> bless{H1288}{{H8761}} his name{H8034}.',
       5: 'For the LORD{H3068} <i>is</i> good{H2896}; his mercy{H2617} <i>is</i> everlasting{H5769}; and his truth{H530} <i>endureth</i> to all{H1755} generations{H1755}.',
     },
     101: {
-      1: '(A Psalm{H4210} of David{H1732}.) I will sing{H7891}{{H8799}} of mercy{H2617} and judgment{H4941}: unto thee, O LORD{H3068}, will I sing{H2167}{{H8762}}.',
+      1: 'I will sing{H7891}{{H8799}} of mercy{H2617} and judgment{H4941}: unto thee, O LORD{H3068}, will I sing{H2167}{{H8762}}.',
       2: 'I will behave myself wisely{H7919}{{H8686}} in a perfect{H8549} way{H1870}. O when wilt thou come{H935}{{H8799}} unto me? I will walk{H1980}{{H8691}} within{H7130} my house{H1004} with a perfect{H8537} heart{H3824}.',
       3: 'I will set{H7896}{{H8799}} no wicked{H1100} thing{H1697} before mine eyes{H5869}: I hate{H8130}{{H8804}} the work{H6213}{{H8800}} of them that turn aside{H7750}; <i>it</i> shall not cleave{H1692}{{H8799}} to me.',
       4: 'A froward{H6141} heart{H3824} shall depart{H5493}{{H8799}} from me: I will not know{H3045}{{H8799}} a wicked{H7451} <i>person</i>.',
@@ -16719,7 +16719,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'I will early{H1242} destroy{H6789}{{H8686}} all the wicked{H7563} of the land{H776}; that I may cut off{H3772}{{H8687}} all wicked{H205} doers{H6466}{{H8802}} from the city{H5892} of the LORD{H3068}.',
     },
     102: {
-      1: '(A Prayer{H8605} of the afflicted{H6041}, when he is overwhelmed{H5848}{{H8799}}, and poureth out{H8210}{{H8799}} his complaint{H7879} before{H6440} the LORD{H3068}.) Hear{H8085}{{H8798}} my prayer{H8605}, O LORD{H3068}, and let my cry{H7775} come{H935}{{H8799}} unto thee.',
+      1: 'Hear{H8085}{{H8798}} my prayer{H8605}, O LORD{H3068}, and let my cry{H7775} come{H935}{{H8799}} unto thee.',
       2: 'Hide{H5641}{{H8686}} not thy face{H6440} from me in the day{H3117} <i>when</i> I am in trouble{H6862}; incline{H5186}{{H8685}} thine ear{H241} unto me: in the day{H3117} <i>when</i> I call{H7121}{{H8799}} answer{H6030}{{H8798}} me speedily{H4118}.',
       3: 'For my days{H3117} are consumed{H3615}{{H8804}} like smoke{H6227}, and my bones{H6106} are burned{H2787}{{H8738}} as an hearth{H4168}.',
       4: 'My heart{H3820} is smitten{H5221}{{H8717}}, and withered{H3001}{{H8799}} like grass{H6212}; so that I forget{H7911}{{H8804}} to eat{H398}{{H8800}} my bread{H3899}.',
@@ -16749,7 +16749,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       28: 'The children{H1121} of thy servants{H5650} shall continue{H7931}{{H8799}}, and their seed{H2233} shall be established{H3559}{{H8735}} before{H6440} thee.',
     },
     103: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Bless{H1288}{{H8761}} the LORD{H3068}, O my soul{H5315}: and all that is within{H7130} me, <i>bless</i> his holy{H6944} name{H8034}.',
+      1: 'Bless{H1288}{{H8761}} the LORD{H3068}, O my soul{H5315}: and all that is within{H7130} me, <i>bless</i> his holy{H6944} name{H8034}.',
       2: 'Bless{H1288}{{H8761}} the LORD{H3068}, O my soul{H5315}, and forget{H7911}{{H8799}} not all his benefits{H1576}:',
       3: 'Who forgiveth{H5545}{{H8802}} all thine iniquities{H5771}; who healeth{H7495}{{H8802}} all thy diseases{H8463};',
       4: 'Who redeemeth{H1350}{{H8802}} thy life{H2416} from destruction{H7845}; who crowneth{H5849}{{H8764}} thee with lovingkindness{H2617} and tender mercies{H7356};',
@@ -16952,7 +16952,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       43: 'Whoso <i>is</i> wise{H2450}, and will observe{H8104}{{H8799}} these <i>things</i>, even they shall understand{H995}{{H8709}} the lovingkindness{H2617} of the LORD{H3068}.',
     },
     108: {
-      1: '(A Song{H7892} <i>or</i> Psalm{H4210} of David{H1732}.) O God{H430}, my heart{H3820} is fixed{H3559}{{H8737}}; I will sing{H7891}{{H8799}} and give praise{H2167}{{H8762}}, even with my glory{H3519}.',
+      1: 'O God{H430}, my heart{H3820} is fixed{H3559}{{H8737}}; I will sing{H7891}{{H8799}} and give praise{H2167}{{H8762}}, even with my glory{H3519}.',
       2: 'Awake{H5782}{{H8798}}, psaltery{H5035} and harp{H3658}: I <i>myself</i> will awake{H5782}{{H8686}} early{H7837}.',
       3: 'I will praise{H3034}{{H8686}} thee, O LORD{H3068}, among the people{H5971}: and I will sing praises{H2167}{{H8762}} unto thee among the nations{H3816}.',
       4: 'For thy mercy{H2617} <i>is</i> great{H1419} above the heavens{H8064}: and thy truth{H571} <i>reacheth</i> unto the clouds{H7834}.',
@@ -16967,7 +16967,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'Through God{H430} we shall do{H6213}{{H8799}} valiantly{H2428}: for he <i>it is that</i> shall tread down{H947}{{H8799}} our enemies{H6862}.',
     },
     109: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) Hold not thy peace{H2790}{{H8799}}, O God{H430} of my praise{H8416};',
+      1: 'Hold not thy peace{H2790}{{H8799}}, O God{H430} of my praise{H8416};',
       2: 'For the mouth{H6310} of the wicked{H7563} and the mouth{H6310} of the deceitful{H4820} are opened{H6605}{{H8804}} against me: they have spoken{H1696}{{H8765}} against me with a lying{H8267} tongue{H3956}.',
       3: 'They compassed{H5437}{{H8804}} me about also with words{H1697} of hatred{H8135}; and fought{H3898}{{H8735}} against me without a cause{H2600}.',
       4: 'For my love{H160} they are my adversaries{H7853}{{H8799}}: but I <i>give myself unto</i> prayer{H8605}.',
@@ -17000,7 +17000,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       31: 'For he shall stand{H5975}{{H8799}} at the right hand{H3225} of the poor{H34}, to save{H3467}{{H8687}} <i>him</i> from those that condemn{H8199}{{H8802}} his soul{H5315}.',
     },
     110: {
-      1: '(A Psalm{H4210} of David{H1732}.) The LORD{H3068} said{H5002}{{H8803}} unto my Lord{H113}, Sit{H3427}{{H8798}} thou at my right hand{H3225}, until I make{H7896}{{H8799}} thine enemies{H341}{{H8802}} thy footstool{H1916}{H7272}.',
+      1: 'The LORD{H3068} said{H5002}{{H8803}} unto my Lord{H113}, Sit{H3427}{{H8798}} thou at my right hand{H3225}, until I make{H7896}{{H8799}} thine enemies{H341}{{H8802}} thy footstool{H1916}{H7272}.',
       2: 'The LORD{H3068} shall send{H7971}{{H8799}} the rod{H4294} of thy strength{H5797} out of Zion{H6726}: rule{H7287}{{H8798}} thou in the midst{H7130} of thine enemies{H341}{{H8802}}.',
       3: 'Thy people{H5971} <i>shall be</i> willing{H5071} in the day{H3117} of thy power{H2428}, in the beauties{H1926} of holiness{H6944} from the womb{H7358} of the morning{H4891}: thou hast the dew{H2919} of thy youth{H3208}.',
       4: 'The LORD{H3068} hath sworn{H7650}{{H8738}}, and will not repent{H5162}{{H8735}}, Thou <i>art</i> a priest{H3548} for ever{H5769} after the order{H1700} of Melchizedek{H4442}.',
@@ -17308,7 +17308,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       176: 'I have gone astray{H8582}{{H8804}} like a lost{H6}{{H8802}} sheep{H7716}; seek{H1245}{{H8761}} thy servant{H5650}; for I do not forget{H7911}{{H8804}} thy commandments{H4687}.',
     },
     120: {
-      1: '(A Song{H7892} of degrees{H4609}.) In my distress{H6869} I cried{H7121}{{H8804}} unto the LORD{H3068}, and he heard{H6030}{{H8799}} me.',
+      1: 'In my distress{H6869} I cried{H7121}{{H8804}} unto the LORD{H3068}, and he heard{H6030}{{H8799}} me.',
       2: 'Deliver{H5337}{{H8685}} my soul{H5315}, O LORD{H3068}, from lying{H8267} lips{H8193}, <i>and</i> from a deceitful{H7423} tongue{H3956}.',
       3: 'What shall be given{H5414}{{H8799}} unto thee? or what shall be done{H3254}{{H8686}} unto thee, thou false{H7423} tongue{H3956}?',
       4: 'Sharp{H8150}{{H8802}} arrows{H2671} of the mighty{H1368}, with coals{H1513} of juniper{H7574}.',
@@ -17317,7 +17317,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'I <i>am for</i> peace{H7965}: but when I speak{H1696}{{H8762}}, they <i>are</i> for war{H4421}.',
     },
     121: {
-      1: '(A Song{H7892} of degrees{H4609}.) I will lift up{H5375}{{H8799}} mine eyes{H5869} unto the hills{H2022}, from whence{H370} cometh{H935}{{H8799}} my help{H5828}.',
+      1: 'I will lift up{H5375}{{H8799}} mine eyes{H5869} unto the hills{H2022}, from whence{H370} cometh{H935}{{H8799}} my help{H5828}.',
       2: 'My help{H5828} <i>cometh</i> from the LORD{H3068}, which made{H6213}{{H8802}} heaven{H8064} and earth{H776}.',
       3: 'He will not suffer{H5414}{{H8799}} thy foot{H7272} to be moved{H4132}: he that keepeth{H8104}{{H8802}} thee will not slumber{H5123}{{H8799}}.',
       4: 'Behold, he that keepeth{H8104}{{H8802}} Israel{H3478} shall neither slumber{H5123}{{H8799}} nor sleep{H3462}{{H8799}}.',
@@ -17327,7 +17327,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'The LORD{H3068} shall preserve{H8104}{{H8799}} thy going out{H3318}{{H8800}} and thy coming in{H935}{{H8800}} from this time forth, and even for{H5704} evermore{H5769}.',
     },
     122: {
-      1: '(A Song{H7892} of degrees{H4609} of David{H1732}.) I was glad{H8055}{{H8804}} when they said{H559}{{H8802}} unto me, Let us go{H3212}{{H8799}} into the house{H1004} of the LORD{H3068}.',
+      1: 'I was glad{H8055}{{H8804}} when they said{H559}{{H8802}} unto me, Let us go{H3212}{{H8799}} into the house{H1004} of the LORD{H3068}.',
       2: 'Our feet{H7272} shall stand{H5975}{{H8802}} within thy gates{H8179}, O Jerusalem{H3389}.',
       3: 'Jerusalem{H3389} is builded{H1129}{{H8803}} as a city{H5892} that is compact{H2266}{{H8795}} together{H3162}:',
       4: 'Whither{H8033} the tribes{H7626} go up{H5927}{{H8804}}, the tribes{H7626} of the LORD{H3050}, unto the testimony{H5715} of Israel{H3478}, to give thanks{H3034}{{H8687}} unto the name{H8034} of the LORD{H3068}.',
@@ -17338,13 +17338,13 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'Because of the house{H1004} of the LORD{H3068} our God{H430} I will seek{H1245}{{H8762}} thy good{H2896}.',
     },
     123: {
-      1: '(A Song{H7892} of degrees{H4609}.) Unto thee lift I up{H5375}{{H8804}} mine eyes{H5869}, O thou that dwellest{H3427}{{H8802}} in the heavens{H8064}.',
+      1: 'Unto thee lift I up{H5375}{{H8804}} mine eyes{H5869}, O thou that dwellest{H3427}{{H8802}} in the heavens{H8064}.',
       2: 'Behold, as the eyes{H5869} of servants{H5650} <i>look</i> unto the hand{H3027} of their masters{H113}, <i>and</i> as the eyes{H5869} of a maiden{H8198} unto the hand{H3027} of her mistress{H1404}; so our eyes{H5869} <i>wait</i> upon the LORD{H3068} our God{H430}, until that he have mercy{H2603}{{H8799}} upon us.',
       3: 'Have mercy{H2603}{{H8798}} upon us, O LORD{H3068}, have mercy{H2603}{{H8798}} upon us: for we are exceedingly{H7227} filled{H7646}{{H8804}} with contempt{H937}.',
       4: 'Our soul{H5315} is exceedingly{H7227} filled{H7646}{{H8804}} with the scorning{H3933} of those that are at ease{H7600}, <i>and</i> with the contempt{H937} of the proud{H3238}{{H8802}}{H1343}{{H8678}}{H1349}{{H8675}}.',
     },
     124: {
-      1: '(A Song{H7892} of degrees{H4609} of David{H1732}.) If{H3884} <i>it had</i> not <i>been</i> the LORD{H3068} who was on our side, now may Israel{H3478} say{H559}{{H8799}};',
+      1: 'If{H3884} <i>it had</i> not <i>been</i> the LORD{H3068} who was on our side, now may Israel{H3478} say{H559}{{H8799}};',
       2: 'If{H3884} <i>it had</i> not <i>been</i> the LORD{H3068} who was on our side, when men{H120} rose up{H6965}{{H8800}} against us:',
       3: 'Then{H233} they had swallowed us up{H1104}{{H8804}} quick{H2416}, when their wrath{H639} was kindled{H2734}{{H8800}} against us:',
       4: 'Then{H233} the waters{H4325} had overwhelmed{H7857}{{H8804}} us, the stream{H5158} had gone over{H5674}{{H8804}} our soul{H5315}:',
@@ -17354,14 +17354,14 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'Our help{H5828} <i>is</i> in the name{H8034} of the LORD{H3068}, who made{H6213}{{H8802}} heaven{H8064} and earth{H776}.',
     },
     125: {
-      1: '(A Song{H7892} of degrees{H4609}.) They that trust{H982}{{H8802}} in the LORD{H3068} <i>shall be</i> as mount{H2022} Zion{H6726}, <i>which</i> cannot be removed{H4131}{{H8735}}, <i>but</i> abideth{H3427}{{H8799}} for ever{H5769}.',
+      1: 'They that trust{H982}{{H8802}} in the LORD{H3068} <i>shall be</i> as mount{H2022} Zion{H6726}, <i>which</i> cannot be removed{H4131}{{H8735}}, <i>but</i> abideth{H3427}{{H8799}} for ever{H5769}.',
       2: '<i>As</i> the mountains{H2022} <i>are</i> round about{H5439} Jerusalem{H3389}, so the LORD{H3068} <i>is</i> round about{H5439} his people{H5971} from henceforth even for{H5704} ever{H5769}.',
       3: 'For the rod{H7626} of the wicked{H7562} shall not rest{H5117}{{H8799}} upon the lot{H1486} of the righteous{H6662}; lest{H4616} the righteous{H6662} put forth{H7971}{{H8799}} their hands{H3027} unto iniquity{H5766}.',
       4: 'Do good{H2895}{{H8685}}, O LORD{H3068}, unto <i>those that be</i> good{H2896}, and to <i>them that are</i> upright{H3477} in their hearts{H3826}.',
       5: 'As for such as turn aside{H5186}{{H8688}} unto their crooked ways{H6128}, the LORD{H3068} shall lead them forth{H3212}{{H8686}} with the workers{H6466}{{H8802}} of iniquity{H205}: <i>but</i> peace{H7965} <i>shall be</i> upon Israel{H3478}.',
     },
     126: {
-      1: '(A Song{H7892} of degrees{H4609}.) When the LORD{H3068} turned again{H7725}{{H8800}} the captivity{H7870} of Zion{H6726}, we were like them that dream{H2492}{{H8802}}.',
+      1: 'When the LORD{H3068} turned again{H7725}{{H8800}} the captivity{H7870} of Zion{H6726}, we were like them that dream{H2492}{{H8802}}.',
       2: 'Then was our mouth{H6310} filled{H4390}{{H8735}} with laughter{H7814}, and our tongue{H3956} with singing{H7440}: then said{H559}{{H8799}} they among the heathen{H1471}, The LORD{H3068} hath done{H6213}{{H8800}} great things{H1431}{{H8689}} for them.',
       3: 'The LORD{H3068} hath done{H6213}{{H8800}} great things{H1431}{{H8689}} for us; <i>whereof</i> we are glad{H8056}.',
       4: 'Turn again{H7725}{{H8798}} our captivity{H7622}{H7622}{{H8675}}, O LORD{H3068}, as the streams{H650} in the south{H5045}.',
@@ -17369,14 +17369,14 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       6: 'He that goeth{H3212}{{H8799}} forth{H1980}{{H8800}} and weepeth{H1058}{{H8800}}, bearing{H5375}{{H8802}} precious{H4901} seed{H2233}, shall doubtless{H935}{{H8800}} come{H935}{{H8799}} again with rejoicing{H7440}, bringing{H5375}{{H8802}} his sheaves{H485} <i>with him</i>.',
     },
     127: {
-      1: '(A Song{H7892} of degrees{H4609} for Solomon{H8010}.) Except the LORD{H3068} build{H1129}{{H8799}} the house{H1004}, they labour{H5998}{{H8804}} in vain{H7723} that build{H1129}{{H8802}} it: except the LORD{H3068} keep{H8104}{{H8799}} the city{H5892}, the watchman{H8104}{{H8802}} waketh{H8245}{{H8804}} <i>but</i> in vain{H7723}.',
+      1: 'Except the LORD{H3068} build{H1129}{{H8799}} the house{H1004}, they labour{H5998}{{H8804}} in vain{H7723} that build{H1129}{{H8802}} it: except the LORD{H3068} keep{H8104}{{H8799}} the city{H5892}, the watchman{H8104}{{H8802}} waketh{H8245}{{H8804}} <i>but</i> in vain{H7723}.',
       2: '<i>It is</i> vain{H7723} for you to rise up{H6965}{{H8800}} early{H7925}{{H8688}}, to sit up{H3427}{{H8800}} late{H309}{{H8764}}, to eat{H398}{{H8802}} the bread{H3899} of sorrows{H6089}: <i>for</i> so he giveth{H5414}{{H8799}} his beloved{H3039} sleep{H8142}.',
       3: 'Lo, children{H1121} <i>are</i> an heritage{H5159} of the LORD{H3068}: <i>and</i> the fruit{H6529} of the womb{H990} <i>is his</i> reward{H7939}.',
       4: 'As arrows{H2671} <i>are</i> in the hand{H3027} of a mighty man{H1368}; so <i>are</i> children{H1121} of the youth{H5271}.',
       5: 'Happy{H835} <i>is</i> the man{H1397} that hath his quiver{H827} full{H4390}{{H8765}} of them: they shall not be ashamed{H954}{{H8799}}, but they shall speak{H1696}{{H8762}} with the enemies{H341}{{H8802}} in the gate{H8179}.',
     },
     128: {
-      1: '(A Song{H7892} of degrees{H4609}.) Blessed{H835} <i>is</i> every one that feareth{H3373} the LORD{H3068}; that walketh{H1980}{{H8802}} in his ways{H1870}.',
+      1: 'Blessed{H835} <i>is</i> every one that feareth{H3373} the LORD{H3068}; that walketh{H1980}{{H8802}} in his ways{H1870}.',
       2: 'For thou shalt eat{H398}{{H8799}} the labour{H3018} of thine hands{H3709}: happy{H835} <i>shalt</i> thou <i>be</i>, and <i>it shall be</i> well{H2896} with thee.',
       3: 'Thy wife{H802} <i>shall be</i> as a fruitful{H6509}{{H8802}} vine{H1612} by the sides{H3411} of thine house{H1004}: thy children{H1121} like olive{H2132} plants{H8363} round about{H5439} thy table{H7979}.',
       4: 'Behold, that thus shall the man{H1397} be blessed{H1288}{{H8792}} that feareth{H3373} the LORD{H3068}.',
@@ -17384,7 +17384,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       6: 'Yea, thou shalt see{H7200}{{H8798}} thy children\'s{H1121} children{H1121}, <i>and</i> peace{H7965} upon Israel{H3478}.',
     },
     129: {
-      1: '(A Song{H7892} of degrees{H4609}.) Many a time{H7227} have they afflicted{H6887}{{H8804}} me from my youth{H5271}, may Israel{H3478} now say{H559}{{H8799}}:',
+      1: 'Many a time{H7227} have they afflicted{H6887}{{H8804}} me from my youth{H5271}, may Israel{H3478} now say{H559}{{H8799}}:',
       2: 'Many a time{H7227} have they afflicted{H6887}{{H8804}} me from my youth{H5271}: yet they have not prevailed{H3201}{{H8804}} against me.',
       3: 'The plowers{H2790}{{H8802}} plowed{H2790}{{H8804}} upon my back{H1354}: they made long{H748}{{H8689}} their furrows{H4618}{H4618}{{H8675}}.',
       4: 'The LORD{H3068} <i>is</i> righteous{H6662}: he hath cut asunder{H7112}{{H8765}} the cords{H5688} of the wicked{H7563}.',
@@ -17394,7 +17394,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'Neither do they which go by{H5674}{{H8802}} say{H559}{{H8804}}, The blessing{H1293} of the LORD{H3068} <i>be</i> upon you: we bless{H1288}{{H8765}} you in the name{H8034} of the LORD{H3068}.',
     },
     130: {
-      1: '(A Song{H7892} of degrees{H4609}.) Out of the depths{H4615} have I cried{H7121}{{H8804}} unto thee, O LORD{H3068}.',
+      1: 'Out of the depths{H4615} have I cried{H7121}{{H8804}} unto thee, O LORD{H3068}.',
       2: 'Lord{H136}, hear{H8085}{{H8798}} my voice{H6963}: let thine ears{H241} be attentive{H7183} to the voice{H6963} of my supplications{H8469}.',
       3: 'If thou, LORD{H3050}, shouldest mark{H8104}{{H8799}} iniquities{H5771}, O Lord{H136}, who shall stand{H5975}{{H8799}}?',
       4: 'But <i>there is</i> forgiveness{H5547} with thee, that thou mayest be feared{H3372}{{H8735}}.',
@@ -17404,12 +17404,12 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'And he shall redeem{H6299}{{H8799}} Israel{H3478} from all his iniquities{H5771}.',
     },
     131: {
-      1: '(A Song{H7892} of degrees{H4609} of David{H1732}.) LORD{H3068}, my heart{H3820} is not haughty{H1361}{{H8804}}, nor mine eyes{H5869} lofty{H7311}{{H8804}}: neither do I exercise{H1980}{{H8765}} myself in great matters{H1419}, or in things too high{H6381}{{H8737}} for me.',
+      1: 'LORD{H3068}, my heart{H3820} is not haughty{H1361}{{H8804}}, nor mine eyes{H5869} lofty{H7311}{{H8804}}: neither do I exercise{H1980}{{H8765}} myself in great matters{H1419}, or in things too high{H6381}{{H8737}} for me.',
       2: 'Surely I have behaved{H7737}{{H8765}} and quieted{H1826}{{H8776}} myself{H5315}, as a child that is weaned{H1580}{{H8803}} of his mother{H517}: my soul{H5315} <i>is</i> even as a weaned child{H1580}{{H8803}}.',
       3: 'Let Israel{H3478} hope{H3176}{{H8761}} in the LORD{H3068} from henceforth and for{H5704} ever{H5769}.',
     },
     132: {
-      1: '(A Song{H7892} of degrees{H4609}.) LORD{H3068}, remember{H2142}{{H8798}} David{H1732}, <i>and</i> all his afflictions{H6031}{{H8793}}:',
+      1: 'LORD{H3068}, remember{H2142}{{H8798}} David{H1732}, <i>and</i> all his afflictions{H6031}{{H8793}}:',
       2: 'How he sware{H7650}{{H8738}} unto the LORD{H3068}, <i>and</i> vowed{H5087}{{H8804}} unto the mighty{H46} <i>God</i> of Jacob{H3290};',
       3: 'Surely I will not come{H935}{{H8799}} into the tabernacle{H168} of my house{H1004}, nor go up{H5927}{{H8799}} into my bed{H6210}{H3326};',
       4: 'I will not give{H5414}{{H8799}} sleep{H8153} to mine eyes{H5869}, <i>or</i> slumber{H8572} to mine eyelids{H6079},',
@@ -17429,12 +17429,12 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       18: 'His enemies{H341}{{H8802}} will I clothe{H3847}{{H8686}} with shame{H1322}: but upon himself shall his crown{H5145} flourish{H6692}{{H8686}}.',
     },
     133: {
-      1: '(A Song{H7892} of degrees{H4609} of David{H1732}.) Behold, how good{H2896} and how pleasant{H5273} <i>it is</i> for brethren{H251} to dwell{H3427}{{H8800}} together{H3162} in unity{H3162}!',
+      1: 'Behold, how good{H2896} and how pleasant{H5273} <i>it is</i> for brethren{H251} to dwell{H3427}{{H8800}} together{H3162} in unity{H3162}!',
       2: '<i>It is</i> like the precious{H2896} ointment{H8081} upon the head{H7218}, that ran down{H3381}{{H8802}} upon the beard{H2206}, <i>even</i> Aaron\'s{H175} beard{H2206}: that went down{H3381}{{H8802}} to the skirts{H6310} of his garments{H4060};',
       3: 'As the dew{H2919} of Hermon{H2768}, <i>and as the dew</i> that descended{H3381}{{H8802}} upon the mountains{H2042} of Zion{H6726}: for there the LORD{H3068} commanded{H6680}{{H8765}} the blessing{H1293}, <i>even</i> life{H2416} for evermore{H5769}.',
     },
     134: {
-      1: '(A Song{H7892} of degrees{H4609}.) Behold, bless{H1288}{{H8761}} ye the LORD{H3068}, all <i>ye</i> servants{H5650} of the LORD{H3068}, which by night{H3915} stand{H5975}{{H8802}} in the house{H1004} of the LORD{H3068}.',
+      1: 'Behold, bless{H1288}{{H8761}} ye the LORD{H3068}, all <i>ye</i> servants{H5650} of the LORD{H3068}, which by night{H3915} stand{H5975}{{H8802}} in the house{H1004} of the LORD{H3068}.',
       2: 'Lift up{H5375}{{H8798}} your hands{H3027} <i>in</i> the sanctuary{H6944}, and bless{H1288}{{H8761}} the LORD{H3068}.',
       3: 'The LORD{H3068} that made{H6213}{{H8802}} heaven{H8064} and earth{H776} bless{H1288}{{H8762}} thee out of Zion{H6726}.',
     },
@@ -17501,7 +17501,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       9: 'Happy{H835} <i>shall he be</i>, that taketh{H270}{{H8799}} and dasheth{H5310}{{H8765}} thy little ones{H5768} against the stones{H5553}.',
     },
     138: {
-      1: '(<i>A Psalm</i> of David{H1732}.) I will praise{H3034}{{H8686}} thee with my whole heart{H3820}: before the gods{H430} will I sing praise{H2167}{{H8762}} unto thee.',
+      1: 'I will praise{H3034}{{H8686}} thee with my whole heart{H3820}: before the gods{H430} will I sing praise{H2167}{{H8762}} unto thee.',
       2: 'I will worship{H7812}{{H8691}} toward thy holy{H6944} temple{H1964}, and praise{H3034}{{H8686}} thy name{H8034} for thy lovingkindness{H2617} and for thy truth{H571}: for thou hast magnified{H1431}{{H8689}} thy word{H565} above all thy name{H8034}.',
       3: 'In the day{H3117} when I cried{H7121}{{H8804}} thou answeredst{H6030}{{H8799}} me, <i>and</i> strengthenedst{H7292}{{H8686}} me <i>with</i> strength{H5797} in my soul{H5315}.',
       4: 'All the kings{H4428} of the earth{H776} shall praise{H3034}{{H8686}} thee, O LORD{H3068}, when they hear{H8085}{{H8804}} the words{H561} of thy mouth{H6310}.',
@@ -17511,7 +17511,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       8: 'The LORD{H3068} will perfect{H1584}{{H8799}} <i>that which</i> concerneth me: thy mercy{H2617}, O LORD{H3068}, <i>endureth</i> for ever{H5769}: forsake{H7503}{{H8686}} not the works{H4639} of thine own hands{H3027}.',
     },
     139: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) O LORD{H3068}, thou hast searched{H2713}{{H8804}} me, and known{H3045}{{H8799}} <i>me</i>.',
+      1: 'O LORD{H3068}, thou hast searched{H2713}{{H8804}} me, and known{H3045}{{H8799}} <i>me</i>.',
       2: 'Thou knowest{H3045}{{H8804}} my downsitting{H3427}{{H8800}} and mine uprising{H6965}{{H8800}}, thou understandest{H995}{{H8804}} my thought{H7454} afar off{H7350}.',
       3: 'Thou compassest{H2219}{{H8765}} my path{H734} and my lying down{H7252}, and art acquainted{H5532}{{H8689}} <i>with</i> all my ways{H1870}.',
       4: 'For <i>there is</i> not a word{H4405} in my tongue{H3956}, <i>but</i>, lo, O LORD{H3068}, thou knowest{H3045}{{H8804}} it altogether.',
@@ -17537,7 +17537,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       24: 'And see{H7200}{{H8798}} if <i>there be any</i> wicked{H6090} way{H1870} in me, and lead{H5148}{{H8798}} me in the way{H1870} everlasting{H5769}.',
     },
     140: {
-      1: '(To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.) Deliver{H2502}{{H8761}} me, O LORD{H3068}, from the evil{H7451} man{H120}: preserve{H5341}{{H8799}} me from the violent{H2555} man{H376};',
+      1: 'Deliver{H2502}{{H8761}} me, O LORD{H3068}, from the evil{H7451} man{H120}: preserve{H5341}{{H8799}} me from the violent{H2555} man{H376};',
       2: 'Which imagine{H2803}{{H8804}} mischiefs{H7451} in <i>their</i> heart{H3820}; continually{H3117} are they gathered together{H1481}{{H8799}} <i>for</i> war{H4421}.',
       3: 'They have sharpened{H8150}{{H8804}} their tongues{H3956} like a serpent{H5175}; adders\'{H5919} poison{H2534} <i>is</i> under their lips{H8193}. Selah{H5542}.',
       4: 'Keep{H8104}{{H8798}} me, O LORD{H3068}, from the hands{H3027} of the wicked{H7563}; preserve{H5341}{{H8799}} me from the violent{H2555} man{H376}; who have purposed{H2803}{{H8804}} to overthrow{H1760}{{H8800}} my goings{H6471}.',
@@ -17552,7 +17552,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       13: 'Surely the righteous{H6662} shall give thanks{H3034}{{H8686}} unto thy name{H8034}: the upright{H3477} shall dwell{H3427}{{H8799}} in thy presence{H6440}.',
     },
     141: {
-      1: '(A Psalm{H4210} of David{H1732}.) LORD{H3068}, I cry{H7121}{{H8804}} unto thee: make haste{H2363}{{H8798}} unto me; give ear{H238}{{H8685}} unto my voice{H6963}, when I cry{H7121}{{H8800}} unto thee.',
+      1: 'LORD{H3068}, I cry{H7121}{{H8804}} unto thee: make haste{H2363}{{H8798}} unto me; give ear{H238}{{H8685}} unto my voice{H6963}, when I cry{H7121}{{H8800}} unto thee.',
       2: 'Let my prayer{H8605} be set forth{H3559}{{H8735}} before{H6440} thee <i>as</i> incense{H7004}; <i>and</i> the lifting up{H4864} of my hands{H3709} <i>as</i> the evening{H6153} sacrifice{H4503}.',
       3: 'Set{H7896}{{H8798}} a watch{H8108}, O LORD{H3068}, before my mouth{H6310}; keep{H5341}{{H8798}} the door{H1817} of my lips{H8193}.',
       4: 'Incline{H5186}{{H8686}} not my heart{H3820} to <i>any</i> evil{H7451} thing{H1697}, to practise{H5953}{{H8705}} wicked{H7562} works{H5949} with men{H376} that work{H6466}{{H8802}} iniquity{H205}: and let me not eat{H3898}{{H8799}} of their dainties{H4516}.',
@@ -17564,7 +17564,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       10: 'Let the wicked{H7563} fall{H5307}{{H8799}} into their own nets{H4364}, whilst that I withal{H3162} escape{H5674}{{H8799}}.',
     },
     142: {
-      1: '(Maschil{H4905}{{H8688}} of David{H1732}; A Prayer{H8605} when he was in the cave{H4631}.) I cried{H2199}{{H8799}} unto the LORD{H3068} with my voice{H6963}; with my voice{H6963} unto the LORD{H3068} did I make my supplication{H2603}{{H8691}}.',
+      1: 'I cried{H2199}{{H8799}} unto the LORD{H3068} with my voice{H6963}; with my voice{H6963} unto the LORD{H3068} did I make my supplication{H2603}{{H8691}}.',
       2: 'I poured out{H8210}{{H8799}} my complaint{H7879} before{H6440} him; I shewed{H5046}{{H8686}} before{H6440} him my trouble{H6869}.',
       3: 'When my spirit{H7307} was overwhelmed{H5848}{{H8692}} within me, then thou knewest{H3045}{{H8804}} my path{H5410}. In the way{H734} wherein{H2098} I walked{H1980}{{H8762}} have they privily laid{H2934}{{H8804}} a snare{H6341} for me.',
       4: 'I looked{H5027}{{H8685}} on <i>my</i> right hand{H3225}, and beheld{H7200}{{H8798}}, but <i>there was</i> no man that would know{H5234}{{H8688}} me: refuge{H4498} failed{H6}{{H8804}} me; no man cared{H1875}{{H8802}} for my soul{H5315}.',
@@ -17573,7 +17573,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       7: 'Bring{H3318}{{H8685}} my soul{H5315} out of prison{H4525}, that I may praise{H3034}{{H8687}} thy name{H8034}: the righteous{H6662} shall compass me about{H3803}{{H8686}}; for thou shalt deal bountifully{H1580}{{H8799}} with me.',
     },
     143: {
-      1: '(A Psalm{H4210} of David{H1732}.) Hear{H8085}{{H8798}} my prayer{H8605}, O LORD{H3068}, give ear{H238}{{H8685}} to my supplications{H8469}: in thy faithfulness{H530} answer{H6030}{{H8798}} me, <i>and</i> in thy righteousness{H6666}.',
+      1: 'Hear{H8085}{{H8798}} my prayer{H8605}, O LORD{H3068}, give ear{H238}{{H8685}} to my supplications{H8469}: in thy faithfulness{H530} answer{H6030}{{H8798}} me, <i>and</i> in thy righteousness{H6666}.',
       2: 'And enter{H935}{{H8799}} not into judgment{H4941} with thy servant{H5650}: for in thy sight{H6440} shall no man living{H2416} be justified{H6663}{{H8799}}.',
       3: 'For the enemy{H341}{{H8802}} hath persecuted{H7291}{{H8804}} my soul{H5315}; he hath smitten{H1792} my life{H2416} down{H1792}{{H8765}} to the ground{H776}; he hath made me to dwell{H3427}{{H8689}} in darkness{H4285}, as those that have been long{H5769} dead{H4191}{{H8801}}.',
       4: 'Therefore is my spirit{H7307} overwhelmed{H5848}{{H8691}} within me; my heart{H3820} within{H8432} me is desolate{H8074}{{H8709}}.',
@@ -17587,7 +17587,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       12: 'And of thy mercy{H2617} cut off{H6789}{{H8686}} mine enemies{H341}{{H8802}}, and destroy{H6}{{H8689}} all them that afflict{H6887}{{H8802}} my soul{H5315}: for I <i>am</i> thy servant{H5650}.',
     },
     144: {
-      1: '(<i>A Psalm</i> of David{H1732}.) Blessed{H1288}{{H8803}} <i>be</i> the LORD{H3068} my strength{H6697}, which teacheth{H3925}{{H8764}} my hands{H3027} to war{H7128}, <i>and</i> my fingers{H676} to fight{H4421}:',
+      1: 'Blessed{H1288}{{H8803}} <i>be</i> the LORD{H3068} my strength{H6697}, which teacheth{H3925}{{H8764}} my hands{H3027} to war{H7128}, <i>and</i> my fingers{H676} to fight{H4421}:',
       2: 'My goodness{H2617}, and my fortress{H4686}; my high tower{H4869}, and my deliverer{H6403}{{H8764}}; my shield{H4043}, and <i>he</i> in whom I trust{H2620}{{H8804}}; who subdueth{H7286}{{H8802}} my people{H5971} under me.',
       3: 'LORD{H3068}, what <i>is</i> man{H120}, that thou takest knowledge{H3045}{{H8799}} of him! <i>or</i> the son{H1121} of man{H582}, that thou makest account{H2803}{{H8762}} of him!',
       4: 'Man{H120} is like{H1819}{{H8804}} to vanity{H1892}: his days{H3117} <i>are</i> as a shadow{H6738} that passeth away{H5674}{{H8802}}.',
@@ -17604,7 +17604,7 @@ const Map<String, Map<int, Map<int, String>>> bibleDataStrongs = {
       15: 'Happy{H835} <i>is that</i> people{H5971}, that is in such a case{H3602}: <i>yea</i>, happy{H835} <i>is that</i> people{H5971}, whose God{H430} <i>is</i> the LORD{H3068}.',
     },
     145: {
-      1: '(David\'s{H1732} <i>Psalm</i> of praise{H8416}.) I will extol{H7311}{{H8787}} thee, my God{H430}, O king{H4428}; and I will bless{H1288}{{H8762}} thy name{H8034} for ever{H5769} and ever{H5703}.',
+      1: 'I will extol{H7311}{{H8787}} thee, my God{H430}, O king{H4428}; and I will bless{H1288}{{H8762}} thy name{H8034} for ever{H5769} and ever{H5703}.',
       2: 'Every day{H3117} will I bless{H1288}{{H8762}} thee; and I will praise{H1984}{{H8762}} thy name{H8034} for ever{H5769} and ever{H5703}.',
       3: 'Great{H1419} <i>is</i> the LORD{H3068}, and greatly{H3966} to be praised{H1984}{{H8794}}; and his greatness{H1420} <i>is</i> unsearchable{H2714}.',
       4: 'One{H1755} generation{H1755} shall praise{H7623}{{H8762}} thy works{H4639} to another, and shall declare{H5046}{{H8686}} thy mighty acts{H1369}.',
