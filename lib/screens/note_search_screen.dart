@@ -65,6 +65,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   bool _useWholeWord = false;
   bool _caseSensitive = false;
   bool _isResetting = false; // Flag to prevent spamming the reset button
+  bool _isOptionsDrawerOpen = false;
 
   // Book filter state
   String _bookFilterType = 'All Books'; // Current selected filter type
@@ -79,7 +80,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
-  Timer? _onSearchDebounce;
   int? _totalMatches;
   int? _totalVerses;
   RegExp? _currentRegex;
@@ -287,7 +287,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     if (useRegex) {
       RegExp searchRegex = _createRegExp(input, _caseSensitive);
 
-      return {'regex': searchRegex};
+      return {'Regular Expressions': searchRegex};
     } else {
       // parse phrases and words
       RegExp phraseRegExp = RegExp(r'"([^"]+)"');
@@ -303,7 +303,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
           .toList();
       final allTerms = [...phrases, ...originalWords];
       if (allTerms.isEmpty) {
-        return {'regex': _createRegExp('.*', _caseSensitive)};
+        return {'Regular Expressions': _createRegExp('.*', _caseSensitive)};
       }
 
       // Treat * as [A-Za-z]*
@@ -320,7 +320,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
       } else {
         pattern = '(${escapedTerms.join('|')})';
       }
-      return {'regex': _createRegExp(pattern, _caseSensitive)};
+      return {'Regular Expressions': _createRegExp(pattern, _caseSensitive)};
     }
   }
 
@@ -346,7 +346,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
     _resultsScrollController.dispose();
-    _onSearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -357,7 +356,8 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         _useRegex = prefs.getBool(_regexKey) ?? false;
         _useWholeWord = prefs.getBool(_wholeWordKey) ?? false;
         _caseSensitive = prefs.getBool(_caseSensitiveKey) ?? false;
-        _bookFilterType = prefs.getString(_bookFilterTypeKey) ?? 'All Books';
+        _bookFilterType =
+            BookFilter.normalizeFilterType(prefs.getString(_bookFilterTypeKey));
         _customBookFilter = prefs.getString(_bookFilterCustomKey) ?? '';
         // Update the text controller to reflect loaded custom range
         _customRangeController.text = _customBookFilter;
@@ -434,7 +434,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
 
       final patternData =
           _buildSearchPattern(_useRegex, lastSearch, _useWholeWord);
-      _currentRegex = patternData['regex'] as RegExp;
+      _currentRegex = patternData['Regular Expressions'] as RegExp;
 
       // Perform the search
       final results = await _searchNotes(lastSearch);
@@ -520,7 +520,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     try {
       final patternData =
           _buildSearchPattern(_useRegex, searchText, _useWholeWord);
-      _currentRegex = patternData['regex'] as RegExp;
+      _currentRegex = patternData['Regular Expressions'] as RegExp;
 
       // Perform the search
       final results = await _searchNotes(searchText);
@@ -572,6 +572,144 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     }
   }
 
+  // Show focused help for a single search option (triggered by the
+  // circled-i icon next to each toggle in the options drawer).
+  void _showSearchOptionHelp(String title, List<String> bullets) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        insetPadding: EdgeInsets.all(0.0),
+        contentPadding: EdgeInsets.all(16.0),
+        actionsPadding: EdgeInsets.all(0.0),
+        titlePadding: EdgeInsets.all(0.0),
+        backgroundColor: bgColor,
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(title,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context))),
+              const SizedBox(height: 8),
+              ...bullets.map((b) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text(
+                      '\u2022 $b',
+                      style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
+                    ),
+                  )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              child: Text(
+                'Close',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context)),
+              ),
+              onPressed: () => Navigator.pop(context))
+        ],
+      ),
+    );
+  }
+
+  // Glanceable indicator shown only when any mode toggle is non-default (on).
+  // Appears as a small line after the Reset/Search buttons and before results.
+  // On the same line it also reports whether a book filter is in use.
+  Widget _buildActiveModesIndicator() {
+    final activeModes = <String>[];
+    if (_caseSensitive) activeModes.add('Case-sensitive');
+    if (_useWholeWord) activeModes.add('Whole Word');
+    if (_useRegex) activeModes.add('Regular Expressions');
+    if (activeModes.isEmpty) return const SizedBox.shrink();
+
+    final bool hasBookFilter = _bookFilterType != 'All Books';
+    String indicatorText = activeModes.join(', ');
+    if (hasBookFilter) {
+      final String filterLabel;
+      if (_bookFilterType == 'Custom Range') {
+        final custom = _customBookFilter.trim();
+        filterLabel = custom.isEmpty ? 'Custom Range' : 'Custom ($custom)';
+      } else {
+        filterLabel = _bookFilterType;
+      }
+      indicatorText += ' • Filter: $filterLabel';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 4.0),
+      child: Text(
+        indicatorText,
+        textAlign: TextAlign.center,
+        softWrap: true,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: uiFontSize - 4,
+          fontFamily: uiFontFamily,
+          fontStyle: FontStyle.italic,
+          color: getAdaptiveTextColor(context).withValues(alpha: 0.75),
+        ),
+      ),
+    );
+  }
+
+  // Builds a drawer toggle row with a large help button to the left of the
+  // label (matching the app's size-32 icon convention). The info button
+  // sits outside the SwitchListTile so tapping it never flips the toggle.
+  Widget _buildSearchOptionTile({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required String helpTitle,
+    required List<String> helpBullets,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: IconButton(
+            icon: Icon(
+              Icons.info_outline,
+              size: 32,
+              color: getAdaptiveTextColor(context),
+              semanticLabel: '$title help',
+            ),
+            tooltip: '$title help',
+            onPressed: () => _showSearchOptionHelp(helpTitle, helpBullets),
+          ),
+        ),
+        Expanded(
+          child: SwitchListTile(
+            title: Text(title,
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
+            contentPadding: const EdgeInsets.only(left: 0.0, right: 16.0),
+            value: value,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+
   // Show action menu for search results (simplified for notes)
   void _showNoteSearchResultActionMenu(
       BuildContext context, Map<String, dynamic> result) async {
@@ -605,8 +743,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
 
     final cleanVerseText = VerseTextParser.toPlainVerseText(verseText);
     final copyText = '$bookName $chapter:$verse\n$cleanVerseText';
-    final copyTextWithStrongs = '$bookName $chapter:$verse\n'
-        '${VerseTextParser.toStrongsAnnotatedVerseText(verseText)}';
 
     if (context.mounted) {
       showModalBottomSheet(
@@ -687,24 +823,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 });
               },
             ),
-            ListTile(
-              title: Center(
-                  child: Text(
-                "Copy Verse $verse (with Strong's)",
-                style: TextStyle(
-                    fontFamily: fontFamilyNotifier.value,
-                    fontSize: uiFontSize + 8,
-                    color: getAdaptiveTextColor(context)),
-              )),
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: copyTextWithStrongs))
-                    .then((_) {
-                  if (!context.mounted) return;
-                  showStyledSnackBar(context, "Copied with Strong's Numbers");
-                  Navigator.of(context).pop();
-                });
-              },
-            ),
           ],
         ),
       );
@@ -733,8 +851,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         referenceText: referenceText, // Highlight the target verse
         onNavigateToVerse: (verse) => _gotoVerse(
             normalizedShortBookName, chapter, verse), // Navigate to the verse
-        onNoteIconTap: (int verse, String? noteText) => _openNoteFromSearch(
-            normalizedShortBookName, chapter, verse, noteText),
         onNoteEditTap: (int verse, String? noteText) => _openNoteFromSearch(
             normalizedShortBookName, chapter, verse, noteText),
         onVerseLink: (link, referenceText) => handleVerseLink(
@@ -743,7 +859,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
           referenceText,
           navigateToVerse: _gotoVerse,
           onVerseLinkRecursion: null, // Infinite recursion enabled by default
-          onNoteIconTap: _openNoteFromSearch,
           onNoteEditTap: _openNoteFromSearch,
         ),
       ),
@@ -937,6 +1052,17 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 existingNote: existingNote))); // Use provided existing note
   }
 
+  void _toggleSearchOptionsDrawer() {
+    final scaffoldState = _scaffoldKey.currentState;
+    if (scaffoldState == null) return;
+
+    if (_isOptionsDrawerOpen) {
+      scaffoldState.closeEndDrawer();
+    } else {
+      scaffoldState.openEndDrawer();
+    }
+  }
+
   String _formatNumber(int? number) {
     return number.toString().replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+($|\D))'),
@@ -960,6 +1086,12 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
+      onEndDrawerChanged: (isOpened) {
+        if (_isOptionsDrawerOpen == isOpened) return;
+        setState(() {
+          _isOptionsDrawerOpen = isOpened;
+        });
+      },
       appBar: AppBar(
         scrolledUnderElevation: 0,
         iconTheme: IconThemeData(
@@ -991,17 +1123,27 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.menu,
+              _isOptionsDrawerOpen ? Icons.menu_open : Icons.menu,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Show Search Options Menu',
+              semanticLabel: _isOptionsDrawerOpen
+                  ? 'Close Notes Search Options Menu'
+                  : 'Show Notes Search Options Menu',
             ),
+            tooltip: _isOptionsDrawerOpen ? 'Close' : 'Search Options',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+            onPressed: _toggleSearchOptionsDrawer,
           ),
         ],
       ),
       endDrawer: Drawer(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          side: BorderSide(
+            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+            width: 1.0,
+          ),
+        ),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? darkBackgroundColor.value
             : lightBackgroundColor.value,
@@ -1015,18 +1157,96 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 color:
                     isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
+              automaticallyImplyLeading: false,
               toolbarHeight: 60,
               backgroundColor: Theme.of(context).brightness == Brightness.dark
                   ? darkBackgroundColor.value
                   : lightBackgroundColor.value,
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    Icons.menu_open,
+                    size: 32,
+                    color: isDark
+                        ? darkPrimaryColor.value
+                        : lightPrimaryColor.value,
+                    semanticLabel: 'Close Notes Search Options Menu',
+                  ),
+                  tooltip: 'Close',
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  onPressed: () => _scaffoldKey.currentState?.closeEndDrawer(),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('Regex',
+            Center(
+              child: Text('Notes Search Options',
+                  style: TextStyle(
+                      fontSize: uiFontSize + 2,
+                      fontFamily: uiFontFamily,
+                      fontWeight: FontWeight.bold,
+                      color: getAdaptiveTextColor(context))),
+            ),
+            const SizedBox(height: 8),
+            Divider(
+              indent: 16,
+              endIndent: 16,
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text('Mode Toggles',
                   style: TextStyle(
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,
                       color: getAdaptiveTextColor(context))),
+            ),
+            const SizedBox(height: 8),
+            _buildSearchOptionTile(
+              title: _caseSensitive
+                  ? 'Disable Case-sensitivity'
+                  : 'Enable Case-sensitivity',
+              value: _caseSensitive,
+              onChanged: (val) async {
+                setState(() {
+                  _caseSensitive = val;
+                });
+                await _saveSearchOptions();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+              },
+              helpTitle: 'Case-sensitivity',
+              helpBullets: const [
+                'Off: case is ignored, so "love" matches love, Love, and LOVE.',
+                'On: only exact case matches, so "Love" will not match "love".',
+                'Applies to regular, whole-word, and regex searches.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useWholeWord ? 'Disable Whole Word' : 'Enable Whole Word',
+              value: _useWholeWord,
+              onChanged: (val) async {
+                setState(() {
+                  _useWholeWord = val;
+                  if (_useWholeWord) _useRegex = false;
+                });
+                await _saveSearchOptions();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+              },
+              helpTitle: 'Whole Word',
+              helpBullets: const [
+                'Matches complete words only: "love" finds love but NOT loved or lovely.',
+                'With several words, a note must contain every word as a whole word.',
+                'The * wildcard still works (eg. love* matches love, loved, and loveth).',
+                'Enabling this turns off Regular Expressions.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useRegex
+                  ? 'Disable Regular Expressions'
+                  : 'Enable Regular Expressions',
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {
@@ -1040,44 +1260,27 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                   _onSearch();
                 }
               },
+              helpTitle: 'Regular Expressions',
+              helpBullets: const [
+                'Enables ECMAScript 2018 regular expressions with Unicode property support (eg. \\p{L} matches any letter).',
+                'Enabling this turns off Whole Word (they are mutually exclusive).',
+                'The caret symbol ^ matches the start of any line (eg. "^My" matches any note that begins with My).',
+                'The dollar symbol \$ matches the end of a line (eg. "!\$" matches any note that ends with an exclamation mark).',
+                'The period character . matches any single character (eg. "S.chem"). Add a quantifier to match more than one character (eg. "S.+chem").',
+                '\\s matches any white-space character (eg. " ").',
+                '\\w is shorthand for the word character class [a-zA-Z0-9_] which is the same as any lower or uppercase character, any digit, and the underscore symbol.',
+                'Parenthesis group text and combine with the alternation operator | to match close variations (eg. "S(y|i|he)chem" matches "Sichem", "Shechem", and "Sychem").',
+                'Character classes match any one of the characters in the set (eg. "[abc]" matches any ONE of a, b, or c; "[a-z]+thite" matches Hamathite, Kohathite, and more).',
+                'The negation operator inside character classes excludes characters (eg. "\\b[^gG]od\\b" matches any three-letter word ending in "od" that does not begin with "g" or "G").',
+                'Positive/negative lookahead (?=)/(?!) and lookbehinds (?<=)/(?<!) are supported (eg. "(?<!dark)ness" matches words ending with "ness" but not "darkness").',
+                'Quantifiers after a character, class, or group set how many match: * = zero or more, + = one or more, ? = zero or one, {n} = exactly n, {n,} = n or more, {n,m} = between n and m.',
+              ],
             ),
-            SwitchListTile(
-              title: Text('Whole word',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _useWholeWord,
-              onChanged: (val) async {
-                setState(() {
-                  _useWholeWord = val;
-                  if (_useWholeWord) _useRegex = false;
-                });
-                await _saveSearchOptions();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-              },
+            const SizedBox(height: 8),
+            Divider(
+              indent: 16,
+              endIndent: 16,
             ),
-            SwitchListTile(
-              title: Text('Case-sensitive',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _caseSensitive,
-              onChanged: (val) async {
-                setState(() {
-                  _caseSensitive = val;
-                });
-                await _saveSearchOptions();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            Divider(),
             const SizedBox(height: 8),
             Padding(
               padding:
@@ -1225,10 +1428,11 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                         subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                          Text('Custom range help:',
+                          Text('Custom Range Rules:',
                               style: TextStyle(
                                   fontSize: uiFontSize,
                                   fontFamily: uiFontFamily,
+                                  fontWeight: FontWeight.bold,
                                   color: getAdaptiveTextColor(context))),
                           const SizedBox(height: 16),
                           Text(
@@ -1320,17 +1524,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                     ),
                     onChanged: (_) {
                       _lastInputTime = DateTime.now();
-                      if (_onSearchDebounce?.isActive ?? false) {
-                        _onSearchDebounce?.cancel();
-                      }
-                      _onSearchDebounce =
-                          Timer(Duration(milliseconds: 500), () {
-                        if (_controller.text.isNotEmpty &&
-                            _controller.text.length > 1 &&
-                            (_controller.text.split('"').length - 1) % 2 == 0) {
-                          _onSearch();
-                        }
-                      });
                     },
                     onSubmitted: (_) => _onSearch(),
                     style: TextStyle(
@@ -1407,6 +1600,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                         ),
                       ]),
                   const SizedBox(height: 8),
+                  _buildActiveModesIndicator(),
                   Expanded(
                     child: _controller.text.trim().isEmpty
                         ? Center(
@@ -1615,7 +1809,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                 noteText: result[
                                                                         'note_text']
                                                                     as String,
-                                                                onTap: () => _editNoteFromSearch(result),
+                                                                onTap: () =>
+                                                                    _editNoteFromSearch(
+                                                                        result),
                                                                 highlightRegex:
                                                                     _currentRegex,
                                                                 highlightColor:
@@ -1631,8 +1827,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                                                                       _gotoVerse,
                                                                   onVerseLinkRecursion:
                                                                       null, // Infinite recursion enabled by default in handleVerseLink
-                                                                  onNoteIconTap:
-                                                                      _openNoteFromSearch, // so notes work in nested dialogs
                                                                   onNoteEditTap:
                                                                       _openNoteFromSearch,
                                                                 ),

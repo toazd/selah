@@ -51,10 +51,22 @@ class WebstersDefinitionDialog {
         insetPadding: isMobile
             ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
             : const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-        // title: Text(
-        //   headword,
-        //   style: primaryTextStyle(dialogContext, uiFontSize + 4),
-        // ),
+        titlePadding: const EdgeInsets.fromLTRB(24.0, 8.0, 8.0, 0.0),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                headword,
+                style: textStyle(dialogContext, uiFontSize, bold: true),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: 'Close',
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+          ],
+        ),
         content: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: constrainedMaxWidth,
@@ -85,7 +97,8 @@ class WebstersDefinitionDialog {
                 'Definition copied to clipboard',
               );
             },
-            child: Text('Copy', style: textStyle(dialogContext, uiFontSize)),
+            child: Text('Copy Definition',
+                style: textStyle(dialogContext, uiFontSize)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -128,7 +141,6 @@ class WebstersDefinitionDialog {
                     referenceText,
                     navigateToVerse: null,
                     onVerseLinkRecursion: null,
-                    onNoteIconTap: null,
                     onNoteEditTap: null,
                   );
                 }
@@ -614,8 +626,9 @@ class _WebstersDefinitionLookupDialogState
   }
 
   void _copyDefinition() {
+    if (_currentHeadword == null || _currentDefinition == null) return;
     final plain =
-        '${_currentHeadword ?? ''}\n${_currentDefinition != null ? Websters1828DefinitionsDatabase.stripHtml(_currentDefinition!) : ''}';
+        '${_currentHeadword!}\n${Websters1828DefinitionsDatabase.stripHtml(_currentDefinition!)}';
     Clipboard.setData(ClipboardData(text: plain));
     showStyledSnackBar(context, 'Definition copied to clipboard');
   }
@@ -639,7 +652,26 @@ class _WebstersDefinitionLookupDialogState
       insetPadding: isMobile
           ? const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0)
           : const EdgeInsets.symmetric(horizontal: 32.0, vertical: 64.0),
-      contentPadding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+      titlePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 0.0),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              "Noah Webster's 1828 Dictionary Unabridged",
+              style: _textStyle(context, uiFontSize, bold: true),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: 'Close',
+            onPressed: () {
+              _persistState();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
       content: SizedBox(
         width: constrainedMaxWidth,
         height: maxHeight,
@@ -670,9 +702,10 @@ class _WebstersDefinitionLookupDialogState
                 suffixIcon: IconButton(
                   icon: Icon(
                     Icons.clear,
-                    semanticLabel: 'Reset',
+                    semanticLabel: 'Clear search text',
                     color: primaryColor,
                   ),
+                  tooltip: 'Clear search text',
                   onPressed: _clear,
                 ),
               ),
@@ -838,13 +871,14 @@ class _WebstersDefinitionLookupDialogState
             style: _textStyle(context, uiFontSize),
           ),
         ),
-        TextButton(
-          onPressed: _copyDefinition,
-          child: Text(
-            'Copy',
-            style: _textStyle(context, uiFontSize),
+        if (_currentHeadword != null && _currentDefinition != null)
+          TextButton(
+            onPressed: _copyDefinition,
+            child: Text(
+              'Copy Definition',
+              style: _textStyle(context, uiFontSize),
+            ),
           ),
-        ),
         TextButton(
           onPressed: () {
             _persistState();

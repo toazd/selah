@@ -20,9 +20,7 @@ Widget buildVerseDisplayWidget({
   required String rawVerseText,
   required TextStyle baseTextStyle,
   required Color backgroundColor,
-  required Map<String, dynamic> noteForVerse,
   required List<Map<String, dynamic>> highlightsForVerse,
-  required bool showNotesInline,
   required String fontFamily,
   required Color lightModeTextColor,
   required Color darkModeTextColor,
@@ -30,13 +28,9 @@ Widget buildVerseDisplayWidget({
   required Function(int)? onVerseLongPress,
   required Function(String, String?)? onLinkTap,
   required GlobalKey? verseKey,
-  required Function(int, String?)? onNoteIconTap,
   double? verseNumberWidth,
   Color? customBackgroundColor,
   bool displayVerseNumber = true,
-  bool showStrongsNumbers = false,
-  bool expandStrongsTapTarget = false,
-  void Function(String strongsNumber)? onStrongsTap,
 }) {
   // Determine whether it's a dark theme or not
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -69,30 +63,6 @@ Widget buildVerseDisplayWidget({
   // Build the right column spans (verse text with highlights)
   final rightSpans = <InlineSpan>[];
 
-  // Only show icon inline in verse if not showNotesInline and note exists
-  if (!showNotesInline && noteForVerse.isNotEmpty) {
-    rightSpans.add(WidgetSpan(
-      alignment: PlaceholderAlignment.bottom,
-      child: Padding(
-        padding: const EdgeInsets.only(
-            right: 8.0), // add a little space between the icon and the text
-        child: GestureDetector(
-          onTap: onNoteIconTap != null
-              ? () => onNoteIconTap(verseNumber, noteForVerse['note_text'])
-              : null,
-          child: Icon(
-            applyTextScaling: false,
-            Icons.text_snippet_outlined,
-            size: FontSizeAdjustments.getAdjustedSize(
-                fontFamilyNotifier.value, fontSizeNotifier.value),
-            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            semanticLabel: 'Verse note',
-          ),
-        ),
-      ),
-    ));
-  }
-
   // Apply highlights to the verse text
   final highlightedSpans = applyHighlightsToText(
     rawVerseText,
@@ -103,9 +73,6 @@ Widget buildVerseDisplayWidget({
     highlightsForVerse,
     lightModeTextColor,
     darkModeTextColor,
-    showStrongsNumbers: showStrongsNumbers,
-    expandStrongsTapTarget: expandStrongsTapTarget,
-    onStrongsTap: onStrongsTap,
   );
   rightSpans.addAll(highlightedSpans);
 
@@ -190,29 +157,20 @@ List<InlineSpan> applyHighlightsToText(
   Color backgroundColor,
   List<Map<String, dynamic>> highlights,
   Color lightModeTextColor,
-  Color darkModeTextColor, {
-  bool showStrongsNumbers = false,
-  bool expandStrongsTapTarget = false,
-  void Function(String strongsNumber)? onStrongsTap,
-}) {
+  Color darkModeTextColor,
+) {
   final displayVerseText = _removePilcrowMarkup(rawVerseText);
 
   // If no highlights, just parse the text normally
   if (highlights.isEmpty) {
-    return VerseTextParser.parseVerseText(displayVerseText, baseStyle,
-                showStrongsNumbers: showStrongsNumbers,
-                expandStrongsTapTarget: expandStrongsTapTarget,
-                onStrongsTap: onStrongsTap)
+    return VerseTextParser.parseVerseText(displayVerseText, baseStyle)
             .children ??
         [];
   }
 
   // Parse the raw verse text to get spans with markup removed from visible text.
-  final parsedVerseText = VerseTextParser.parseVerseText(
-      displayVerseText, baseStyle,
-      showStrongsNumbers: showStrongsNumbers,
-      expandStrongsTapTarget: expandStrongsTapTarget,
-      onStrongsTap: onStrongsTap);
+  final parsedVerseText =
+      VerseTextParser.parseVerseText(displayVerseText, baseStyle);
   final originalSpans = parsedVerseText.children ?? [];
 
   final adjustedHighlights = <Map<String, dynamic>>[];
@@ -266,8 +224,7 @@ TextRange? resolveHighlightCleanTextRange({
   return null;
 }
 
-/// Applies highlights while preserving parsed display-only spans, such as
-/// Strong's number widgets and the visual spaces inserted between them.
+/// Applies highlights while preserving the parsed display spans.
 List<InlineSpan> _applyHighlightsToParsedSpans({
   required List<InlineSpan> originalSpans,
   required List<Map<String, dynamic>> adjustedHighlights,
@@ -287,24 +244,10 @@ List<InlineSpan> _applyHighlightsToParsedSpans({
       continue;
     }
 
-    var spanText = span.text ?? '';
+    final spanText = span.text ?? '';
     if (spanText.isEmpty) {
       spans.add(span);
       continue;
-    }
-
-    if (_isDisplayOnlyStrongsSeparator(originalSpans, spanIndex)) {
-      spans.add(span);
-      continue;
-    }
-
-    // The parser keeps the leading space in the same TextSpan as the first
-    // word. Preserve it visually, but exclude it from clean-text offsets.
-    if (_hasLeadingStrongsDisplaySpace(originalSpans, spanIndex) &&
-        spanText.startsWith(' ')) {
-      spans.add(TextSpan(text: ' ', style: span.style));
-      spanText = spanText.substring(1);
-      if (spanText.isEmpty) continue;
     }
 
     final spanStart = cleanPosition;
@@ -406,29 +349,6 @@ TextSpan _buildHighlightedTextSpan({
   );
 }
 
-bool _isDisplayOnlyStrongsSeparator(List<InlineSpan> spans, int index) {
-  final span = spans[index];
-  return span is TextSpan &&
-      span.text == ' ' &&
-      index > 0 &&
-      index < spans.length - 1 &&
-      spans[index - 1] is WidgetSpan &&
-      spans[index + 1] is WidgetSpan;
-}
-
-/// The cleaned verse text removes the space following leading Strong's tags,
-/// but the parser keeps it so the superscript and the first word are visually
-/// separated. It must not advance the character positions used by highlights.
-bool _hasLeadingStrongsDisplaySpace(List<InlineSpan> spans, int index) {
-  final span = spans[index];
-  if (span is! TextSpan || index == 0) return false;
-
-  for (var i = 0; i < index; i++) {
-    if (spans[i] is! WidgetSpan) return false;
-  }
-  return true;
-}
-
 String _removePilcrowMarkup(String text) {
   return text.replaceAll('¶ ', '').replaceAll('¶', '');
 }
@@ -479,13 +399,10 @@ Widget buildVerseWidgetFromData(
   Function(int)? onVerseTap,
   Function(int)? onVerseLongPress,
   Function(String, String?)? onLinkTap,
-  Function(int, String?)? onNoteIconTap,
   Function(int, String?)? onNoteEditTap,
   Color lightHighlightTextColor,
   Color darkHighlightTextColor,
-  void Function(String strongsNumber)? onStrongsTap, {
-  bool expandStrongsTapTarget = false,
-}) {
+) {
   final widgets = <Widget>[];
 
   // Add paragraph break if needed
@@ -500,9 +417,7 @@ Widget buildVerseWidgetFromData(
     rawVerseText: data.rawVerseText,
     baseTextStyle: data.textStyle,
     backgroundColor: data.backgroundColor,
-    noteForVerse: data.noteForVerse,
     highlightsForVerse: data.highlightsForVerse,
-    showNotesInline: data.showNotesInline,
     fontFamily: data.fontFamily,
     lightModeTextColor: lightHighlightTextColor,
     darkModeTextColor: darkHighlightTextColor,
@@ -510,12 +425,8 @@ Widget buildVerseWidgetFromData(
     onVerseLongPress: onVerseLongPress,
     onLinkTap: onLinkTap,
     verseKey: data.verseKey,
-    onNoteIconTap: onNoteIconTap,
     verseNumberWidth: data.verseNumberWidth,
     customBackgroundColor: data.customBackgroundColor,
-    showStrongsNumbers: data.showStrongsNumbers,
-    expandStrongsTapTarget: expandStrongsTapTarget,
-    onStrongsTap: onStrongsTap,
   );
 
   widgets.add(
@@ -542,8 +453,8 @@ Widget buildVerseWidgetFromData(
     );
   }
 
-  // If showNotesInline, display note content below the verse
-  if (data.showNotesInline && data.noteText.isNotEmpty) {
+  // Display note content below the verse
+  if (data.noteText.isNotEmpty) {
     widgets.add(
       Container(
         margin: EdgeInsets.all(0.0),
@@ -579,9 +490,7 @@ List<VerseDisplayData> buildVerseDataList({
   required Color verseNumberColor,
   required Color backgroundColor,
   required double lineHeight,
-  required bool showNotesInline,
   bool showTskReferences = false,
-  bool showStrongsNumbers = false,
   Map<int, String> tskReferences = const {},
   required String fontFamily,
   required Color lightHighlightTextColor,
@@ -591,8 +500,6 @@ List<VerseDisplayData> buildVerseDataList({
 }) {
   final dataList = <VerseDisplayData>[];
   bool pilcrowSeen = false;
-  final effectiveLineHeight =
-      showStrongsNumbers ? lineHeight + 0.35 : lineHeight;
 
   // Different styles whether it is the verse number or the text itself
   final numStyle = TextStyle(
@@ -601,14 +508,14 @@ List<VerseDisplayData> buildVerseDataList({
     fontFamily: fontFamily,
     color: verseNumberColor,
     fontWeight: FontWeight.normal,
-    height: effectiveLineHeight,
+    height: lineHeight,
   );
   final textStyle = TextStyle(
     fontSize:
         FontSizeAdjustments.getAdjustedSize(fontFamily, fontSizeNotifier.value),
     fontFamily: fontFamily,
     color: textColor,
-    height: effectiveLineHeight,
+    height: lineHeight,
   );
 
   // Calculate dynamic width for verse number column based on current chapter's verses
@@ -628,9 +535,8 @@ List<VerseDisplayData> buildVerseDataList({
     }
 
     // Get note text if available
-    final noteText = (showNotesInline && notes.containsKey(vn))
-        ? (notes[vn]!['note_text'] as String? ?? '')
-        : '';
+    final noteText =
+        notes.containsKey(vn) ? (notes[vn]!['note_text'] as String? ?? '') : '';
 
     // Get TSK text if available
     final rawTskText = (tskReferences[vn] ?? '').trim();
@@ -642,16 +548,13 @@ List<VerseDisplayData> buildVerseDataList({
       VerseDisplayData(
         verseNumber: vn,
         rawVerseText: rawVerseText,
-        noteForVerse: notes[vn] ?? {},
         highlightsForVerse: highlights[vn] ?? [],
         fontFamily: fontFamily,
         textStyle: textStyle,
         //numStyle: numStyle,
         verseNumberWidth: verseNumberWidth,
         backgroundColor: backgroundColor,
-        showNotesInline: showNotesInline,
         showTskReferences: showTskReferences,
-        showStrongsNumbers: showStrongsNumbers,
         tskText: rawTskText,
         noteText: noteText,
         addParagraphBreak: addParagraphBreak,

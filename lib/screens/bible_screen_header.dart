@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../main.dart'; // For color notifiers
 import '../utils/book_name_converter.dart'; // For book name conversion
 
+import '../utils/preferences_constants.dart'; // For uiFontSize / uiFontFamily
+
 class BibleScreenHeader extends StatelessWidget {
   //final bool showViewMenu;
   final VoidCallback? onOpenDrawer;
@@ -12,7 +14,6 @@ class BibleScreenHeader extends StatelessWidget {
   final String? selectedBook;
   final int? selectedChapter;
   final VoidCallback? onShowNotesSearch;
-  final VoidCallback? onShowStrongsDefinitions;
   final VoidCallback? onShowWebstersDefinitions;
   //final VoidCallback? onShowBookmarksManager;
 
@@ -26,7 +27,6 @@ class BibleScreenHeader extends StatelessWidget {
     this.selectedBook,
     this.selectedChapter,
     this.onShowNotesSearch,
-    this.onShowStrongsDefinitions,
     this.onShowWebstersDefinitions,
     //this.onShowBookmarksManager,
   });
@@ -39,52 +39,37 @@ class BibleScreenHeader extends StatelessWidget {
         context);
     final primaryColor =
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
-    final actions = _buildHeaderActions();
+    final overflowActions = _buildOverflowActions();
 
+    // Fixed layout: drawer menu on the left, title in the center,
+    // and a single 3-dot overflow menu on the right. No width-based
+    // dynamic icon logic.
     return Container(
       height: 55, // Fixed height for consistent sizing
       color: barColor,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final visibleActionIds =
-              _visibleActionIdsForWidth(constraints.maxWidth);
-          final visibleActions = actions
-              .where((action) => visibleActionIds.contains(action.id))
-              .toList();
-          final hiddenActions = actions
-              .where((action) => !visibleActionIds.contains(action.id))
-              .toList();
-          final canShowOverflow =
-              constraints.maxWidth >= _minTitleWidth + _headerIconExtent;
-          final leftActions = visibleActions
-              .where((action) => action.side == _HeaderActionSide.left);
-          final rightActions = visibleActions
-              .where((action) => action.side == _HeaderActionSide.right);
+      child: Row(
+        children: [
+          _buildHeaderIconButton(
+            icon: Icons.menu,
+            semanticLabel: 'Main Options Menu',
+            tooltip: 'Options',
+            onPressed: onOpenDrawer,
+            color: primaryColor,
+          ),
 
-          return Row(
-            children: [
-              for (final action in leftActions)
-                _buildHeaderIconButton(action, primaryColor),
+          // Title area (centered)
+          Flexible(
+            fit: FlexFit.tight,
+            child: _buildTitleButton(context),
+          ),
 
-              // Title area (centered)
-              //Expanded(
-              Flexible(
-                fit: FlexFit.tight,
-                child: _buildTitleButton(context),
-              ),
-
-              for (final action in rightActions)
-                _buildHeaderIconButton(action, primaryColor),
-              if (hiddenActions.isNotEmpty && canShowOverflow)
-                _buildOverflowMenu(hiddenActions, primaryColor),
-            ],
-          );
-        },
+          _buildOverflowMenu(context, overflowActions, primaryColor),
+        ],
       ),
     );
   }
 
-  List<_HeaderAction> _buildHeaderActions() {
+  List<_HeaderAction> _buildOverflowActions() {
     void showSearch() {
       final callback = onShowSearch;
       if (callback != null) {
@@ -94,142 +79,142 @@ class BibleScreenHeader extends StatelessWidget {
 
     return [
       _HeaderAction(
-        id: _HeaderActionId.menu,
-        side: _HeaderActionSide.left,
-        icon: Icons.menu,
-        semanticLabel: 'Main Options Menu',
-        tooltip: 'Options',
-        onPressed: onOpenDrawer,
-      ),
-      _HeaderAction(
-        id: _HeaderActionId.notesSearch,
-        side: _HeaderActionSide.left,
-        icon: Icons.manage_search_rounded,
-        semanticLabel: 'Search Notes',
-        tooltip: 'Notes Search',
-        onPressed: onShowNotesSearch,
-      ),
-      _HeaderAction(
-        id: _HeaderActionId.strongsDefinitions,
-        side: _HeaderActionSide.left,
-        icon: Icons.menu_book,
-        semanticLabel: 'Show Strong\'s Definitions Lookup',
-        tooltip: 'Strong\'s Definitions',
-        onPressed: onShowStrongsDefinitions,
+        id: _HeaderActionId.search,
+        icon: Icons.search,
+        semanticLabel: 'Goto Search Screen',
+        tooltip: 'Open Search Screen',
+        onPressed: onShowSearch == null ? null : showSearch,
       ),
       _HeaderAction(
         id: _HeaderActionId.webstersDefinitions,
-        side: _HeaderActionSide.right,
         icon: Icons.auto_stories,
         semanticLabel: 'Show Webster\'s 1828 Dictionary',
         tooltip: 'Webster\'s 1828 Dictionary',
         onPressed: onShowWebstersDefinitions,
       ),
+      _HeaderAction(
+        id: _HeaderActionId.history,
+        icon: Icons.history,
+        semanticLabel: 'Show Verse Reference History Dialog',
+        tooltip: 'View Verse History',
+        onPressed: onShowHistory,
+      ),
+      _HeaderAction(
+        id: _HeaderActionId.notesSearch,
+        icon: Icons.manage_search_rounded,
+        semanticLabel: 'Open Search Notes Screen',
+        tooltip: 'Open Notes Search Screen',
+        onPressed: onShowNotesSearch,
+      ),
       // Uncomment if bookmark functionality is added
       // _HeaderAction(
       //   id: _HeaderActionId.bookmarks,
-      //   side: _HeaderActionSide.right,
       //   icon: Icons.bookmark_border_rounded,
       //   semanticLabel: 'Manage Bookmarks',
       //   tooltip: 'Bookmarks',
       //   onPressed: onShowBookmarksManager,
       // ),
-      _HeaderAction(
-        id: _HeaderActionId.history,
-        side: _HeaderActionSide.right,
-        icon: Icons.history,
-        semanticLabel: 'Show Verse Reference History Dialog',
-        tooltip: 'Verse History',
-        onPressed: onShowHistory,
-      ),
-      _HeaderAction(
-        id: _HeaderActionId.search,
-        side: _HeaderActionSide.right,
-        icon: Icons.search,
-        semanticLabel: 'Goto Search Screen',
-        tooltip: 'Search',
-        onPressed: onShowSearch == null ? null : showSearch,
-      ),
     ];
   }
 
-  Set<_HeaderActionId> _visibleActionIdsForWidth(double maxWidth) {
-    // Wide to narrow: keep the full bar until overflow is needed, then
-    // preserve symmetry with only the outer menu and More Actions buttons.
-    final visibleActionSets = [
-      {
-        _HeaderActionId.menu,
-        _HeaderActionId.search,
-        _HeaderActionId.notesSearch,
-        _HeaderActionId.history,
-        _HeaderActionId.strongsDefinitions,
-        _HeaderActionId.webstersDefinitions,
-      },
-      {
-        _HeaderActionId.menu,
-      },
-      <_HeaderActionId>{},
-    ];
-
-    for (final visibleActionIds in visibleActionSets) {
-      final hiddenActionCount = _headerActionCount - visibleActionIds.length;
-      final overflowWidth = hiddenActionCount > 0 ? _headerIconExtent : 0.0;
-      final reservedWidth =
-          (visibleActionIds.length * _headerIconExtent) + overflowWidth;
-
-      if (maxWidth - reservedWidth >= _minTitleWidth) {
-        return visibleActionIds;
-      }
-    }
-
-    return const {};
-  }
-
-  Widget _buildHeaderIconButton(_HeaderAction action, Color color) {
+  Widget _buildHeaderIconButton({
+    required IconData icon,
+    required String semanticLabel,
+    required String tooltip,
+    required VoidCallback? onPressed,
+    required Color color,
+  }) {
     return IconButton(
       icon: Icon(
-        action.icon,
-        semanticLabel: action.semanticLabel,
+        icon,
+        semanticLabel: semanticLabel,
       ),
-      tooltip: action.tooltip,
-      onPressed: action.onPressed,
+      tooltip: tooltip,
+      onPressed: onPressed,
       iconSize: 32,
       padding: EdgeInsets.all(8),
       color: color,
     );
   }
 
-  Widget _buildOverflowMenu(List<_HeaderAction> actions, Color color) {
-    return PopupMenuButton<_HeaderActionId>(
-      icon: Icon(
-        Icons.more_vert,
-        semanticLabel: 'More Bible Header Actions',
-        color: color,
-      ),
-      tooltip: 'More Actions',
-      iconSize: 32,
-      padding: EdgeInsets.all(8),
-      onSelected: (id) {
-        final action = actions.firstWhere((action) => action.id == id);
-        action.onPressed?.call();
-      },
-      itemBuilder: (context) {
-        return [
-          for (final action in actions)
-            PopupMenuItem<_HeaderActionId>(
-              value: action.id,
-              enabled: action.onPressed != null,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(action.icon, size: 22),
-                  const SizedBox(width: 12),
-                  Text(action.tooltip),
-                ],
-              ),
+  Widget _buildOverflowMenu(
+    BuildContext context,
+    List<_HeaderAction> actions,
+    Color primaryColor,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final menuBackgroundColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+    final menuTextColor = isDark ? darkTextColor.value : lightTextColor.value;
+    final menuTextStyle = TextStyle(
+      fontSize: uiFontSize,
+      fontFamily: uiFontFamily,
+      color: menuTextColor,
+    );
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        popupMenuTheme: PopupMenuThemeData(
+          color: menuBackgroundColor,
+          textStyle: menuTextStyle,
+          iconColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            side: BorderSide(
+              color: primaryColor,
+              width: 1.0,
             ),
-        ];
-      },
+          ),
+        ),
+      ),
+      child: PopupMenuButton<_HeaderActionId>(
+        icon: Icon(
+          Icons.more_vert,
+          semanticLabel: 'More Bible Header Actions',
+          color: primaryColor,
+        ),
+        tooltip: 'More Actions',
+        iconSize: 32,
+        padding: EdgeInsets.all(8),
+        color: menuBackgroundColor,
+        onSelected: (id) {
+          final action = actions.firstWhere((action) => action.id == id);
+          action.onPressed?.call();
+        },
+        itemBuilder: (context) {
+          return [
+            for (final action in actions)
+              PopupMenuItem<_HeaderActionId>(
+                value: action.id,
+                enabled: action.onPressed != null,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      action.icon,
+                      size: 22,
+                      color:
+                          action.onPressed != null ? primaryColor : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        action.tooltip,
+                        style: menuTextStyle.copyWith(
+                          color: action.onPressed != null
+                              ? menuTextColor
+                              : Colors.grey,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ];
+        },
+      ),
     );
   }
 
@@ -342,28 +327,16 @@ class BibleScreenHeader extends StatelessWidget {
   }
 }
 
-const double _headerIconExtent = 48.0;
-const double _minTitleWidth = 80.0;
-const int _headerActionCount = 6;
-
 enum _HeaderActionId {
-  menu,
   notesSearch,
-  strongsDefinitions,
   webstersDefinitions,
   history,
   search,
 }
 
-enum _HeaderActionSide {
-  left,
-  right,
-}
-
 class _HeaderAction {
   const _HeaderAction({
     required this.id,
-    required this.side,
     required this.icon,
     required this.semanticLabel,
     required this.tooltip,
@@ -371,7 +344,6 @@ class _HeaderAction {
   });
 
   final _HeaderActionId id;
-  final _HeaderActionSide side;
   final IconData icon;
   final String semanticLabel;
   final String tooltip;

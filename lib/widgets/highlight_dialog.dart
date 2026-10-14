@@ -578,7 +578,7 @@ class _HighlightDialogState extends State<HighlightDialog> {
                       TextButton(
                         onPressed: _confirmClearHighlights,
                         child: Text(
-                          'Clear',
+                          'Delete All',
                           style: TextStyle(
                             fontSize: uiFontSize,
                             fontFamily: uiFontFamily,

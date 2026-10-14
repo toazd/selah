@@ -264,28 +264,62 @@ class _AuthScreenState extends State<AuthScreen> {
         child: SingleChildScrollView(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: 500),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    _isSignUp
-                        ? 'Create an account'
-                        : 'Sign in to sync your data',
-                    style: TextStyle(
-                        fontSize: uiFontSize + 8,
-                        fontFamily: uiFontFamily,
-                        fontWeight: FontWeight.normal,
-                        color: getAdaptiveTextColor(context)),
+                  Center(
+                    child: Text(
+                      _isSignUp
+                          ? 'Create an account'
+                          : 'Sign in to sync your data',
+                      style: TextStyle(
+                          fontSize: uiFontSize + 8,
+                          fontFamily: uiFontFamily,
+                          fontWeight: FontWeight.bold,
+                          color: getAdaptiveTextColor(context)),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Center(
-                      child: Image.asset(
-                    'assets/icon.png',
-                    scale: 2.0,
-                    isAntiAlias: true,
-                    filterQuality: FilterQuality.high,
-                  )),
+                    child: Text(
+                        'Create an account to backup and sync your highlights, notes, saved searches, and verse history using a free online cloud service. You may sign into the same account on multiple devices and they will seemlessly sync data between each other.\n\nCreating an account and using the sync service is both free and anonymous.\n\nThe sync service is provided for free compliments of the Supabase free tier (www.supabase.com).',
+                        style: TextStyle(
+                            fontSize: uiFontSize - 2,
+                            fontFamily: uiFontFamily,
+                            fontWeight: FontWeight.normal,
+                            color: getAdaptiveTextColor(context))),
+                  ),
+                  // Center(
+                  //     child: Image.asset(
+                  //   'assets/icon.png',
+                  //   scale: 2.0,
+                  //   isAntiAlias: true,
+                  //   filterQuality: FilterQuality.high,
+                  // )),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isSignUp = !_isSignUp;
+                        _errorMessage = null;
+                      });
+                    },
+                    child: Text(
+                      _isSignUp
+                          ? isMobile
+                              ? 'Already have an account? Tap here to sign in.'
+                              : 'Already have an account? Click here to sign in.'
+                          : isMobile
+                              ? 'Don\'t have an account? Tap here to create one.'
+                              : 'Don\'t have an account? Click here to create one.',
+                      style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          fontWeight: FontWeight.bold,
+                          color: getAdaptiveTextColor(context)),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     autofocus: true,
@@ -376,29 +410,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     usePrimaryColor: true)),
                           ),
                   ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isSignUp = !_isSignUp;
-                        _errorMessage = null;
-                      });
-                    },
-                    child: Text(
-                      _isSignUp
-                          ? isMobile
-                              ? 'Already have an account? Tap here to sign in.'
-                              : 'Already have an account? Click here to sign in.'
-                          : isMobile
-                              ? 'Don\'t have an account? Tap here to create one.'
-                              : 'Don\'t have an account? Click here to create one.',
-                      style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          fontWeight: FontWeight.bold,
-                          color: getAdaptiveTextColor(context)),
-                    ),
-                  ),
+                  //const SizedBox(height: 16),
                 ],
               ),
             ),

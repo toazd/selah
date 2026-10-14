@@ -5,7 +5,7 @@ summary: Cross-platform KJV Bible study app
 description: |
   Selah is a cross-platform, touch-friendly Bible study application built with
   Flutter. It provides offline King James Bible reading, rich verse notes,
-  word-level highlighting, Strong's definitions and search, TSK cross
+  word-level highlighting, TSK cross
   references, verse history, import and export tools, and optional account-based
   sync.
 

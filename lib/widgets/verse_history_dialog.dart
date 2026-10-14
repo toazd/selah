@@ -177,7 +177,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Choose the oldest date you want to keep. History before that date will be removed after you confirm.',
+                  'Choose the oldest date you want to keep. History before that date will be removed.',
                   style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -327,7 +327,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Clear',
+            child: Text('Delete All',
                 style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -678,7 +678,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                   children: [
                     TextButton(
                       onPressed: _clearHistory,
-                      child: Text('Clear',
+                      child: Text('Delete All',
                           style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,

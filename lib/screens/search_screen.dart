@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../database/bible_database.dart';
 import '../main.dart';
 import '../utils/verse_text_parser.dart';
-import '../widgets/search_history_dialog.dart';
+import '../widgets/saved_search_dialog.dart';
 import '../utils/book_name_converter.dart'; // Import for book name conversion
 import '../utils/book_filter.dart'; // Import for book filtering
 import '../screens/chapter_dialog.dart'; // Import for ChapterDialog
@@ -25,7 +25,6 @@ import 'dart:async';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/error_handler.dart';
-import 'strongs_search_screen.dart';
 
 // Top-level functions for compute() to keep expensive search work off the UI
 // isolate on native platforms.
@@ -943,7 +942,6 @@ class _SearchScreenState extends State<SearchScreen>
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
-  Timer? _onSearchDebounce;
   int _activeSearchId = 0;
   int? _totalMatches;
   int? _totalVerses;
@@ -1135,7 +1133,6 @@ class _SearchScreenState extends State<SearchScreen>
     //_searchFocusNode.removeListener(_onFocusChange);
     //_searchFocusNode.dispose();
     //_keyboardChannel.setMethodCallHandler(null);
-    _onSearchDebounce?.cancel();
     super.dispose();
   }
 
@@ -1201,7 +1198,8 @@ class _SearchScreenState extends State<SearchScreen>
         _useWholeWord = prefs.getBool(_wholeWordKey) ?? false;
         _useRedLetter = prefs.getBool(_redLetterKey) ?? false;
         _caseSensitive = prefs.getBool(_caseSensitiveKey) ?? false;
-        _bookFilterType = prefs.getString(_bookFilterTypeKey) ?? 'All Books';
+        _bookFilterType =
+            BookFilter.normalizeFilterType(prefs.getString(_bookFilterTypeKey));
         _customBookFilter = prefs.getString(_bookFilterCustomKey) ?? '';
         // Update the text controller to reflect loaded custom range
         _customRangeController.text = _customBookFilter;
@@ -1345,9 +1343,11 @@ class _SearchScreenState extends State<SearchScreen>
       final lastSearchCaseSensitive = prefs.containsKey(_caseSensitiveKey)
           ? _caseSensitive
           : (prefs.getBool('lastSearchCaseSensitive') ?? false);
-      final lastSearchBookFilterType = prefs.containsKey(_bookFilterTypeKey)
-          ? _bookFilterType
-          : (prefs.getString('lastSearchBookFilterType') ?? 'All Books');
+      final lastSearchBookFilterType = BookFilter.normalizeFilterType(
+        prefs.containsKey(_bookFilterTypeKey)
+            ? _bookFilterType
+            : prefs.getString('lastSearchBookFilterType'),
+      );
       final lastSearchCustomBookFilter = prefs.containsKey(_bookFilterCustomKey)
           ? _customBookFilter
           : (prefs.getString('lastSearchCustomBookFilter') ?? '');
@@ -1924,8 +1924,9 @@ class _SearchScreenState extends State<SearchScreen>
     return spans;
   }
 
-  // Show help dialog
-  void _showHelpDialog() {
+  // Show focused help for a single search option (triggered by the
+  // circled-i icon next to each toggle in the options drawer).
+  void _showSearchOptionHelp(String title, List<String> bullets) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
@@ -1933,216 +1934,33 @@ class _SearchScreenState extends State<SearchScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        insetPadding: EdgeInsets.all(0.0),
-        contentPadding: EdgeInsets.all(16.0),
-        actionsPadding: EdgeInsets.all(0.0),
-        titlePadding: EdgeInsets.all(0.0),
+        insetPadding: EdgeInsets.all(8.0),
+        contentPadding: EdgeInsets.all(8.0),
+        actionsPadding: EdgeInsets.all(8.0),
+        titlePadding: EdgeInsets.all(8.0),
         backgroundColor: bgColor,
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              UnbreakableText('Regular search',
+              UnbreakableText(title,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,
                       color: getAdaptiveTextColor(context))),
               const SizedBox(height: 8),
-              //UnbreakableText(
-              //  '• The default search enables partial word',
-              //  style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
-              //),
-              UnbreakableText(
-                '• Exact phrases must be surrounded by quotes (eg. "love one another").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              //UnbreakableText(
-              //  '• Enable the whole word option to match complete words only (eg. "love" won\'t match "loved" or "lovely").',
-              //  style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily, color: getAdaptiveTextColor(context)),
-              //),
-              UnbreakableText(
-                '• The asterisk is a wild card and can be used with one or more words (eg. love* will match love, lovest, loved, etc.).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Check the search options menu for more ways to customize your searches.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• You can mix and match the various search options but some of them are mututally exclusive.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              const SizedBox(height: 16),
-              UnbreakableText(
-                  'Nearby search (must be enabled in search options)',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              const SizedBox(height: 8),
-              UnbreakableText(
-                '• Finds passages where all search words appear within 3 verses of each other.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Requires more than one word (does not support quotes or the asterisk).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Example: "graven carved" results: Judges 18:17-20, 2 Chronicles 33:19-22, 2 Chronicles 34:7.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              const SizedBox(height: 16),
-              UnbreakableText(
-                  'Regular expression (must be enabled in search options)',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              const SizedBox(height: 8),
-              UnbreakableText(
-                '• Supports ECMAScript 2018 regular expressions with Unicode properties.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• The caret symbol ^ matches the start of any line (eg. "^My" matches any verse that begins with My or my - since there are no verses that begin with a lowercase letter the case-sensitive toggle won\'t change the results).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• The dollar symbol \$ matches the end of a line (eg. "!\$" matches any verse that ends with an exclamation mark).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• The period character . matches any single character (eg. "S.chem"). Note that you need to add a quantifier if you want the period to match more than one character (eg. "S.+chem").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• \\s matches any white-space character (eg. " ").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• \\w is shorthand for the word character class [a-zA-Z0-9_] which is the same as any lower or uppercase character, any digit, and the underscore symbol.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Parenthesis can be used as a grouping construct and when combined with the alternation operator | they can be used together to match close variations of the same word (eg. "S(y|i|he)chem" will match "Sichem", "Shechem", and "Sychem"). Note that in grouping constructs the characters must appear in the order they are given to match (the same as an AND operator between each character).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Characters classes match any one of the characters in the set (eg. "[abc]" will match any ONE of a, b, or c which is the same as an OR operator between each character; "[abc]+" will match one or more of any character in the set; "[a-z]+" will match any one or more characters in the range a to z; "[a-z]+thite" will match Hamathite, Kohathite, Korathite, Gazathite, Ashdothite, and more).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• The negation operator can be used inside of character classes to negate characters or ranges from matching (eg. "\\b[^gG]od\\b" will match any three-letter word that does not begin with "g" or "G" and ends with "od").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Positive/negative lookahead (?=)/(?!) and positive/negative lookbehinds (?<=)/(?<!) are fully supported (eg. "(?<!dark)ness" will match any word that ends with "ness" but does not begin with "dark").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Characters classes and the grouping construct can be used together (eg. "S([yi]|he)chem" will match "Sichem", "Shechem", and "Sychem").',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Quantifiers can appear after any character, character class/set, or grouping construct to specify quantities. Quantifiers: * = zero or more, + = one or more, ? = zero or one, {n} = exactly n times, {n,} = n or more times, {n,m} = between n and m times inclusive. Note that quantifiers with no limit (* and +) are inherently greedy (they match as many as possible). Add a ? after any quantifier to make it lazy (match as few as possible). The range quantifier can be used to specify a precise amount or range that you are looking for "a{2}" will match sequences of exactly two a\'s (Naamah, Canaan, Balaam).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Unicode properties: \\p{P} = punctuation, \\p{L} = any letter, \\p{N} = any number, \\p{S} = any symbol, \\p{Z} = separators (spaces, line/paragraph breaks), \\p{M} = marks (accents, combining characters)',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Example: "^Verily" (with Red Letter enabled) matches any sentence that Jesus spoke that begins with "Verily".',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Example: "\\b(?!\\bwrit)\\w*ten\\b" will match all words that end with "ten" but do not begin with "writ".',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Example: "(!|\\?)\$" matches any verse that ends with an exclamation mark or a question mark. Take note that if the character you are looking for is also a quantifier it needs to be escaped to become literal (by adding a backslash \\ before it).',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
-              UnbreakableText(
-                '• Example: "horeb|sinai|mount of God|Sina" matches any verse that contains the text horeb, sinai, "mount of God", and Sina.',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    color: getAdaptiveTextColor(context)),
-              ),
+              ...bullets.map((b) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: UnbreakableText(
+                      '• $b',
+                      style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: getAdaptiveTextColor(context)),
+                    ),
+                  )),
             ],
           ),
         ),
@@ -2158,6 +1976,91 @@ class _SearchScreenState extends State<SearchScreen>
               onPressed: () => Navigator.pop(context))
         ],
       ),
+    );
+  }
+
+  // Glanceable indicator shown only when any mode toggle is non-default (on).
+  // Appears as a small line after the Reset/Search buttons and before results.
+  // On the same line it also reports whether a book filter is in use.
+  Widget _buildActiveModesIndicator() {
+    final activeModes = <String>[];
+    if (_caseSensitive) activeModes.add('Case-sensitive');
+    if (_useWholeWord) activeModes.add('Whole Word');
+    if (_useRedLetter) activeModes.add('Red Letter Only');
+    if (_useNearby) activeModes.add('Nearby');
+    if (_useRegex) activeModes.add('Regular Expressions');
+    if (activeModes.isEmpty) return const SizedBox.shrink();
+
+    final bool hasBookFilter = _bookFilterType != 'All Books';
+    String indicatorText = activeModes.join(', ');
+    if (hasBookFilter) {
+      final String filterLabel;
+      if (_bookFilterType == 'Custom Range') {
+        final custom = _customBookFilter.trim();
+        filterLabel = custom.isEmpty ? 'Custom Range' : 'Custom ($custom)';
+      } else {
+        filterLabel = _bookFilterType;
+      }
+      indicatorText += ' • Filter: $filterLabel';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 4.0),
+      child: Text(
+        indicatorText,
+        textAlign: TextAlign.center,
+        softWrap: true,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: uiFontSize - 4,
+          fontFamily: uiFontFamily,
+          fontStyle: FontStyle.italic,
+          color: getAdaptiveTextColor(context).withValues(alpha: 0.75),
+        ),
+      ),
+    );
+  }
+
+  // Builds a drawer toggle row with a large help button to the left of the
+  // label (matching the app's size-32 icon convention). The info button
+  // sits outside the SwitchListTile so tapping it never flips the toggle.
+  Widget _buildSearchOptionTile({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required String helpTitle,
+    required List<String> helpBullets,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: IconButton(
+            icon: Icon(
+              Icons.info_outline,
+              size: 32,
+              color: getAdaptiveTextColor(context),
+              semanticLabel: '$title help',
+            ),
+            tooltip: '$title help',
+            onPressed: () => _showSearchOptionHelp(helpTitle, helpBullets),
+          ),
+        ),
+        Expanded(
+          child: SwitchListTile(
+            title: Text(title,
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
+            contentPadding: const EdgeInsets.only(left: 0.0, right: 16.0),
+            value: value,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
     );
   }
 
@@ -2184,10 +2087,6 @@ class _SearchScreenState extends State<SearchScreen>
         ? '$chapter:$verseNum-$endVerseNum'
         : '$chapter:$verseNum';
     final copyText = '$bookName $verseRef\n$cleanVerseText';
-    // Nearby results bundle several verses into a single string, so a verse can
-    // begin mid-string and its leading Strong's tags must be hoisted per line.
-    final copyTextWithStrongs = '$bookName $verseRef\n'
-        '${VerseTextParser.toStrongsAnnotatedVerseText(rawVerseText, perLine: isNearbyResult)}';
 
     showModalBottomSheet(
       context: context,
@@ -2236,26 +2135,6 @@ class _SearchScreenState extends State<SearchScreen>
                 if (!context.mounted) return;
                 showStyledSnackBar(context,
                     '${isNearbyResult ? 'Verses' : 'Verse'} copied to clipboard');
-                Navigator.of(context).pop();
-              });
-            },
-          ),
-          ListTile(
-            title: Center(
-                child: Text(
-              isNearbyResult
-                  ? "Copy Verses $verseNum-$endVerseNum (with Strong's)"
-                  : "Copy Verse $verseNum (with Strong's)",
-              style: TextStyle(
-                  fontFamily: fontFamilyNotifier.value,
-                  fontSize: uiFontSize + 8,
-                  color: getAdaptiveTextColor(context)),
-            )),
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: copyTextWithStrongs))
-                  .then((_) {
-                if (!context.mounted) return;
-                showStyledSnackBar(context, "Copied with Strong's Numbers");
                 Navigator.of(context).pop();
               });
             },
@@ -2349,8 +2228,6 @@ class _SearchScreenState extends State<SearchScreen>
         referenceText: referenceText, // Highlight the target verse
         onNavigateToVerse: (verse) => _gotoVerse(normalizedShortBookName,
             chapter, verse), // Navigate the bible screen to the verse
-        onNoteIconTap: (int verse, String? noteText) => _openNoteFromSearch(
-            normalizedShortBookName, chapter, verse, noteText),
         onNoteEditTap: (int verse, String? noteText) => _openNoteFromSearch(
             normalizedShortBookName, chapter, verse, noteText),
         onVerseLink: (link, referenceText) => handleVerseLink(
@@ -2360,7 +2237,6 @@ class _SearchScreenState extends State<SearchScreen>
           navigateToVerse: _gotoVerse,
           onVerseLinkRecursion:
               null, // Infinite recursion enabled by default in handleVerseLink
-          onNoteIconTap: _openNoteFromSearch, // so notes work in nested dialogs
           onNoteEditTap: _openNoteFromSearch,
         ),
       ),
@@ -2415,7 +2291,7 @@ class _SearchScreenState extends State<SearchScreen>
                 minFontSize: uiFontSize - 14,
               ))
             : Text(
-                'Bible Search',
+                'Bible Search Screen',
                 style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -2426,28 +2302,17 @@ class _SearchScreenState extends State<SearchScreen>
         actions: [
           IconButton(
             icon: Icon(
-              Icons.help_outline,
-              size: 32,
-              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Show Help Dialog',
-            ),
-            tooltip: 'Help',
-            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: _showHelpDialog,
-          ),
-          IconButton(
-            icon: Icon(
               Icons.history,
               size: 32,
               color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               semanticLabel: 'Show Search History Dialog',
             ),
-            tooltip: 'Search History',
+            tooltip: 'Saved Searches',
             color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) => SearchHistoryDialog(
+                builder: (context) => SavedSearchDialog(
                   onUpdateSearchQuery: (searchOptions) {
                     setState(() {
                       _controller.text = searchOptions['query'] as String;
@@ -2456,8 +2321,8 @@ class _SearchScreenState extends State<SearchScreen>
                       _useWholeWord = searchOptions['useWholeWord'] as bool;
                       _useRedLetter = searchOptions['useRedLetter'] as bool;
                       _caseSensitive = searchOptions['caseSensitive'] as bool;
-                      _bookFilterType =
-                          searchOptions['bookFilterType'] as String;
+                      _bookFilterType = BookFilter.normalizeFilterType(
+                          searchOptions['bookFilterType'] as String?);
                       _customBookFilter =
                           searchOptions['customBookFilter'] as String;
                       _customRangeController.text = _customBookFilter;
@@ -2471,32 +2336,6 @@ class _SearchScreenState extends State<SearchScreen>
                   },
                 ),
               );
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.manage_search,
-              size: 32,
-              color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              semanticLabel: 'Open Strongs Search',
-            ),
-            tooltip: 'Strongs Search',
-            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-            onPressed: () async {
-              final strongsResult = await Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StrongsSearchScreen(
-                    sourceScreenIndex: widget.sourceScreenIndex,
-                  ),
-                ),
-              );
-
-              if (strongsResult != null &&
-                  strongsResult.containsKey('verseLocation') &&
-                  context.mounted) {
-                Navigator.pop(context, strongsResult);
-              }
             },
           ),
           IconButton(
@@ -2515,6 +2354,13 @@ class _SearchScreenState extends State<SearchScreen>
         ],
       ),
       endDrawer: Drawer(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          side: BorderSide(
+            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+            width: 1.0,
+          ),
+        ),
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? darkBackgroundColor.value
             : lightBackgroundColor.value,
@@ -2528,7 +2374,6 @@ class _SearchScreenState extends State<SearchScreen>
                 color:
                     isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
               ),
-              //title: Text('Search Options', style: TextStyle(fontSize: uiFontSize, fontFamily: uiFontFamily)),
               automaticallyImplyLeading: false,
               toolbarHeight: 60,
               backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -2551,13 +2396,128 @@ class _SearchScreenState extends State<SearchScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('Regex',
+            Center(
+              child: Text('Search Options',
+                  style: TextStyle(
+                      fontSize: uiFontSize + 2,
+                      fontFamily: uiFontFamily,
+                      fontWeight: FontWeight.bold,
+                      color: getAdaptiveTextColor(context))),
+            ),
+            const SizedBox(height: 8),
+            Divider(
+              indent: 16,
+              endIndent: 16,
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text('Mode Toggles',
                   style: TextStyle(
                       fontSize: uiFontSize,
                       fontFamily: uiFontFamily,
                       color: getAdaptiveTextColor(context))),
+            ),
+            const SizedBox(height: 8),
+            _buildSearchOptionTile(
+              title: _caseSensitive
+                  ? 'Disable Case-sensitivity'
+                  : 'Enable Case-sensitivity',
+              value: _caseSensitive,
+              onChanged: (val) async {
+                setState(() {
+                  _caseSensitive = val;
+                });
+                await _saveSearchOptions();
+                // Clear cache when search options change
+                _clearHighlightCache();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+                // Removed Navigator.of(context).pop() - drawer stays open
+              },
+              helpTitle: 'Case-sensitivity',
+              helpBullets: const [
+                'Off: case is ignored, so "love" matches love, Love, and LOVE.',
+                'On: only exact case matches, so "Love" will not match "love".',
+                'Applies to regular, nearby, whole-word, and regex searches.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useWholeWord ? 'Disable Whole Word' : 'Enable Whole Word',
+              value: _useWholeWord,
+              onChanged: (val) async {
+                setState(() {
+                  _useWholeWord = val;
+                  if (_useWholeWord) _useRegex = false;
+                });
+                await _saveSearchOptions();
+                // Clear cache when search options change
+                _clearHighlightCache();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+                // Removed Navigator.of(context).pop() - drawer stays open
+              },
+              helpTitle: 'Whole Word',
+              helpBullets: const [
+                'Matches complete words only: "love" finds love but NOT loved or lovely.',
+                'With several words, a verse must contain every word as a whole word.',
+                'The * wildcard still works (eg. love* matches love, loved, and loveth).',
+                'Enabling this turns off Regular Expressions.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useRedLetter
+                  ? 'Disable Red Letter Only'
+                  : 'Enable Red Letter Only',
+              value: _useRedLetter,
+              onChanged: (val) async {
+                setState(() {
+                  _useRedLetter = val;
+                });
+                await _saveSearchOptions();
+                // Clear cache when search options change
+                _clearHighlightCache();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+                // Removed Navigator.of(context).pop() - drawer stays open
+              },
+              helpTitle: 'Red Letter Only',
+              helpBullets: const [
+                'Searches only the words of Jesus (the red-letter text) instead of every verse.',
+                'Combines with any other option, including regular, nearby, and regex search.',
+                'Example: "^Verily" with this on finds sentences Jesus spoke that begin with Verily.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useNearby ? 'Disable Nearby Word' : 'Enable Nearby Word',
+              value: _useNearby,
+              onChanged: (val) async {
+                setState(() {
+                  _useNearby = val;
+                  if (_useNearby) _useRegex = false;
+                });
+                await _saveSearchOptions();
+                // Clear cache when search options change
+                _clearHighlightCache();
+                if (_controller.text.trim().isNotEmpty) {
+                  _onSearch();
+                }
+                // Removed Navigator.of(context).pop() - drawer stays open
+              },
+              helpTitle: 'Nearby Word',
+              helpBullets: const [
+                'Finds passages where ALL search words appear within 3 verses of each other.',
+                'Needs more than one word (quotes and the * wildcard are not supported here).',
+                'Example: "graven carved" finds Judges 18:17-20, 2 Chronicles 33:19-22, and 2 Chronicles 34:7.',
+                'Enabling this turns off Regular Expressions.',
+              ],
+            ),
+            _buildSearchOptionTile(
+              title: _useRegex
+                  ? 'Disable Regular Expressions'
+                  : 'Enable Regular Expressions',
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {
@@ -2575,95 +2535,35 @@ class _SearchScreenState extends State<SearchScreen>
                 }
                 // Removed Navigator.of(context).pop() - drawer stays open
               },
+              helpTitle: 'Regular Expressions',
+              helpBullets: const [
+                'Enables ECMAScript 2018 regular expressions with Unicode property support (eg. \\p{L} matches any letter).',
+                'Enabling this turns off Nearby Word and Whole Word (they are mutually exclusive).',
+                'The caret symbol ^ matches the start of any line (eg. "^My" matches any verse that begins with My).',
+                'The dollar symbol \$ matches the end of a line (eg. "!\$" matches any verse that ends with an exclamation mark).',
+                'The period character . matches any single character (eg. "S.chem"). Note that you need to add a quantifier if you want the period to match more than one character (eg. "S.+chem").',
+                '\\s matches any white-space character (eg. " ").',
+                '\\w is shorthand for the word character class [a-zA-Z0-9_] which is the same as any lower or uppercase character, any digit, and the underscore symbol.',
+                'Parenthesis can be used as a grouping construct and when combined with the alternation operator | they can be used together to match close variations of the same word (eg. "S(y|i|he)chem" will match "Sichem", "Shechem", and "Sychem"). Note that in grouping constructs the characters must appear in the order they are given to match (the same as an AND operator between each character).',
+                'Characters classes match any one of the characters in the set (eg. "[abc]" will match any ONE of a, b, or c which is the same as an OR operator between each character; "[abc]+" will match one or more of any character in the set; "[a-z]+" will match any one or more characters in the range a to z; "[a-z]+thite" will match Hamathite, Kohathite, Korathite, Gazathite, Ashdothite, and more).',
+                'The negation operator can be used inside of character classes to negate characters or ranges from matching (eg. "\\b[^gG]od\\b" will match any three-letter word that does not begin with "g" or "G" and ends with "od").',
+                'Positive/negative lookahead (?=)/(?!) and positive/negative lookbehinds (?<=)/(?<!) are fully supported (eg. "(?<!dark)ness" will match any word that ends with "ness" but does not begin with "dark").',
+                'Characters classes and the grouping construct can be used together (eg. "S([yi]|he)chem" will match "Sichem", "Shechem", and "Sychem").',
+                'Quantifiers can appear after any character, character class/set, or grouping construct to specify quantities. Quantifiers: * = zero or more, + = one or more, ? = zero or one, {n} = exactly n times, {n,} = n or more times, {n,m} = between n and m times inclusive. Note that quantifiers with no limit (* and +) are inherently greedy (they match as many as possible). Add a ? after any quantifier to make it lazy (match as few as possible). The range quantifier can be used to specify a precise amount or range that you are looking for "a{2}" will match sequences of exactly two a\'s (Naamah, Canaan, Balaam).',
+                'Unicode properties: \\p{P} = punctuation, \\p{L} = any letter, \\p{N} = any number, \\p{S} = any symbol, \\p{Z} = separators (spaces, line/paragraph breaks), \\p{M} = marks (accents, combining characters)',
+                'Example: "^Verily" (with Red Letter enabled) matches any sentence that Jesus spoke that begins with "Verily".',
+                'Example: "\\b(?!\\bwrit)\\w*ten\\b" will match all words that end with "ten" but do not begin with "writ".',
+                'Example: "(!|\\?)\$" matches any verse that ends with an exclamation mark or a question mark. Take note that if the character you are looking for is also a quantifier it needs to be escaped to become literal (by adding a backslash \\ before it).',
+                'Example: "horeb|sinai|mount of God|Sina" matches any verse that contains the text horeb, sinai, "mount of God", and Sina.',
+              ],
             ),
-            SwitchListTile(
-              title: Text('Nearby',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _useNearby,
-              onChanged: (val) async {
-                setState(() {
-                  _useNearby = val;
-                  if (_useNearby) _useRegex = false;
-                });
-                await _saveSearchOptions();
-                // Clear cache when search options change
-                _clearHighlightCache();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-                // Removed Navigator.of(context).pop() - drawer stays open
-              },
-            ),
-            SwitchListTile(
-              title: Text('Whole word',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _useWholeWord,
-              onChanged: (val) async {
-                setState(() {
-                  _useWholeWord = val;
-                  if (_useWholeWord) _useRegex = false;
-                });
-                await _saveSearchOptions();
-                // Clear cache when search options change
-                _clearHighlightCache();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-                // Removed Navigator.of(context).pop() - drawer stays open
-              },
-            ),
-            SwitchListTile(
-              title: Text('Red letter',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _useRedLetter,
-              onChanged: (val) async {
-                setState(() {
-                  _useRedLetter = val;
-                });
-                await _saveSearchOptions();
-                // Clear cache when search options change
-                _clearHighlightCache();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-                // Removed Navigator.of(context).pop() - drawer stays open
-              },
-            ),
-            SwitchListTile(
-              title: Text('Case-sensitive',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              value: _caseSensitive,
-              onChanged: (val) async {
-                setState(() {
-                  _caseSensitive = val;
-                });
-                await _saveSearchOptions();
-                // Clear cache when search options change
-                _clearHighlightCache();
-                if (_controller.text.trim().isNotEmpty) {
-                  _onSearch();
-                }
-                // Removed Navigator.of(context).pop() - drawer stays open
-              },
-            ),
-            const SizedBox(height: 16),
-            Divider(),
             const SizedBox(height: 8),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            Divider(
+              indent: 32,
+              endIndent: 32,
+            ),
+            const SizedBox(height: 8),
+            Center(
               child: Text(
                 'Book Filter',
                 style: TextStyle(
@@ -2810,10 +2710,11 @@ class _SearchScreenState extends State<SearchScreen>
                         subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                          Text('Custom range help:',
+                          Text('Custom Range Rules:',
                               style: TextStyle(
                                   fontSize: uiFontSize,
                                   fontFamily: uiFontFamily,
+                                  fontWeight: FontWeight.bold,
                                   color: getAdaptiveTextColor(context))),
                           const SizedBox(height: 16),
                           Text(
@@ -2901,7 +2802,6 @@ class _SearchScreenState extends State<SearchScreen>
                           semanticLabel: 'Clear Search Query',
                         ),
                         onPressed: () async {
-                          _onSearchDebounce?.cancel();
                           _activeSearchId++;
                           setState(() {
                             _controller.clear();
@@ -2920,23 +2820,6 @@ class _SearchScreenState extends State<SearchScreen>
                     onChanged: (_) {
                       _lastInputTime = DateTime.now();
                       unawaited(_saveSearchOptions());
-                      _activeSearchId++;
-                      if (_onSearchDebounce?.isActive ?? false) {
-                        _onSearchDebounce?.cancel();
-                      }
-                      final canLiveSearch = _controller.text.isNotEmpty &&
-                          _controller.text.length > 3 &&
-                          (_controller.text.split('"').length - 1) % 2 == 0;
-                      if (kIsWeb || !canLiveSearch) {
-                        if (_isSearching) {
-                          setState(() => _isSearching = false);
-                        }
-                        return;
-                      }
-                      _onSearchDebounce =
-                          Timer(Duration(milliseconds: 500), () {
-                        _onSearch();
-                      });
                     },
                     onSubmitted: (_) {
                       _onSearch();
@@ -2962,7 +2845,9 @@ class _SearchScreenState extends State<SearchScreen>
                                       searchText,
                                       _isNearbySearchActive
                                           ? 'nearby'
-                                          : (_useRegex ? 'regex' : null));
+                                          : (_useRegex
+                                              ? 'Regular Expressions'
+                                              : null));
                                 }
                               : null,
                           style: ButtonStyle(
@@ -3012,7 +2897,6 @@ class _SearchScreenState extends State<SearchScreen>
                               ? null
                               : () async {
                                   if (_isResetting) return;
-                                  _onSearchDebounce?.cancel();
                                   _activeSearchId++;
                                   setState(() => _isResetting = true);
 
@@ -3114,6 +2998,7 @@ class _SearchScreenState extends State<SearchScreen>
                         ),
                       ]),
                   const SizedBox(height: 8),
+                  _buildActiveModesIndicator(),
                   Expanded(
                     child: _controller.text.trim().isEmpty
                         ? SizedBox.shrink()

@@ -110,10 +110,8 @@ const List<Color> defaultHighlightColors = [
   Colors.pinkAccent,
 ];
 
-const bool defaultShowNotesInline = true;
 final bool defaultShowNavigationBar = !isMobile;
 const bool defaultShowTskReferences = false;
-const bool defaultShowStrongs = false;
 
 // Sync retry delay constants (shared by all sync retry systems)
 const int syncRetryDelay1Seconds = 1; // First retry delay
@@ -127,7 +125,6 @@ const bool defaultSyncSearchHistory = true;
 
 // Moved to SharedPreferences so the cached username is independent of the local history database.
 const String cachedUsernamePreferenceKey = 'cachedUsername';
-const String strongsSearchTermPreferenceKey = 'lastStrongsSearchTerm';
 
 // Time-based theme preferences
 const int defaultDayStartHour = 7; // 7 AM

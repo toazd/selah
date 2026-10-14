@@ -433,7 +433,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
           _tapMode = tapModeIdx != null
               ? TapMode.values[tapModeIdx]
               : TapMode.threeTap;
-          _showQuickJump = showQuickJump ?? true;
+          _showQuickJump = showQuickJump ?? false;
         });
       }
     } catch (_) {
@@ -548,16 +548,18 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
+              scrollable: true,
+              constraints: BoxConstraints(maxWidth: 480),
               //title: Text('Verse Chooser Settings'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                        'Enables manual\n book, chapter, and optional\nverse entry (eg. John 3).',
+                        'Enables a text box for manual book, chapter, and optional verse entry (eg. John 3).',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.normal,
                             fontFamily: uiFontFamily,
                             fontSize: uiFontSize,
                             color: getAdaptiveTextColor(context))),
@@ -580,10 +582,10 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                        '3-Tap requires choosing\na verse number and\n2-Tap does not.',
+                        'The Tap Mode toggle determines whether or not choosing a verse number is required for navigation.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.normal,
                             fontFamily: uiFontFamily,
                             fontSize: uiFontSize,
                             color: getAdaptiveTextColor(context))),
@@ -628,14 +630,14 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                           fontSize: uiFontSize,
                           color: Colors.red)),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel',
-                      style: TextStyle(
-                          fontFamily: uiFontFamily,
-                          fontSize: uiFontSize,
-                          color: getAdaptiveTextColor(context))),
-                ),
+                // TextButton(
+                //   onPressed: () => Navigator.pop(context),
+                //   child: Text('Cancel',
+                //       style: TextStyle(
+                //           fontFamily: uiFontFamily,
+                //           fontSize: uiFontSize,
+                //           color: getAdaptiveTextColor(context))),
+                // ),
                 TextButton(
                   onPressed: () {
                     _onSettingsChanged(
@@ -644,7 +646,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     );
                     Navigator.pop(context);
                   },
-                  child: Text('Save',
+                  child: Text('Close',
                       style: TextStyle(
                           fontFamily: uiFontFamily,
                           fontSize: uiFontSize,

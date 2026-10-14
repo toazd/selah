@@ -2,17 +2,12 @@
 
 import 'package:flutter_quill/flutter_quill.dart' show Document, LinkAttribute;
 import 'package:flutter_quill/quill_delta.dart' show Delta;
-import '../database/strongs_definitions_database.dart';
 import 'verse_reference_detector.dart';
 
 /// Utility class for adding internal Bible-study links to Quill documents.
 class VerseReferenceLinker {
-  static final RegExp _strongsReferencePattern =
-      RegExp(r'(^|[^A-Za-z0-9])([HhGg]\d{1,4})(?![A-Za-z0-9])');
-  static const String _strongsLinkPrefix = 's://';
-
   static bool textMightContainAutomaticLinks(String text) {
-    return text.contains(':') || _strongsReferencePattern.hasMatch(text);
+    return text.contains(':');
   }
 
   /// Checks if a specific range in a Quill document already has link attributes
@@ -65,7 +60,7 @@ class VerseReferenceLinker {
     }
   }
 
-  /// Adds generated verse and Strong's links. Existing links are preserved.
+  /// Adds generated verse links. Existing links are preserved.
   static Document addAutomaticLinks(Document document) {
     final plainText = document.getPlainText(0, document.length);
     if (!textMightContainAutomaticLinks(plainText)) {
@@ -76,10 +71,6 @@ class VerseReferenceLinker {
 
     if (plainText.contains(':')) {
       _addVerseReferenceLinks(newDocument, plainText);
-    }
-
-    if (_strongsReferencePattern.hasMatch(plainText)) {
-      _addStrongsLinks(newDocument, plainText);
     }
 
     return newDocument;
@@ -146,67 +137,6 @@ class VerseReferenceLinker {
     }
   }
 
-  static void _addStrongsLinks(Document document, String plainText) {
-    final references = _detectStrongsReferences(plainText);
-
-    if (references.isEmpty) {
-      return;
-    }
-
-    final sortedReferences = references.toList()
-      ..sort((a, b) => b.startIndex.compareTo(a.startIndex));
-
-    for (final reference in sortedReferences) {
-      try {
-        if (hasLinkAtRange(
-            document, reference.startIndex, reference.originalText.length)) {
-          continue;
-        }
-
-        if (reference.originalText != reference.normalizedText) {
-          document.replace(
-            reference.startIndex,
-            reference.originalText.length,
-            reference.normalizedText,
-          );
-        }
-
-        document.format(
-          reference.startIndex,
-          reference.normalizedText.length,
-          LinkAttribute('$_strongsLinkPrefix${reference.normalizedText}'),
-        );
-      } catch (e) {
-        continue;
-      }
-    }
-  }
-
-  static List<_StrongsReference> _detectStrongsReferences(String text) {
-    final references = <_StrongsReference>[];
-
-    for (final match in _strongsReferencePattern.allMatches(text)) {
-      final prefixText = match.group(1) ?? '';
-      final originalText = match.group(2);
-      if (originalText == null) continue;
-
-      final normalizedText =
-          StrongsDefinitionsDatabase.normalizeStrongsNumber(originalText);
-      if (normalizedText == null ||
-          !StrongsDefinitionsDatabase.hasDefinition(normalizedText)) {
-        continue;
-      }
-
-      references.add(_StrongsReference(
-        originalText: originalText,
-        normalizedText: normalizedText,
-        startIndex: match.start + prefixText.length,
-      ));
-    }
-
-    return references;
-  }
-
   /// Removes generated internal links from a Quill document before editing.
   /// This prevents stale links when users edit previously saved notes.
   static Document removeVerseLinksForEditing(Document document) {
@@ -255,20 +185,9 @@ class VerseReferenceLinker {
     //link.startsWith('v:') ||
     //link.startsWith('verse://') ||
     //link.startsWith('verse:') ||
-    return link.startsWith('v://') ||
-        link.startsWith(_strongsLinkPrefix) ||
-        link.startsWith('strongs://');
+    return link.startsWith('v://');
   }
 }
 
-class _StrongsReference {
-  final String originalText;
-  final String normalizedText;
-  final int startIndex;
 
-  const _StrongsReference({
-    required this.originalText,
-    required this.normalizedText,
-    required this.startIndex,
-  });
-}
+

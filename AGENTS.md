@@ -29,8 +29,8 @@ Selah is a cross‑platform Bible study app built with **Flutter 3** (Dart �
 ## Project Structure (high‑level)
 ```
 lib/
-├─ data/          # Bible text, Strong's definitions, TSK data
-├─ database/      # SQLite wrappers for notes, highlights, history, search, Strong's
+├─ data/          # Bible text, Webster's 1828 definitions, TSK data
+├─ database/      # SQLite wrappers for notes, highlights, history, search
 ├─ models/        # Simple data classes (e.g., verse display data)
 ├─ services/      # Business logic: auth, Supabase sync, imports, change notifier
 ├─ screens/       # Top‑level UI pages (BibleScreen, SearchScreen, AuthScreen…)
@@ -45,7 +45,7 @@ lib/
 - **Platform detection**: `_isDesktop`, `_isMobilePlatform`, and `kIsWeb` flags are used throughout to branch UI logic.
 - **Supabase sync** lives in `services/supabase_sync_service.dart`. It creates realtime channels for notes, highlights, history, and search history. All sync calls guard against `null` user IDs.
 - **Auth** in `services/auth_service.dart` wraps Supabase auth APIs and updates the global `isSignedIn` and `currentUser` notifiers.
-- **Search** supports three modes (plain, regex, nearby) – see `screens/strongs_search_screen.dart` and `utils/bible_utils.dart` for the implementation.
+- **Search** supports three modes (plain, regex, nearby) – see `screens/search_screen.dart` and `utils/bible_utils.dart` for the implementation.
 
 ## Naming & Style Conventions
 - Files use **snake_case**; classes use **PascalCase**.

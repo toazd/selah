@@ -2364,11 +2364,8 @@ class SupabaseSyncService {
         final book = data['book'] as String;
         final chapter = data['chapter'] as int;
         final verse = data['verse'] as int;
-        final deltaText =
-            NoteStorageFormat.ensureDeltaFormat(data['note_text'] as String);
         final noteText =
-            NoteStorageFormat.normalizeLegacyStrongsLinks(deltaText);
-        final hasLegacyStrongsLinks = noteText != deltaText;
+            NoteStorageFormat.ensureDeltaFormat(data['note_text'] as String);
         final createdAt = data['created_at'] as int;
         final remoteUuid = data['id'] as String?;
         final verseKey = '$book:$chapter:$verse';
@@ -2422,19 +2419,6 @@ class SupabaseSyncService {
           };
           hasChanges = true;
           processedCount++;
-
-          if (hasLegacyStrongsLinks && shouldApplyRemote) {
-            try {
-              await _uploadNote(noteToPersist);
-            } catch (_) {
-              await _queuePersistentOperation(
-                'note_${noteToPersist['created_at']}',
-                'note',
-                'update',
-                noteToPersist,
-              );
-            }
-          }
         }
       }
 
@@ -3357,9 +3341,7 @@ class SupabaseSyncService {
   Future<void> _uploadNote(Map<String, dynamic> note) async {
     if (_currentUserId == null) return;
 
-    final normalizedNote = Map<String, dynamic>.from(note)
-      ..['note_text'] = NoteStorageFormat.normalizeLegacyStrongsLinks(
-          note['note_text'] as String);
+    final normalizedNote = Map<String, dynamic>.from(note);
 
     // Validate data before uploading to prevent sending corrupt data to Supabase
     final isValid =

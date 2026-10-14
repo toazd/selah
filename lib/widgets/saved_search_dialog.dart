@@ -8,25 +8,29 @@ import '../services/supabase_sync_service.dart'; // For sync service streams
 import '../utils/preferences_constants.dart'; // For uiFontSize and uiFontFamily
 import '../main.dart'; // For getAdaptiveTextColor
 
-class SearchHistoryDialog extends StatefulWidget {
+class SavedSearchDialog extends StatefulWidget {
   final void Function(Map<String, dynamic>) onUpdateSearchQuery;
 
-  const SearchHistoryDialog({
+  const SavedSearchDialog({
     super.key,
     required this.onUpdateSearchQuery,
   });
 
   @override
-  State<SearchHistoryDialog> createState() => _SearchHistoryDialogState();
+  State<SavedSearchDialog> createState() => _SavedSearchDialogState();
 }
 
-class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
+class _SavedSearchDialogState extends State<SavedSearchDialog> {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> _searchHistoryItems = [];
   bool _isLoading = false;
   bool _hasMoreData = true;
   int _currentOffset = 0;
   static const int _pageSize = 50;
+
+  // Selection mode state
+  bool _isSelectMode = false;
+  final Set<int> _selectedItemIds = {};
 
   // Stream subscriptions for real-time updates
   late StreamSubscription _localSearchHistorySubscription;
@@ -154,7 +158,7 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
             onPressed: () => Navigator.pop(context, false),
           ),
           TextButton(
-            child: Text('Clear',
+            child: Text('Delete All',
                 style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -224,6 +228,75 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
         }
       }
     }
+  }
+
+  Future<void> _deleteSelectedItems() async {
+    if (_selectedItemIds.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        constraints: const BoxConstraints(maxWidth: 400),
+        content: Text(
+            'Delete ${_selectedItemIds.length} selected saved ${_selectedItemIds.length == 1 ? 'search' : 'searches'}?',
+            style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context))),
+        actions: [
+          TextButton(
+            child: Text('Cancel',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: getAdaptiveTextColor(context))),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            child: Text('Delete',
+                style: TextStyle(
+                    fontSize: uiFontSize,
+                    fontFamily: uiFontFamily,
+                    color: Colors.red)),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        // Delete each selected item
+        for (final itemId in _selectedItemIds) {
+          await SearchDatabase.deleteSearchHistoryItem(itemId);
+        }
+
+        setState(() {
+          // Remove deleted items from the list
+          _searchHistoryItems =
+              List<Map<String, dynamic>>.from(_searchHistoryItems)
+                  .where((item) => !_selectedItemIds.contains(item['id']))
+                  .toList();
+          _currentOffset = _searchHistoryItems.length;
+          _selectedItemIds.clear();
+          _isSelectMode = false; // Exit select mode after deletion
+        });
+        LocalDataChangeNotifier.notifySearchHistoryChanged();
+      } catch (e) {
+        if (mounted) {
+          showStyledSnackBar(
+              context, 'Failed to delete selected saved searches: $e',
+              isError: true);
+        }
+      }
+    }
+  }
+
+  void _toggleSelectMode() {
+    setState(() {
+      _isSelectMode = !_isSelectMode;
+      _selectedItemIds.clear(); // Clear any previous selection
+    });
   }
 
   @override
@@ -360,8 +433,22 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                       : '';
                   //debugPrint('optionsText: "$optionsText"');
 
-                  // Search history dialog
+                  // Saved search dialog
                   final listTile = ListTile(
+                      leading: _isSelectMode
+                          ? Checkbox(
+                              value: _selectedItemIds.contains(h['id']),
+                              onChanged: (bool? selected) {
+                                setState(() {
+                                  if (selected!) {
+                                    _selectedItemIds.add(h['id'] as int);
+                                  } else {
+                                    _selectedItemIds.remove(h['id'] as int);
+                                  }
+                                });
+                              },
+                            )
+                          : null,
                       subtitle: Text.rich(
                         TextSpan(
                           style: TextStyle(
@@ -397,11 +484,28 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                           ],
                         ),
                       ),
-                      onTap: () => {
-                            _updateSearchQuery(query, h),
-                          },
-                      onLongPress: () =>
-                          _deleteSearchHistoryItem(h['id'] as int, i));
+                      onTap: _isSelectMode
+                          ? () {
+                              setState(() {
+                                if (_selectedItemIds.contains(h['id'])) {
+                                  _selectedItemIds.remove(h['id']);
+                                } else {
+                                  _selectedItemIds.add(h['id'] as int);
+                                }
+                              });
+                            }
+                          : () => _updateSearchQuery(query, h),
+                      onLongPress: _isSelectMode
+                          ? () {
+                              setState(() {
+                                if (_selectedItemIds.contains(h['id'])) {
+                                  _selectedItemIds.remove(h['id']);
+                                } else {
+                                  _selectedItemIds.add(h['id'] as int);
+                                }
+                              });
+                            }
+                          : () => _deleteSearchHistoryItem(h['id'] as int, i));
 
                   widgets.add(listTile);
 
@@ -412,29 +516,78 @@ class _SearchHistoryDialogState extends State<SearchHistoryDialog> {
                 },
               ),
       ),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: _clearSearchHistory,
-              child: Text('Clear',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: Colors.red)),
-            ),
-            TextButton(
-              child: Text('Close',
-                  style: TextStyle(
-                      fontSize: uiFontSize,
-                      fontFamily: uiFontFamily,
-                      color: getAdaptiveTextColor(context))),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ],
+      actions: _isSelectMode
+          ? [
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    TextButton(
+                      onPressed: _selectedItemIds.isEmpty
+                          ? null
+                          : _deleteSelectedItems,
+                      child: Text(
+                        'Delete Selected (${_selectedItemIds.length})',
+                        style: TextStyle(
+                          fontSize: uiFontSize,
+                          fontFamily: uiFontFamily,
+                          color: _selectedItemIds.isEmpty
+                              ? Colors.grey
+                              : Colors.red,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _toggleSelectMode,
+                      child: Text('Done',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                    ),
+                  ],
+                ),
+              ),
+            ]
+          : [
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    TextButton(
+                      onPressed: _clearSearchHistory,
+                      child: Text('Delete All',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: Colors.red)),
+                    ),
+                    TextButton(
+                      onPressed: _toggleSelectMode,
+                      child: Text('Select',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                    ),
+                    TextButton(
+                      child: Text('Close',
+                          style: TextStyle(
+                              fontSize: uiFontSize,
+                              fontFamily: uiFontFamily,
+                              color: getAdaptiveTextColor(context))),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
     );
   }
 }

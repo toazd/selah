@@ -1,135 +1,58 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:selah/utils/verse_display_utils.dart';
 import 'package:selah/utils/verse_text_parser.dart';
 
 void main() {
   group('applyHighlightsToText', () {
-    test('keeps clean-position highlights aligned when Strong numbers display',
-        () {
-      const rawVerseText =
-          'and let them choose{H977}{H8799} one{H259} bullock{H6499}';
-      final plainVerseText =
-          VerseTextParser.toPlainVerseText(rawVerseText, removePilcrow: true);
-      final cleanStart = plainVerseText.indexOf('one');
+    test('highlights a word in plain verse text', () {
+      const raw = 'and let them choose one bullock';
+      final plain = VerseTextParser.toPlainVerseText(raw, removePilcrow: true);
+      final cleanStart = plain.indexOf('one');
       final cleanEnd = cleanStart + 'one'.length;
 
       final spans = applyHighlightsToText(
-        rawVerseText,
-        plainVerseText,
-        const TextStyle(color: Colors.black, fontSize: 20),
-        1,
+        raw, plain, const TextStyle(color: Colors.black, fontSize: 20), 1,
         Colors.white,
-        [
-          {
-            'start': cleanStart,
-            'end': cleanEnd,
-            'color': Colors.yellow.toARGB32(),
-          },
-        ],
-        Colors.black,
-        Colors.white,
-        showStrongsNumbers: true,
+        [{'start': cleanStart, 'end': cleanEnd,
+          'color': Colors.yellow.toARGB32()}],
+        Colors.black, Colors.white,
       );
 
       expect(_highlightedText(spans), 'one');
     });
 
-    test('does not count the visual space after a leading Strong number', () {
-      const rawVerseText =
-          '{G1161} There was{G2258}{{G5713}} a man{G444} of{G1537} the Pharisees{G5330}';
-      final plainVerseText =
-          VerseTextParser.toPlainVerseText(rawVerseText, removePilcrow: true);
-      final start = plainVerseText.indexOf('a man');
-
+    test('uses clean text offsets with markup removed', () {
+      const raw = 'And the LORD God took the man, and put him into the garden.';
+      final plain = VerseTextParser.toPlainVerseText(raw, removePilcrow: true);
+      final start = plain.indexOf('garden');
       final spans = applyHighlightsToText(
-        rawVerseText,
-        plainVerseText,
-        const TextStyle(color: Colors.black, fontSize: 20),
-        1,
+        raw, plain, const TextStyle(color: Colors.black, fontSize: 20), 15,
         Colors.white,
-        [
-          {
-            'start': start,
-            'end': start + 'a man'.length,
-            'color': Colors.blue.toARGB32(),
-          },
-        ],
-        Colors.black,
-        Colors.white,
-        showStrongsNumbers: true,
+        [{'start': start, 'end': start + 'garden'.length,
+          'color': Colors.yellow.toARGB32()}],
+        Colors.black, Colors.white,
       );
 
-      expect(_highlightedText(spans), 'a man');
-    });
-
-    test('uses existing Gen 2:15 ranges as clean text offsets', () {
-      const rawVerseText =
-          'And the LORD{H3068} God{H430} took{H3947}{{H8799}} the man{H120}, and put him{H3240}{{H8686}} into the garden{H1588} of Eden{H5731} to dress{H5647}{{H8800}} it and to keep{H8104}{{H8800}} it.';
-      final plainVerseText =
-          VerseTextParser.toPlainVerseText(rawVerseText, removePilcrow: true);
-      final highlights = [
-        {
-          'start': 52,
-          'end': 58,
-          'color': Colors.yellow.toARGB32(),
-        },
-        {
-          'start': 67,
-          'end': 78,
-          'color': Colors.green.toARGB32(),
-        },
-        {
-          'start': 83,
-          'end': 93,
-          'color': Colors.pink.toARGB32(),
-        },
-      ];
-
-      final spans = applyHighlightsToText(
-        rawVerseText,
-        plainVerseText,
-        const TextStyle(color: Colors.black, fontSize: 20),
-        15,
-        Colors.white,
-        highlights,
-        Colors.black,
-        Colors.white,
-        showStrongsNumbers: true,
-      );
-
-      expect(_highlightedText(spans), 'gardento dress itto keep it');
-      expect(_resolvedText(rawVerseText, 52, 58), 'garden');
-      expect(_resolvedText(rawVerseText, 67, 78), 'to dress it');
-      expect(_resolvedText(rawVerseText, 83, 93), 'to keep it');
+      expect(_highlightedText(spans), 'garden');
+      expect(_resolvedText(raw, start, start + 'garden'.length), 'garden');
     });
 
     test('uses offsets after removing pilcrow markers', () {
-      const rawVerseText = '¶ And God{H430} said{H559}{{H8799}}, Let there be';
-      final plainVerseText =
-          VerseTextParser.toPlainVerseText(rawVerseText, removePilcrow: true);
-      final cleanStart = plainVerseText.indexOf('God');
+      const raw = '¶ And God said, Let there be';
+      final plain = VerseTextParser.toPlainVerseText(raw, removePilcrow: true);
+      final cleanStart = plain.indexOf('God');
       final cleanEnd = cleanStart + 'God'.length;
 
       final spans = applyHighlightsToText(
-        rawVerseText,
-        plainVerseText,
-        const TextStyle(color: Colors.black, fontSize: 20),
-        3,
+        raw, plain, const TextStyle(color: Colors.black, fontSize: 20), 3,
         Colors.white,
-        [
-          {
-            'start': cleanStart,
-            'end': cleanEnd,
-            'color': Colors.yellow.toARGB32(),
-          },
-        ],
-        Colors.black,
-        Colors.white,
-        showStrongsNumbers: true,
+        [{'start': cleanStart, 'end': cleanEnd,
+          'color': Colors.yellow.toARGB32()}],
+        Colors.black, Colors.white,
       );
 
-      expect(plainVerseText.startsWith('And'), isTrue);
+      expect(plain.startsWith('And'), isTrue);
       expect(_highlightedText(spans), 'God');
     });
   });

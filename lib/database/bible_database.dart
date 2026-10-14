@@ -1,15 +1,15 @@
-import '../data/bible_data_strongs.dart';
+import '../data/bible_data.dart';
 import '../data/book_metadata.dart';
 
 class BibleDatabase {
   // Get all book names in canonical order
   static Future<List<String>> getBooks() async {
-    return bibleDataStrongs.keys.toList();
+    return BibleData.keys.toList();
   }
 
   // Get all chapters for a book
   static Future<List<int>> getChapters(String bookShortName) async {
-    final bookData = bibleDataStrongs[bookShortName];
+    final bookData = BibleData[bookShortName];
     if (bookData == null) return [];
     return bookData.keys.toList();
   }
@@ -17,7 +17,7 @@ class BibleDatabase {
   // Get all verses for a book/chapter
   static Future<List<Map<String, dynamic>>> getVerses(
       String bookShortName, int chapter) async {
-    final bookData = bibleDataStrongs[bookShortName];
+    final bookData = BibleData[bookShortName];
     if (bookData == null) return [];
 
     final chapterData = bookData[chapter];
@@ -37,8 +37,8 @@ class BibleDatabase {
   static Future<List<Map<String, dynamic>>> getAllVerses() async {
     final results = <Map<String, dynamic>>[];
 
-    for (final book in bibleDataStrongs.keys) {
-      final bookData = bibleDataStrongs[book]!;
+    for (final book in BibleData.keys) {
+      final bookData = BibleData[book]!;
       for (final chapter in bookData.keys) {
         final chapterData = bookData[chapter]!;
         for (final verse in chapterData.keys) {

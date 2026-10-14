@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:selah/data/bible_data_strongs.dart';
+import 'package:selah/data/bible_data.dart';
 import 'package:selah/screens/search_screen.dart';
 import 'package:selah/utils/verse_text_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -131,7 +131,7 @@ bool _spanHasHighlightedText(InlineSpan span, String needle) {
   var verseCount = 0;
   final refs = <String>[];
 
-  for (final bookEntry in bibleDataStrongs.entries) {
+  for (final bookEntry in BibleData.entries) {
     for (final chapterEntry in bookEntry.value.entries) {
       for (final verseEntry in chapterEntry.value.entries) {
         var searchText = VerseTextParser.toPlainVerseText(
@@ -215,7 +215,7 @@ void main() {
     await _waitForFinder(tester, find.text('242 matches in 239 verses'));
   });
 
-  testWidgets('quoted phrase search matches Strong-tagged visible text',
+  testWidgets('quoted phrase search matches tagged visible text',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
 
@@ -237,7 +237,7 @@ void main() {
   });
 
   testWidgets(
-      'regex phrase search highlights across Strong-tagged visible text',
+      'regex phrase search highlights across tagged visible text',
       (tester) async {
     SharedPreferences.setMockInitialValues({'searchRegex': true});
 
@@ -368,7 +368,7 @@ void main() {
     expect(_hasHighlightedText(tester, 'darkness'), isFalse);
   });
 
-  testWidgets('default search does not match Strong numbers', (tester) async {
+  testWidgets('default search does not match raw markup', (tester) async {
     SharedPreferences.setMockInitialValues({});
 
     await tester.pumpWidget(
@@ -380,14 +380,14 @@ void main() {
 
     final searchField = _searchFieldFinder();
 
-    await tester.enterText(searchField, 'H1867');
+    await tester.enterText(searchField, '<r>');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
     await tester.pump();
 
     await _waitForFinder(tester, find.text('0 matches in 0 verses'));
   });
 
-  testWidgets('nearby search does not match Strong numbers', (tester) async {
+  testWidgets('nearby search does not match raw markup', (tester) async {
     SharedPreferences.setMockInitialValues({'searchNearby': true});
 
     await tester.pumpWidget(
@@ -399,14 +399,14 @@ void main() {
 
     final searchField = _searchFieldFinder();
 
-    await tester.enterText(searchField, 'H1867 Darius');
+    await tester.enterText(searchField, '<r> Darius');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
     await tester.pump();
 
     await _waitForFinder(tester, find.text('0 matches in 0 verses'));
   });
 
-  testWidgets('nearby search highlights keywords after Strong tags are ignored',
+  testWidgets('nearby search highlights keywords after markup is ignored',
       (tester) async {
     SharedPreferences.setMockInitialValues({'searchNearby': true});
 

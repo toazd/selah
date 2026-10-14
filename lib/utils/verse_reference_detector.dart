@@ -1,4 +1,4 @@
-import '../data/bible_data_strongs.dart';
+import '../data/bible_data.dart';
 import 'book_name_converter.dart';
 
 class VerseReference {
@@ -21,8 +21,8 @@ class VerseReference {
   });
 
   bool get isValid {
-    // Validate existence using bibleDataStrongs (book -> chapter -> verse)
-    final bookData = bibleDataStrongs[book];
+    // Validate existence using BibleData (book -> chapter -> verse)
+    final bookData = BibleData[book];
     if (bookData == null || !bookData.containsKey(chapter)) {
       return false;
     }
@@ -304,7 +304,7 @@ class VerseReferenceDetector {
       }
 
       // Validate all verses exist in chapter
-      final bookData = bibleDataStrongs[normalizedBook];
+      final bookData = BibleData[normalizedBook];
       if (bookData == null || !bookData.containsKey(chapter)) {
         return null;
       }
@@ -514,7 +514,7 @@ class VerseReferenceDetector {
     if (normalizedBook == null) return null;
 
     // Validate book and chapter exist
-    final bookData = bibleDataStrongs[normalizedBook];
+    final bookData = BibleData[normalizedBook];
     if (bookData == null || !bookData.containsKey(chapter)) return null;
 
     // Validate verse if provided

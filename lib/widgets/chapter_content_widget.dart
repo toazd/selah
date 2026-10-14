@@ -16,18 +16,14 @@ class ChapterContentWidget extends StatefulWidget {
   final Map<int, Map<String, dynamic>> notes;
   final Map<int, List<Map<String, dynamic>>> highlights;
   final String? bookTitle;
-  final bool showNotesInline;
   final bool showTskReferences;
-  final bool showStrongsNumbers;
   final Color backgroundColor;
   final Color textColor;
   final Color verseNumberColor;
   final Function(int)? onVerseTap;
   final Function(int)? onVerseLongPress;
   final Function(String, String?)? onLinkTap;
-  final Function(int, String?)? onNoteIconTap;
   final Function(int, String?)? onNoteEditTap;
-  final void Function(String strongsNumber)? onStrongsTap;
   final int? initialScrollToVerse;
 
   const ChapterContentWidget({
@@ -38,18 +34,14 @@ class ChapterContentWidget extends StatefulWidget {
     required this.notes,
     required this.highlights,
     this.bookTitle,
-    required this.showNotesInline,
     required this.showTskReferences,
-    this.showStrongsNumbers = false,
     required this.backgroundColor,
     required this.textColor,
     required this.verseNumberColor,
     this.onVerseTap,
     this.onVerseLongPress,
     this.onLinkTap,
-    this.onNoteIconTap,
     this.onNoteEditTap,
-    this.onStrongsTap,
     this.initialScrollToVerse,
   });
 
@@ -145,9 +137,7 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
       verseNumberColor: widget.verseNumberColor,
       backgroundColor: widget.backgroundColor,
       lineHeight: lineHeightNotifier.value,
-      showNotesInline: widget.showNotesInline,
       showTskReferences: widget.showTskReferences,
-      showStrongsNumbers: widget.showStrongsNumbers,
       tskReferences: tskReferencesForChapter ?? const {},
       fontFamily: fontFamilyNotifier.value,
       lightHighlightTextColor: lightTextColor.value,
@@ -194,19 +184,11 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                                 fontFamilyNotifier.value,
                                 fontSizeNotifier.value + 1,
                               ),
-                              height: widget.showStrongsNumbers
-                                  ? lineHeightNotifier.value + 0.35
-                                  : lineHeightNotifier.value,
+                              height: lineHeightNotifier.value,
                               color: isDark
                                   ? darkTextColor.value
                                   : lightTextColor.value,
                             ),
-                            showStrongsNumbers: widget.showStrongsNumbers,
-                            expandStrongsTapTarget: true,
-                            strongsColor: isDark
-                                ? darkPrimaryColor.value
-                                : lightPrimaryColor.value,
-                            onStrongsTap: widget.onStrongsTap,
                           ),
                         ),
                       ),
@@ -248,12 +230,9 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                       widget.onVerseTap,
                       widget.onVerseLongPress,
                       widget.onLinkTap,
-                      widget.onNoteIconTap,
                       widget.onNoteEditTap,
                       lightTextColor.value,
                       darkTextColor.value,
-                      widget.onStrongsTap,
-                      expandStrongsTapTarget: true,
                     );
                     //);
                   }).toList(),

@@ -76,83 +76,33 @@ class BookFilter {
       'Jud',
       'Rev'
     ],
-    'Pentateuch/Torah': ['Gen', 'Exo', 'Lev', 'Num', 'Deu'],
-    'Historical Books': [
-      'Jos',
-      'Jdg',
-      'Rth',
-      '1Sa',
-      '2Sa',
-      '1Ki',
-      '2Ki',
-      '1Ch',
-      '2Ch',
-      'Ezr',
-      'Neh',
-      'Est'
-    ],
-    'Poetry': ['Job', 'Psa', 'Pro', 'Ecc', 'Son'],
-    'Major Prophets': ['Isa', 'Jer', 'Lam', 'Eze', 'Dan'],
-    'Minor Prophets': [
-      'Hos',
-      'Joe',
-      'Amo',
-      'Oba',
-      'Jon',
-      'Mic',
-      'Nah',
-      'Hab',
-      'Zep',
-      'Hag',
-      'Zec',
-      'Mal'
-    ],
-    'Gospels': ['Mat', 'Mar', 'Luk', 'Joh'],
-    'Acts': ['Act'],
-    'Pauline Epistles': [
-      'Rom',
-      '1Co',
-      '2Co',
-      'Gal',
-      'Eph',
-      'Phi',
-      'Col',
-      '1Th',
-      '2Th',
-      '1Ti',
-      '2Ti',
-      'Tit',
-      'Phm',
-      'Heb'
-    ],
-    'General Epistles': ['Jam', '1Pe', '2Pe', '1Jo', '2Jo', '3Jo', 'Jud'],
-    'Revelation': ['Rev'],
-    'Law': ['Gen', 'Exo', 'Lev', 'Num', 'Deu'],
-    'Prophets': [
-      'Isa',
-      'Jer',
-      'Lam',
-      'Eze',
-      'Dan',
-      'Hos',
-      'Joe',
-      'Amo',
-      'Oba',
-      'Jon',
-      'Mic',
-      'Nah',
-      'Hab',
-      'Zep',
-      'Hag',
-      'Zec',
-      'Mal'
-    ],
-    'Wisdom': ['Job', 'Psa', 'Pro', 'Ecc'],
   };
 
   /// Get display names for dropdown options
   static List<String> get categoryDisplayNames =>
       predefinedCategories.keys.toList();
+
+  /// The full set of filter types the UI supports, including the special
+  /// 'Custom Range' option which is handled separately from the predefined
+  /// category map above.
+  static const List<String> supportedFilterTypes = [
+    'All Books',
+    'Old Testament',
+    'New Testament',
+    'Custom Range',
+  ];
+
+  /// Normalize a persisted/history-provided filter type against the set of
+  /// supported filters. Any value that is no longer offered (e.g. a category
+  /// that has since been removed) falls back to 'All Books'. This prevents a
+  /// DropdownButton from being given a `value` that matches no menu item,
+  /// which would otherwise trigger an assertion error.
+  static String normalizeFilterType(String? type) {
+    if (type != null && supportedFilterTypes.contains(type)) {
+      return type;
+    }
+    return 'All Books';
+  }
 
   /// Parse a custom range specification and return list of allowed book short names
   /// Supports formats like: "Psa 119, Pro 1-20, Gen-Deu, Mat 22 - John 21"

@@ -6,13 +6,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-import '../database/strongs_definitions_database.dart';
 import '../utils/note_storage_format.dart';
 import '../utils/verse_reference_linker.dart';
 import '../main.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
-import 'strongs_definition_dialog.dart';
 import 'dart:io';
 
 class QuillNoteDisplay extends StatefulWidget {
@@ -39,8 +37,6 @@ class QuillNoteDisplay extends StatefulWidget {
 }
 
 class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
-  static const String _strongsLinkPrefix = 's://';
-
   late QuillController _controller;
   late FocusNode _focusNode;
   late ScrollController _scrollController;
@@ -84,10 +80,8 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
 
     Document document;
     if (NoteStorageFormat.isDeltaFormat(noteText)) {
-      final normalizedNoteText =
-          NoteStorageFormat.normalizeLegacyStrongsLinks(noteText);
       final normalizedDeltaJson =
-          _ensureDeltaHasTrailingNewline(jsonDecode(normalizedNoteText));
+          _ensureDeltaHasTrailingNewline(jsonDecode(noteText));
       final delta = Delta.fromJson(normalizedDeltaJson);
       document = Document.fromDelta(delta);
     } else {
@@ -155,35 +149,9 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
       return;
     }
 
-    final strongsNumber = _strongsNumberFromLink(link);
-    if (strongsNumber != null) {
-      StrongsDefinitionDialog.show(context, strongsNumber);
-      return;
-    }
-
     if (widget.onLinkTap != null) {
       widget.onLinkTap!(link, null);
     }
-  }
-
-  String? _strongsNumberFromLink(String link) {
-    var normalizedLink = link;
-    if (normalizedLink.startsWith('unsafe:')) {
-      normalizedLink = normalizedLink.substring('unsafe:'.length);
-    }
-
-    String? strongsNumber;
-    if (normalizedLink.startsWith(_strongsLinkPrefix)) {
-      strongsNumber = normalizedLink.substring(_strongsLinkPrefix.length);
-    } else if (normalizedLink.startsWith('strongs://')) {
-      strongsNumber = normalizedLink.substring('strongs://'.length);
-    }
-
-    if (strongsNumber == null) {
-      return null;
-    }
-
-    return StrongsDefinitionsDatabase.normalizeStrongsNumber(strongsNumber);
   }
 
   /// Converts note text to plain text for searching/highlighting

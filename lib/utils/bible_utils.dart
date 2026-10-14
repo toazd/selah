@@ -21,7 +21,6 @@ Future<void> handleVerseLink(
   String? referenceText, {
   required Function(String, int, int?)? navigateToVerse,
   Function(String, String?)? onVerseLinkRecursion,
-  Function(String, int, int, String?)? onNoteIconTap,
   Function(String, int, int, String?)? onNoteEditTap,
 }) async {
   // Remove old and conflicting prefixes
@@ -104,7 +103,6 @@ Future<void> handleVerseLink(
                   recursiveRefText,
                   navigateToVerse: navigateToVerse,
                   onVerseLinkRecursion: null, // This enables infinite recursion
-                  onNoteIconTap: onNoteIconTap,
                   onNoteEditTap: onNoteEditTap,
                 );
           }
@@ -120,10 +118,6 @@ Future<void> handleVerseLink(
               onNavigateToVerse: navigateToVerse != null
                   ? (verse) => navigateToVerse(normalizedBook, chapter, verse)
                   : null, // Navigate to verse callback
-              onNoteIconTap: onNoteIconTap != null
-                  ? (verse, noteText) =>
-                      onNoteIconTap(normalizedBook, chapter, verse, noteText)
-                  : null,
               onNoteEditTap: onNoteEditTap != null
                   ? (verse, noteText) =>
                       onNoteEditTap(normalizedBook, chapter, verse, noteText)
