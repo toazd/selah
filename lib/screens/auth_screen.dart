@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart';
 import '../services/auth_service.dart';
 import '../main.dart';
 import '../utils/preferences_constants.dart';
