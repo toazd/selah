@@ -1202,9 +1202,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
             ),
             const SizedBox(height: 8),
             _buildSearchOptionTile(
-              title: _caseSensitive
-                  ? 'Disable Case-sensitivity'
-                  : 'Enable Case-sensitivity',
+              title: 'Case-sensitivity',
               value: _caseSensitive,
               onChanged: (val) async {
                 setState(() {
@@ -1223,7 +1221,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
               ],
             ),
             _buildSearchOptionTile(
-              title: _useWholeWord ? 'Disable Whole Word' : 'Enable Whole Word',
+              title: 'Whole Word',
               value: _useWholeWord,
               onChanged: (val) async {
                 setState(() {
@@ -1244,9 +1242,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
               ],
             ),
             _buildSearchOptionTile(
-              title: _useRegex
-                  ? 'Disable Regular Expressions'
-                  : 'Enable Regular Expressions',
+              title: 'Regular Expressions',
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {

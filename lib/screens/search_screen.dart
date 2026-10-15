@@ -2666,9 +2666,7 @@ class _SearchScreenState extends State<SearchScreen>
             ),
             const SizedBox(height: 8),
             _buildSearchOptionTile(
-              title: _caseSensitive
-                  ? 'Disable Case-sensitivity'
-                  : 'Enable Case-sensitivity',
+              title: 'Case-sensitivity',
               value: _caseSensitive,
               onChanged: (val) async {
                 setState(() {
@@ -2690,7 +2688,7 @@ class _SearchScreenState extends State<SearchScreen>
               ],
             ),
             _buildSearchOptionTile(
-              title: _useWholeWord ? 'Disable Whole Word' : 'Enable Whole Word',
+              title: 'Whole Word',
               value: _useWholeWord,
               onChanged: (val) async {
                 setState(() {
@@ -2714,9 +2712,7 @@ class _SearchScreenState extends State<SearchScreen>
               ],
             ),
             _buildSearchOptionTile(
-              title: _useRedLetter
-                  ? 'Disable Red Letter Only'
-                  : 'Enable Red Letter Only',
+              title: 'Red Letter',
               value: _useRedLetter,
               onChanged: (val) async {
                 setState(() {
@@ -2730,15 +2726,15 @@ class _SearchScreenState extends State<SearchScreen>
                 }
                 // Removed Navigator.of(context).pop() - drawer stays open
               },
-              helpTitle: 'Red Letter Only',
+              helpTitle: 'Red Letter',
               helpBullets: const [
                 'Searches only the words of Jesus (the red-letter text) instead of every verse.',
                 'Combines with any other option, including regular, nearby, and regex search.',
-                'Example: "^Verily" with this on finds sentences Jesus spoke that begin with Verily.',
+                'Example: "^Verily" with this mode and Regular Expressions enabled will find all sentences that Jesus spoke that begin with the word Verily.',
               ],
             ),
             _buildSearchOptionTile(
-              title: _useNearby ? 'Disable Nearby Word' : 'Enable Nearby Word',
+              title: 'Nearby Word',
               value: _useNearby,
               onChanged: (val) async {
                 setState(() {
@@ -2758,15 +2754,13 @@ class _SearchScreenState extends State<SearchScreen>
               helpTitle: 'Nearby Word',
               helpBullets: const [
                 'Finds passages where ALL search words appear within 3 verses of each other.',
-                'Needs more than one word (quotes and the * wildcard are not supported here).',
+                'Requires at least two words (quotes and the * wildcard are not supported here).',
                 'Example: "graven carved" finds Judges 18:17-20, 2 Chronicles 33:19-22, and 2 Chronicles 34:7.',
-                'Enabling this turns off Regular Expressions.',
+                'Enabling this mode turns off Regular Expressions.',
               ],
             ),
             _buildSearchOptionTile(
-              title: _useRegex
-                  ? 'Disable Regular Expressions'
-                  : 'Enable Regular Expressions',
+              title: 'Regular Expressions',
               value: _useRegex,
               onChanged: (val) async {
                 setState(() {

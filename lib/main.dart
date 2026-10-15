@@ -3141,9 +3141,8 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 builder: (context, isVertical, _) {
                   return SwitchListTile(
                     title: _buildMainOptionTitle(
-                      title: isVertical
-                          ? 'Vertical Screen Layout'
-                          : 'Horizontal Screen Layout',
+                      title:
+                          isVertical ? 'Vertical Layout' : 'Horizontal Layout',
                       helpTitle: 'Screen Layout',
                       helpBullets: const [
                         'Use this option to choose the arrangement that best fits your screen.',
@@ -3181,9 +3180,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 builder: (context, showTskReferences, _) {
                   return SwitchListTile(
                     title: _buildMainOptionTitle(
-                      title: showTskReferences
-                          ? 'Hide Treasury of Scripture Knowledge'
-                          : 'Show Treasury of Scripture Knowledge',
+                      title: 'Treasury of Scripture Knowledge',
                       helpTitle: 'Treasury of Scripture Knowledge',
                       helpBullets: const [
                         'Shows or hides Treasury of Scripture Knowledge cross-references below verses.',
@@ -3206,9 +3203,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   builder: (context, fullscreen, _) {
                     return SwitchListTile(
                       title: _buildMainOptionTitle(
-                        title: fullscreen
-                            ? 'Exit Fullscreen Mode'
-                            : 'Enter Fullscreen Mode',
+                        title: 'Fullscreen Mode',
                         helpTitle: 'Fullscreen Mode',
                         helpBullets: const [
                           'Hides the operating system window controls and expands the app to use all of the available screen space.',
@@ -3229,9 +3224,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 builder: (context, showNavBar, _) {
                   return SwitchListTile(
                     title: _buildMainOptionTitle(
-                      title: showNavBar
-                          ? 'Show Bottom Navigation Bar'
-                          : 'Hide Bottom Navigation Bar',
+                      title: 'Bottom Navigation Bar',
                       helpTitle: 'Bottom Navigation Bar',
                       helpBullets: const [
                         'Shows or hides the navigation bar at the bottom of the screen that has buttons for navigating between chapters.',

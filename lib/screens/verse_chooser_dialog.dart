@@ -680,39 +680,39 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
       context,
       labels: _books.map(_toDisplayKey),
       style: bookTileStyle,
-      horizontalPadding: 20,
-      verticalPadding: 10,
-      minWidth: 67,
-      minHeight: 36,
+      horizontalPadding: 8,
+      verticalPadding: 8,
+      minWidth: 50,
+      minHeight: 50,
     );
     final chapterChipSize = _scaledTileSize(
       context,
       labels: _chapters.isEmpty ? ['119'] : _chapters.map((c) => '$c'),
       style: numberTileStyle,
-      horizontalPadding: 18,
-      verticalPadding: 10,
-      minWidth: 48,
-      minHeight: 36,
+      horizontalPadding: 8,
+      verticalPadding: 8,
+      minWidth: 50,
+      minHeight: 50,
     );
     final verseChipSize = _scaledTileSize(
       context,
       labels: _verses.isEmpty ? ['176'] : _verses.map((v) => '$v'),
       style: numberTileStyle,
-      horizontalPadding: 18,
-      verticalPadding: 10,
-      minWidth: 48,
-      minHeight: 36,
+      horizontalPadding: 8,
+      verticalPadding: 8,
+      minWidth: 50,
+      minHeight: 50,
     );
 
-    const gridSpacing = 8.0;
-    const gridColumns = 6;
+    const gridSpacing = 6.0;
+    const gridColumns = 6.0;
     final gridContentWidth = (bookChipSize.width * gridColumns) +
         (gridSpacing * (gridColumns - 1)) +
         24;
-    final maxDialogWidth = max(280.0, MediaQuery.of(context).size.width - 32);
-    final targetDialogWidth = max(480.0, gridContentWidth);
+    final maxDialogWidth = max(300.0, MediaQuery.of(context).size.width - 32);
+    final targetDialogWidth = max(500.0, gridContentWidth);
     final dialogWidth =
-        targetDialogWidth.clamp(280.0, maxDialogWidth).toDouble();
+        targetDialogWidth.clamp(300.0, maxDialogWidth).toDouble();
 
     // Use display key for color of the selected book title
     Color? selectedBookColor;
@@ -722,15 +722,23 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
     }
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      //insetPadding: const EdgeInsets.symmetric(horizontal: 64, vertical: 64),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        side: BorderSide(
+          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+          width: 1.0,
+        ),
+      ),
       child: Container(
         width: dialogWidth,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height - 64,
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                  maxWidth: MediaQuery.of(context).size.width * 0.9,
                 ),
                 child: Stack(
                   children: [
@@ -786,7 +794,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                                     Center(child: buildBookWrap(otList)),
                                     Divider(
                                       thickness: 1,
-                                      height: 16,
+                                      height: 8,
                                       indent:
                                           MediaQuery.of(context).size.width *
                                               0.01,
