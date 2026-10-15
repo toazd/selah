@@ -5,9 +5,9 @@
 
 Selah is a cross-platform, touch-friendly, 1769 KJB only Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a>. It is intuitive and simple by default but also has unique and advanced features tucked away to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
 
-The purpose of Selah is to faithfully preserve the 1769 Holy Bible (colloquially known as the King James Bible) and to provide tools to make studying it more efficient. If you think that all digital KJB's are the same, remember Isaiah 14:14b and read the following article: https://cheerful-wmcdannell.wordpress.com/2025/09/25/not-all-kjvs-are-equal/. 1Thess 5:21 reads "Prove all things; hold fast that which is good." That is a commandment and it is your personal responsibility. Selah is my response to the war against God's word (Gen 3:1, Mat 4:3-4).
+The purpose of Selah is to faithfully preserve the 1769 Holy Bible (colloquially known as the King James Bible) and to provide tools to make studying it more efficient. If you think that all digital KJB's are the same, remember Isaiah 14:14b and read the following article: https://cheerful-wmcdannell.wordpress.com/2025/09/25/not-all-kjvs-are-equal/. Selah is my response to the war against God's word (Gen 3:1).
 
-Selah is named as such because the word itself means a musical refrain and/or to pause and reflect and as it is written in the first Psalm "...in his law doth he meditate day and night.". If you think that the law refers only to the first five books of Moses, I refer you to the words of the Lord Jesus Christ in John 10:34 and John 15:25.
+Selah is named as such because the word itself means a musical refrain and/or to pause and reflect and as it is written in the first Psalm "...in his law doth he meditate day and night.".
 
 Because Selah uses only the 1769 KJB, issues, comments, and pull requests related to any other translation other than the 1611-1769 KJB will be rejected.
 
