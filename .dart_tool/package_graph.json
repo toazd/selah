@@ -1669,11 +1669,6 @@
       ]
     },
     {
-      "name": "vm_service",
-      "version": "15.3.0",
-      "dependencies": []
-    },
-    {
       "name": "sqlite3",
       "version": "3.7.1",
       "dependencies": [
@@ -1741,6 +1736,11 @@
         "path",
         "platform"
       ]
+    },
+    {
+      "name": "vm_service",
+      "version": "15.4.0",
+      "dependencies": []
     },
     {
       "name": "video_player",

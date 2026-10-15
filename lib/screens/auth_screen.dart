@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 import '../services/auth_service.dart';
 import '../main.dart';
 import '../utils/preferences_constants.dart';
@@ -70,12 +71,21 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       if (user != null && mounted) {
+        debugPrint(
+            '[AuthTrace] AuthScreen received successful login user=${user.id} '
+            'notifierSignedIn=${isSignedIn.value} notifierUser=${currentUser.value?.id} '
+            'clientUser=${Supabase.instance.client.auth.currentUser?.id}');
         // Show sync options dialog after successful authentication
         await _showSyncDialog();
 
         try {
           final syncService = SupabaseSyncService();
+          debugPrint(
+              '[AuthTrace] AuthScreen starting login resync user=${Supabase.instance.client.auth.currentUser?.id}');
           await syncService.initialize(isLoginResync: true);
+          debugPrint(
+              '[AuthTrace] AuthScreen login resync finished notifierSignedIn=${isSignedIn.value} '
+              'notifierUser=${currentUser.value?.id} clientUser=${Supabase.instance.client.auth.currentUser?.id}');
         } catch (e) {
           ErrorHandler.logError(
             e,

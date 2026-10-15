@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'supabase_sync_service.dart';
 import '../utils/internet_access_checker.dart';
 import '../utils/error_handler.dart';
@@ -95,6 +96,7 @@ class AuthService {
   // Username/Password Sign In
   Future<User?> signInWithUsername(String username, String password) async {
     try {
+      debugPrint('[AuthTrace] sign-in started');
       // Check network connectivity before attempting authentication
       final hasInternet = await InternetAccessChecker.hasInternetAccess();
       if (!hasInternet) {
@@ -124,6 +126,10 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      debugPrint('[AuthTrace] sign-in response user=${response.user?.id} '
+          'clientUser=${_supabase.auth.currentUser?.id} '
+          'sessionExpired=${_supabase.auth.currentSession?.isExpired}');
 
       return response.user;
     } catch (e) {

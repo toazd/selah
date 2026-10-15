@@ -24,7 +24,7 @@ import 'utils/preferences_constants.dart';
 import 'utils/snackbar_notification.dart';
 import 'services/supabase_sync_service.dart';
 import 'services/auth_service.dart';
-import 'services/windows_auth_storage.dart';
+import 'services/windows_auth_migration.dart';
 import 'services/selah_import_service.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:file_picker/file_picker.dart';
@@ -149,6 +149,16 @@ final ValueNotifier<bool> isSignedIn = ValueNotifier(false);
 final ValueNotifier<User?> currentUser = ValueNotifier(null);
 int _authStateGeneration = 0;
 
+String _describeAuthSession(Session? session) {
+  if (session == null) return 'null';
+  return 'user=${session.user.id}, expired=${session.isExpired}, '
+      'expiresAt=${session.expiresAt}, hasRefreshToken=${session.refreshToken != null}';
+}
+
+void _authTrace(String message) {
+  debugPrint('[AuthTrace ${DateTime.now().toIso8601String()}] $message');
+}
+
 bool _shouldIgnoreNullSessionAuthEvent({
   required AuthChangeEvent event,
   required bool signedIn,
@@ -173,8 +183,19 @@ Future<void> _handleAuthenticatedUser(
   int generation,
   Session? session,
 ) async {
+  _authTrace(
+    'authenticated event=${event.name} generation=$generation '
+    'session=${_describeAuthSession(session)} '
+    'beforeNotifierSignedIn=${isSignedIn.value} '
+    'beforeNotifierUser=${currentUser.value?.id} '
+    'clientUser=${Supabase.instance.client.auth.currentUser?.id}',
+  );
   isSignedIn.value = true;
   currentUser.value = user;
+  _authTrace(
+    'authenticated state applied user=${user.id} '
+    'notifierSignedIn=${isSignedIn.value}',
+  );
 
   // Supabase sets the saved session before it asynchronously attempts a
   // refresh. Keep the UI signed in, but wait for tokenRefreshed before doing
@@ -182,28 +203,49 @@ Future<void> _handleAuthenticatedUser(
   if (event == AuthChangeEvent.initialSession &&
       session != null &&
       session.isExpired) {
+    _authTrace(
+        'initial session is expired; waiting for Supabase token refresh before sync');
     return;
   }
 
   final prefs = await SharedPreferences.getInstance();
-  if (generation != _authStateGeneration) return;
+  if (generation != _authStateGeneration) {
+    _authTrace(
+        'authenticated event abandoned after prefs await: generation changed to $_authStateGeneration');
+    return;
+  }
 
   final lastLoginTime = prefs.getInt('lastLoginTime');
 
   if (lastLoginTime == null) {
     await prefs.setInt('lastLoginTime', DateTime.now().millisecondsSinceEpoch);
-    if (generation != _authStateGeneration) return;
+    _authTrace('lastLoginTime initialized for user=${user.id}');
+    if (generation != _authStateGeneration) {
+      _authTrace(
+          'authenticated event abandoned after lastLoginTime write: generation changed to $_authStateGeneration');
+      return;
+    }
   }
 
   // AuthScreen shows the sync options and starts the login resync after the
   // user confirms them. Startup/token refresh events initialize directly.
   if (event != AuthChangeEvent.signedIn) {
+    _authTrace('starting startup/token-refresh sync for user=${user.id}');
     await SupabaseSyncService().initialize(isLoginResync: true);
+    _authTrace('startup/token-refresh sync finished for user=${user.id}');
   }
 }
 
 Future<void> _handleSignedOutAuthState(int generation) async {
-  if (generation != _authStateGeneration) return;
+  _authTrace(
+    'signed-out event generation=$generation currentGeneration=$_authStateGeneration '
+    'clientUser=${Supabase.instance.client.auth.currentUser?.id} '
+    'reason=auth stream event',
+  );
+  if (generation != _authStateGeneration) {
+    _authTrace('signed-out event ignored because it is stale');
+    return;
+  }
 
   isSignedIn.value = false;
   currentUser.value = null;
@@ -213,38 +255,67 @@ Future<void> _handleSignedOutAuthState(int generation) async {
   if (generation != _authStateGeneration) return;
 
   await prefs.remove('lastLoginTime');
+  _authTrace('signed-out state applied; notifierSignedIn=${isSignedIn.value}');
 }
 
 Future<void> _handleSupabaseAuthStateChange(AuthState data) async {
   final generation = ++_authStateGeneration;
   final user = data.session?.user;
 
-  if (user != null) {
-    await _handleAuthenticatedUser(user, data.event, generation, data.session);
-    return;
-  }
+  _authTrace(
+    'auth event=${data.event.name} generation=$generation '
+    'fromBroadcast=${data.fromBroadcast} session=${_describeAuthSession(data.session)} '
+    'signOutReason=${data.signOutReason?.name ?? 'none'} '
+    'notifierSignedIn=${isSignedIn.value} notifierUser=${currentUser.value?.id} '
+    'clientUser=${Supabase.instance.client.auth.currentUser?.id}',
+  );
 
-  if (_shouldIgnoreNullSessionAuthEvent(
-    event: data.event,
-    signedIn: isSignedIn.value,
-    hasCurrentUser: currentUser.value != null,
-  )) {
-    if (isSignedIn.value || currentUser.value != null) {
-      await ErrorHandler.logError(
-        'Ignored Supabase auth event with null session while signed in',
-        customMessage: 'Supabase auth null-session event ignored',
-        context: {
-          'class': 'main.dart',
-          'method': '_handleSupabaseAuthStateChange',
-          'event': data.event.name,
-          'fromBroadcast': data.fromBroadcast,
-        },
-      );
+  try {
+    if (user != null) {
+      await _handleAuthenticatedUser(
+          user, data.event, generation, data.session);
+      return;
     }
-    return;
-  }
 
-  await _handleSignedOutAuthState(generation);
+    if (_shouldIgnoreNullSessionAuthEvent(
+      event: data.event,
+      signedIn: isSignedIn.value,
+      hasCurrentUser: currentUser.value != null,
+    )) {
+      _authTrace('null-session auth event ignored event=${data.event.name} '
+          'because notifier is already signed in');
+      if (isSignedIn.value || currentUser.value != null) {
+        await ErrorHandler.logError(
+          'Ignored Supabase auth event with null session while signed in',
+          customMessage: 'Supabase auth null-session event ignored',
+          context: {
+            'class': 'main.dart',
+            'method': '_handleSupabaseAuthStateChange',
+            'event': data.event.name,
+            'fromBroadcast': data.fromBroadcast,
+          },
+        );
+      }
+      return;
+    }
+
+    await _handleSignedOutAuthState(generation);
+  } catch (error, stackTrace) {
+    _authTrace(
+        'auth event handler failed event=${data.event.name} error=$error');
+    _authTrace(stackTrace.toString());
+    unawaited(ErrorHandler.logError(
+      error,
+      customMessage: 'Supabase auth event handler failed',
+      context: {
+        'class': 'main.dart',
+        'method': '_handleSupabaseAuthStateChange',
+        'event': data.event.name,
+        'generation': generation,
+        'stack': stackTrace.toString(),
+      },
+    ));
+  }
 }
 
 // Global navigator key for showing dialogs from window manager
@@ -618,15 +689,14 @@ void main() async {
 
   // Initialize Supabase
   try {
-    final authOptions = !kIsWeb && Platform.isWindows
-        ? FlutterAuthClientOptions(localStorage: windowsAuthStorage)
-        : const FlutterAuthClientOptions();
+    await migrateLegacyWindowsAuthSession();
     await Supabase.initialize(
       url: SupabaseConfig.supabaseUrl,
       //anonKey: SupabaseConfig.supabaseAnonKey,
       publishableKey: SupabaseConfig.supabaseAnonKey,
-      authOptions: authOptions,
     );
+    _authTrace(
+        'Supabase initialized currentSession=${_describeAuthSession(Supabase.instance.client.auth.currentSession)}');
   } catch (e) {
     ErrorHandler.logError(
       'Supabase initialize exception: ${e.toString()}',
@@ -649,6 +719,8 @@ void main() async {
       ));
     },
   );
+  _authTrace(
+      'auth listener attached currentSession=${_describeAuthSession(Supabase.instance.client.auth.currentSession)}');
 
   await _loadAllPrefs();
   final prefs = await SharedPreferences.getInstance();
@@ -659,6 +731,9 @@ void main() async {
   // Reconcile the already-restored session so a
   // valid upgrade session is reflected in the UI immediately.
   final initialSession = Supabase.instance.client.auth.currentSession;
+  _authTrace(
+      'startup reconciliation currentSession=${_describeAuthSession(initialSession)} '
+      'notifierSignedIn=${isSignedIn.value}');
   if (!isSignedIn.value && initialSession != null) {
     unawaited(_handleSupabaseAuthStateChange(
       AuthState(AuthChangeEvent.initialSession, initialSession),
@@ -1037,22 +1112,6 @@ Future<void> _saveAllCurrentPrefs() async {
       e,
       customMessage: '_saveAllCurrentPrefs exception',
       context: {'class': 'main.dart', 'method': '_saveAllCurrentPrefs'},
-    );
-  }
-}
-
-Future<void> _flushWindowsAuthStorage() async {
-  if (kIsWeb || !Platform.isWindows) return;
-
-  try {
-    // Prevent a token refresh from starting while the process is being closed.
-    Supabase.instance.client.auth.stopAutoRefresh();
-    await windowsAuthStorage.flush();
-  } catch (e) {
-    ErrorHandler.logError(
-      e,
-      customMessage: 'Failed to flush Windows auth storage during shutdown',
-      context: {'class': 'main.dart', 'method': '_flushWindowsAuthStorage'},
     );
   }
 }
@@ -1498,7 +1557,6 @@ class _WindowManagerListener extends WindowListener {
         // await windowManager.destroy();
         // await windowManager.setPreventClose(false);
         // windowManager.close();
-        await _flushWindowsAuthStorage();
         try {
           _releaseSingleInstanceLock();
         } catch (_) {}
@@ -1556,10 +1614,6 @@ class _WindowManagerListener extends WindowListener {
 
       // Properly dispose the listeners
       LocalDataChangeNotifier.dispose();
-
-      // Supabase auth persistence is asynchronous. Ensure a just-refreshed
-      // token is on disk before exit so the next launch/install can recover it.
-      await _flushWindowsAuthStorage();
 
       // This only runs after all saving and syncing is complete.
 
@@ -4892,13 +4946,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _clearPreferences({bool preserveSyncQueues = true}) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // The Windows auth session is intentionally outside SharedPreferences, so
-    // reset operations must clear it explicitly just as they cleared the old
-    // shared auth key.
-    if (!kIsWeb && Platform.isWindows) {
-      await windowsAuthStorage.removePersistedSession();
-    }
-
     String? pendingHighlights;
     String? pendingNotes;
     String? pendingHistory;
@@ -5093,9 +5140,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
       try {
         final Map<String, dynamic> newPrefs =
             jsonDecode(controller.text) as Map<String, dynamic>;
-        if (!kIsWeb && Platform.isWindows) {
-          await windowsAuthStorage.removePersistedSession();
-        }
         await prefs.clear();
         for (final entry in newPrefs.entries) {
           final k = entry.key;

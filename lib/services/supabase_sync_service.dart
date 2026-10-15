@@ -1048,9 +1048,22 @@ class SupabaseSyncService {
   // callbacks cannot run competing full syncs at the same time.
   Future<void> initialize({bool isLoginResync = false}) async {
     final userId = _currentUserId;
-    if (userId == null) return;
+    if (userId == null) {
+      debugPrint(
+          '[SyncTrace] initialize skipped: no Supabase user loginResync=$isLoginResync');
+      return;
+    }
 
-    if (_isInitialized && _initializedUserId == userId) return;
+    debugPrint(
+        '[SyncTrace] initialize requested user=$userId loginResync=$isLoginResync '
+        'initialized=$_isInitialized initializedUser=$_initializedUserId '
+        'initializingUser=$_initializingUserId hasInitialization=${_initializationFuture != null}');
+
+    if (_isInitialized && _initializedUserId == userId) {
+      debugPrint(
+          '[SyncTrace] initialize skipped: already initialized user=$userId');
+      return;
+    }
 
     final existingInitialization = _initializationFuture;
     if (existingInitialization != null) {
@@ -1093,7 +1106,18 @@ class SupabaseSyncService {
       if (_isActiveFor(userId, generation)) {
         _isInitialized = true;
         _initializedUserId = userId;
+        debugPrint(
+            '[SyncTrace] initialize completed user=$userId loginResync=$isLoginResync');
+      } else {
+        debugPrint(
+            '[SyncTrace] initialize completed but became inactive user=$userId '
+            'generation=$generation currentGeneration=$_lifecycleGeneration clientUser=$_currentUserId');
       }
+    } catch (error, stackTrace) {
+      debugPrint(
+          '[SyncTrace] initialize failed user=$userId loginResync=$isLoginResync error=$error');
+      debugPrint(stackTrace.toString());
+      rethrow;
     } finally {
       if (identical(_initializationFuture, initialization)) {
         _initializationFuture = null;
@@ -1151,6 +1175,10 @@ class SupabaseSyncService {
     required String userId,
     required int generation,
   }) {
+    debugPrint(
+        '[SyncTrace] realtime status category=$category status=${status.name} '
+        'user=$userId generation=$generation currentGeneration=$_lifecycleGeneration '
+        'error=${error ?? 'none'}');
     // Ignore callbacks from channels that were deliberately replaced, signed
     // out, or disposed. This is especially important on Android, where a close
     // callback can be delivered after the app has resumed and recreated a
@@ -1386,7 +1414,7 @@ class SupabaseSyncService {
           syncStatusNotifier.value = _syncStatus;
           await _flushQueuedOperations();
           if (!isActive()) return;
-          
+
           // Reconcile after every listener setup, but skip during login resync
           // since we'll do a full sync immediately after.
           // Realtime subscriptions do not replay events that happened while
@@ -4251,8 +4279,13 @@ class SupabaseSyncService {
   // Sync all data types
   Future<void> syncAll() {
     final existingSync = _syncAllFuture;
-    if (existingSync != null) return existingSync;
+    if (existingSync != null) {
+      debugPrint(
+          '[SyncTrace] full sync request coalesced user=$_currentUserId');
+      return existingSync;
+    }
 
+    debugPrint('[SyncTrace] full sync request accepted user=$_currentUserId');
     final sync = _syncAllInternal();
     _syncAllFuture = sync;
     return sync.whenComplete(() {
@@ -4264,8 +4297,12 @@ class SupabaseSyncService {
 
   Future<void> _syncAllInternal() async {
     if (_currentUserId == null) {
+      debugPrint('[SyncTrace] full sync skipped: no current user');
       return;
     }
+
+    final syncUserId = _currentUserId;
+    debugPrint('[SyncTrace] full sync started user=$syncUserId');
 
     // Set syncing status to show progress dialog
     final previousStatus = _syncStatus;
@@ -4295,6 +4332,9 @@ class SupabaseSyncService {
         // If was offline, keep offline
         syncStatusNotifier.value = _syncStatus;
       }
+      debugPrint(
+          '[SyncTrace] full sync finished requestedUser=$syncUserId currentUser=$_currentUserId '
+          'notifierStatus=${syncStatusNotifier.value.name}');
     }
   }
 
