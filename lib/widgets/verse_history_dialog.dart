@@ -257,7 +257,7 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        constraints: const BoxConstraints(maxWidth: 400),
+        //constraints: const BoxConstraints(maxWidth: 400),
         content: Text(
             'Trim $itemCount history ${itemCount == 1 ? 'item' : 'items'} before ${_formatHistoryDate(selectedDate)}? This action cannot be undone.',
             style: TextStyle(
@@ -528,7 +528,10 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                     if (currentDate.year != previousDate.year ||
                         currentDate.month != previousDate.month ||
                         currentDate.day != previousDate.day) {
-                      widgets.add(Divider());
+                      widgets.add(Divider(
+                        indent: 16,
+                        endIndent: 16,
+                      ));
                       widgets.add(
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -638,8 +641,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                 width: double.infinity,
                 child: Wrap(
                   alignment: WrapAlignment.end,
-                  spacing: 8,
-                  runSpacing: 4,
+                  spacing: 0,
+                  runSpacing: 0,
                   children: [
                     TextButton(
                       onPressed: _selectedItemIds.isEmpty
@@ -673,8 +676,8 @@ class _VerseHistoryDialogState extends State<VerseHistoryDialog>
                 width: double.infinity,
                 child: Wrap(
                   alignment: WrapAlignment.end,
-                  spacing: 8,
-                  runSpacing: 4,
+                  spacing: 0,
+                  runSpacing: 0,
                   children: [
                     TextButton(
                       onPressed: _clearHistory,

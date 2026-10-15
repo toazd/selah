@@ -41,6 +41,24 @@ Future<BibleSearchComputationResult> _computeRegularBibleSearch(
   final patternData = _buildBibleSearchPattern(data);
   final results = await _searchBibleVersesOrdered(data, patternData);
 
+  if (results.isEmpty &&
+      !data.useRegex &&
+      !data.useNearby &&
+      !data.caseSensitive) {
+    final fuzzyResult = await _searchBibleVersesFuzzy(data);
+    if (fuzzyResult.results.isNotEmpty) {
+      return BibleSearchComputationResult(
+        searchResults: fuzzyResult.results,
+        totalMatches: fuzzyResult.totalMatches,
+        totalVerses: fuzzyResult.results.length,
+        isNearbySearchActive: false,
+        regexPattern: patternData.pattern,
+        regexCaseSensitive: false,
+        regexUnicode: patternData.unicode,
+      );
+    }
+  }
+
   int matchCount = 0;
   for (final verse in results) {
     final text =
@@ -159,6 +177,16 @@ class _BibleSearchPatternData {
     required this.escapedTerms,
     required this.pattern,
     required this.unicode,
+  });
+}
+
+class _FuzzyBibleSearchResult {
+  final List<Map<String, dynamic>> results;
+  final int totalMatches;
+
+  const _FuzzyBibleSearchResult({
+    required this.results,
+    required this.totalMatches,
   });
 }
 
@@ -686,6 +714,216 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesOrdered(
   return filteredResults;
 }
 
+const double _minimumFuzzyWordSimilarity = 0.70;
+final RegExp _fuzzyWordRegExp = RegExp(r"[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*");
+
+Future<_FuzzyBibleSearchResult> _searchBibleVersesFuzzy(
+    BibleSearchTaskData data) async {
+  final queryWords = _getBiblePreFilterKeywords(
+    _getEffectiveBibleSearchTerms(data.input),
+  )
+      .map((word) => word.replaceAll('*', '').toLowerCase())
+      .where((word) => word.isNotEmpty)
+      .toList();
+  if (queryWords.isEmpty) {
+    return const _FuzzyBibleSearchResult(results: [], totalMatches: 0);
+  }
+
+  final results = <Map<String, dynamic>>[];
+  var totalMatches = 0;
+  final allVerses = await BibleDatabase.getAllVerses();
+  final similarityCache = <String, Map<String, double>>{};
+  final tokenizedVerses = List<List<String>?>.filled(allVerses.length, null);
+  final vocabulary = <String>{};
+
+  double similarityFor(String queryWord, String verseWord) {
+    final wordScores = similarityCache.putIfAbsent(queryWord, () => {});
+    return wordScores.putIfAbsent(
+      verseWord,
+      () => _fuzzyWordSimilarity(queryWord, verseWord),
+    );
+  }
+
+  for (var verseOrder = 0; verseOrder < allVerses.length; verseOrder++) {
+    final verse = allVerses[verseOrder];
+    final verseWords = _fuzzyWordRegExp
+        .allMatches(_getBibleSearchText(
+          verse['text'] as String,
+          data.useRedLetter,
+        ))
+        .map((match) => match.group(0)!.toLowerCase())
+        .toList();
+
+    // Choose fuzzy candidates from the complete Bible vocabulary. Otherwise,
+    // a filter can remove the best match (for example, Nehelamite) and cause
+    // a much weaker in-range word such as "need" or "near" to be promoted.
+    vocabulary.addAll(verseWords);
+    if (BookFilter.verseMatchesFilter(
+        verse, data.allowedBooks, data.allowedChapters)) {
+      tokenizedVerses[verseOrder] = verseWords;
+    }
+  }
+
+  // Use the strongest vocabulary candidate for each query word. This keeps
+  // the 70% floor useful without treating every related word as a typo match.
+  final candidateWordsByQuery = <String, Set<String>>{};
+  for (final queryWord in queryWords) {
+    var bestScore = 0.0;
+    final bestWords = <String>{};
+    for (final verseWord in vocabulary) {
+      final score = similarityFor(queryWord, verseWord);
+      if (score > bestScore) {
+        bestScore = score;
+        bestWords
+          ..clear()
+          ..add(verseWord);
+      } else if (score == bestScore && score >= _minimumFuzzyWordSimilarity) {
+        bestWords.add(verseWord);
+      }
+    }
+    if (bestScore < _minimumFuzzyWordSimilarity) {
+      return const _FuzzyBibleSearchResult(results: [], totalMatches: 0);
+    }
+    candidateWordsByQuery[queryWord] = bestWords;
+  }
+
+  for (var verseOrder = 0; verseOrder < allVerses.length; verseOrder++) {
+    final verseWords = tokenizedVerses[verseOrder];
+    if (verseWords == null) continue;
+    final verse = allVerses[verseOrder];
+
+    final bestScores = <double>[];
+    var containsEveryQueryWord = true;
+    for (final queryWord in queryWords) {
+      final candidateWords = candidateWordsByQuery[queryWord]!;
+      var bestScore = 0.0;
+      for (final verseWord in verseWords) {
+        if (!candidateWords.contains(verseWord)) continue;
+        final score = similarityFor(queryWord, verseWord);
+        if (score > bestScore) bestScore = score;
+      }
+      if (bestScore < _minimumFuzzyWordSimilarity) {
+        containsEveryQueryWord = false;
+        break;
+      }
+      bestScores.add(bestScore);
+    }
+    if (!containsEveryQueryWord) continue;
+
+    final matchedWords = <String>{};
+    var verseMatchCount = 0;
+    for (final verseWord in verseWords) {
+      final isMatch = candidateWordsByQuery.values
+          .any((candidateWords) => candidateWords.contains(verseWord));
+      if (isMatch) {
+        matchedWords.add(verseWord);
+        verseMatchCount++;
+      }
+    }
+
+    final score = bestScores.reduce((a, b) => a + b) / bestScores.length;
+    results.add({
+      ...verse,
+      'bookLongName':
+          BookNameConverter.shortNameToLongName(verse['book'] as String),
+      '_fuzzyScore': score,
+      '_fuzzyOrder': verseOrder,
+      '_fuzzyMatchedWords': matchedWords.toList(),
+    });
+    totalMatches += verseMatchCount;
+  }
+
+  results.sort((a, b) {
+    final scoreOrder =
+        (b['_fuzzyScore'] as double).compareTo(a['_fuzzyScore'] as double);
+    if (scoreOrder != 0) return scoreOrder;
+    return (a['_fuzzyOrder'] as int).compareTo(b['_fuzzyOrder'] as int);
+  });
+
+  return _FuzzyBibleSearchResult(
+    results: results,
+    totalMatches: totalMatches,
+  );
+}
+
+double _fuzzyWordSimilarity(String left, String right) {
+  if (left == right) return 1.0;
+  if (left.isEmpty || right.isEmpty) return 0.0;
+
+  final previous = List<int>.generate(right.length + 1, (index) => index);
+  for (var leftIndex = 1; leftIndex <= left.length; leftIndex++) {
+    var diagonal = previous[0];
+    previous[0] = leftIndex;
+    for (var rightIndex = 1; rightIndex <= right.length; rightIndex++) {
+      final above = previous[rightIndex];
+      final replacementCost =
+          left.codeUnitAt(leftIndex - 1) == right.codeUnitAt(rightIndex - 1)
+              ? 0
+              : 1;
+      previous[rightIndex] = math.min(
+        math.min(previous[rightIndex] + 1, previous[rightIndex - 1] + 1),
+        diagonal + replacementCost,
+      );
+      diagonal = above;
+    }
+  }
+
+  final distance = previous[right.length];
+  final editSimilarity = 1.0 - distance / math.max(left.length, right.length);
+  return math.max(editSimilarity, _jaroWinklerSimilarity(left, right));
+}
+
+double _jaroWinklerSimilarity(String left, String right) {
+  final matchDistance = math.max(left.length, right.length) ~/ 2 - 1;
+  if (matchDistance < 0) return 0.0;
+
+  final leftMatches = List<bool>.filled(left.length, false);
+  final rightMatches = List<bool>.filled(right.length, false);
+  var matches = 0;
+
+  for (var leftIndex = 0; leftIndex < left.length; leftIndex++) {
+    final start = math.max(0, leftIndex - matchDistance);
+    final end = math.min(leftIndex + matchDistance + 1, right.length);
+    for (var rightIndex = start; rightIndex < end; rightIndex++) {
+      if (rightMatches[rightIndex] ||
+          left.codeUnitAt(leftIndex) != right.codeUnitAt(rightIndex)) {
+        continue;
+      }
+      leftMatches[leftIndex] = true;
+      rightMatches[rightIndex] = true;
+      matches++;
+      break;
+    }
+  }
+
+  if (matches == 0) return 0.0;
+
+  final matchedLeft = <int>[];
+  final matchedRight = <int>[];
+  for (var index = 0; index < left.length; index++) {
+    if (leftMatches[index]) matchedLeft.add(left.codeUnitAt(index));
+  }
+  for (var index = 0; index < right.length; index++) {
+    if (rightMatches[index]) matchedRight.add(right.codeUnitAt(index));
+  }
+
+  var transpositions = 0;
+  for (var index = 0; index < matchedLeft.length; index++) {
+    if (matchedLeft[index] != matchedRight[index]) transpositions++;
+  }
+
+  final jaro = (matches / left.length +
+          matches / right.length +
+          (matches - transpositions / 2) / matches) /
+      3;
+  var prefix = 0;
+  while (prefix < math.min(4, math.min(left.length, right.length)) &&
+      left.codeUnitAt(prefix) == right.codeUnitAt(prefix)) {
+    prefix++;
+  }
+  return jaro + prefix * 0.1 * (1 - jaro);
+}
+
 Future<List<Map<String, dynamic>>> _searchBibleVersesNearby(
     BibleSearchTaskData data) async {
   final keywords = _getBibleKeywordsFromInput(data.input);
@@ -964,7 +1202,8 @@ class _SearchScreenState extends State<SearchScreen>
     final verseNum = verse['verse'] as int;
 
     // Include search options in cache key to invalidate when options change
-    return '$book:$chapter:$verseNum:${_useRegex}_$_useWholeWord}_$_useRedLetter}_$_caseSensitive}:$verseText';
+    final fuzzyWords = (verse['_fuzzyMatchedWords'] as List?)?.join(',') ?? '';
+    return '$book:$chapter:$verseNum:${_useRegex}_$_useWholeWord}_$_useRedLetter}_$_caseSensitive}_$fuzzyWords:$verseText';
   }
 
   // Get cached highlighted span or compute and cache it
@@ -988,9 +1227,16 @@ class _SearchScreenState extends State<SearchScreen>
       baseStyle,
     );
 
+    final fuzzyWords = verse['_fuzzyMatchedWords'];
+    final highlightRegex = fuzzyWords is List && fuzzyWords.isNotEmpty
+        ? _createBibleSearchRegExp(
+            '\\b(${fuzzyWords.map((word) => RegExp.escape(word as String)).join('|')})\\b',
+            false,
+          )
+        : _currentRegex!;
     final highlightedSpan = _highlightParsedSpan(
       parsedSpan,
-      _currentRegex!,
+      highlightRegex,
       context,
       redLetterOnly: _useRedLetter,
     );
@@ -1934,10 +2180,11 @@ class _SearchScreenState extends State<SearchScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        insetPadding: EdgeInsets.all(8.0),
-        contentPadding: EdgeInsets.all(8.0),
-        actionsPadding: EdgeInsets.all(8.0),
-        titlePadding: EdgeInsets.all(8.0),
+        constraints: BoxConstraints(maxWidth: 500),
+        insetPadding: const EdgeInsets.all(16.0),
+        contentPadding: const EdgeInsets.all(16.0),
+        actionsPadding: const EdgeInsets.all(16.0),
+        titlePadding: const EdgeInsets.all(16.0),
         backgroundColor: bgColor,
         content: SingleChildScrollView(
           child: Column(
@@ -2496,7 +2743,9 @@ class _SearchScreenState extends State<SearchScreen>
               onChanged: (val) async {
                 setState(() {
                   _useNearby = val;
-                  if (_useNearby) _useRegex = false;
+                  if (_useNearby) {
+                    _useRegex = false;
+                  }
                 });
                 await _saveSearchOptions();
                 // Clear cache when search options change
@@ -2563,15 +2812,37 @@ class _SearchScreenState extends State<SearchScreen>
               endIndent: 32,
             ),
             const SizedBox(height: 8),
-            Center(
-              child: Text(
-                'Book Filter',
-                style: TextStyle(
-                    fontSize: uiFontSize,
-                    fontFamily: uiFontFamily,
-                    fontWeight: FontWeight.normal,
-                    color: getAdaptiveTextColor(context)),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Book Filter',
+                  style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      fontWeight: FontWeight.normal,
+                      color: getAdaptiveTextColor(context)),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.info_outline,
+                    size: 28,
+                    color: getAdaptiveTextColor(context),
+                    semanticLabel: 'Book Filter help',
+                  ),
+                  tooltip: 'Book Filter help',
+                  onPressed: () => _showSearchOptionHelp(
+                    'Book Filter',
+                    const [
+                      'Enable a book filter to restrict your search results to the chosen books.',
+                      'When "Custom Range" is selected you must enter the book names manually following these rules:',
+                      'Both short and long book names are supported but spaces in book names are not supported (eg. Deu or Deuteronomy, 1Jo or 1John).',
+                      'Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
+                      'Multiple books and/or ranges must be separated by a comma (eg. Gen, Exo, Mat-1John 3)',
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Padding(
@@ -2704,48 +2975,6 @@ class _SearchScreenState extends State<SearchScreen>
                                   usePrimaryColor: true))),
                     ),
                   ),
-                  if (_bookFilterType == 'Custom Range') ...[
-                    const SizedBox(height: 16),
-                    ListTile(
-                        subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                          Text('Custom Range Rules:',
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  fontWeight: FontWeight.bold,
-                                  color: getAdaptiveTextColor(context))),
-                          const SizedBox(height: 16),
-                          Text(
-                              '• Both short and long book names are supported.',
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context))),
-                          const SizedBox(height: 8),
-                          Text(
-                              '• Book and chapter ranges must be separated by a dash and can optionally include chapter numbers\n(eg. Mat 22 - John).',
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context))),
-                          const SizedBox(height: 8),
-                          Text(
-                              '• Multiple ranges must be separated by a comma (,)',
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context))),
-                          const SizedBox(height: 8),
-                          Text(
-                              '• For example:\nGenesis, Num 10-20, Jud-Rev, Mat 22 - Joh 15',
-                              style: TextStyle(
-                                  fontSize: uiFontSize,
-                                  fontFamily: uiFontFamily,
-                                  color: getAdaptiveTextColor(context))),
-                        ]))
-                  ],
                 ],
               ),
           ],
@@ -2903,7 +3132,7 @@ class _SearchScreenState extends State<SearchScreen>
                                   setState(() {
                                     // Clear search query text
                                     _controller.clear();
-                                    // Reset all search option toggles to false
+                                    // Reset all search option toggles to their defaults
                                     _useRegex = false;
                                     _useNearby = false;
                                     _isNearbySearchActive = false;

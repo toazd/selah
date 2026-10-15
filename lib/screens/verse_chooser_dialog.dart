@@ -582,7 +582,7 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                        'The Tap Mode toggle determines whether or not choosing a verse number is required for navigation.',
+                        'The Tap Mode determines whether or not choosing a verse number is required for navigation.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontWeight: FontWeight.normal,

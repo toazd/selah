@@ -426,4 +426,80 @@ void main() {
     await _waitForHighlightedText(tester, 'God');
     expect(_hasHighlightedText(tester, 'darkness'), isTrue);
   });
+
+  testWidgets('fuzzy search recovers a misspelled word', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(_searchFieldFinder(), 'destroyyed');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('167 matches in 164 verses'));
+    expect(_hasHighlightedText(tester, 'destroyed'), isTrue);
+  });
+
+  testWidgets('fuzzy search tolerates shifted characters', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(_searchFieldFinder(), 'gomaroh');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('19 matches in 19 verses'));
+    expect(_hasHighlightedText(tester, 'Gomorrah'), isTrue);
+  });
+
+  testWidgets(
+      'fuzzy search does not promote weaker words inside a book filter',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'searchBookFilterType': 'Custom Range',
+      'searchBookFilterCustom': 'Mat 22-John',
+      'lastSearchTerm': 'nehalemi',
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await _waitForFinder(tester, find.text('0 matches in 0 verses'));
+  });
+
+  testWidgets('fuzzy search matches misspelled words in any order',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchScreen(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.enterText(
+        _searchFieldFinder(), 'destroyyed lac knowludge');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
+    await tester.pump();
+
+    await _waitForHighlightedText(tester, 'destroyed');
+    expect(_hasHighlightedText(tester, 'lack'), isTrue);
+    expect(_hasHighlightedText(tester, 'knowledge'), isTrue);
+  });
 }

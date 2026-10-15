@@ -63,7 +63,32 @@ class BibleScreenHeader extends StatelessWidget {
             child: _buildTitleButton(context),
           ),
 
-          _buildOverflowMenu(context, overflowActions, primaryColor),
+          ValueListenableBuilder<bool>(
+            valueListenable: simpleUiModeNotifier,
+            builder: (context, simpleUiMode, _) {
+              if (simpleUiMode) {
+                return _buildOverflowMenu(
+                  context,
+                  overflowActions,
+                  primaryColor,
+                );
+              }
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final action in overflowActions.reversed)
+                    _buildHeaderIconButton(
+                      icon: action.icon,
+                      semanticLabel: action.semanticLabel,
+                      tooltip: action.tooltip,
+                      onPressed: action.onPressed,
+                      color: primaryColor,
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );

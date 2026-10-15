@@ -87,9 +87,10 @@ Color hexToColor(String hexString) {
 }
 
 const bool defaultFullscreen = false;
+const bool defaultSimpleUiMode = true;
 
 // Only user-configurable through the advanced -> edit preferences dialog
-const int defaultMaxScreens = 8;
+const int defaultMaxScreens = 4;
 
 const List<Color> defaultHighlightColors = [
   Colors.yellow,

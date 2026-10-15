@@ -102,6 +102,8 @@ final ValueNotifier<Color> darkBackgroundColor =
     ValueNotifier(const Color(0xFF000010));
 final ValueNotifier<Color> darkTextColor = ValueNotifier(Colors.white);
 final ValueNotifier<bool> fullscreenNotifier = ValueNotifier(false);
+final ValueNotifier<bool> simpleUiModeNotifier =
+    ValueNotifier(defaultSimpleUiMode);
 final ValueNotifier<int> maxScreens = ValueNotifier(defaultMaxScreens);
 final ValueNotifier<List<Color>> highlightColorsNotifier =
     ValueNotifier<List<Color>>(defaultHighlightColors);
@@ -809,6 +811,8 @@ Future<void> _loadAllPrefs() async {
 
     // Fullscreen
     fullscreenNotifier.value = prefs.getBool('fullscreen') ?? defaultFullscreen;
+    simpleUiModeNotifier.value =
+        prefs.getBool('simpleUiMode') ?? defaultSimpleUiMode;
 
     // Max screens
     int maxScreensValue = prefs.getInt('maxScreens') ?? defaultMaxScreens;
@@ -994,6 +998,7 @@ Future<void> _saveAllCurrentPrefs() async {
             _colorToHex(darkVerseReferenceColor.value),
           ),
       () => prefs.setBool('fullscreen', fullscreenNotifier.value),
+      () => prefs.setBool('simpleUiMode', simpleUiModeNotifier.value),
       () => prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       () =>
           prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
@@ -1586,6 +1591,102 @@ class _MultiBibleViewState extends State<MultiBibleView>
   int _drawerUsernameLoadGeneration = 0;
   bool _wasAppHidden = false;
 
+  void _showMainOptionHelp(String title, List<String> bullets) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDark ? darkBackgroundColor.value : lightBackgroundColor.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        constraints: BoxConstraints(maxWidth: 500),
+        insetPadding: const EdgeInsets.all(16.0),
+        contentPadding: const EdgeInsets.all(16.0),
+        actionsPadding: const EdgeInsets.all(16.0),
+        titlePadding: const EdgeInsets.all(16.0),
+        backgroundColor: bgColor,
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              UnbreakableText(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: uiFontSize,
+                  fontFamily: uiFontFamily,
+                  color: getAdaptiveTextColor(context),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...bullets.map(
+                (bullet) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: UnbreakableText(
+                    '• $bullet',
+                    style: TextStyle(
+                      fontSize: uiFontSize,
+                      fontFamily: uiFontFamily,
+                      color: getAdaptiveTextColor(context),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Close',
+              style: TextStyle(
+                fontSize: uiFontSize,
+                fontFamily: uiFontFamily,
+                color: getAdaptiveTextColor(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainOptionTitle({
+    required String title,
+    required String helpTitle,
+    required List<String> helpBullets,
+  }) {
+    return Row(
+      children: [
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: Icon(
+            Icons.info_outline,
+            size: 32,
+            color: getAdaptiveTextColor(context),
+            semanticLabel: '$title help',
+          ),
+          tooltip: '$title help',
+          onPressed: () => _showMainOptionHelp(helpTitle, helpBullets),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: uiFontSize,
+              fontFamily: uiFontFamily,
+              color: getAdaptiveTextColor(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _resumeSyncAfterAppWasHidden() async {
     if (Supabase.instance.client.auth.currentUser == null) return;
 
@@ -2017,6 +2118,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool('fullscreen', fullscreenNotifier.value);
+  }
+
+  Future<void> _saveSimpleUiModePrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('simpleUiMode', simpleUiModeNotifier.value);
   }
 
   void _showHistoryDialog(BuildContext context, int screenIndex) async {
@@ -2959,15 +3065,17 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 valueListenable: isVerticalTile,
                 builder: (context, isVertical, _) {
                   return SwitchListTile(
-                    title: Text(
-                      isVertical
+                    title: _buildMainOptionTitle(
+                      title: isVertical
                           ? 'Vertical Screen Layout'
                           : 'Horizontal Screen Layout',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context),
-                      ),
+                      helpTitle: 'Screen Layout',
+                      helpBullets: const [
+                        'Use this option to choose the arrangement that best fits your screen.',
+                        'Note that more than one Bible screen is required to see any difference between these modes (click/tap the "Add Bible Screen" button to add more Bible screens).',
+                        'Vertical layout places Bible screens next to each other from left to right.',
+                        'Horizontal layout stacks Bible screens on top of each other from top to bottom.',
+                      ],
                     ),
                     value: isVertical,
                     onChanged: (val) {
@@ -2980,7 +3088,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 indent: 16,
                 endIndent: 16,
               ),
-              const SizedBox(height: 8),
+              //const SizedBox(height: 8),
               Center(
                 child: Text(
                   'Mode Toggles',
@@ -2997,15 +3105,17 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 valueListenable: showTskReferencesNotifier,
                 builder: (context, showTskReferences, _) {
                   return SwitchListTile(
-                    title: Text(
-                      showTskReferences
+                    title: _buildMainOptionTitle(
+                      title: showTskReferences
                           ? 'Hide Treasury of Scripture Knowledge'
                           : 'Show Treasury of Scripture Knowledge',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context),
-                      ),
+                      helpTitle: 'Treasury of Scripture Knowledge',
+                      helpBullets: const [
+                        'Shows or hides Treasury of Scripture Knowledge cross-references below verses.',
+                        'The Treasurey of Scripture knowledge is a massive collection of Biblical cross-references built on the principle that the Bible is its own best commentary.',
+                        'It was first published around 1830 and has seen many revisions since then.',
+                        'The digital edition of the TSK used in this app was obtained from http://www.justverses.com/jv/app/downloadTSK.vm',
+                      ],
                     ),
                     value: showTskReferences,
                     onChanged: (val) async {
@@ -3020,15 +3130,16 @@ class _MultiBibleViewState extends State<MultiBibleView>
                   valueListenable: fullscreenNotifier,
                   builder: (context, fullscreen, _) {
                     return SwitchListTile(
-                      title: Text(
-                        fullscreen
+                      title: _buildMainOptionTitle(
+                        title: fullscreen
                             ? 'Exit Fullscreen Mode'
                             : 'Enter Fullscreen Mode',
-                        style: TextStyle(
-                          fontSize: uiFontSize,
-                          fontFamily: uiFontFamily,
-                          color: getAdaptiveTextColor(context),
-                        ),
+                        helpTitle: 'Fullscreen Mode',
+                        helpBullets: const [
+                          'Hides the operating system window controls and expands the app to use all of the available screen space.',
+                          'Turn this off to return to the normal windowed view.',
+                          'Note that on Mobile (Android/iOS) platforms this toggle may have little to no effect.',
+                        ],
                       ),
                       value: fullscreen,
                       onChanged: (val) {
@@ -3042,15 +3153,15 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 valueListenable: showNavigationBarNotifier,
                 builder: (context, showNavBar, _) {
                   return SwitchListTile(
-                    title: Text(
-                      showNavBar
+                    title: _buildMainOptionTitle(
+                      title: showNavBar
                           ? 'Show Bottom Navigation Bar'
                           : 'Hide Bottom Navigation Bar',
-                      style: TextStyle(
-                        fontSize: uiFontSize,
-                        fontFamily: uiFontFamily,
-                        color: getAdaptiveTextColor(context),
-                      ),
+                      helpTitle: 'Bottom Navigation Bar',
+                      helpBullets: const [
+                        'Shows or hides the navigation bar at the bottom of the screen that has buttons for navigating between chapters.',
+                        'You may want to hide it if you have a touchscreen device and you want more room for Bible text.',
+                      ],
                     ),
                     value: showNavBar,
                     onChanged: (val) async {
@@ -3443,13 +3554,14 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       ValueListenableBuilder<bool>(
                         valueListenable: syncHighlightsNotifier,
                         builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Highlights',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
+                          title: _buildMainOptionTitle(
+                            title: 'Highlights',
+                            helpTitle: 'Sync Highlights',
+                            helpBullets: const [
+                              'When enabled, your local highlights are synchronized with your account.',
+                              'This lets your highlights follow you across signed-in devices.',
+                              'Turning it off stops future syncing; the app will ask what to do with existing synced data.',
+                            ],
                           ),
                           value: value,
                           onChanged: (val) async {
@@ -3554,13 +3666,14 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       ValueListenableBuilder<bool>(
                         valueListenable: syncNotesNotifier,
                         builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Notes',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
+                          title: _buildMainOptionTitle(
+                            title: 'Notes',
+                            helpTitle: 'Sync Notes',
+                            helpBullets: const [
+                              'When enabled, your local notes are synchronized with your account.',
+                              'This lets your notes follow you across signed-in devices.',
+                              'Turning it off stops future syncing; the app will ask what to do with existing synced data.',
+                            ],
                           ),
                           value: value,
                           onChanged: (val) async {
@@ -3665,13 +3778,14 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       ValueListenableBuilder<bool>(
                         valueListenable: syncHistoryNotifier,
                         builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'History',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
+                          title: _buildMainOptionTitle(
+                            title: 'History',
+                            helpTitle: 'Sync History',
+                            helpBullets: const [
+                              'When enabled, your Bible reading history is synchronized with your account.',
+                              'This lets your history follow you across signed-in devices.',
+                              'Turning it off stops future syncing; the app will ask what to do with existing synced data.',
+                            ],
                           ),
                           value: value,
                           onChanged: (val) async {
@@ -3778,13 +3892,14 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       ValueListenableBuilder<bool>(
                         valueListenable: syncSearchHistoryNotifier,
                         builder: (context, value, child) => SwitchListTile(
-                          title: Text(
-                            'Search History',
-                            style: TextStyle(
-                              fontSize: uiFontSize,
-                              fontFamily: uiFontFamily,
-                              color: getAdaptiveTextColor(context),
-                            ),
+                          title: _buildMainOptionTitle(
+                            title: 'Search History',
+                            helpTitle: 'Sync Search History',
+                            helpBullets: const [
+                              'When enabled, your saved search history is synchronized with your account.',
+                              'This lets your recent searches follow you across signed-in devices.',
+                              'Turning it off stops future syncing; the app will ask what to do with existing synced data.',
+                            ],
                           ),
                           value: value,
                           onChanged: (val) async {
@@ -3895,7 +4010,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
               ),
               ExpansionTile(
                 title: Text(
-                  'Advanced Functions',
+                  'Advanced',
                   style: TextStyle(
                     fontSize: uiFontSize,
                     fontFamily: uiFontFamily,
@@ -3905,6 +4020,29 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 initiallyExpanded: false,
                 childrenPadding: EdgeInsets.all(8),
                 children: [
+                  ValueListenableBuilder<bool>(
+                    valueListenable: simpleUiModeNotifier,
+                    builder: (context, simpleUiMode, _) {
+                      return SwitchListTile(
+                        title: _buildMainOptionTitle(
+                          title: simpleUiMode
+                              ? 'Enable Simple UI Mode'
+                              : 'Disable Simple UI Mode',
+                          helpTitle: 'Simple UI Mode',
+                          helpBullets: const [
+                            'When enabled, the Bible screen app bar uses a three-dot menu for additional screens and functions.',
+                            'When disabled, those menu choices appear as individual icons on the right side of the app bar.',
+                            'The direct icons are ordered from left to right: Notes Search, Verse History, Webster\'s Dictionary, and Search.',
+                          ],
+                        ),
+                        value: simpleUiMode,
+                        onChanged: (value) {
+                          simpleUiModeNotifier.value = value;
+                          _saveSimpleUiModePrefs();
+                        },
+                      );
+                    },
+                  ),
                   ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -4053,7 +4191,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                             ),
                           ),
                           content: Text(
-                            'This will reset all of the saved preferences to the defaults. The app will then exit because a restart is required for the changes to take effect. Are you sure?',
+                            'This will reset all of the saved preferences to the defaults and sign you out if you are logged into a Sync account (it will not delete any of your local data). The app will then exit because a restart is required for the changes to take effect. Are you sure?',
                             style: TextStyle(
                               fontSize: uiFontSize,
                               fontFamily: uiFontFamily,
