@@ -1349,6 +1349,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: TextField(
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      autofillHints: null,
                       autofocus: true,
                       maxLength: 100,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -1482,6 +1485,9 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextField(
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    autofillHints: null,
                     autofocus: true,
                     maxLength: 100,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,

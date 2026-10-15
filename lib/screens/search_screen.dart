@@ -2898,8 +2898,10 @@ class _SearchScreenState extends State<SearchScreen>
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
-                    child: //OnscreenKeyboardTextField(
-                        TextField(
+                    child: TextField(
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      autofillHints: null,
                       autofocus: true,
                       maxLength: 100,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -2994,6 +2996,9 @@ class _SearchScreenState extends State<SearchScreen>
                     CrossAxisAlignment.stretch, // ensure full width
                 children: [
                   TextField(
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    autofillHints: null,
                     autofocus: true,
                     maxLength: 100,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
