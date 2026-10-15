@@ -74,6 +74,11 @@ class _AuthScreenState extends State<AuthScreen> {
             '[AuthTrace] AuthScreen received successful login user=${user.id} '
             'notifierSignedIn=${isSignedIn.value} notifierUser=${currentUser.value?.id} '
             'clientUser=${Supabase.instance.client.auth.currentUser?.id}');
+        debugPrint('[AuthTrace] AuthScreen waiting for queued auth state');
+        await waitForAuthStateProcessing();
+        debugPrint('[AuthTrace] AuthScreen auth state queue complete '
+            'notifierSignedIn=${isSignedIn.value} '
+            'notifierUser=${currentUser.value?.id}');
         // Show sync options dialog after successful authentication
         await _showSyncDialog();
 

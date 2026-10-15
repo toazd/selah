@@ -148,6 +148,7 @@ final ValueNotifier<bool> syncSearchHistoryNotifier =
 final ValueNotifier<bool> isSignedIn = ValueNotifier(false);
 final ValueNotifier<User?> currentUser = ValueNotifier(null);
 int _authStateGeneration = 0;
+Future<void> _authEventQueue = Future<void>.value();
 
 String _describeAuthSession(Session? session) {
   if (session == null) return 'null';
@@ -247,6 +248,17 @@ Future<void> _handleSignedOutAuthState(int generation) async {
     return;
   }
 
+  // A delayed signed-out notification can arrive after a successful login.
+  // Do not let that stale notification clear the already-restored session.
+  final activeSession = Supabase.instance.client.auth.currentSession;
+  if (activeSession != null) {
+    _authTrace(
+      'signed-out event ignored because Supabase still has an active session '
+      '${_describeAuthSession(activeSession)}',
+    );
+    return;
+  }
+
   isSignedIn.value = false;
   currentUser.value = null;
   SupabaseSyncService().dispose(); // Handles sign-out immediately
@@ -257,6 +269,15 @@ Future<void> _handleSignedOutAuthState(int generation) async {
   await prefs.remove('lastLoginTime');
   _authTrace('signed-out state applied; notifierSignedIn=${isSignedIn.value}');
 }
+
+void _enqueueSupabaseAuthStateChange(AuthState data) {
+  _authEventQueue = _authEventQueue.then((_) async {
+    await _handleSupabaseAuthStateChange(data);
+  });
+}
+
+/// Allows login UI to wait until its auth event has updated the global state.
+Future<void> waitForAuthStateProcessing() => _authEventQueue;
 
 Future<void> _handleSupabaseAuthStateChange(AuthState data) async {
   final generation = ++_authStateGeneration;
@@ -706,7 +727,7 @@ void main() async {
 
   // Listen to auth state changes
   Supabase.instance.client.auth.onAuthStateChange.listen(
-    _handleSupabaseAuthStateChange,
+    _enqueueSupabaseAuthStateChange,
     onError: (Object error, StackTrace stackTrace) {
       unawaited(ErrorHandler.logError(
         error,
@@ -735,9 +756,9 @@ void main() async {
       'startup reconciliation currentSession=${_describeAuthSession(initialSession)} '
       'notifierSignedIn=${isSignedIn.value}');
   if (!isSignedIn.value && initialSession != null) {
-    unawaited(_handleSupabaseAuthStateChange(
+    _enqueueSupabaseAuthStateChange(
       AuthState(AuthChangeEvent.initialSession, initialSession),
-    ));
+    );
   }
 
   // Initialize time-based theme switching if needed
