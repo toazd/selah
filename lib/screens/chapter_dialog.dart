@@ -491,7 +491,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                 builder: (context, showDialogTsk, _) {
                   return SwitchListTile(
                     title: Text(
-                      showDialogTsk ? 'Show TSK' : 'Hide TSK',
+                      'Treasury of Scripture Knowledge',
                       style: textStyle,
                     ),
                     value: showDialogTsk,
@@ -600,8 +600,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                   builder: (context, showDialogTsk, _) {
                                     // Rebuild data list when display settings change
                                     _rebuildVerseDataList();
-                                    final showBookTitle =
-                                        _shouldShowBookTitle;
+                                    final showBookTitle = _shouldShowBookTitle;
                                     final children = <Widget>[
                                       if (showBookTitle)
                                         _buildBookTitleWidget(isDark),
@@ -612,12 +611,10 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                           child: buildVerseWidgetFromData(
                                             context,
                                             data,
-                                            (verseNum) =>
-                                                _showChapterVerseMenu(
-                                                    context, verseNum),
-                                            (verseNum) =>
-                                                _enterHighlightMode(
-                                                    context, verseNum),
+                                            (verseNum) => _showChapterVerseMenu(
+                                                context, verseNum),
+                                            (verseNum) => _enterHighlightMode(
+                                                context, verseNum),
                                             _handleVerseLink,
                                             widget.onNoteEditTap != null
                                                 ? (vn, noteText) =>
@@ -631,34 +628,33 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                       }),
                                       const SizedBox(height: 16.0),
                                     ];
-                                        return ScrollConfiguration(
-                                          behavior:
-                                              ScrollConfiguration.of(context)
-                                                  .copyWith(scrollbars: false),
-                                          child: RawScrollbar(
-                                            thumbColor: isDark
-                                                ? darkPrimaryColor.value
-                                                    .withValues(alpha: 0.9)
-                                                : lightPrimaryColor.value
-                                                    .withValues(alpha: 0.9),
-                                            thumbVisibility: false,
-                                            trackVisibility: false,
-                                            thickness: 22.0,
-                                            radius: Radius.circular(8.0),
-                                            controller: _scrollController,
-                                            child: SingleChildScrollView(
-                                              controller: _scrollController,
-                                              padding: const EdgeInsets.only(
-                                                  right: 22),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: children,
-                                              ),
-                                            ),
+                                    return ScrollConfiguration(
+                                      behavior: ScrollConfiguration.of(context)
+                                          .copyWith(scrollbars: false),
+                                      child: RawScrollbar(
+                                        thumbColor: isDark
+                                            ? darkPrimaryColor.value
+                                                .withValues(alpha: 0.9)
+                                            : lightPrimaryColor.value
+                                                .withValues(alpha: 0.9),
+                                        thumbVisibility: false,
+                                        trackVisibility: false,
+                                        thickness: 22.0,
+                                        radius: Radius.circular(8.0),
+                                        controller: _scrollController,
+                                        child: SingleChildScrollView(
+                                          controller: _scrollController,
+                                          padding:
+                                              const EdgeInsets.only(right: 22),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: children,
                                           ),
-                                        );
-                                    },
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                         ),
                       ),

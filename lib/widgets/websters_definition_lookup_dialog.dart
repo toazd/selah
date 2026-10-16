@@ -702,10 +702,10 @@ class _WebstersDefinitionLookupDialogState
                 suffixIcon: IconButton(
                   icon: Icon(
                     Icons.clear,
-                    semanticLabel: 'Clear search text',
+                    semanticLabel: 'Clear Search Text',
                     color: primaryColor,
                   ),
-                  tooltip: 'Clear search text',
+                  tooltip: 'Clear Search Text',
                   onPressed: _clear,
                 ),
               ),
