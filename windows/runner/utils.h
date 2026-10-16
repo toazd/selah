@@ -17,15 +17,4 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string);
 // encoded in UTF-8. Returns an empty std::vector<std::string> on failure.
 std::vector<std::string> GetCommandLineArguments();
 
-// Tablet mode detection functions
-bool IsTabletMode();
-bool IsKeyboardAttached();
-bool HasTouchScreen();
-int GetMaximumTouchPoints();
-bool IsConvertibleDevice();
-
-// Debug functions
-std::string DebugLogInputDevices();
-std::string GetKeyboardDevices();
-
 #endif  // RUNNER_UTILS_H_

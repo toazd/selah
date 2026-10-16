@@ -89,7 +89,6 @@ class BibleScreen extends StatefulWidget {
   final ValueListenable<bool>? showTskReferences;
   final VoidCallback? onShowNotesSearch;
   //final VoidCallback? onShowBookmarksManager;
-  final VoidCallback? onNoteScreenClosed;
 
   const BibleScreen({
     super.key,
@@ -104,7 +103,6 @@ class BibleScreen extends StatefulWidget {
     this.showTskReferences, // optional listenable for TSK display mode
     this.onShowNotesSearch,
     //this.onShowBookmarksManager,
-    this.onNoteScreenClosed,
   });
   @override
   State<BibleScreen> createState() => _BibleScreenState();
@@ -736,11 +734,6 @@ class _BibleScreenState extends State<BibleScreen> {
                 chapter: noteChapter,
                 verse: vn,
                 existingNote: existingNote)));
-    // Force focus to invisible button to prevent Windows OSK bug
-    // if (kDebugMode) {
-    //   debugPrint('>>> NoteScreen closed, calling onNoteScreenClosed callback');
-    // }
-    widget.onNoteScreenClosed?.call();
     await _loadNotes();
     // Note: sync operations are handled by database update methods, no need for additional marking
     if (mounted) setState(() {});

@@ -38,10 +38,9 @@ import 'utils/internet_access_checker.dart';
 import 'database/search_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-import 'utils/tablet_mode_detector.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "1.1.5";
+final appVersion = "1.1.6";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -424,32 +423,6 @@ class _FullscreenRouteObserver extends NavigatorObserver {
 
 final NavigatorObserver fullscreenRouteObserver = _FullscreenRouteObserver();
 
-// Global tablet mode detection service
-// Only used on Windows desktop to circumvent
-// a bug that can be triggered with the OSK
-class TabletModeService {
-  static final TabletModeService _instance = TabletModeService._internal();
-  factory TabletModeService() => _instance;
-  TabletModeService._internal();
-
-  ValueNotifier<bool>? _tabletModeNotifier;
-
-  void initializeNotifier() {
-    if (_tabletModeNotifier == null && !kIsWeb && Platform.isWindows) {
-      _tabletModeNotifier = TabletModeDetector.createTabletModeNotifier();
-    }
-  }
-
-  void dispose() {
-    _tabletModeNotifier?.dispose();
-    _tabletModeNotifier = null;
-    TabletModeDetector.dispose();
-  }
-
-  ValueNotifier<bool>? get notifier => _tabletModeNotifier;
-  bool get isTablet => _tabletModeNotifier?.value ?? false;
-}
-
 // Add: color hex helpers
 String _colorToHex(Color c) =>
     '#${(c.toARGB32() & 0x00FFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
@@ -765,13 +738,6 @@ void main() async {
   _initializeTimeBasedTheme();
 
   runApp(BibleStudyApp());
-
-  //final isTabletMode = await TabletModeDetector.isTabletMode();
-  //debugPrint('isTabletMode: $isTabletMode');
-  //TabletModeDetector.testTabletModeDetection();
-
-  // Initialize tablet mode detection service
-  TabletModeService().initializeNotifier();
 }
 
 Future<bool> checkAtLeastOneSyncEnabled() {
@@ -1661,7 +1627,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
   _WindowManagerListener? _windowListener;
   bool _wasMaximizedBeforeFullscreen =
       false; // Track maximized state before fullscreen
-  final FocusNode _invisibleElevatedButtonNode = FocusNode();
   String _drawerUsername = 'Unknown';
   int _drawerUsernameLoadGeneration = 0;
   bool _wasAppHidden = false;
@@ -1884,10 +1849,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
 
     // Remove binding observer
     WidgetsBinding.instance.removeObserver(this);
-
-    TabletModeService().dispose();
-
-    _invisibleElevatedButtonNode.dispose();
 
     super.dispose();
   }
@@ -4739,221 +4700,138 @@ class _MultiBibleViewState extends State<MultiBibleView>
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // This invisible ElevatedButton is necessary to circumvent a bug
-          // on windows desktop where the OSK will pop up for nearly any
-          // ui event after entering a TextField. It's focusNode must be
-          // forced after any interaction with a TextField to circumvent
-          // the bug.
-          ElevatedButton(
-            onPressed: () {},
-            focusNode: _invisibleElevatedButtonNode,
-            style: ElevatedButton.styleFrom(
-                //minimumSize: Size(1, 1), // DO NOT SET THIS OR THE BUG CIRCUMVENTION WILL NOT WORK
-                //maximumSize: Size(1, 1),
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                overlayColor: Colors
-                    .transparent, // required or the button can be seen under certain circumstances
-                iconColor: Colors.transparent,
-                disabledIconColor: Colors.transparent,
-                disabledBackgroundColor: Colors.transparent,
-                disabledForegroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent),
-            child: SizedBox.shrink(),
-          ),
-          SafeArea(
-            child: ValueListenableBuilder<bool>(
-              valueListenable: isVerticalTile,
-              builder: (context, vertical, _) {
-                if (vertical) {
-                  return Row(
-                    // Main Bible screen row
-                    children: List.generate(_screenLocations.length, (i) {
-                      return Expanded(
-                        child: BibleScreen(
-                          initialBook: _screenLocations[i]['book'],
-                          initialChapter: _screenLocations[i]['chapter'],
-                          initialVerse: _screenLocations[i]['verse'],
-                          onLocationChanged: (book, chapter, verse) =>
-                              _updateLocation(i, book, chapter, verse),
-                          onOpenDrawer: () => Scaffold.of(context).openDrawer(),
-                          onShowHistory: () => _showHistoryDialog(context, i),
-                          onShowSearch: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchScreen(
-                                  sourceScreenIndex:
-                                      i, // Pass the current screen index
-                                ),
-                                settings: RouteSettings(name: '/search'),
-                              ),
-                            ).then((searchResult) {
-                              // Handle returned verse location from search screen
-                              if (searchResult != null &&
-                                  searchResult is Map<String, dynamic>) {
-                                final verseLocation =
-                                    searchResult['verseLocation']
-                                        as Map<String, dynamic>?;
-                                final targetScreenIndex =
-                                    searchResult['targetScreenIndex'] as int?;
+      body: SafeArea(
+        child: ValueListenableBuilder<bool>(
+          valueListenable: isVerticalTile,
+          builder: (context, vertical, _) {
+            if (vertical) {
+              return Row(
+                // Main Bible screen row
+                children: List.generate(_screenLocations.length, (i) {
+                  return Expanded(
+                    child: BibleScreen(
+                      initialBook: _screenLocations[i]['book'],
+                      initialChapter: _screenLocations[i]['chapter'],
+                      initialVerse: _screenLocations[i]['verse'],
+                      onLocationChanged: (book, chapter, verse) =>
+                          _updateLocation(i, book, chapter, verse),
+                      onOpenDrawer: () => Scaffold.of(context).openDrawer(),
+                      onShowHistory: () => _showHistoryDialog(context, i),
+                      onShowSearch: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SearchScreen(
+                              sourceScreenIndex:
+                                  i, // Pass the current screen index
+                            ),
+                            settings: RouteSettings(name: '/search'),
+                          ),
+                        ).then((searchResult) {
+                          // Handle returned verse location from search screen
+                          if (searchResult != null &&
+                              searchResult is Map<String, dynamic>) {
+                            final verseLocation = searchResult['verseLocation']
+                                as Map<String, dynamic>?;
+                            final targetScreenIndex =
+                                searchResult['targetScreenIndex'] as int?;
 
-                                if (verseLocation != null &&
-                                    targetScreenIndex != null) {
-                                  final book = verseLocation['book'] as String?;
-                                  final chapter =
-                                      verseLocation['chapter'] as int?;
-                                  final verse = verseLocation['verse'] as int?;
+                            if (verseLocation != null &&
+                                targetScreenIndex != null) {
+                              final book = verseLocation['book'] as String?;
+                              final chapter = verseLocation['chapter'] as int?;
+                              final verse = verseLocation['verse'] as int?;
 
-                                  if (book != null &&
-                                      chapter != null &&
-                                      verse != null) {
-                                    // Update the target bible screen with the verse location
-                                    setState(() {
-                                      _updateLocation(
-                                        targetScreenIndex,
-                                        book,
-                                        chapter,
-                                        verse,
-                                      );
-                                    });
-                                  }
-                                }
+                              if (book != null &&
+                                  chapter != null &&
+                                  verse != null) {
+                                // Update the target bible screen with the verse location
+                                setState(() {
+                                  _updateLocation(
+                                    targetScreenIndex,
+                                    book,
+                                    chapter,
+                                    verse,
+                                  );
+                                });
                               }
-                            });
-                          },
-                          // Show options on the first screen explicitly
-                          //showViewMenu: i == 0,
-                          showTskReferences: showTskReferencesNotifier,
-                          // Force focus to invisible button when the note screen closes
-                          // to circumvent the Windows OSK bug
-                          onNoteScreenClosed: () {
-                            // debugPrint(
-                            //     '>>> onNoteScreenClosed callback received in main.dart (vertical)');
-                            // debugPrint(
-                            //     '>>> mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-                            // debugPrint(
-                            //     '>>> FocusNode hasFocus before: ${_invisibleElevatedButtonNode.hasFocus}');
-                            if (!kIsWeb && Platform.isWindows) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                // debugPrint('>>> Inside postFrameCallback');
-                                if (mounted &&
-                                    _invisibleElevatedButtonNode
-                                        .canRequestFocus) {
-                                  // debugPrint('>>> Calling requestFocus()');
-                                  _invisibleElevatedButtonNode.requestFocus();
-                                  // debugPrint(
-                                  //     '>>> FocusNode hasFocus after: ${_invisibleElevatedButtonNode.hasFocus}');
-                                } else {
-                                  // debugPrint(
-                                  //     '>>> SKIPPED requestFocus - mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-                                }
-                              });
                             }
-                          },
-                        ),
-                      );
-                    }),
+                          }
+                        });
+                      },
+                      // Show options on the first screen explicitly
+                      //showViewMenu: i == 0,
+                      showTskReferences: showTskReferencesNotifier,
+                    ),
                   );
-                } else {
-                  return Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: List.generate(_screenLocations.length, (i) {
-                      return Expanded(
-                        child: BibleScreen(
-                          initialBook: _screenLocations[i]['book'],
-                          initialChapter: _screenLocations[i]['chapter'],
-                          initialVerse: _screenLocations[i]['verse'],
-                          onLocationChanged: (book, chapter, verse) =>
-                              _updateLocation(i, book, chapter, verse),
-                          onOpenDrawer: () => Scaffold.of(context).openDrawer(),
-                          onShowHistory: () => _showHistoryDialog(context, i),
-                          onShowSearch: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchScreen(
-                                  sourceScreenIndex:
-                                      i, // Pass the current screen index
-                                ),
-                                settings: RouteSettings(name: '/search'),
-                              ),
-                            ).then((searchResult) {
-                              // Handle returned verse location from search screen
-                              if (searchResult != null &&
-                                  searchResult is Map<String, dynamic>) {
-                                final verseLocation =
-                                    searchResult['verseLocation']
-                                        as Map<String, dynamic>?;
-                                final targetScreenIndex =
-                                    searchResult['targetScreenIndex'] as int?;
+                }),
+              );
+            } else {
+              return Column(
+                mainAxisSize: MainAxisSize.max,
+                children: List.generate(_screenLocations.length, (i) {
+                  return Expanded(
+                    child: BibleScreen(
+                      initialBook: _screenLocations[i]['book'],
+                      initialChapter: _screenLocations[i]['chapter'],
+                      initialVerse: _screenLocations[i]['verse'],
+                      onLocationChanged: (book, chapter, verse) =>
+                          _updateLocation(i, book, chapter, verse),
+                      onOpenDrawer: () => Scaffold.of(context).openDrawer(),
+                      onShowHistory: () => _showHistoryDialog(context, i),
+                      onShowSearch: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SearchScreen(
+                              sourceScreenIndex:
+                                  i, // Pass the current screen index
+                            ),
+                            settings: RouteSettings(name: '/search'),
+                          ),
+                        ).then((searchResult) {
+                          // Handle returned verse location from search screen
+                          if (searchResult != null &&
+                              searchResult is Map<String, dynamic>) {
+                            final verseLocation = searchResult['verseLocation']
+                                as Map<String, dynamic>?;
+                            final targetScreenIndex =
+                                searchResult['targetScreenIndex'] as int?;
 
-                                if (verseLocation != null &&
-                                    targetScreenIndex != null) {
-                                  final book = verseLocation['book'] as String?;
-                                  final chapter =
-                                      verseLocation['chapter'] as int?;
-                                  final verse = verseLocation['verse'] as int?;
+                            if (verseLocation != null &&
+                                targetScreenIndex != null) {
+                              final book = verseLocation['book'] as String?;
+                              final chapter = verseLocation['chapter'] as int?;
+                              final verse = verseLocation['verse'] as int?;
 
-                                  if (book != null &&
-                                      chapter != null &&
-                                      verse != null) {
-                                    // Update the target bible screen with the verse location
-                                    setState(() {
-                                      _updateLocation(
-                                        targetScreenIndex,
-                                        book,
-                                        chapter,
-                                        verse,
-                                      );
-                                    });
-                                  }
-                                }
+                              if (book != null &&
+                                  chapter != null &&
+                                  verse != null) {
+                                // Update the target bible screen with the verse location
+                                setState(() {
+                                  _updateLocation(
+                                    targetScreenIndex,
+                                    book,
+                                    chapter,
+                                    verse,
+                                  );
+                                });
                               }
-                            });
-                          },
-                          // Show options menu on the first screen only
-                          //showViewMenu: i == 0,
-                          showTskReferences: showTskReferencesNotifier,
-                          // Force focus to invisible button when the note screen closes
-                          // to prevent the Windows OSK bug
-                          onNoteScreenClosed: () {
-                            // debugPrint(
-                            //     '>>> onNoteScreenClosed callback received in main.dart (horizontal)');
-                            // debugPrint(
-                            //     '>>> mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-                            // debugPrint(
-                            //     '>>> FocusNode hasFocus before: ${_invisibleElevatedButtonNode.hasFocus}');
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              // debugPrint('>>> Inside postFrameCallback');
-                              if (mounted &&
-                                  _invisibleElevatedButtonNode
-                                      .canRequestFocus) {
-                                // debugPrint('>>> Calling requestFocus()');
-                                _invisibleElevatedButtonNode.requestFocus();
-                                // debugPrint(
-                                //     '>>> FocusNode hasFocus after: ${_invisibleElevatedButtonNode.hasFocus}');
-                              } else {
-                                // debugPrint(
-                                //     '>>> SKIPPED requestFocus - mounted: $mounted, canRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}');
-                              }
-                            });
-                          },
-                        ),
-                      );
-                    }),
+                            }
+                          }
+                        });
+                      },
+                      // Show options menu on the first screen only
+                      //showViewMenu: i == 0,
+                      showTskReferences: showTskReferencesNotifier,
+                    ),
                   );
-                }
-              },
-            ),
-          ),
-        ],
+                }),
+              );
+            }
+          },
+        ),
       ),
-      //],
-      //),
     );
   }
 
@@ -5109,8 +4987,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
           //title: Text('WARNING: edit with caution!', style: TextStyle(fontFamily: uiFontFamily, fontSize: uiFontSize, color: Colors.red)),
           content: SizedBox(
             width: 600,
-            child: //OnscreenKeyboardTextField(
-                TextField(
+            child: TextField(
               controller: controller,
               maxLines: 30,
               minLines: 10,
@@ -5185,27 +5062,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
         );
       }
     }
-
-    // Force focus away from the TextField after dialog closes
-    // This executes no matter how the dialog was closed (Cancel, Save, or other means)
-    // This is to circumvent an OSK bug on windows desktop touchscreens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _invisibleElevatedButtonNode.canRequestFocus) {
-        // ErrorHandler.logError(
-        //   'Changing focus to fix bug',
-        //   context: {'class': 'main.dart', 'method': '_showEditPreferencesDialog'},
-        // );
-        _invisibleElevatedButtonNode.requestFocus();
-      } else {
-        ErrorHandler.logError(
-          'Changing focus failed:\nmounted: $mounted\ncanRequestFocus: ${_invisibleElevatedButtonNode.canRequestFocus}',
-          context: {
-            'class': 'main.dart',
-            'method': '_showEditPreferencesDialog'
-          },
-        );
-      }
-    });
   }
 
   Future<bool> _requestStoragePermission() async {
@@ -5834,7 +5690,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              //OnscreenKeyboardTextField(
               TextField(
                 maxLength: 100,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -5852,7 +5707,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 obscureText: true,
               ),
               const SizedBox(height: 16),
-              //OnscreenKeyboardTextField(
               TextField(
                 maxLength: 100,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -5870,7 +5724,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 obscureText: true,
               ),
               const SizedBox(height: 16),
-              //OnscreenKeyboardTextField(
               TextField(
                 maxLength: 100,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -6028,7 +5881,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              //OnscreenKeyboardTextField(
               TextField(
                 maxLength: 100,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,

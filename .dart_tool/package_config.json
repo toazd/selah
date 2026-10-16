@@ -15,7 +15,7 @@
     },
     {
       "name": "android_file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/android_file_picker-1.1.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/android_file_picker-2.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -123,7 +123,7 @@
     },
     {
       "name": "connectivity_plus",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/connectivity_plus-7.3.1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/connectivity_plus-7.3.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -158,12 +158,6 @@
       "languageVersion": "3.1"
     },
     {
-      "name": "cupertino_icons",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.9",
-      "packageUri": "lib/",
-      "languageVersion": "3.9"
-    },
-    {
       "name": "cupertino_ui",
       "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_ui-1.1.3",
       "packageUri": "lib/",
@@ -183,9 +177,9 @@
     },
     {
       "name": "dbus",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/dbus-0.7.15",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/dbus-0.8.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.0"
     },
     {
       "name": "dependency_validator",
@@ -231,31 +225,31 @@
     },
     {
       "name": "file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-12.3.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker-13.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_darwin",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_darwin-1.2.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_darwin-2.3.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_linux",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_linux-1.1.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_linux-2.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_platform_interface",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_platform_interface-3.4.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_platform_interface-4.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
     {
       "name": "file_picker_web",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_web-3.1.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_picker_web-4.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },
@@ -300,12 +294,6 @@
       "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_colorpicker-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.14"
-    },
-    {
-      "name": "flutter_html",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_html-3.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
     },
     {
       "name": "flutter_keyboard_visibility_linux",
@@ -423,9 +411,9 @@
     },
     {
       "name": "html",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.6",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.7",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.6"
     },
     {
       "name": "http",
@@ -560,12 +548,6 @@
       "languageVersion": "3.8"
     },
     {
-      "name": "list_counter",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/list_counter-1.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
       "name": "logging",
       "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/logging-1.3.0",
       "packageUri": "lib/",
@@ -615,9 +597,9 @@
     },
     {
       "name": "nm",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/nm-0.5.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/nm-0.6.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "objective_c",
@@ -938,18 +920,6 @@
       "languageVersion": "3.1"
     },
     {
-      "name": "sqflite",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.4.4+2",
-      "packageUri": "lib/",
-      "languageVersion": "3.12"
-    },
-    {
-      "name": "sqflite_android",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_android-2.4.4+1",
-      "packageUri": "lib/",
-      "languageVersion": "3.12"
-    },
-    {
       "name": "sqflite_common",
       "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.14",
       "packageUri": "lib/",
@@ -964,18 +934,6 @@
     {
       "name": "sqflite_common_ffi_web",
       "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common_ffi_web-1.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.12"
-    },
-    {
-      "name": "sqflite_darwin",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_darwin-2.4.4+1",
-      "packageUri": "lib/",
-      "languageVersion": "3.12"
-    },
-    {
-      "name": "sqflite_platform_interface",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_platform_interface-2.4.2",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
@@ -1185,7 +1143,7 @@
     },
     {
       "name": "windows_file_picker",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/windows_file_picker-1.3.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/windows_file_picker-2.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.10"
     },

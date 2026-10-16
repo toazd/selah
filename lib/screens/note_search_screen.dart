@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_quill/quill_delta.dart' show Delta;
 import 'package:flutter_quill/flutter_quill.dart' show Document;
@@ -53,7 +51,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
   final ScrollController _resultsScrollController = ScrollController();
-  final FocusNode _searchButtonFocusNode = FocusNode();
 
   static const String _regexKey = 'noteSearchRegex';
   static const String _wholeWordKey = 'noteSearchWholeWord';
@@ -83,9 +80,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   int? _totalMatches;
   int? _totalVerses;
   RegExp? _currentRegex;
-
-  // Tracking when the user last input any character
-  DateTime _lastInputTime = DateTime.now();
 
   @override
   bool get wantKeepAlive => true;
@@ -331,9 +325,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     // Initialize controllers
     _customRangeController = TextEditingController(text: _customBookFilter);
 
-    // Add a listener to the focus node to show/hide the on-screen keyboard.
-    //_searchFocusNode.addListener(_onFocusChange);
-
     _loadSearchOptions();
     _loadLastSearch();
     _resultsScrollController.addListener(_saveScrollOffset);
@@ -341,7 +332,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
 
   @override
   void dispose() {
-    _searchButtonFocusNode.dispose();
     _controller.dispose();
     _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
@@ -540,29 +530,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
       });
 
       await _saveLastSearch(searchText, _useRegex);
-
-      // Don't bother to use this bug-workaround if we aren't on windows
-      // and we aren't in tablet mode because it can be frustrating having
-      // the focus removed when we aren't done typing. when in tablet mode
-      // we have to deal with it because the OSK bug is far more frustrating once
-      // it is triggered (it opens the OSK on ANY UI interaction)
-      if (!kIsWeb && (Platform.isWindows && TabletModeService().isTablet)) {
-        // After a delay of 1s, check if any input was recieved in the last 1s, if not
-        // then force the focus away to prevent the windows OSK bug
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          if (!_isSearching &&
-              DateTime.now().difference(_lastInputTime).inMilliseconds >=
-                  1000) {
-            if (_searchResults.isNotEmpty) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted && _searchButtonFocusNode.canRequestFocus) {
-                  _searchButtonFocusNode.requestFocus();
-                }
-              });
-            }
-          }
-        });
-      }
     } catch (e) {
       setState(() {
         _searchResults = [];
@@ -1524,9 +1491,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                         iconSize: 32,
                       ),
                     ),
-                    onChanged: (_) {
-                      _lastInputTime = DateTime.now();
-                    },
                     onSubmitted: (_) => _onSearch(),
                     style: TextStyle(
                         fontSize: uiFontSize + 4,
@@ -1589,7 +1553,6 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          focusNode: _searchButtonFocusNode,
                           onPressed: () => _onSearch(),
                           child: Text('Search',
                               softWrap: false,

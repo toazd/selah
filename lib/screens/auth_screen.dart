@@ -19,26 +19,15 @@ class _AuthScreenState extends State<AuthScreen> {
   final AuthService _authService = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  //final FocusNode _usernameFocusNode = FocusNode();
-  final FocusNode _signInButtonFocusNode = FocusNode();
 
   bool _isSignUp = false;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
-  void initState() {
-    super.initState();
-    //WidgetsBinding.instance.addPostFrameCallback((_) {
-    //  _usernameFocusNode.requestFocus();
-    //});
-  }
-
-  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    //_usernameFocusNode.dispose();
     super.dispose();
   }
 
@@ -340,7 +329,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     maxLength: 100,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
                     controller: _emailController,
-                    //focusNode: _usernameFocusNode,
                     decoration: InputDecoration(
                       counter: SizedBox.shrink(), // Hide the counter eg. 0/100
                       labelText: 'Username',
@@ -391,20 +379,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    focusNode: _signInButtonFocusNode,
                     onPressed: () {
-                      // ALWAYS shift focus away from text fields immediately
-                      // Circumvents a bug on windows desktop touchscreens
-                      // where the TextField retains focus and the OSK keeps popping
-                      // up for events that it shouldn't
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          if (_signInButtonFocusNode.canRequestFocus) {
-                            _signInButtonFocusNode.requestFocus();
-                          }
-                        }
-                      });
-
                       // Only proceed with authentication if not loading
                       if (!_isLoading) {
                         _authenticate();

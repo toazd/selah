@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/websters_1828_definitions_database.dart';
@@ -13,7 +11,7 @@ import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
 import '../utils/preferences_constants.dart';
 import '../utils/snackbar_notification.dart';
-import '../utils/verse_reference_detector.dart';
+import 'websters_definition_renderer.dart';
 
 class WebstersDefinitionDialog {
   static Future<void> show(
@@ -114,158 +112,34 @@ class WebstersDefinitionDialog {
     String definition, {
     void Function(String headword)? onDictionaryTap,
   }) {
-    final baseStyle = textStyle(context, uiFontSize);
-    final linkedDefinition = _linkVerseReferencesInHtml(definition);
-
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: Html(
-          data: linkedDefinition,
-          extensions: [
-            _DictionaryAnchorExtension(
-              onTap: (url, referenceText) {
-                if (url == null) return;
-                if (url.startsWith('dict://')) {
-                  if (onDictionaryTap != null) {
-                    onDictionaryTap(url);
-                  } else {
-                    show(context, url);
-                  }
-                  return;
-                }
-                if (url.startsWith('v://') || url.startsWith('v:')) {
-                  handleVerseLink(
-                    context,
-                    url,
-                    referenceText,
-                    navigateToVerse: null,
-                    onVerseLinkRecursion: null,
-                    onNoteEditTap: null,
-                  );
-                }
-              },
-            ),
-          ],
-          style: {
-            'body': Style(
-              fontSize: FontSize(uiFontSize),
-              fontFamily: fontFamilyNotifier.value,
-              color: baseStyle.color,
-              margin: Margins.zero,
-              padding: HtmlPaddings.zero,
-              lineHeight: const LineHeight(1.5),
-            ),
-            'a': Style(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? darkPrimaryColor.value
-                  : lightPrimaryColor.value,
-              textDecoration: TextDecoration.none,
-              fontWeight: FontWeight.bold,
-            ),
+        child: WebstersDefinitionRenderer(
+          data: definition,
+          onLinkTap: (url, referenceText) {
+            if (url.startsWith('dict://')) {
+              if (onDictionaryTap != null) {
+                onDictionaryTap(url);
+              } else {
+                show(context, url);
+              }
+              return;
+            }
+            if (url.startsWith('v://') || url.startsWith('v:')) {
+              handleVerseLink(
+                context,
+                url,
+                referenceText,
+                navigateToVerse: null,
+                onVerseLinkRecursion: null,
+                onNoteEditTap: null,
+              );
+            }
           },
         ),
       ),
     ];
-  }
-
-  static String _linkVerseReferencesInHtml(String html) {
-    final buffer = StringBuffer();
-    final tagPattern = RegExp(r'<[^>]+>');
-    var currentIndex = 0;
-    var anchorDepth = 0;
-
-    for (final match in tagPattern.allMatches(html)) {
-      if (match.start > currentIndex) {
-        final text = html.substring(currentIndex, match.start);
-        buffer.write(
-          anchorDepth > 0 ? text : _linkVerseReferencesInText(text),
-        );
-      }
-
-      final tag = match.group(0)!;
-      final lowerTag = tag.toLowerCase();
-      if (RegExp(r'^<\s*a\b').hasMatch(lowerTag)) {
-        anchorDepth++;
-      } else if (RegExp(r'^<\s*/\s*a\b').hasMatch(lowerTag) &&
-          anchorDepth > 0) {
-        anchorDepth--;
-      }
-      buffer.write(tag);
-      currentIndex = match.end;
-    }
-
-    if (currentIndex < html.length) {
-      final text = html.substring(currentIndex);
-      buffer.write(anchorDepth > 0 ? text : _linkVerseReferencesInText(text));
-    }
-
-    return buffer.toString();
-  }
-
-  static String _linkVerseReferencesInText(String text) {
-    final references = VerseReferenceDetector.detectReferences(text);
-    if (references.isEmpty) return text;
-
-    final sortedReferences = references.toList()
-      ..sort((a, b) {
-        final startCompare = a.startIndex.compareTo(b.startIndex);
-        if (startCompare != 0) return startCompare;
-        return b.originalText.length.compareTo(a.originalText.length);
-      });
-
-    final acceptedReferences = <VerseReference>[];
-    var lastEnd = -1;
-    for (final reference in sortedReferences) {
-      final end = reference.startIndex + reference.originalText.length;
-      if (reference.startIndex < lastEnd) continue;
-      acceptedReferences.add(reference);
-      lastEnd = end;
-    }
-
-    if (acceptedReferences.isEmpty) return text;
-
-    final buffer = StringBuffer();
-    var currentIndex = 0;
-    for (final reference in acceptedReferences) {
-      buffer.write(text.substring(currentIndex, reference.startIndex));
-      final link = _verseLinkForReference(reference);
-      final referenceText = reference.originalText;
-      buffer.write(
-        '<a href="${_escapeHtmlAttribute(link)}" '
-        'data-reference-text="${_escapeHtmlAttribute(referenceText)}">'
-        '$referenceText</a>',
-      );
-      currentIndex = reference.startIndex + reference.originalText.length;
-    }
-    buffer.write(text.substring(currentIndex));
-    return buffer.toString();
-  }
-
-  static String _verseLinkForReference(VerseReference reference) {
-    var verseSpec = '';
-    final colonIndex = reference.originalText.indexOf(':');
-    if (colonIndex != -1 && colonIndex + 1 < reference.originalText.length) {
-      verseSpec = reference.originalText
-          .substring(colonIndex + 1)
-          .replaceAll(RegExp(r'\s+'), '');
-    }
-
-    if (verseSpec.isEmpty && reference.endVerse != null) {
-      verseSpec = '${reference.verse}-${reference.endVerse}';
-    } else if (verseSpec.isEmpty) {
-      verseSpec = reference.verse.toString();
-    }
-
-    return 'v://${reference.book}/${reference.chapter}/$verseSpec';
-  }
-
-  static String _escapeHtmlAttribute(String value) {
-    return value
-        .replaceAll('&', '&amp;')
-        .replaceAll('"', '&quot;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
   }
 
   // static TextStyle primaryTextStyle(BuildContext context, double fontSize) {
@@ -293,84 +167,6 @@ class WebstersDefinitionDialog {
       fontWeight: bold ? FontWeight.bold : null,
       color: isDark ? darkTextColor.value : lightTextColor.value,
     );
-  }
-}
-
-class _DictionaryAnchorExtension extends HtmlExtension {
-  final void Function(String? url, String? referenceText) onTap;
-
-  const _DictionaryAnchorExtension({
-    required this.onTap,
-  });
-
-  @override
-  Set<String> get supportedTags => {'a'};
-
-  @override
-  bool matches(ExtensionContext context) {
-    return supportedTags.contains(context.elementName) &&
-        context.attributes.containsKey('href');
-  }
-
-  @override
-  StyledElement prepare(
-    ExtensionContext context,
-    List<StyledElement> children,
-  ) {
-    return InteractiveElement(
-      name: context.elementName,
-      children: children,
-      href: context.attributes['href'],
-      style: Style(
-        color: Colors.blue,
-        textDecoration: TextDecoration.underline,
-      ),
-      node: context.node,
-      elementId: context.id,
-    );
-  }
-
-  @override
-  InlineSpan build(ExtensionContext context) {
-    void handleTap() {
-      onTap(
-        (context.styledElement! as InteractiveElement).href,
-        context.attributes['data-reference-text'] ?? context.innerHtml,
-      );
-    }
-
-    return TextSpan(
-      children: context.inlineSpanChildren
-          ?.map(
-              (childSpan) => _buildClickableSpan(context, childSpan, handleTap))
-          .toList(),
-    );
-  }
-
-  InlineSpan _buildClickableSpan(
-    ExtensionContext context,
-    InlineSpan childSpan,
-    VoidCallback onTap,
-  ) {
-    if (childSpan is TextSpan) {
-      return TextSpan(
-        text: childSpan.text,
-        children: childSpan.children
-            ?.map((span) => _buildClickableSpan(context, span, onTap))
-            .toList(),
-        recognizer: TapGestureRecognizer()..onTap = onTap,
-        style:
-            context.styledElement?.style.generateTextStyle() ?? childSpan.style,
-        semanticsLabel: childSpan.semanticsLabel,
-        locale: childSpan.locale,
-        mouseCursor: SystemMouseCursors.click,
-        onEnter: childSpan.onEnter,
-        onExit: childSpan.onExit,
-        spellOut: childSpan.spellOut,
-      );
-    }
-
-    return childSpan;
   }
 }
 

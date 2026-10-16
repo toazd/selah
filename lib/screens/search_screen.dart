@@ -1,9 +1,7 @@
-﻿import 'dart:io';
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:selah/utils/tablet_mode_detector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/bible_database.dart';
 import '../main.dart';
@@ -1142,9 +1140,7 @@ class _SearchScreenState extends State<SearchScreen>
     with AutomaticKeepAliveClientMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
-  //final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _resultsScrollController = ScrollController();
-  final FocusNode _searchButtonFocusNode = FocusNode();
 
   static const String _regexKey = 'searchRegex';
   static const String _nearbyKey = 'searchNearby';
@@ -1161,7 +1157,6 @@ class _SearchScreenState extends State<SearchScreen>
   bool _useWholeWord = false;
   bool _useRedLetter = false;
   bool _caseSensitive = false;
-  //bool _isDisposing = false; // Flag to prevent operations during disposal
   bool _isResetting = false; // Flag to prevent spamming the reset button
   bool _isOptionsDrawerOpen = false;
 
@@ -1175,7 +1170,6 @@ class _SearchScreenState extends State<SearchScreen>
       _customRangeController; // Controller for custom range input
   String? _customRangeError; // Error message for invalid custom range
   // Define the method channel, ensuring the name matches the C++ implementation.
-  //static const _keyboardChannel = MethodChannel('com.selah.holybible/keyboard');
 
   // Search results
   List<Map<String, dynamic>> _searchResults = [];
@@ -1184,9 +1178,6 @@ class _SearchScreenState extends State<SearchScreen>
   int? _totalMatches;
   int? _totalVerses;
   RegExp? _currentRegex;
-
-  // Tracking when the user last input any character
-  DateTime _lastInputTime = DateTime.now();
 
   // Cache for highlighted text spans to improve performance
   final Map<String, TextSpan> _highlightedSpansCache = {};
@@ -1349,36 +1340,18 @@ class _SearchScreenState extends State<SearchScreen>
     // Initialize controllers
     _customRangeController = TextEditingController(text: _customBookFilter);
 
-    // Add a listener to the focus node to show/hide the on-screen keyboard.
-    //_searchFocusNode.addListener(_onFocusChange);
-
     _restoreSearchState();
     _resultsScrollController.addListener(_saveScrollOffset);
-
-    // Debug: dump semantics tree after TextField gets focus
-    // if (kDebugMode) {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     Future.delayed(const Duration(milliseconds: 500), () {
-    //       debugDumpSemanticsTree();
-    //     });
-    //   });
-    // }
   }
 
   @override
   void dispose() {
     _activeSearchId++;
-    _searchButtonFocusNode.dispose();
-    //_isDisposing = true; // Set flag to prevent platform channel calls during disposal
     _saveLastSearchOnExit(); // Save search term only if different from saved one
     _controller.dispose();
     _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
     _resultsScrollController.dispose();
-    // Clean up the focus node listener.
-    //_searchFocusNode.removeListener(_onFocusChange);
-    //_searchFocusNode.dispose();
-    //_keyboardChannel.setMethodCallHandler(null);
     super.dispose();
   }
 
@@ -1398,42 +1371,6 @@ class _SearchScreenState extends State<SearchScreen>
       scaffoldState.openEndDrawer();
     }
   }
-
-  /// Calls the native method channel to show/hide the keyboard on Windows.
-  /*
-  void _onFocusChange() {
-    // Don't make platform channel calls if we're being disposed
-    if (_isDisposing || !mounted) return;
-
-    // This logic is specific to the Windows platform.
-    if (!kIsWeb && Platform.isWindows) {
-      if (_searchFocusNode.hasFocus) {
-        // Use timeout to prevent hanging platform channel calls
-        Future<void>(() async {
-          if (_isDisposing || !mounted) return;
-          try {
-            await _keyboardChannel.invokeMethod('showKeyboard').timeout(const Duration(seconds: 1));
-          } catch (e) {
-            // Handle platform channel errors gracefully - platform may not be available
-            // This prevents memory leaks from unanswered platform messages
-            if (kDebugMode) debugPrint('_onFocusChange exception: $e');
-          }
-        });
-      } else {
-        // Use timeout to prevent hanging platform channel calls
-        Future<void>(() async {
-          if (_isDisposing || !mounted) return;
-          try {
-            await _keyboardChannel.invokeMethod('hideKeyboard').timeout(const Duration(seconds: 1));
-          } catch (error) {
-            // Handle platform channel errors gracefully - platform may not be available
-            // This prevents memory leaks from unanswered platform messages
-          }
-        });
-      }
-    }
-  }
-  */
 
   Future<void> _loadSearchOptions() async {
     try {
@@ -1567,9 +1504,6 @@ class _SearchScreenState extends State<SearchScreen>
           _isNearbySearchActive = false;
         });
         // Only focus the text field when there's no saved search term
-        //WidgetsBinding.instance.addPostFrameCallback((_) {
-        //  _searchFocusNode.requestFocus();
-        //});
         return;
       }
 
@@ -1846,44 +1780,6 @@ class _SearchScreenState extends State<SearchScreen>
 
       await _saveLastSearch();
       if (!mounted || searchId != _activeSearchId) return;
-
-      // Don't bother to use this bug-workaround if we aren't on windows
-      // and we aren't in tablet mode because it can be frustrating having
-      // the focus removed when we aren't done typing. when in tablet mode
-      // we have to deal with it because the OSK bug is far more frustrating once
-      // it is triggered (it opens the OSK on ANY UI interaction)
-      //
-      // Check that the device is touch capable and has a physical keyboard to attempt
-      // to avoid triggering this when a 2-in-1 is in laptop mode (keyboard attached)
-      //
-      // .isKeyboardAttached might not work as expected
-      if (!kIsWeb &&
-          (Platform.isWindows &&
-              TabletModeService().isTablet &&
-              await TabletModeDetector.hasTouchScreen() &&
-              await TabletModeDetector.isKeyboardAttached())) {
-        // After a delay of 1s, check if any input was recieved in the last 1s, if not
-        // then force the focus away to prevent the windows OSK bug
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          if (!mounted || searchId != _activeSearchId) return;
-          if (!_isSearching &&
-              DateTime.now().difference(_lastInputTime).inMilliseconds >=
-                  1000) {
-            if (_searchResults.isNotEmpty) {
-              // Request focus on the Search button this is required
-              // to circumvent Windows OSK bug. Manually pushing the button
-              // does not remove focus from the TextField which is evidently part
-              // of the bug in that the focus becomes 'stuck' to the TextField and
-              // then ANY subsequent UI interaction triggers the OSK popup
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted && _searchButtonFocusNode.canRequestFocus) {
-                  _searchButtonFocusNode.requestFocus();
-                }
-              });
-            }
-          }
-        });
-      }
     } catch (e) {
       if (!mounted || searchId != _activeSearchId) return;
       setState(() {
@@ -3046,7 +2942,6 @@ class _SearchScreenState extends State<SearchScreen>
                       ),
                     ),
                     onChanged: (_) {
-                      _lastInputTime = DateTime.now();
                       unawaited(_saveSearchOptions());
                     },
                     onSubmitted: (_) {
@@ -3213,7 +3108,6 @@ class _SearchScreenState extends State<SearchScreen>
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          focusNode: _searchButtonFocusNode,
                           onPressed: () => _onSearch(),
                           child: Text('Search',
                               softWrap: false,

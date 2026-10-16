@@ -71,18 +71,6 @@ class _NoteScreenState extends State<NoteScreen> {
     // Create scroll controller
     _scrollController = ScrollController();
 
-    // Auto-focus the editor after the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-
-      // if (kDebugMode) {
-      //   // Debug: print semantics info
-      //   Future.delayed(Duration(milliseconds: 500), () {
-      //     debugDumpSemanticsTree();
-      //   });
-      // }
-    });
-
     // Set created_at for sync operations and store original content hash
     if (widget.existingNote != null && widget.existingNote!.isNotEmpty) {
       try {
@@ -138,9 +126,6 @@ class _NoteScreenState extends State<NoteScreen> {
         buttonOptions: QuillSimpleToolbarButtonOptions(
           base: QuillToolbarBaseButtonOptions(
             iconSize: 18,
-            afterButtonPressed: () {
-              _focusNode.requestFocus();
-            },
           ),
         ),
       ),
@@ -406,19 +391,6 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _saveAndExit() async {
-    // Explicitly hide keyboard BEFORE popping to prevent Windows OSK from staying open
-    _focusNode.unfocus();
-
-    // Clear any primary focus in the app
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    // Close the text input connection
-    await SystemChannels.textInput.invokeMethod('TextInput.hide');
-    await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
-
-    // Small delay to ensure Windows processes the keyboard hide
-    await Future.delayed(const Duration(milliseconds: 50));
-
     // Always close UI for both save and back buttons
     if (mounted) {
       Navigator.of(context).pop();
@@ -491,12 +463,6 @@ class _NoteScreenState extends State<NoteScreen> {
         await NotesDatabase.deleteNote(existing['id']);
       }
 
-      // Explicitly hide keyboard BEFORE popping to prevent Windows OSK from staying open
-      _focusNode.unfocus();
-      FocusManager.instance.primaryFocus?.unfocus();
-      await SystemChannels.textInput.invokeMethod('TextInput.hide');
-      await SystemChannels.textInput.invokeMethod('TextInput.clearClient');
-      await Future.delayed(const Duration(milliseconds: 50));
       if (mounted) {
         Navigator.of(context).pop();
       }
