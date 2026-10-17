@@ -23,11 +23,13 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isSignUp = false;
   bool _isLoading = false;
   String? _errorMessage;
+  final FocusNode signInButtonFocusNode = FocusNode();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    signInButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -343,7 +345,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           : null,
                     ),
                     keyboardType: TextInputType.text,
-                    onSubmitted: (_) => _authenticate(),
+                    onSubmitted: (_) {
+                      // Windows OSK bug workaround
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      signInButtonFocusNode.requestFocus();
+
+                      _authenticate;
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -363,7 +371,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           : null,
                     ),
                     obscureText: true,
-                    onSubmitted: (_) => _authenticate(),
+                    onSubmitted: (_) {
+                      // Windows OSK bug workaround
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      signInButtonFocusNode.requestFocus();
+
+                      _authenticate();
+                    },
                   ),
                   const SizedBox(height: 24),
                   if (_errorMessage != null &&
@@ -379,7 +393,12 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   const SizedBox(height: 16),
                   ElevatedButton(
+                    focusNode: signInButtonFocusNode,
                     onPressed: () {
+                      // Windows OSK bug workaround
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      signInButtonFocusNode.requestFocus();
+
                       // Only proceed with authentication if not loading
                       if (!_isLoading) {
                         _authenticate();

@@ -399,6 +399,10 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _saveAndExit() async {
+    // Windows OSK bug workaround
+    FocusManager.instance.primaryFocus?.unfocus();
+    FocusScope.of(context).unfocus();
+
     // Always close UI for both save and back buttons
     if (mounted) {
       Navigator.of(context).pop();
@@ -478,6 +482,10 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _handlePopInvoked(bool didPop, void result) async {
+    // Windows OSK bug workaround
+    FocusManager.instance.primaryFocus?.unfocus();
+    FocusScope.of(context).unfocus();
+
     if (!didPop) {
       await _saveAndExit(); // Same method as save button
     }

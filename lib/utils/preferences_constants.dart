@@ -59,8 +59,7 @@ const String defaultDarkTextColorHex = '#FFC2C5C7'; //'#FF6D6866';
 const String defaultLightHighlightColorHex = '#FFFFD400';
 const String defaultDarkHighlightColorHex = '#FF1B295F'; //'#FF383F41';
 const String defaultLightVerseReferenceColorHex = '#FF2196F3'; // Colors.blue
-const String defaultDarkVerseReferenceColorHex =
-    '#FF09610C'; // Color.fromARGB(255, 9, 97, 12)
+const String defaultDarkVerseReferenceColorHex = '#FFFFF200';
 // Hex => Integer conversions for ValueNotifiers that require colors as ints
 Color get defaultLightPrimaryColor => hexToColor(defaultLightPrimaryColorHex);
 Color get defaultLightBackgroundColor =>

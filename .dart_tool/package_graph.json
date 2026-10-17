@@ -1172,18 +1172,21 @@
     },
     {
       "name": "shared_preferences_foundation",
-      "version": "2.5.7",
+      "version": "2.6.0",
       "dependencies": [
+        "ffi",
         "flutter",
         "meta",
+        "objective_c",
         "shared_preferences_platform_interface"
       ]
     },
     {
       "name": "shared_preferences_android",
-      "version": "2.4.28",
+      "version": "2.5.0",
       "dependencies": [
         "flutter",
+        "jni",
         "meta",
         "shared_preferences_platform_interface"
       ]
