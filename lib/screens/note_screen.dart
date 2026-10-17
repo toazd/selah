@@ -46,9 +46,9 @@ class _NoteScreenState extends State<NoteScreen> {
   int _existingCreatedAt = 0;
   late String _originalContentHash;
   late QuillController _quillController;
-  late FocusNode _focusNode;
+  late FocusNode quillFocusNode;
   late ScrollController _scrollController;
-  //final FocusNode hiddenButtonFocusNode = FocusNode();
+  final FocusNode hiddenButtonFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _NoteScreenState extends State<NoteScreen> {
     }
 
     // Create focus node for auto-focus
-    _focusNode = FocusNode();
+    quillFocusNode = FocusNode();
 
     // Create scroll controller
     _scrollController = ScrollController();
@@ -97,9 +97,9 @@ class _NoteScreenState extends State<NoteScreen> {
   @override
   void dispose() {
     _quillController.dispose();
-    _focusNode.dispose();
+    quillFocusNode.dispose();
     _scrollController.dispose();
-    //hiddenButtonFocusNode.dispose();
+    hiddenButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -319,14 +319,6 @@ class _NoteScreenState extends State<NoteScreen> {
                             body: SafeArea(
                               //bottom: false,
                               child: Column(children: [
-                                Offstage(
-                                  offstage: true,
-                                  child: ElevatedButton(
-                                    //focusNode: hiddenButtonFocusNode,
-                                    onPressed: () {},
-                                    child: Text('Hidden Button'),
-                                  ),
-                                ),
                                 Expanded(
                                     child: Column(
                                         children: isMobile
@@ -335,7 +327,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                                   child: QuillEditor(
                                                     controller:
                                                         _quillController,
-                                                    focusNode: _focusNode,
+                                                    focusNode: quillFocusNode,
                                                     scrollController:
                                                         _scrollController,
                                                     config: QuillEditorConfig(
@@ -364,7 +356,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                                   child: QuillEditor(
                                                     controller:
                                                         _quillController,
-                                                    focusNode: _focusNode,
+                                                    focusNode: quillFocusNode,
                                                     scrollController:
                                                         _scrollController,
                                                     config: QuillEditorConfig(
@@ -399,10 +391,6 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _saveAndExit() async {
-    // Windows OSK bug workaround
-    FocusManager.instance.primaryFocus?.unfocus();
-    FocusScope.of(context).unfocus();
-
     // Always close UI for both save and back buttons
     if (mounted) {
       Navigator.of(context).pop();
@@ -482,10 +470,6 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<void> _handlePopInvoked(bool didPop, void result) async {
-    // Windows OSK bug workaround
-    FocusManager.instance.primaryFocus?.unfocus();
-    FocusScope.of(context).unfocus();
-
     if (!didPop) {
       await _saveAndExit(); // Same method as save button
     }

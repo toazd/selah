@@ -6,6 +6,6 @@ Icon=${SNAP}/meta/gui/selah.png
 Terminal=false
 Type=Application
 Categories=Education;Literature;
-Keywords=Bible;Study;KJV;King James Version;Strong's;TSK;
+Keywords=Bible;Study;KJV;King James Version;TSK;
 StartupNotify=true
 StartupWMClass=io.github.toazd.selah

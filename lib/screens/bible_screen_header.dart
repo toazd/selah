@@ -17,6 +17,9 @@ class BibleScreenHeader extends StatelessWidget {
   final VoidCallback? onShowWebstersDefinitions;
   //final VoidCallback? onShowBookmarksManager;
 
+  // WIndows OSK bug workaround
+  final FocusNode? titleFocusNode;
+
   const BibleScreenHeader({
     super.key,
     //required this.showViewMenu,
@@ -29,6 +32,9 @@ class BibleScreenHeader extends StatelessWidget {
     this.onShowNotesSearch,
     this.onShowWebstersDefinitions,
     //this.onShowBookmarksManager,
+
+    // Windows OSK bug workaround
+    this.titleFocusNode,
   });
 
   @override
@@ -303,6 +309,7 @@ class BibleScreenHeader extends StatelessWidget {
               : shortTitle;
 
           return ElevatedButton(
+            focusNode: titleFocusNode,
             style: ElevatedButton.styleFrom(
               backgroundColor: _adjustBarColor(barColor, context),
               padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
