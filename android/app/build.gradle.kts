@@ -15,7 +15,7 @@ java {
 
 android {
     namespace = "com.selah.holybible"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_25
