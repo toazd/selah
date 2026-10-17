@@ -1049,19 +1049,19 @@ class SupabaseSyncService {
   Future<void> initialize({bool isLoginResync = false}) async {
     final userId = _currentUserId;
     if (userId == null) {
-      debugPrint(
-          '[SyncTrace] initialize skipped: no Supabase user loginResync=$isLoginResync');
+      //debugPrint(
+      //    '[SyncTrace] initialize skipped: no Supabase user loginResync=$isLoginResync');
       return;
     }
 
-    debugPrint(
-        '[SyncTrace] initialize requested user=$userId loginResync=$isLoginResync '
-        'initialized=$_isInitialized initializedUser=$_initializedUserId '
-        'initializingUser=$_initializingUserId hasInitialization=${_initializationFuture != null}');
+    //debugPrint(
+    //    '[SyncTrace] initialize requested user=$userId loginResync=$isLoginResync '
+    //    'initialized=$_isInitialized initializedUser=$_initializedUserId '
+    //    'initializingUser=$_initializingUserId hasInitialization=${_initializationFuture != null}');
 
     if (_isInitialized && _initializedUserId == userId) {
-      debugPrint(
-          '[SyncTrace] initialize skipped: already initialized user=$userId');
+      //debugPrint(
+      //    '[SyncTrace] initialize skipped: already initialized user=$userId');
       return;
     }
 
@@ -1106,16 +1106,16 @@ class SupabaseSyncService {
       if (_isActiveFor(userId, generation)) {
         _isInitialized = true;
         _initializedUserId = userId;
-        debugPrint(
-            '[SyncTrace] initialize completed user=$userId loginResync=$isLoginResync');
+        //debugPrint(
+        //    '[SyncTrace] initialize completed user=$userId loginResync=$isLoginResync');
       } else {
-        debugPrint(
-            '[SyncTrace] initialize completed but became inactive user=$userId '
-            'generation=$generation currentGeneration=$_lifecycleGeneration clientUser=$_currentUserId');
+        //debugPrint(
+        //    '[SyncTrace] initialize completed but became inactive user=$userId '
+        //    'generation=$generation currentGeneration=$_lifecycleGeneration clientUser=$_currentUserId');
       }
     } catch (error, stackTrace) {
-      debugPrint(
-          '[SyncTrace] initialize failed user=$userId loginResync=$isLoginResync error=$error');
+      //debugPrint(
+      //    '[SyncTrace] initialize failed user=$userId loginResync=$isLoginResync error=$error');
       debugPrint(stackTrace.toString());
       rethrow;
     } finally {
@@ -1175,10 +1175,10 @@ class SupabaseSyncService {
     required String userId,
     required int generation,
   }) {
-    debugPrint(
-        '[SyncTrace] realtime status category=$category status=${status.name} '
-        'user=$userId generation=$generation currentGeneration=$_lifecycleGeneration '
-        'error=${error ?? 'none'}');
+    //debugPrint(
+    //    '[SyncTrace] realtime status category=$category status=${status.name} '
+    //    'user=$userId generation=$generation currentGeneration=$_lifecycleGeneration '
+    //    'error=${error ?? 'none'}');
     // Ignore callbacks from channels that were deliberately replaced, signed
     // out, or disposed. This is especially important on Android, where a close
     // callback can be delivered after the app has resumed and recreated a
@@ -4280,12 +4280,12 @@ class SupabaseSyncService {
   Future<void> syncAll() {
     final existingSync = _syncAllFuture;
     if (existingSync != null) {
-      debugPrint(
-          '[SyncTrace] full sync request coalesced user=$_currentUserId');
+      //debugPrint(
+      //    '[SyncTrace] full sync request coalesced user=$_currentUserId');
       return existingSync;
     }
 
-    debugPrint('[SyncTrace] full sync request accepted user=$_currentUserId');
+    //debugPrint('[SyncTrace] full sync request accepted user=$_currentUserId');
     final sync = _syncAllInternal();
     _syncAllFuture = sync;
     return sync.whenComplete(() {
@@ -4297,12 +4297,12 @@ class SupabaseSyncService {
 
   Future<void> _syncAllInternal() async {
     if (_currentUserId == null) {
-      debugPrint('[SyncTrace] full sync skipped: no current user');
+      //debugPrint('[SyncTrace] full sync skipped: no current user');
       return;
     }
 
-    final syncUserId = _currentUserId;
-    debugPrint('[SyncTrace] full sync started user=$syncUserId');
+    //final syncUserId = _currentUserId;
+    //debugPrint('[SyncTrace] full sync started user=$syncUserId');
 
     // Set syncing status to show progress dialog
     final previousStatus = _syncStatus;
@@ -4332,9 +4332,9 @@ class SupabaseSyncService {
         // If was offline, keep offline
         syncStatusNotifier.value = _syncStatus;
       }
-      debugPrint(
-          '[SyncTrace] full sync finished requestedUser=$syncUserId currentUser=$_currentUserId '
-          'notifierStatus=${syncStatusNotifier.value.name}');
+      //debugPrint(
+      //    '[SyncTrace] full sync finished requestedUser=$syncUserId currentUser=$_currentUserId '
+      //    'notifierStatus=${syncStatusNotifier.value.name}');
     }
   }
 

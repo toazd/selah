@@ -156,7 +156,7 @@ String _describeAuthSession(Session? session) {
 }
 
 void _authTrace(String message) {
-  debugPrint('[AuthTrace ${DateTime.now().toIso8601String()}] $message');
+  //debugPrint('[AuthTrace ${DateTime.now().toIso8601String()}] $message');
 }
 
 bool _shouldIgnoreNullSessionAuthEvent({
@@ -1471,10 +1471,10 @@ class BibleStudyApp extends StatelessWidget {
                                                 ),
                                               ),
                                               builder: (context, child) {
-                                                // This ensures the current, resolved theme is available to the Overlay
                                                 return Theme(
                                                   data: Theme.of(context),
-                                                  child: child!,
+                                                  child:
+                                                      child ?? const SizedBox(),
                                                 );
                                               },
                                               themeMode: mode,

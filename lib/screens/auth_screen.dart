@@ -59,26 +59,26 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       if (user != null && mounted) {
-        debugPrint(
-            '[AuthTrace] AuthScreen received successful login user=${user.id} '
-            'notifierSignedIn=${isSignedIn.value} notifierUser=${currentUser.value?.id} '
-            'clientUser=${Supabase.instance.client.auth.currentUser?.id}');
-        debugPrint('[AuthTrace] AuthScreen waiting for queued auth state');
+        //debugPrint(
+        //    '[AuthTrace] AuthScreen received successful login user=${user.id} '
+        //    'notifierSignedIn=${isSignedIn.value} notifierUser=${currentUser.value?.id} '
+        //    'clientUser=${Supabase.instance.client.auth.currentUser?.id}');
+        //debugPrint('[AuthTrace] AuthScreen waiting for queued auth state');
         await waitForAuthStateProcessing();
-        debugPrint('[AuthTrace] AuthScreen auth state queue complete '
-            'notifierSignedIn=${isSignedIn.value} '
-            'notifierUser=${currentUser.value?.id}');
+        //debugPrint('[AuthTrace] AuthScreen auth state queue complete '
+        //    'notifierSignedIn=${isSignedIn.value} '
+        //    'notifierUser=${currentUser.value?.id}');
         // Show sync options dialog after successful authentication
         await _showSyncDialog();
 
         try {
           final syncService = SupabaseSyncService();
-          debugPrint(
-              '[AuthTrace] AuthScreen starting login resync user=${Supabase.instance.client.auth.currentUser?.id}');
+          //debugPrint(
+          //    '[AuthTrace] AuthScreen starting login resync user=${Supabase.instance.client.auth.currentUser?.id}');
           await syncService.initialize(isLoginResync: true);
-          debugPrint(
-              '[AuthTrace] AuthScreen login resync finished notifierSignedIn=${isSignedIn.value} '
-              'notifierUser=${currentUser.value?.id} clientUser=${Supabase.instance.client.auth.currentUser?.id}');
+          //debugPrint(
+          //    '[AuthTrace] AuthScreen login resync finished notifierSignedIn=${isSignedIn.value} '
+          //    'notifierUser=${currentUser.value?.id} clientUser=${Supabase.instance.client.auth.currentUser?.id}');
         } catch (e) {
           ErrorHandler.logError(
             e,

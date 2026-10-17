@@ -24,8 +24,8 @@ Future<void> migrateLegacyWindowsAuthSession() async {
 
     // Do not replace a session already managed by Supabase's standard storage.
     if (preferences.containsKey(persistSessionKey)) {
-      debugPrint(
-          '[AuthTrace] Windows legacy session migration skipped: shared session already exists');
+      //debugPrint(
+      //    '[AuthTrace] Windows legacy session migration skipped: shared session already exists');
       return;
     }
 
@@ -36,15 +36,15 @@ Future<void> migrateLegacyWindowsAuthSession() async {
 
     final session = await sessionFile.readAsString();
     if (!_isSessionJson(session)) {
-      debugPrint(
-          '[AuthTrace] Windows legacy session migration skipped: file contents were invalid');
+      //debugPrint(
+      //    '[AuthTrace] Windows legacy session migration skipped: file contents were invalid');
       return;
     }
 
     final saved = await preferences.setString(persistSessionKey, session);
     if (!saved) {
-      debugPrint(
-          '[AuthTrace] Windows legacy session migration failed: SharedPreferences rejected the session');
+      //debugPrint(
+      //    '[AuthTrace] Windows legacy session migration failed: SharedPreferences rejected the session');
       return;
     }
 
@@ -53,10 +53,10 @@ Future<void> migrateLegacyWindowsAuthSession() async {
     await sessionFile.delete();
     final backupFile = File('${sessionFile.path}.bak');
     if (await backupFile.exists()) await backupFile.delete();
-    debugPrint(
-        '[AuthTrace] Windows legacy session migrated to SharedPreferences');
+    //debugPrint(
+    //    '[AuthTrace] Windows legacy session migrated to SharedPreferences');
   } catch (error, stackTrace) {
-    debugPrint('[AuthTrace] Windows legacy session migration error: $error');
+    //debugPrint('[AuthTrace] Windows legacy session migration error: $error');
     debugPrint(stackTrace.toString());
   }
 }

@@ -1141,6 +1141,7 @@ class _SearchScreenState extends State<SearchScreen>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
   final ScrollController _resultsScrollController = ScrollController();
+  final FocusNode searchButtonFocusNode = FocusNode();
 
   static const String _regexKey = 'searchRegex';
   static const String _nearbyKey = 'searchNearby';
@@ -1352,6 +1353,7 @@ class _SearchScreenState extends State<SearchScreen>
     _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
     _resultsScrollController.dispose();
+    searchButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -1726,6 +1728,10 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Future<void> _onSearch() async {
+    // Windows OSK bug workaround
+    searchButtonFocusNode.unfocus();
+    searchButtonFocusNode.requestFocus();
+
     final searchId = ++_activeSearchId;
 
     // Check for invalid custom range
@@ -3108,7 +3114,10 @@ class _SearchScreenState extends State<SearchScreen>
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          onPressed: () => _onSearch(),
+                          focusNode: searchButtonFocusNode,
+                          onPressed: () {
+                            _onSearch();
+                          },
                           child: Text('Search',
                               softWrap: false,
                               overflow: TextOverflow.ellipsis,

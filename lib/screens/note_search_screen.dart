@@ -57,6 +57,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   static const String _caseSensitiveKey = 'noteSearchCaseSensitive';
   static const String _bookFilterTypeKey = 'noteSearchBookFilterType';
   static const String _bookFilterCustomKey = 'noteSearchBookFilterCustom';
+  final FocusNode searchButtonFocusNode = FocusNode();
 
   bool _useRegex = false;
   bool _useWholeWord = false;
@@ -336,6 +337,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
     _customRangeController.dispose();
     _resultsScrollController.removeListener(_saveScrollOffset);
     _resultsScrollController.dispose();
+    searchButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -487,6 +489,10 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
   }
 
   Future<void> _onSearch() async {
+    // Windows OSK bug workaround
+    searchButtonFocusNode.unfocus();
+    searchButtonFocusNode.requestFocus();
+
     // Validate input - prevent empty searches that would cause freezing
     final searchText = _useRegex ? _controller.text : _controller.text.trim();
     if (searchText.isEmpty) {
@@ -1553,6 +1559,7 @@ class _NoteSearchScreenState extends State<NoteSearchScreen>
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
+                          focusNode: searchButtonFocusNode,
                           onPressed: () => _onSearch(),
                           child: Text('Search',
                               softWrap: false,

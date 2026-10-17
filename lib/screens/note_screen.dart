@@ -48,6 +48,7 @@ class _NoteScreenState extends State<NoteScreen> {
   late QuillController _quillController;
   late FocusNode _focusNode;
   late ScrollController _scrollController;
+  //final FocusNode hiddenButtonFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -98,6 +99,7 @@ class _NoteScreenState extends State<NoteScreen> {
     _quillController.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
+    //hiddenButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -317,6 +319,14 @@ class _NoteScreenState extends State<NoteScreen> {
                             body: SafeArea(
                               //bottom: false,
                               child: Column(children: [
+                                Offstage(
+                                  offstage: true,
+                                  child: ElevatedButton(
+                                    //focusNode: hiddenButtonFocusNode,
+                                    onPressed: () {},
+                                    child: Text('Hidden Button'),
+                                  ),
+                                ),
                                 Expanded(
                                     child: Column(
                                         children: isMobile
@@ -340,7 +350,6 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               textColor),
                                                       customLinkPrefixes: const [
                                                         'v://',
-                                                        's://',
                                                       ],
                                                     ),
                                                   ),
@@ -372,7 +381,6 @@ class _NoteScreenState extends State<NoteScreen> {
                                                               textColor),
                                                       customLinkPrefixes: const [
                                                         'v://',
-                                                        's://',
                                                       ],
                                                     ),
                                                   ),

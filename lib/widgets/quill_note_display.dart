@@ -282,7 +282,6 @@ class _QuillNoteDisplayState extends State<QuillNoteDisplay> {
                   : FlutterQuillEmbeds.editorBuilders(),
               customLinkPrefixes: const [
                 'v://',
-                's://',
               ],
               onLaunchUrl: _handleLinkTap,
               customStyles: DefaultStyles(
