@@ -491,6 +491,10 @@ void _initializeSqflite() {
     // Initialize FFI for desktop - only do this once
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+  } else if (Platform.isAndroid || Platform.isIOS) {
+    // Mobile: Explicitly assign the default sqflite database factory
+    // to prevent uninitialized errors during early main() execution.
+    databaseFactory = databaseFactory;
   }
 }
 

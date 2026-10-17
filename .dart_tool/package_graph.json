@@ -21,7 +21,6 @@
         "permission_handler",
         "screen_retriever",
         "shared_preferences",
-        "sqflite",
         "sqflite_common_ffi",
         "sqflite_common_ffi_web",
         "supabase_flutter",
@@ -438,29 +437,6 @@
       ]
     },
     {
-      "name": "sqflite",
-      "version": "2.4.4+2",
-      "dependencies": [
-        "flutter",
-        "path",
-        "sqflite_android",
-        "sqflite_common",
-        "sqflite_darwin",
-        "sqflite_platform_interface"
-      ]
-    },
-    {
-      "name": "sqflite_platform_interface",
-      "version": "2.4.2",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "platform",
-        "plugin_platform_interface",
-        "sqflite_common"
-      ]
-    },
-    {
       "name": "flutter_quill",
       "version": "11.6.0",
       "dependencies": [
@@ -603,16 +579,6 @@
       ]
     },
     {
-      "name": "sqflite_android",
-      "version": "2.4.4+1",
-      "dependencies": [
-        "flutter",
-        "path",
-        "sqflite_common",
-        "sqflite_platform_interface"
-      ]
-    },
-    {
       "name": "charcode",
       "version": "1.4.0",
       "dependencies": []
@@ -670,17 +636,6 @@
       "dependencies": [
         "meta",
         "path"
-      ]
-    },
-    {
-      "name": "sqflite_darwin",
-      "version": "2.4.4+1",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "path",
-        "sqflite_common",
-        "sqflite_platform_interface"
       ]
     },
     {
@@ -1513,13 +1468,6 @@
       ]
     },
     {
-      "name": "platform",
-      "version": "3.2.0",
-      "dependencies": [
-        "meta"
-      ]
-    },
-    {
       "name": "build_config",
       "version": "1.4.0",
       "dependencies": [
@@ -1546,6 +1494,13 @@
         "flutter",
         "platform",
         "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "platform",
+      "version": "3.2.0",
+      "dependencies": [
+        "meta"
       ]
     },
     {
