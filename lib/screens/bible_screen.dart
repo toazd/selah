@@ -21,6 +21,7 @@ import '../utils/verse_text_parser.dart';
 import 'bible_screen_header.dart'; // Import custom header
 import '../widgets/chapter_content_widget.dart'; // For PageView chapter display
 import '../widgets/websters_definition_lookup_dialog.dart';
+import '../utils/error_handler.dart';
 
 // Helper function to create a slightly different shade for bars
 Color _adjustBarColor(Color backgroundColor, BuildContext context) {
@@ -272,7 +273,18 @@ class _BibleScreenState extends State<BibleScreen> {
     // Initialize PageController at real index
     _pageController = PageController(initialPage: _currentPageIndex);
 
-    await _loadVerses();
+    try {
+      await _loadVerses();
+    } catch (e) {
+      ErrorHandler.logError(
+        e,
+        customMessage: '_loadVerses exception',
+        context: {
+          'class': 'bible_screen.dart',
+          'method': '_loadInitialLocation'
+        },
+      );
+    }
     _selectedVerse = (widget.initialVerse != null &&
             _verses.any((v) => v['verse'] == widget.initialVerse))
         ? widget.initialVerse

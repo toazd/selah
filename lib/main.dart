@@ -699,22 +699,29 @@ void main() async {
   }
 
   // Listen to auth state changes
-  Supabase.instance.client.auth.onAuthStateChange.listen(
-    _enqueueSupabaseAuthStateChange,
-    onError: (Object error, StackTrace stackTrace) {
-      unawaited(ErrorHandler.logError(
-        error,
-        customMessage: 'Supabase auth state stream error',
-        context: {
-          'class': 'main.dart',
-          'method': 'main',
-          'stack': stackTrace.toString(),
-        },
-      ));
-    },
-  );
-  _authTrace(
-      'auth listener attached currentSession=${_describeAuthSession(Supabase.instance.client.auth.currentSession)}');
+  try {
+    Supabase.instance.client.auth.onAuthStateChange.listen(
+      _enqueueSupabaseAuthStateChange,
+      onError: (Object error, StackTrace stackTrace) {
+        unawaited(ErrorHandler.logError(
+          error,
+          customMessage: 'Supabase auth state stream error',
+          context: {
+            'class': 'main.dart',
+            'method': 'main',
+            'stack': stackTrace.toString(),
+          },
+        ));
+      },
+    );
+    _authTrace(
+        'auth listener attached currentSession=${_describeAuthSession(Supabase.instance.client.auth.currentSession)}');
+  } catch (e) {
+    ErrorHandler.logError(
+      'Auth state listener exception: ${e.toString()}',
+      context: {'class': 'main.dart', 'method': 'main', 'error': e.toString()},
+    );
+  }
 
   await _loadAllPrefs();
   final prefs = await SharedPreferences.getInstance();
@@ -724,13 +731,20 @@ void main() async {
 
   // Reconcile the already-restored session so a
   // valid upgrade session is reflected in the UI immediately.
-  final initialSession = Supabase.instance.client.auth.currentSession;
-  _authTrace(
-      'startup reconciliation currentSession=${_describeAuthSession(initialSession)} '
-      'notifierSignedIn=${isSignedIn.value}');
-  if (!isSignedIn.value && initialSession != null) {
-    _enqueueSupabaseAuthStateChange(
-      AuthState(AuthChangeEvent.initialSession, initialSession),
+  try {
+    final initialSession = Supabase.instance.client.auth.currentSession;
+    _authTrace(
+        'startup reconciliation currentSession=${_describeAuthSession(initialSession)} '
+        'notifierSignedIn=${isSignedIn.value}');
+    if (!isSignedIn.value && initialSession != null) {
+      _enqueueSupabaseAuthStateChange(
+        AuthState(AuthChangeEvent.initialSession, initialSession),
+      );
+    }
+  } catch (e) {
+    ErrorHandler.logError(
+      'Supabase reconciliation exception: ${e.toString()}',
+      context: {'class': 'main.dart', 'method': 'main', 'error': e.toString()},
     );
   }
 
