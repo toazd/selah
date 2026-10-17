@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
-    // FlutterFire Configuration removed (no Firebase usage)
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -8,28 +9,19 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
 android {
     namespace = "com.selah.holybible"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        //sourceCompatibility = JavaVersion.VERSION_11
-        //targetCompatibility = JavaVersion.VERSION_11
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
-    kotlinOptions {
-        //jvmTarget = JavaVersion.VERSION_11.toString()
-        jvmTarget = JavaVersion.VERSION_21.toString()
-
-        freeCompilerArgs += listOf("-Xlint:deprecation")
-    }
 
     signingConfigs {
         create("release") {
@@ -57,6 +49,17 @@ android {
         debug {
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        // Explicit bytecode target; keeps parity with compileOptions above.
+        // (Optional in practice — with the Java 25 toolchain set, Kotlin
+        //  defaults to it — but keeping it explicit documents intent.)
+        jvmTarget = JvmTarget.JVM_25
+
+        freeCompilerArgs.add("-Xlint:deprecation")
     }
 }
 
