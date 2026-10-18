@@ -16,3 +16,4 @@
 -keep class kotlin.coroutines.Continuation { *; }
 -keep class kotlin.coroutines.intrinsics.CoroutineSingletons { *; }
 -keep class kotlin.coroutines.intrinsics.IntrinsicsKt { *; }
+-dontobfuscate
