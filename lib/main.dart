@@ -8,7 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart'
     as flutter_localizations;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
@@ -37,6 +36,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'utils/internet_access_checker.dart';
 import 'database/search_database.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/error_handler.dart';
 
@@ -482,19 +482,14 @@ Color getAdaptiveTextColor(
 }
 
 // Initialize sqflite FFI once at startup to prevent memory leaks
-void _initializeSqflite() {
+Future<void> _initializeSqflite() async {
   if (kIsWeb) {
     // Web: Use IndexedDB via sqflite_common_ffi_web
     databaseFactory = databaseFactoryFfiWeb;
   } else if (!kIsWeb &&
       (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-    // Initialize FFI for desktop - only do this once
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-  } else if (Platform.isAndroid || Platform.isIOS) {
-    // Mobile: Explicitly assign the default sqflite database factory
-    // to prevent uninitialized errors during early main() execution.
-    databaseFactory = databaseFactory;
   }
 }
 
@@ -567,7 +562,8 @@ RandomAccessFile? _singleInstanceLockFile;
 /// Returns true if the lock was acquired (first instance), false if another
 /// instance already holds the lock (in which case the caller should exit).
 bool _acquireSingleInstanceLock() {
-  if (kIsWeb) return true;
+  if (kIsWeb || Platform.isAndroid || Platform.isIOS) return true;
+
   if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     return true;
   }
@@ -679,7 +675,7 @@ void main() async {
   };
 
   // Initialize sqflite once at startup to prevent memory leaks
-  _initializeSqflite();
+  await _initializeSqflite();
 
   // Migrate the username cache before Supabase/auth startup can read or write
   // user data. The old SQLite table remains as a compatibility source only.
