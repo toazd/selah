@@ -25457,7 +25457,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       3: 'But he said unto them, <r>Have ye not read what David did, when he was an hungred, and they that were with him;</r>',
       4: '<r>How he entered into the house of God, and did eat the shewbread, which was not lawful for him to eat, neither for them which were with him, but only for the priests?</r>',
       5: '<r>Or have ye not read in the law, how that on the sabbath days the priests in the temple profane the sabbath, and are blameless?</r>',
-      6: '<r>But I say unto you, That in this place is</r> one <r>greater than the temple.</r>',
+      6: '<r>But I say unto you, That in this place is <i>one</i> greater than the temple.</r>',
       7: '<r>But if ye had known what <i>this</i> meaneth, I will have mercy, and not sacrifice, ye would not have condemned the guiltless.</r>',
       8: '<r>For the Son of man is Lord even of the sabbath day.</r>',
       9: 'And when he was departed thence, he went into their synagogue:',
