@@ -532,7 +532,13 @@ class _VerseChooserDialogState extends State<VerseChooserDialog> {
             },
           ),
         ),
-        onSubmitted: _onQuickJumpSubmit,
+        onSubmitted: (value) {
+          // Windows OSK bug workaround attempt
+          FocusManager.instance.primaryFocus?.unfocus(
+            disposition: UnfocusDisposition.previouslyFocusedChild,
+          );
+          _onQuickJumpSubmit(value);
+        },
       ),
     );
   }

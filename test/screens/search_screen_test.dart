@@ -184,6 +184,113 @@ void main() {
     expect(wholeWordResult.refs, isNot(contains('Jdg 7:18')));
   });
 
+  test('quoted phrase with whole-word off matches inflected words in order',
+      () {
+    // Mirrors _escapeBibleSearchTerm(wholeWord=false): each word gets
+    // implicit [A-Za-z-]* affixes (hyphen included, apostrophe excluded)
+    // and words are joined with \s+ to enforce order + adjacency.
+    final loose = RegExp(
+      r'([A-Za-z-]*word[A-Za-z-]*\s+[A-Za-z-]*of[A-Za-z-]*\s+[A-Za-z-]*the[A-Za-z-]*\s+[A-Za-z-]*LORD[A-Za-z-]*)',
+      caseSensitive: false,
+    );
+    final exact = RegExp(
+      r'(word\ of\ the\ LORD)',
+      caseSensitive: false,
+    );
+    var looseMatches = 0;
+    var looseVerses = 0;
+    for (final bookEntry in BibleData.entries) {
+      for (final chapterEntry in bookEntry.value.entries) {
+        for (final verseEntry in chapterEntry.value.entries) {
+          var searchText = VerseTextParser.toPlainVerseText(
+            verseEntry.value,
+            removePilcrow: false,
+          );
+          if (searchText.contains('¶ ')) {
+            searchText = searchText.replaceAll('¶ ', '');
+          }
+          final matches = loose.allMatches(searchText).length;
+          if (matches == 0) continue;
+          looseMatches += matches;
+          looseVerses++;
+        }
+      }
+    }
+    // Loose quoted phrase is a superset of the exact phrase: it also
+    // matches inflected forms such as "words of the LORD".
+    expect(looseMatches, 283);
+    expect(looseVerses, 280);
+    expect(
+      loose.hasMatch('all the words of the LORD'),
+      isTrue,
+    );
+    expect(
+      exact.hasMatch('all the words of the LORD'),
+      isFalse,
+    );
+    // "pass over" (whole-word OFF) matches "passed over" in order.
+    final passOverLoose = RegExp(
+      r'([A-Za-z-]*pass[A-Za-z-]*\s+[A-Za-z-]*over[A-Za-z-]*)',
+      caseSensitive: false,
+    );
+    expect(passOverLoose.hasMatch('passed over'), isTrue);
+    expect(passOverLoose.hasMatch('pass over'), isTrue);
+    expect(passOverLoose.hasMatch('over pass'), isFalse);
+    // "and abel" (whole-word OFF) matches "and Abel-beth-maachah".
+    final andAbelLoose = RegExp(
+      r'([A-Za-z-]*and[A-Za-z-]*\s+[A-Za-z-]*abel[A-Za-z-]*)',
+      caseSensitive: false,
+    );
+    final andAbelHit =
+        andAbelLoose.firstMatch('and Abel-beth-maachah')!.group(0);
+    expect(andAbelHit, 'and Abel-beth-maachah');
+    // Apostrophe is excluded from affixes: "david" matches/highlights only
+    // "David" inside "David's", consistent with unquoted default search.
+    final davidLoose = RegExp(
+      r'([A-Za-z-]*david[A-Za-z-]*)',
+      caseSensitive: false,
+    );
+    final davidHit =
+        davidLoose.firstMatch("David's")!.group(0);
+    expect(davidHit, 'David');
+    // Hyphen is included: "abel" highlights the full compound.
+    final abelLoose = RegExp(
+      r'([A-Za-z-]*abel[A-Za-z-]*)',
+      caseSensitive: false,
+    );
+    final abelHit =
+        abelLoose.firstMatch('Abel-beth-maachah')!.group(0);
+    expect(abelHit, 'Abel-beth-maachah');
+  });
+
+  test('word of the LORD phrase counts match cleaned text boundaries', () {
+    final defaultResult = _auditPhraseMatches(
+      'word of the LORD',
+      wholeWord: false,
+      caseSensitive: false,
+    );
+    final wholeWordResult = _auditPhraseMatches(
+      'word of the LORD',
+      wholeWord: true,
+      caseSensitive: false,
+    );
+    final wholeWordCaseSensitiveResult = _auditPhraseMatches(
+      'word of the LORD',
+      wholeWord: true,
+      caseSensitive: true,
+    );
+
+    expect(defaultResult.matches, 264);
+    expect(defaultResult.verses, 261);
+    expect(wholeWordResult.matches, 258);
+    expect(wholeWordResult.verses, 255);
+    expect(wholeWordCaseSensitiveResult.matches, 242);
+    expect(wholeWordCaseSensitiveResult.verses, 239);
+
+    expect(defaultResult.refs, contains('Jdg 7:18'));
+    expect(wholeWordResult.refs, isNot(contains('Jdg 7:18')));
+  });
+
   testWidgets('word of the LORD phrase counts match the search UI',
       (tester) async {
     await _pumpSearchScreenWithOptions(tester);
@@ -192,7 +299,7 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Search'));
     await tester.pump();
 
-    await _waitForFinder(tester, find.text('264 matches in 261 verses'));
+    await _waitForFinder(tester, find.text('283 matches in 280 verses'));
 
     await _pumpSearchScreenWithOptions(tester, wholeWord: true);
 

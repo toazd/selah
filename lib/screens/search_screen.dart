@@ -608,6 +608,36 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesByCleanKeywords(
   return results;
 }
 
+String _escapeBibleSearchTerm(String term, bool useWholeWord) {
+  const affixClass = '[A-Za-z-]*';
+  String escapeWithWildcards(String word) {
+    String escaped = RegExp.escape(word);
+    return escaped.replaceAll('\\*', affixClass);
+  }
+
+  if (useWholeWord) {
+    return escapeWithWildcards(term);
+  }
+
+  // Whole-word OFF: "*word* *word*" semantics. Split on whitespace only so
+  // hyphenated compounds (e.g. Abel-beth-maachah) stay intact as one token.
+  // Each token gets implicit [A-Za-z-]* affixes (letters + hyphen, no
+  // apostrophe) so "david" still highlights only "David" in "David's",
+  // while "abel" highlights the full "Abel-beth-maachah".
+  final words = term.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+  final fragments = words.map((word) {
+    String core = escapeWithWildcards(word);
+    if (!core.startsWith(affixClass)) {
+      core = '$affixClass$core';
+    }
+    if (!core.endsWith(affixClass)) {
+      core = '$core$affixClass';
+    }
+    return core;
+  }).toList();
+  return fragments.join(r'\s+');
+}
+
 _BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
   if (data.useRegex) {
     final regex = _createBibleSearchRegExp(data.input, data.caseSensitive);
@@ -634,11 +664,9 @@ _BibleSearchPatternData _buildBibleSearchPattern(BibleSearchTaskData data) {
 
   final keywords = _getBiblePreFilterKeywords(allTerms);
 
-  final escapedTerms = allTerms.map((term) {
-    String escaped = RegExp.escape(term);
-    escaped = escaped.replaceAll('\\*', '[A-Za-z]*');
-    return escaped;
-  }).toList();
+  final escapedTerms = allTerms
+      .map((term) => _escapeBibleSearchTerm(term, data.useWholeWord))
+      .toList();
 
   final pattern = data.useWholeWord
       ? '\\b(${escapedTerms.join('|')})\\b'
@@ -684,8 +712,7 @@ Future<List<Map<String, dynamic>>> _searchBibleVersesOrdered(
     return filteredResults;
   }
 
-  final hasWildcards =
-      patternData.escapedTerms.any((term) => term.contains('[A-Za-z]*'));
+  final hasWildcards = !data.useRegex && data.input.contains('*');
   final results = patternData.keywords.isEmpty || hasWildcards
       ? await BibleDatabase.getAllVerses()
       : await _searchBibleVersesByCleanKeywords(
