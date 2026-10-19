@@ -58,11 +58,7 @@ android {
 
 kotlin {
     compilerOptions {
-        // Explicit bytecode target; keeps parity with compileOptions above.
-        // (Optional in practice — with the Java 25 toolchain set, Kotlin
-        //  defaults to it — but keeping it explicit documents intent.)
         jvmTarget = JvmTarget.JVM_25
-
         freeCompilerArgs.add("-Xlint:deprecation")
     }
 }
