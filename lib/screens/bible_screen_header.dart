@@ -2,7 +2,6 @@
 import 'package:material_ui/material_ui.dart';
 import '../main.dart'; // For color notifiers
 import '../utils/book_name_converter.dart'; // For book name conversion
-
 import '../utils/preferences_constants.dart'; // For uiFontSize / uiFontFamily
 
 class BibleScreenHeader extends StatelessWidget {
@@ -16,6 +15,10 @@ class BibleScreenHeader extends StatelessWidget {
   final VoidCallback? onShowNotesSearch;
   final VoidCallback? onShowWebstersDefinitions;
   //final VoidCallback? onShowBookmarksManager;
+  final VoidCallback? onPreviousChapter;
+  final VoidCallback? onNextChapter;
+  final bool canGoToPreviousChapter;
+  final bool canGoToNextChapter;
 
   // WIndows OSK bug workaround
   final FocusNode? titleFocusNode;
@@ -32,6 +35,10 @@ class BibleScreenHeader extends StatelessWidget {
     this.onShowNotesSearch,
     this.onShowWebstersDefinitions,
     //this.onShowBookmarksManager,
+    this.onPreviousChapter,
+    this.onNextChapter,
+    this.canGoToPreviousChapter = true,
+    this.canGoToNextChapter = true,
 
     // Windows OSK bug workaround
     this.titleFocusNode,
@@ -63,10 +70,42 @@ class BibleScreenHeader extends StatelessWidget {
             color: primaryColor,
           ),
 
-          // Title area (centered)
+          // Title area: [prev - 8px - title - 8px - next] grouped together
+          // and centered as a unit. Title is width-capped (not Flexible) so
+          // the arrows sit right next to the verse chooser button.
           Flexible(
             fit: FlexFit.tight,
-            child: _buildTitleButton(context),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildChapterNavButton(
+                    icon: Icons.arrow_back_rounded,
+                    semanticLabel: 'Navigate to the Previous Chapter',
+                    tooltip: 'Previous Chapter',
+                    onPressed:
+                        canGoToPreviousChapter ? onPreviousChapter : null,
+                    color: primaryColor,
+                  ),
+                  //const SizedBox(width: 8),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: _maxTitleWidth(context),
+                    ),
+                    child: _buildTitleButton(context),
+                  ),
+                  //const SizedBox(width: 8),
+                  _buildChapterNavButton(
+                    icon: Icons.arrow_forward_rounded,
+                    semanticLabel: 'Navigate to the next chapter',
+                    tooltip: 'Next Chapter',
+                    onPressed: canGoToNextChapter ? onNextChapter : null,
+                    color: primaryColor,
+                  ),
+                ],
+              ),
+            ),
           ),
 
           ValueListenableBuilder<bool>(
@@ -98,6 +137,21 @@ class BibleScreenHeader extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Responsive cap for the verse-chooser title so the group
+  // [prev - title - next] stays centered as a unit. Wide windows get
+  // a comfortable reading width; narrow screens shrink gracefully.
+  double _maxTitleWidth(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    // if (kDebugMode) {
+    //   debugPrint('screenWidth: $screenWidth');
+    // }
+    // if (screenWidth >= 1200) return 215;
+    // if (screenWidth >= 800) return 215;
+    if (screenWidth >= 400) return 215;
+    return 100;
+    //return (screenWidth - 215).clamp(100.0, 115.0);
   }
 
   List<_HeaderAction> _buildOverflowActions() {
@@ -165,6 +219,26 @@ class BibleScreenHeader extends StatelessWidget {
       iconSize: 32,
       padding: EdgeInsets.all(8),
       color: color,
+    );
+  }
+
+  Widget _buildChapterNavButton({
+    required IconData icon,
+    required String semanticLabel,
+    required String tooltip,
+    required VoidCallback? onPressed,
+    required Color color,
+  }) {
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: onPressed != null ? color : Colors.grey,
+        semanticLabel: semanticLabel,
+        size: 32.0,
+      ),
+      tooltip: tooltip,
+      color: color,
+      onPressed: onPressed,
     );
   }
 
@@ -315,6 +389,18 @@ class BibleScreenHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
               minimumSize: Size(availableForText / 4.0, 42), // 54 available
               tapTargetSize: MaterialTapTargetSize.padded,
+              elevation: 2.0,
+              shadowColor:
+                  isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                    16.0), // Adjust to your preferred radius
+                side: BorderSide(
+                  color:
+                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+                  width: 0.5,
+                ),
+              ),
             ),
             onPressed: onTitlePressed,
             child: Text(

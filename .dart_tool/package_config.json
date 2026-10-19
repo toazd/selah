@@ -261,9 +261,9 @@
     },
     {
       "name": "file_selector_macos",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_macos-0.9.5+1",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_macos-0.9.5+2",
       "packageUri": "lib/",
-      "languageVersion": "3.10"
+      "languageVersion": "3.13"
     },
     {
       "name": "file_selector_platform_interface",
@@ -873,7 +873,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.5.0",
+      "rootUri": "file:///C:/Users/wmcdannell/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.5.1",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },

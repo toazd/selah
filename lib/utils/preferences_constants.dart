@@ -110,7 +110,6 @@ const List<Color> defaultHighlightColors = [
   Colors.pinkAccent,
 ];
 
-final bool defaultShowNavigationBar = !isMobile;
 const bool defaultShowTskReferences = false;
 
 // Sync retry delay constants (shared by all sync retry systems)

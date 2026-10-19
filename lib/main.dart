@@ -124,10 +124,6 @@ final ValueNotifier<bool> showTskReferencesNotifier =
 final ValueNotifier<bool> showDialogTskNotifier =
     ValueNotifier<bool>(defaultShowTskReferences);
 
-// Add: navigation bar display mode (false = hidden, true = visible [default])
-final ValueNotifier<bool> showNavigationBarNotifier =
-    ValueNotifier(defaultShowNavigationBar);
-
 // Time-based theme preferences (configurable)
 final ValueNotifier<int> dayStartHourNotifier =
     ValueNotifier(defaultDayStartHour);
@@ -955,10 +951,6 @@ Future<void> _loadAllPrefs() async {
       showDialogTskNotifier.value = savedDialogTsk;
     }
 
-    // Navigation bar display mode
-    showNavigationBarNotifier.value =
-        prefs.getBool('showNavigationBar') ?? defaultShowNavigationBar;
-
     // Time-based theme preferences
     dayStartHourNotifier.value =
         prefs.getInt('dayStartHour') ?? defaultDayStartHour;
@@ -1078,7 +1070,6 @@ Future<void> _saveAllCurrentPrefs() async {
       () => prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       () =>
           prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
-      () => prefs.setBool('showNavigationBar', showNavigationBarNotifier.value),
       () => prefs.setInt('maxScreens', maxScreens.value),
       () => prefs.setStringList(
             'highlightColors',
@@ -2006,11 +1997,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
   Future<void> _saveScreensToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('screens', jsonEncode(_screenLocations));
-  }
-
-  Future<void> _saveNavigationbarPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('showNavigationBar', showNavigationBarNotifier.value);
   }
 
   Future<void> _saveTskReferencesPrefs() async {
@@ -3193,27 +3179,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
                     );
                   },
                 ),
-              // Add: navigation bar display mode toggle
-              ValueListenableBuilder<bool>(
-                valueListenable: showNavigationBarNotifier,
-                builder: (context, showNavBar, _) {
-                  return SwitchListTile(
-                    title: _buildMainOptionTitle(
-                      title: 'Bottom Navigation Bar',
-                      helpTitle: 'Bottom Navigation Bar',
-                      helpBullets: const [
-                        'Shows or hides the navigation bar at the bottom of the screen that has buttons for navigating between chapters.',
-                        'You may want to hide it if you have a touchscreen device and you want more room for Bible text.',
-                      ],
-                    ),
-                    value: showNavBar,
-                    onChanged: (val) async {
-                      showNavigationBarNotifier.value = val;
-                      _saveNavigationbarPrefs();
-                    },
-                  );
-                },
-              ),
               Divider(
                 indent: 16,
                 endIndent: 16,
@@ -4068,14 +4033,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
                     builder: (context, simpleUiMode, _) {
                       return SwitchListTile(
                         title: _buildMainOptionTitle(
-                          title: simpleUiMode
-                              ? 'Enable Simple UI Mode'
-                              : 'Disable Simple UI Mode',
-                          helpTitle: 'Simple UI Mode',
+                          title: 'Compact Tools Menu',
+                          helpTitle: 'Compact Tools Menu',
                           helpBullets: const [
-                            'When enabled, the Bible screen app bar uses a three-dot menu for additional screens and functions.',
-                            'When disabled, those menu choices appear as individual icons on the right side of the app bar.',
-                            'The direct icons are ordered from left to right: Notes Search, Verse History, Webster\'s Dictionary, and Search.',
+                            'When enabled (default), the Bible screen app bar uses a three-dot menu for additional screens and functions (tools).',
+                            'When disabled, those menu choices instead appear as individual icons on the right side of the app bar.',
                           ],
                         ),
                         value: simpleUiMode,
