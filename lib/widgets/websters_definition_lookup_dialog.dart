@@ -158,7 +158,7 @@ class WebstersDefinitionDialog {
     double fontSize, {
     bool bold = false,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = WebstersDefinitionRenderer.usesDarkColors(context);
     return TextStyle(
       fontSize: FontSizeAdjustments.getAdjustedSize(
         fontFamilyNotifier.value,
@@ -440,7 +440,7 @@ class _WebstersDefinitionLookupDialogState
     final constrainedMaxWidth =
         isMobile ? screenWidth : (maxWidth > 1000.0 ? 1000.0 : maxWidth);
     final maxHeight = screenHeight * 1;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = WebstersDefinitionRenderer.usesDarkColors(context);
     final primaryColor =
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
 
@@ -694,7 +694,7 @@ class _WebstersDefinitionLookupDialogState
     double fontSize, {
     bool bold = false,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = WebstersDefinitionRenderer.usesDarkColors(context);
     return TextStyle(
       fontSize: FontSizeAdjustments.getAdjustedSize(
         fontFamilyNotifier.value,

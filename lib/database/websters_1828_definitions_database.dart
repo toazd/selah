@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-
+//import 'package:flutter/foundation.dart';
 import '../data/websters_1828_definitions.dart';
 
 class Websters1828DefinitionsDatabase {
@@ -14,10 +13,10 @@ class Websters1828DefinitionsDatabase {
     if (headword == null) return null;
 
     final definition = websters1828[headword]?['definition'];
-    if (kDebugMode) {
-      debugPrint(
-          "Websters1828DefinitionsDatabase.getDefinition returning: $definition");
-    }
+    // if (kDebugMode) {
+    //   debugPrint(
+    //       "Websters1828DefinitionsDatabase.getDefinition returning: $definition");
+    // }
     return definition is String ? definition : null;
   }
 

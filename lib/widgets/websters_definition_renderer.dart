@@ -21,6 +21,13 @@ class WebstersDefinitionRenderer extends StatefulWidget {
     this.onLinkTap,
   });
 
+  static bool usesDarkColors(BuildContext context) {
+    final mode = themeModeNotifier.value;
+    if (mode.isDark) return true;
+    if (mode.isLight) return false;
+    return Theme.of(context).brightness == Brightness.dark;
+  }
+
   @override
   State<WebstersDefinitionRenderer> createState() =>
       _WebstersDefinitionRendererState();
@@ -38,14 +45,20 @@ class _WebstersDefinitionRendererState
 
   @override
   Widget build(BuildContext context) {
+    // The definition dialog is modal, so the main options drawer cannot be
+    // used to change these colors until the dialog has been dismissed.
     _disposeRecognizers();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = WebstersDefinitionRenderer.usesDarkColors(context);
+    final textColor = isDark ? darkTextColor.value : lightTextColor.value;
+    final linkColor =
+        isDark ? darkVerseReferenceColor.value : lightVerseReferenceColor.value;
+
     final baseStyle = TextStyle(
-      fontSize: uiFontSize,
+      fontSize: uiFontSize + 2,
       fontFamily: fontFamilyNotifier.value,
-      color: isDark ? darkTextColor.value : lightTextColor.value,
-      height: 1.5,
+      color: textColor,
+      height: 1.25,
     );
     final root = _parse(widget.data);
 
@@ -55,6 +68,7 @@ class _WebstersDefinitionRendererState
         children: _buildChildren(
           root,
           baseStyle,
+          linkColor: linkColor,
         ),
       ),
     );
@@ -70,6 +84,7 @@ class _WebstersDefinitionRendererState
   List<InlineSpan> _buildChildren(
     _HtmlNode node,
     TextStyle inheritedStyle, {
+    required Color linkColor,
     String? link,
     String? referenceText,
   }) {
@@ -81,6 +96,7 @@ class _WebstersDefinitionRendererState
           _buildTextSpans(
             child.text!,
             inheritedStyle,
+            linkColor: linkColor,
             link: link,
             referenceText: referenceText,
           ),
@@ -115,6 +131,7 @@ class _WebstersDefinitionRendererState
         _buildChildren(
           child,
           childStyle,
+          linkColor: linkColor,
           link: childLink,
           referenceText: childReferenceText,
         ),
@@ -127,6 +144,7 @@ class _WebstersDefinitionRendererState
   List<InlineSpan> _buildTextSpans(
     String rawText,
     TextStyle inheritedStyle, {
+    required Color linkColor,
     String? link,
     String? referenceText,
   }) {
@@ -134,8 +152,8 @@ class _WebstersDefinitionRendererState
     if (text.isEmpty) return const [];
 
     final linkStyle = inheritedStyle.copyWith(
-      color: Colors.blue,
-      decoration: TextDecoration.underline,
+      color: linkColor,
+      decoration: TextDecoration.none,
     );
 
     if (link != null) {
