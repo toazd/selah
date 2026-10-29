@@ -31,6 +31,8 @@ class _ChapterData {
   final Map<int, Map<String, dynamic>> notes;
   final Map<int, List<Map<String, dynamic>>> highlights;
   final String? bookTitle;
+  final String? colophon;
+  final bool isLastChapter;
 
   const _ChapterData({
     required this.book,
@@ -39,6 +41,8 @@ class _ChapterData {
     required this.notes,
     required this.highlights,
     this.bookTitle,
+    this.colophon,
+    this.isLastChapter = false,
   });
 
   /// Creates a copy with updated fields
@@ -53,6 +57,8 @@ class _ChapterData {
       notes: notes ?? this.notes,
       highlights: highlights ?? this.highlights,
       bookTitle: bookTitle,
+      colophon: colophon,
+      isLastChapter: isLastChapter,
     );
   }
 }
@@ -312,6 +318,11 @@ class _BibleScreenState extends State<BibleScreen> {
 
     // Load metadata
     String? title;
+    String? colophon;
+    final nextLocation = index + 1 < _indexToLocation!.length
+        ? _indexToLocation![index + 1]
+        : null;
+    final isLastChapter = nextLocation == null || nextLocation.$1 != book;
     if (book == 'Psa') {
       final metadata =
           await BibleDatabase.getBookMetadata(book, chapter: chapter);
@@ -319,6 +330,9 @@ class _BibleScreenState extends State<BibleScreen> {
     } else {
       final metadata = await BibleDatabase.getBookMetadata(book);
       title = metadata?['title'] as String?;
+      if (isLastChapter) {
+        colophon = metadata?['colophon'] as String?;
+      }
     }
 
     final chapterData = _ChapterData(
@@ -328,6 +342,8 @@ class _BibleScreenState extends State<BibleScreen> {
       notes: notes,
       highlights: highlights,
       bookTitle: title,
+      colophon: colophon,
+      isLastChapter: isLastChapter,
     );
 
     _chapterCache[index] = chapterData;
@@ -938,6 +954,8 @@ class _BibleScreenState extends State<BibleScreen> {
                                 notes: chapterData.notes,
                                 highlights: chapterData.highlights,
                                 bookTitle: chapterData.bookTitle,
+                                colophon: chapterData.colophon,
+                                isLastChapter: chapterData.isLastChapter,
                                 showTskReferences: showTskReferences,
                                 backgroundColor: bibleBgColor,
                                 textColor: verseTextColor,

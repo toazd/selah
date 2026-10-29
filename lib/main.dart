@@ -40,7 +40,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'utils/error_handler.dart';
 
-final appVersion = "1.1.7";
+final appVersion = "1.1.8";
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.system,
@@ -101,8 +101,6 @@ final ValueNotifier<Color> darkBackgroundColor =
     ValueNotifier(const Color(0xFF000010));
 final ValueNotifier<Color> darkTextColor = ValueNotifier(Colors.white);
 final ValueNotifier<bool> fullscreenNotifier = ValueNotifier(false);
-final ValueNotifier<bool> simpleUiModeNotifier =
-    ValueNotifier(defaultSimpleUiMode);
 final ValueNotifier<int> maxScreens = ValueNotifier(defaultMaxScreens);
 final ValueNotifier<List<Color>> highlightColorsNotifier =
     ValueNotifier<List<Color>>(defaultHighlightColors);
@@ -883,8 +881,6 @@ Future<void> _loadAllPrefs() async {
 
     // Fullscreen
     fullscreenNotifier.value = prefs.getBool('fullscreen') ?? defaultFullscreen;
-    simpleUiModeNotifier.value =
-        prefs.getBool('simpleUiMode') ?? defaultSimpleUiMode;
 
     // Max screens
     int maxScreensValue = prefs.getInt('maxScreens') ?? defaultMaxScreens;
@@ -1066,7 +1062,6 @@ Future<void> _saveAllCurrentPrefs() async {
             _colorToHex(darkVerseReferenceColor.value),
           ),
       () => prefs.setBool('fullscreen', fullscreenNotifier.value),
-      () => prefs.setBool('simpleUiMode', simpleUiModeNotifier.value),
       () => prefs.setBool('showTskReferences', showTskReferencesNotifier.value),
       () =>
           prefs.setBool('showDialogTskReferences', showDialogTskNotifier.value),
@@ -2154,11 +2149,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setBool('fullscreen', fullscreenNotifier.value);
-  }
-
-  Future<void> _saveSimpleUiModePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('simpleUiMode', simpleUiModeNotifier.value);
   }
 
   void _showHistoryDialog(BuildContext context, int screenIndex) async {
@@ -4028,26 +4018,6 @@ class _MultiBibleViewState extends State<MultiBibleView>
                 initiallyExpanded: false,
                 childrenPadding: EdgeInsets.all(8),
                 children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: simpleUiModeNotifier,
-                    builder: (context, simpleUiMode, _) {
-                      return SwitchListTile(
-                        title: _buildMainOptionTitle(
-                          title: 'Compact Tools Menu',
-                          helpTitle: 'Compact Tools Menu',
-                          helpBullets: const [
-                            'When enabled (default), the Bible screen app bar uses a three-dot menu for additional screens and functions (tools).',
-                            'When disabled, those menu choices instead appear as individual icons on the right side of the app bar.',
-                          ],
-                        ),
-                        value: simpleUiMode,
-                        onChanged: (value) {
-                          simpleUiModeNotifier.value = value;
-                          _saveSimpleUiModePrefs();
-                        },
-                      );
-                    },
-                  ),
                   ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

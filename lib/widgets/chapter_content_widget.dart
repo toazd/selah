@@ -16,6 +16,8 @@ class ChapterContentWidget extends StatefulWidget {
   final Map<int, Map<String, dynamic>> notes;
   final Map<int, List<Map<String, dynamic>>> highlights;
   final String? bookTitle;
+  final String? colophon;
+  final bool isLastChapter;
   final bool showTskReferences;
   final Color backgroundColor;
   final Color textColor;
@@ -34,6 +36,8 @@ class ChapterContentWidget extends StatefulWidget {
     required this.notes,
     required this.highlights,
     this.bookTitle,
+    this.colophon,
+    this.isLastChapter = false,
     required this.showTskReferences,
     required this.backgroundColor,
     required this.textColor,
@@ -239,6 +243,15 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                 ),
               ),
             ),
+            if (widget.isLastChapter &&
+                widget.colophon != null &&
+                widget.colophon!.trim().isNotEmpty)
+              SliverToBoxAdapter(
+                child: buildColophonWidget(
+                  context: context,
+                  colophon: widget.colophon!,
+                ),
+              ),
             // Footer sliver for bottom padding
             SliverToBoxAdapter(
               child: Padding(

@@ -13,6 +13,35 @@ import '../models/verse_display_data.dart';
 /// Utility functions for displaying verses with notes and highlights
 /// Extracted from bible_screen.dart for reusability
 
+/// Builds a book colophon displayed after the final chapter's verses.
+Widget buildColophonWidget({
+  required BuildContext context,
+  required String colophon,
+}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  return Padding(
+    padding: const EdgeInsets.only(
+      left: 16.0,
+      top: 16.0,
+      right: 32.0,
+    ),
+    child: Text(
+      colophon.trim(),
+      style: TextStyle(
+        fontFamily: fontFamilyNotifier.value,
+        fontSize: FontSizeAdjustments.getAdjustedSize(
+          fontFamilyNotifier.value,
+          fontSizeNotifier.value - 2,
+        ),
+        fontStyle: FontStyle.italic,
+        height: lineHeightNotifier.value,
+        color: isDark ? darkTextColor.value : lightTextColor.value,
+      ),
+    ),
+  );
+}
+
 /// Builds a verse display widget with support for notes, highlights, and interactions
 Widget buildVerseDisplayWidget({
   required BuildContext context,

@@ -89,6 +89,7 @@ class _ChapterDialogState extends State<ChapterDialog> {
   // Cached long name for the book
   late final String bookLongName;
   String? _bookTitle;
+  String? _colophon;
 
   String get _normalizedBook =>
       BookNameConverter.normalizeShortName(widget.book);
@@ -272,6 +273,11 @@ class _ChapterDialogState extends State<ChapterDialog> {
             )
           : await BibleDatabase.getBookMetadata(normalizedBook);
       _bookTitle = metadata?['title'] as String?;
+      final chapters = await BibleDatabase.getChapters(normalizedBook);
+      final isLastChapter =
+          chapters.isNotEmpty && widget.chapter == chapters.last;
+      _colophon =
+          isLastChapter ? (metadata?['colophon'] as String?) : null;
 
       // Create keys for verse scrolling
       _verseKeys.clear();
@@ -626,6 +632,12 @@ class _ChapterDialogState extends State<ChapterDialog> {
                                           ),
                                         );
                                       }),
+                                      if (_colophon != null &&
+                                          _colophon!.trim().isNotEmpty)
+                                        buildColophonWidget(
+                                          context: context,
+                                          colophon: _colophon!,
+                                        ),
                                       const SizedBox(height: 16.0),
                                     ];
                                     return ScrollConfiguration(

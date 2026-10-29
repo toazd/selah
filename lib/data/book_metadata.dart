@@ -6,6 +6,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '1Co': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO THE CORINTHIANS.',
+    'colophon': 'The first epistle to the Corinthians was written from Philippi by Stephanas, and Fortunatus, and Achaicus, and Timotheus.',
   },
   '1Jo': {
     'title': 'THE FIRST EPISTLE GENERAL OF JOHN.',
@@ -21,15 +22,18 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '1Th': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO THE THESSALONIANS.',
+    'colophon': 'The first epistle unto the Thessalonians was written from Athens.',
   },
   '1Ti': {
     'title': 'THE FIRST EPISTLE OF PAUL THE APOSTLE TO TIMOTHY.',
+    'colophon': 'The first to Timothy was written from Laodicea, which is the chiefest city of Phrygia Pacatiana.',
   },
   '2Ch': {
     'title': 'THE SECOND BOOK OF THE CHRONICLES.',
   },
   '2Co': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO THE CORINTHIANS.',
+    'colophon': 'The second epistle to the Corinthians was written from Philippi, a city of Macedonia, by Titus and Lucas.',
   },
   '2Jo': {
     'title': 'THE SECOND EPISTLE OF JOHN.',
@@ -45,9 +49,11 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   '2Th': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO THE THESSALONIANS.',
+    'colophon': 'The second epistle to the Thessalonians was written from Athens.',
   },
   '2Ti': {
     'title': 'THE SECOND EPISTLE OF PAUL THE APOSTLE TO TIMOTHY.',
+    'colophon': 'The second epistle unto Timotheus, ordained the first bishop of the church of the Ephesians, was written from Rome, when Paul was brought before Nero the second time.',
   },
   '3Jo': {
     'title': 'THE THIRD EPISTLE OF JOHN.',
@@ -60,6 +66,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Col': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE COLOSSIANS.',
+    'colophon': 'Written from Rome to the Colossians by Tychicus and Onesimus.',
   },
   'Dan': {
     'title': 'THE BOOK OF DANIEL.',
@@ -72,6 +79,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Eph': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE EPHESIANS.',
+    'colophon': 'Written from Rome unto the Ephesians by Tychicus.',
   },
   'Est': {
     'title': 'THE BOOK OF ESTHER.',
@@ -87,6 +95,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Gal': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE GALATIANS.',
+    'colophon': 'Unto the Galatians written from Rome.',
   },
   'Gen': {
     'title': 'THE FIRST BOOK OF MOSES, CALLED GENESIS.',
@@ -99,6 +108,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Heb': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE HEBREWS.',
+    'colophon': 'Written to the Hebrews from Italy by Timothy.',
   },
   'Hos': {
     'title': 'HOSEA.',
@@ -168,9 +178,11 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Phi': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE PHILIPPIANS.',
+    'colophon': 'It was written to the Philippians from Rome by Epaphroditus.',
   },
   'Phm': {
     'title': 'THE EPISTLE OF PAUL TO PHILEMON.',
+    'colophon': 'Written from Rome to Philemon, by Onesimus a servant.',
   },
   'Pro': {
     'title': 'THE PROVERBS.',
@@ -531,6 +543,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Rom': {
     'title': 'THE EPISTLE OF PAUL THE APOSTLE TO THE ROMANS.',
+    'colophon': 'Written to the Romans from Corinthus, and sent by Phebe servant of the church at Cenchrea.',
   },
   'Rth': {
     'title': 'THE BOOK OF RUTH.',
@@ -540,6 +553,7 @@ const Map<String, Map<String, String>> bookMetadata = {
   },
   'Tit': {
     'title': 'THE EPISTLE OF PAUL TO TITUS.',
+    'colophon': 'It was written to Titus, ordained the first bishop of the church of the Cretians, from Nicopolis of Macedonia.',
   },
   'Zec': {
     'title': 'ZECHARIAH.',

@@ -54,11 +54,10 @@ class BibleScreenHeader extends StatelessWidget {
         isDark ? darkPrimaryColor.value : lightPrimaryColor.value;
     final overflowActions = _buildOverflowActions();
 
-    // Fixed layout: drawer menu on the left, title in the center,
-    // and a single 3-dot overflow menu on the right. No width-based
-    // dynamic icon logic.
+    // Keep the five header controls in a fixed, predictable arrangement:
+    // menu, previous/title/next centered as a group, and overflow menu.
     return Container(
-      height: 55, // Fixed height for consistent sizing
+      height: 55,
       color: barColor,
       child: Row(
         children: [
@@ -69,10 +68,6 @@ class BibleScreenHeader extends StatelessWidget {
             onPressed: onOpenDrawer,
             color: primaryColor,
           ),
-
-          // Title area: [prev - 8px - title - 8px - next] grouped together
-          // and centered as a unit. Title is width-capped (not Flexible) so
-          // the arrows sit right next to the verse chooser button.
           Flexible(
             fit: FlexFit.tight,
             child: Center(
@@ -88,14 +83,7 @@ class BibleScreenHeader extends StatelessWidget {
                         canGoToPreviousChapter ? onPreviousChapter : null,
                     color: primaryColor,
                   ),
-                  //const SizedBox(width: 8),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: _maxTitleWidth(context),
-                    ),
-                    child: _buildTitleButton(context),
-                  ),
-                  //const SizedBox(width: 8),
+                  _buildTitleButton(context),
                   _buildChapterNavButton(
                     icon: Icons.arrow_forward_rounded,
                     semanticLabel: 'Navigate to the next chapter',
@@ -107,51 +95,14 @@ class BibleScreenHeader extends StatelessWidget {
               ),
             ),
           ),
-
-          ValueListenableBuilder<bool>(
-            valueListenable: simpleUiModeNotifier,
-            builder: (context, simpleUiMode, _) {
-              if (simpleUiMode) {
-                return _buildOverflowMenu(
-                  context,
-                  overflowActions,
-                  primaryColor,
-                );
-              }
-
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final action in overflowActions.reversed)
-                    _buildHeaderIconButton(
-                      icon: action.icon,
-                      semanticLabel: action.semanticLabel,
-                      tooltip: action.tooltip,
-                      onPressed: action.onPressed,
-                      color: primaryColor,
-                    ),
-                ],
-              );
-            },
+          _buildOverflowMenu(
+            context,
+            overflowActions,
+            primaryColor,
           ),
         ],
       ),
     );
-  }
-
-  // Responsive cap for the verse-chooser title so the group
-  // [prev - title - next] stays centered as a unit. Wide windows get
-  // a comfortable reading width; narrow screens shrink gracefully.
-  double _maxTitleWidth(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    // if (kDebugMode) {
-    //   debugPrint('screenWidth: $screenWidth');
-    // }
-    // if (screenWidth >= 1200) return 215;
-    // if (screenWidth >= 800) return 215;
-    if (screenWidth >= 400) return 215;
-    return 100;
-    //return (screenWidth - 215).clamp(100.0, 115.0);
   }
 
   List<_HeaderAction> _buildOverflowActions() {
@@ -329,95 +280,39 @@ class BibleScreenHeader extends StatelessWidget {
         isDark ? darkBackgroundColor.value : lightBackgroundColor.value,
         context);
 
-    return Center(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // final style = Theme.of(context).textTheme.bodyMedium ??
-          //     TextStyle(
-          //       fontSize: fontSizeNotifier.value,
-          //       fontFamily: fontFamilyNotifier.value,
-          //       color: isDark ? darkTextColor.value : lightTextColor.value,
-          //     );
-          final style = TextStyle(
-            fontSize: fontSizeNotifier.value,
-            fontFamily: fontFamilyNotifier.value,
-            color: isDark ? darkTextColor.value : lightTextColor.value,
-          );
+    final label = selectedBook == null || selectedChapter == null
+        ? 'Choose Verse'
+        : '${BookNameConverter.shortNameToLongName(selectedBook!)} $selectedChapter';
 
-          String makeTitle({required bool fullBookName}) {
-            if (selectedBook == null || selectedChapter == null) {
-              return 'Choose Verse';
-            }
-
-            // If fullBookName is true display the longBookName (Genesis), otherwise use the short name (Gen)
-            final name = fullBookName
-                ? BookNameConverter.shortNameToLongName(selectedBook!)
-                : selectedBook;
-
-            // Show just the book name and chapter number
-            return '$name ${selectedChapter!}';
-          }
-
-          double textWidth(String text, TextStyle style) {
-            final tp = TextPainter(
-              text: TextSpan(text: text, style: style),
-              maxLines: 1,
-              textScaler: MediaQuery.textScalerOf(context),
-              textDirection: TextDirection.ltr,
-            )..layout(minWidth: 0, maxWidth: double.infinity);
-            return tp.size.width;
-          }
-
-          // Precise available width inside this center slot
-          final maxButtonWidth = constraints.maxWidth;
-
-          // Button padding we will apply below
-          const double horizontalPad = 16.0;
-          final availableForText =
-              (maxButtonWidth - (horizontalPad * 2)).clamp(0.0, maxButtonWidth);
-
-          final fullTitle = makeTitle(fullBookName: true);
-          final shortTitle = makeTitle(fullBookName: false);
-          final label = textWidth(fullTitle, style) <= availableForText
-              ? fullTitle
-              : shortTitle;
-
-          return ElevatedButton(
-            focusNode: titleFocusNode,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _adjustBarColor(barColor, context),
-              padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
-              minimumSize: Size(availableForText / 4.0, 42), // 54 available
-              tapTargetSize: MaterialTapTargetSize.padded,
-              elevation: 2.0,
-              shadowColor:
-                  isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    16.0), // Adjust to your preferred radius
-                side: BorderSide(
-                  color:
-                      isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-                  width: 0.5,
-                ),
-              ),
-            ),
-            onPressed: onTitlePressed,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: fontSizeNotifier.value - 4,
-                fontFamily: fontFamilyNotifier.value,
-                color:
-                    isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
-              ),
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.fade,
-            ),
-          );
-        },
+    return ElevatedButton(
+      focusNode: titleFocusNode,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _adjustBarColor(barColor, context),
+        padding: const EdgeInsets.all(8),
+        //minimumSize: const Size(0, 42),
+        //tapTargetSize: MaterialTapTargetSize.padded,
+        elevation: 2.0,
+        shadowColor: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          side: BorderSide(
+            color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+            width: 0.05,
+          ),
+        ),
+      ),
+      onPressed: onTitlePressed,
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: uiFontSizeNotifier.value,
+          fontFamily: fontFamilyNotifier.value,
+          color: isDark ? darkPrimaryColor.value : lightPrimaryColor.value,
+        ),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.fade,
       ),
     );
   }

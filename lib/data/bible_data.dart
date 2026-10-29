@@ -30577,7 +30577,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       24: 'The grace of our Lord Jesus Christ <i>be</i> with you all. Amen.',
       25: 'Now to him that is of power to stablish you according to my gospel, and the preaching of Jesus Christ, according to the revelation of the mystery, which was kept secret since the world began,',
       26: 'But now is made manifest, and by the scriptures of the prophets, according to the commandment of the everlasting God, made known to all nations for the obedience of faith:',
-      27: 'To God only wise, <i>be</i> glory through Jesus Christ for ever. Amen. (Written to the Romans from Corinthus, <i>and sent</i> by Phebe servant of the church at Cenchrea.)',
+      27: 'To God only wise, <i>be</i> glory through Jesus Christ for ever. Amen.',
     },
   },
   '1Co': {
@@ -31048,7 +31048,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       21: 'The salutation of <i>me</i> Paul with mine own hand.',
       22: 'If any man love not the Lord Jesus Christ, let him be Anathema Maran-atha.',
       23: 'The grace of our Lord Jesus Christ <i>be</i> with you.',
-      24: 'My love <i>be</i> with you all in Christ Jesus. Amen. (The first <i>epistle</i> to the Corinthians was written from Philippi by Stephanas and Fortunatus and Achaicus and Timotheus.)',
+      24: 'My love <i>be</i> with you all in Christ Jesus. Amen.',
     },
   },
   '2Co': {
@@ -31333,7 +31333,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       11: 'Finally, brethren, farewell. Be perfect, be of good comfort, be of one mind, live in peace; and the God of love and peace shall be with you.',
       12: 'Greet one another with an holy kiss.',
       13: 'All the saints salute you.',
-      14: 'The grace of the Lord Jesus Christ, and the love of God, and the communion of the Holy Ghost, <i>be</i> with you all. Amen. (The second <i>epistle</i> to the Corinthians was written from Philippi, <i>a city</i> of Macedonia, by Titus and Lucas.)',
+      14: 'The grace of the Lord Jesus Christ, and the love of God, and the communion of the Holy Ghost, <i>be</i> with you all. Amen.',
     },
   },
   'Gal': {
@@ -31496,7 +31496,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       15: 'For in Christ Jesus neither circumcision availeth any thing, nor uncircumcision, but a new creature.',
       16: 'And as many as walk according to this rule, peace <i>be</i> on them, and mercy, and upon the Israel of God.',
       17: 'From henceforth let no man trouble me: for I bear in my body the marks of the Lord Jesus.',
-      18: 'Brethren, the grace of our Lord Jesus Christ <i>be</i> with your spirit. Amen. (Unto the Galatians written from Rome.)',
+      18: 'Brethren, the grace of our Lord Jesus Christ <i>be</i> with your spirit. Amen.',
     },
   },
   'Eph': {
@@ -31665,7 +31665,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       21: 'But that ye also may know my affairs, <i>and</i> how I do, Tychicus, a beloved brother and faithful minister in the Lord, shall make known to you all things:',
       22: 'Whom I have sent unto you for the same purpose, that ye might know our affairs, and <i>that</i> he might comfort your hearts.',
       23: 'Peace <i>be</i> to the brethren, and love with faith, from God the Father and the Lord Jesus Christ.',
-      24: 'Grace <i>be</i> with all them that love our Lord Jesus Christ in sincerity. Amen. (Written from Rome unto the Ephesians by Tychicus.)',
+      24: 'Grace <i>be</i> with all them that love our Lord Jesus Christ in sincerity. Amen.',
     },
   },
   'Phi': {
@@ -31779,7 +31779,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       20: 'Now unto God and our Father <i>be</i> glory for ever and ever. Amen.',
       21: 'Salute every saint in Christ Jesus. The brethren which are with me greet you.',
       22: 'All the saints salute you, chiefly they that are of Caesar\'s household.',
-      23: 'The grace of our Lord Jesus Christ <i>be</i> with you all. Amen. (It was written to the Philippians from Rome by Epaphroditus.)',
+      23: 'The grace of our Lord Jesus Christ <i>be</i> with you all. Amen.',
     },
   },
   'Col': {
@@ -31884,7 +31884,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       15: 'Salute the brethren which are in Laodicea, and Nymphas, and the church which is in his house.',
       16: 'And when this epistle is read among you, cause that it be read also in the church of the Laodiceans; and that ye likewise read the <i>epistle</i> from Laodicea.',
       17: 'And say to Archippus, Take heed to the ministry which thou hast received in the Lord, that thou fulfil it.',
-      18: 'The salutation by the hand of me Paul. Remember my bonds. Grace <i>be</i> with you. Amen. (Written from Rome to the Colossians by Tychicus and Onesimus.)',
+      18: 'The salutation by the hand of me Paul. Remember my bonds. Grace <i>be</i> with you. Amen.',
     },
   },
   '1Th': {
@@ -31985,7 +31985,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       25: 'Brethren, pray for us.',
       26: 'Greet all the brethren with an holy kiss.',
       27: 'I charge you by the Lord that this epistle be read unto all the holy brethren.',
-      28: 'The grace of our Lord Jesus Christ <i>be</i> with you. Amen. (The first <i>epistle</i> unto the Thessalonians was written from Athens.)',
+      28: 'The grace of our Lord Jesus Christ <i>be</i> with you. Amen.',
     },
   },
   '2Th': {
@@ -32040,7 +32040,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       15: 'Yet count <i>him</i> not as an enemy, but admonish <i>him</i> as a brother.',
       16: 'Now the Lord of peace himself give you peace always by all means. The Lord <i>be</i> with you all.',
       17: 'The salutation of Paul with mine own hand, which is the token in every epistle: so I write.',
-      18: 'The grace of our Lord Jesus Christ <i>be</i> with you all. Amen. (The second <i>epistle</i> to the Thessalonians was written from Athens.)',
+      18: 'The grace of our Lord Jesus Christ <i>be</i> with you all. Amen.',
     },
   },
   '1Ti': {
@@ -32167,7 +32167,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       18: 'That they do good, that they be rich in good works, ready to distribute, willing to communicate;',
       19: 'Laying up in store for themselves a good foundation against the time to come, that they may lay hold on eternal life.',
       20: 'O Timothy, keep that which is committed to thy trust, avoiding profane <i>and</i> vain babblings, and oppositions of science falsely so called:',
-      21: 'Which some professing have erred concerning the faith. Grace <i>be</i> with thee. Amen. (The first to Timothy was written from Laodicea, which is the chiefest city of Phrygia Pacatiana.)',
+      21: 'Which some professing have erred concerning the faith. Grace <i>be</i> with thee. Amen.',
     },
   },
   '2Ti': {
@@ -32260,7 +32260,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       19: 'Salute Prisca and Aquila, and the household of Onesiphorus.',
       20: 'Erastus abode at Corinth: but Trophimus have I left at Miletum sick.',
       21: 'Do thy diligence to come before winter. Eubulus greeteth thee, and Pudens, and Linus, and Claudia, and all the brethren.',
-      22: 'The Lord Jesus Christ <i>be</i> with thy spirit. Grace <i>be</i> with you. Amen. (The second <i>epistle</i> unto Timotheus, ordained the first bishop of the church of the Ephesians, was written from Rome, when Paul was brought before Nero the second time.)',
+      22: 'The Lord Jesus Christ <i>be</i> with thy spirit. Grace <i>be</i> with you. Amen.',
     },
   },
   'Tit': {
@@ -32314,7 +32314,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       12: 'When I shall send Artemas unto thee, or Tychicus, be diligent to come unto me to Nicopolis: for I have determined there to winter.',
       13: 'Bring Zenas the lawyer and Apollos on their journey diligently, that nothing be wanting unto them.',
       14: 'And let ours also learn to maintain good works for necessary uses, that they be not unfruitful.',
-      15: 'All that are with me salute thee. Greet them that love us in the faith. Grace <i>be</i> with you all. Amen. (It was written to Titus, ordained the first bishop of the church of the Cretians, from Nicopolis of Macedonia.)',
+      15: 'All that are with me salute thee. Greet them that love us in the faith. Grace <i>be</i> with you all. Amen.',
     },
   },
   'Phm': {
@@ -32343,7 +32343,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       22: 'But withal prepare me also a lodging: for I trust that through your prayers I shall be given unto you.',
       23: 'There salute thee Epaphras, my fellowprisoner in Christ Jesus;',
       24: 'Marcus, Aristarchus, Demas, Lucas, my fellowlabourers.',
-      25: 'The grace of our Lord Jesus Christ <i>be</i> with your spirit. Amen. (Written from Rome to Philemon, by Onesimus a servant.)',
+      25: 'The grace of our Lord Jesus Christ <i>be</i> with your spirit. Amen.',
     },
   },
   'Heb': {
@@ -32674,7 +32674,7 @@ const Map<String, Map<int, Map<int, String>>> BibleData = {
       22: 'And I beseech you, brethren, suffer the word of exhortation: for I have written a letter unto you in few words.',
       23: 'Know ye that <i>our</i> brother Timothy is set at liberty; with whom, if he come shortly, I will see you.',
       24: 'Salute all them that have the rule over you, and all the saints. They of Italy salute you.',
-      25: 'Grace <i>be</i> with you all. Amen. (Written to the Hebrews from Italy by Timothy.)',
+      25: 'Grace <i>be</i> with you all. Amen.',
     },
   },
   'Jam': {
