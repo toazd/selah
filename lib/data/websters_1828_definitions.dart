@@ -130219,7 +130219,7 @@ const Map<String, Map<String, dynamic>> websters1828 = {
   },
   'Lowly': {
     'id': 32555,
-    'definition': '<b>LOWLY</b>, <i>a.</i> [low and like.]<br><br>1. Having a low esteem of one\'s own worth; humble; meek; free from pride.<br><br>Take my yoke upon you and learn of me, for I am meek and lovly in heart. Mat 11.<br><br>He scorneth the scorners; but he giveth grace to the lowly. Prov 3.<br><br>2. Mean; low; wanting dignity or rank.<br><br>One common right the great and lowly claim.<br><br>3. Not lofty or sublime; humble.<br><br>these rural poems, and their lowly strain.<br><br>4. Not high; not elevated in place.<br><br><b>LOWLY</b>, <i>adv.</i><br><br>1. Humbly; meekly; modestly.<br><br>Belowly wise.<br><br>2. Meanly; in a low condition; without grandeur or dignity.<br><br>I will show myself highly fed and lowly taught.',
+    'definition': '<b>LOWLY</b>, <i>a.</i> [low and like.]<br><br>1. Having a low esteem of one\'s own worth; humble; meek; free from pride.<br><br>Take my yoke upon you and learn of me, for I am meek and lowly in heart. Mat 11.<br><br>He scorneth the scorners; but he giveth grace to the lowly. Prov 3.<br><br>2. Mean; low; wanting dignity or rank.<br><br>One common right the great and lowly claim.<br><br>3. Not lofty or sublime; humble.<br><br>these rural poems, and their lowly strain.<br><br>4. Not high; not elevated in place.<br><br><b>LOWLY</b>, <i>adv.</i><br><br>1. Humbly; meekly; modestly.<br><br>Belowly wise.<br><br>2. Meanly; in a low condition; without grandeur or dignity.<br><br>I will show myself highly fed and lowly taught.',
   },
   'Lown': {
     'id': 32556,
