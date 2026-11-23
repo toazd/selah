@@ -191,352 +191,352 @@ const Map<String, Map<String, String>> bookMetadata = {
     'title': 'THE BOOK OF PSALMS.',
   },
   'Psa 3': {
-    'title': 'A Psalm{H4210} of David{H1732}, when he fled{H1272}{{H8800}} from{H6440} Absalom{H53} his son{H1121}.',
+    'title': 'A Psalm of David, when he fled from Absalom his son.',
   },
   'Psa 4': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician on Neginoth, A Psalm of David.',
   },
   'Psa 5': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Nehiloth{H5155}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician upon Nehiloth, A Psalm of David.',
   },
   'Psa 6': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058} upon Sheminith{H8067}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician on Neginoth upon Sheminith, A Psalm of David.',
   },
   'Psa 7': {
-    'title': 'Shiggaion{H7692} of David{H1732}, which he sang{H7891}{{H8804}} unto the LORD{H3068}, concerning the words{H1697} of Cush{H3568} the Benjamite{H1121}{H1145}.',
+    'title': 'Shiggaion of David, which he sang unto the LORD, concerning the words of Cush the Benjamite.',
   },
   'Psa 8': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician upon Gittith, A Psalm of David.',
   },
   'Psa 9': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Muth-labben{H4192}{H1121}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician upon Muth-labben, A Psalm of David.',
   },
   'Psa 11': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician, <i>A Psalm</i> of David.',
   },
   'Psa 12': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Sheminith{H8067}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician upon Sheminith, A Psalm of David.',
   },
   'Psa 13': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 14': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician, <i>A Psalm</i> of David.',
   },
   'Psa 15': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 16': {
-    'title': 'Michtam{H4387} of David{H1732}.',
+    'title': 'Michtam of David.',
   },
   'Psa 17': {
-    'title': 'A Prayer{H8605} of David{H1732}.',
+    'title': 'A Prayer of David.',
   },
   'Psa 18': {
-    'title': '(To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}, the servant{H5650} of the LORD{H3068}, who spake{H1696}{{H8765}} unto the LORD{H3068} the words{H1697} of this song{H7892} in the day{H3117} <i>that</i> the LORD{H3068} delivered{H5337}{{H8689}} him from the hand{H3709} of all his enemies{H341}{{H8802}}, and from the hand{H3027} of Saul){H7586}: And he said{H559}{{H8799}},',
+    'title': '(To the chief Musician, <i>A Psalm</i> of David, the servant of the LORD, who spake unto the LORD the words of this song in the day <i>that</i> the LORD delivered him from the hand of all his enemies, and from the hand of Saul): And he said,',
   },
   'Psa 19': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 20': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 21': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 22': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Aijeleth{H365} Shahar{H7837}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician upon Aijeleth Shahar, A Psalm of David.',
   },
   'Psa 23': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 24': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 25': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 26': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 27': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 28': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 29': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 30': {
-    'title': 'A Psalm{H4210} <i>and</i> Song{H7892} <i>at</i> the dedication{H2598} of the house{H1004} of David{H1732}.',
+    'title': 'A Psalm <i>and</i> Song <i>at</i> the dedication of the house of David.',
   },
   'Psa 31': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 32': {
-    'title': '<i>A</i> <i>Psalm</i> of David){H1732}, Maschil{H4905}{{H8688}}.',
+    'title': '<i>A</i> <i>Psalm</i> of David), Maschil.',
   },
   'Psa 34': {
-    'title': '<i>A Psalm</i> of David{H1732}, when he changed{H8138}{{H8763}} his behaviour{H2940} before{H6440} Abimelech{H40}; who drove him away{H1644}{{H8762}}, and he departed{H3212}{{H8799}}.',
+    'title': '<i>A Psalm</i> of David, when he changed his behaviour before Abimelech; who drove him away, and he departed.',
   },
   'Psa 35': {
-    'title': 'A Psalm of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 36': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732} the servant{H5650} of the LORD{H3068}.',
+    'title': 'To the chief Musician, <i>A Psalm</i> of David the servant of the LORD.',
   },
   'Psa 37': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 38': {
-    'title': 'A Psalm{H4210} of David{H1732}, to bring to remembrance{H2142}{{H8687}}.',
+    'title': 'A Psalm of David, to bring to remembrance.',
   },
   'Psa 39': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, <i>even</i> to Jeduthun{H3038}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, <i>even</i> to Jeduthun, A Psalm of David.',
   },
   'Psa 40': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 41': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 42': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Maschil{H4905}{{H8688}}, for the sons{H1121} of Korah{H7141}.',
+    'title': 'To the chief Musician, Maschil, for the sons of Korah.',
   },
   'Psa 44': {
-    'title': 'To the chief Musician{H5329}{{H8764}} for the sons{H1121} of Korah{H7141}, Maschil{H4905}{{H8688}}.',
+    'title': 'To the chief Musician for the sons of Korah, Maschil.',
   },
   'Psa 45': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Shoshannim{H7799}, for the sons{H1121} of Korah{H7141}, Maschil{H4905}{{H8688}}, A Song{H7892} of loves{H3039}.',
+    'title': 'To the chief Musician upon Shoshannim, for the sons of Korah, Maschil, A Song of loves.',
   },
   'Psa 46': {
-    'title': 'To the chief Musician{H5329}{{H8764}} for the sons{H1121} of Korah{H7141}, A Song{H7892} upon Alamoth{H5961}.',
+    'title': 'To the chief Musician for the sons of Korah, A Song upon Alamoth.',
   },
   'Psa 47': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.',
+    'title': 'To the chief Musician, A Psalm for the sons of Korah.',
   },
   'Psa 48': {
-    'title': 'A Song{H7892} <i>and</i> Psalm{H4210} for the sons{H1121} of Korah{H7141}.',
+    'title': 'A Song <i>and</i> Psalm for the sons of Korah.',
   },
   'Psa 49': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.',
+    'title': 'To the chief Musician, A Psalm for the sons of Korah.',
   },
   'Psa 50': {
-    'title': 'A Psalm{H4210} of Asaph{H623}.',
+    'title': 'A Psalm of Asaph.',
   },
   'Psa 51': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}, when Nathan{H5416} the prophet{H5030} came{H935}{{H8800}} unto him, after he had gone in{H935}{{H8804}} to Bath-sheba{H1339}.',
+    'title': 'To the chief Musician, A Psalm of David, when Nathan the prophet came unto him, after he had gone in to Bath-sheba.',
   },
   'Psa 52': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}, when Doeg{H1673} the Edomite{H130} came{H935}{{H8800}} and told{H5046}{{H8686}} Saul{H7586}, and said{H559}{{H8799}} unto him, David{H1732} is come{H935}{{H8804}} to the house{H1004} of Ahimelech{H288}.',
+    'title': 'To the chief Musician, Maschil, <i>A Psalm</i> of David, when Doeg the Edomite came and told Saul, and said unto him, David is come to the house of Ahimelech.',
   },
   'Psa 53': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Mahalath{H4257}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician upon Mahalath, Maschil, <i>A Psalm</i> of David.',
   },
   'Psa 54': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}, when the Ziphims{H2130} came{H935}{{H8800}} and said{H559}{{H8799}} to Saul{H7586}, Doth not David{H1732} hide{H5641}{{H8693}} himself with us?',
+    'title': 'To the chief Musician on Neginoth, Maschil, <i>A Psalm</i> of David, when the Ziphims came and said to Saul, Doth not David hide himself with us?',
   },
   'Psa 55': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, Maschil{H4905}{{H8688}}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician on Neginoth, Maschil, <i>A Psalm</i> of David.',
   },
   'Psa 56': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Jonath-elem-rechokim{H3128}, Michtam{H4387} of David{H1732}, when the Philistines{H6430} took{H270}{{H8800}} him in Gath{H1661}.',
+    'title': 'To the chief Musician upon Jonath-elem-rechokim, Michtam of David, when the Philistines took him in Gath.',
   },
   'Psa 57': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}, when he fled{H1272}{{H8800}} from{H6440} Saul{H7586} in the cave{H4631}.',
+    'title': 'To the chief Musician, Altaschith, Michtam of David, when he fled from Saul in the cave.',
   },
   'Psa 58': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}.',
+    'title': 'To the chief Musician, Altaschith, Michtam of David.',
   },
   'Psa 59': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, Michtam{H4387} of David{H1732}; when Saul{H7586} sent{H7971}{{H8800}}, and they watched{H8104}{{H8799}} the house){H1004} to kill him{H4191}{{H8687}}.',
+    'title': 'To the chief Musician, Altaschith, Michtam of David; when Saul sent, and they watched the house) to kill him.',
   },
   'Psa 60': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Shushan-eduth{H7802}, Michtam{H4387} of David{H1732}, to teach{H3925}{{H8763}}; when he strove{H5327}{{H8687}} with Aram-naharaim{H763}{H5104} and with Aram-zobah{H760}, when Joab{H3097} returned{H7725}{{H8799}}, and smote{H5221}{{H8686}} of Edom{H123} in the valley{H1516} of salt{H4417} twelve{H8147}{H6240} thousand{H505}.',
+    'title': 'To the chief Musician upon Shushan-eduth, Michtam of David, to teach; when he strove with Aram-naharaim and with Aram-zobah, when Joab returned, and smote of Edom in the valley of salt twelve thousand.',
   },
   'Psa 61': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Neginah{H5058}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician upon Neginah, <i>A Psalm</i> of David.',
   },
   'Psa 62': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, to Jeduthun{H3038}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, to Jeduthun, A Psalm of David.',
   },
   'Psa 63': {
-    'title': 'A Psalm{H4210} of David{H1732}, when he was in the wilderness{H4057} of Judah{H3063}.',
+    'title': 'A Psalm of David, when he was in the wilderness of Judah.',
   },
   'Psa 64': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 65': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} <i>and</i> Song{H7892} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm <i>and</i> Song of David.',
   },
   'Psa 66': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Song{H7892} <i>or</i> Psalm{H4210}.',
+    'title': 'To the chief Musician, A Song <i>or</i> Psalm.',
   },
   'Psa 67': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} <i>or</i> Song{H7892}.',
+    'title': 'To the chief Musician on Neginoth, A Psalm <i>or</i> Song.',
   },
   'Psa 68': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} <i>or</i> Song{H7892} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm <i>or</i> Song of David.',
   },
   'Psa 69': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Shoshannim{H7799}, <i>A Psalm</i> of David{H1732}.',
+    'title': 'To the chief Musician upon Shoshannim, <i>A Psalm</i> of David.',
   },
   'Psa 70': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, <i>A Psalm</i> of David{H1732}, to bring to remembrance{H2142}{{H8687}}.',
+    'title': 'To the chief Musician, <i>A Psalm</i> of David, to bring to remembrance.',
   },
   'Psa 72': {
-    'title': '<i>A Psalm</i> for Solomon{H8010}.',
+    'title': '<i>A Psalm</i> for Solomon.',
   },
   'Psa 73': {
-    'title': 'A Psalm{H4210} of Asaph{H623}.',
+    'title': 'A Psalm of Asaph.',
   },
   'Psa 74': {
-    'title': 'Maschil{H4905}{{H8688}} of Asaph{H623}.',
+    'title': 'Maschil of Asaph.',
   },
   'Psa 75': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, Altaschith{H516}{{H8686}}, A Psalm{H4210} <i>or</i> Song{H7892} of Asaph{H623}.',
+    'title': 'To the chief Musician, Altaschith, A Psalm <i>or</i> Song of Asaph.',
   },
   'Psa 76': {
-    'title': 'To the chief Musician{H5329}{{H8764}} on Neginoth{H5058}, A Psalm{H4210} <i>or</i> Song{H7892} of Asaph{H623}.',
+    'title': 'To the chief Musician on Neginoth, A Psalm <i>or</i> Song of Asaph.',
   },
   'Psa 77': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, to Jeduthun{H3038}, A Psalm{H4210} of Asaph{H623}.',
+    'title': 'To the chief Musician, to Jeduthun, A Psalm of Asaph.',
   },
   'Psa 78': {
-    'title': 'Maschil{H4905}{{H8688}} of Asaph{H623}.',
+    'title': 'Maschil of Asaph.',
   },
   'Psa 79': {
-    'title': 'A Psalm{H4210} of Asaph{H623}.',
+    'title': 'A Psalm of Asaph.',
   },
   'Psa 80': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Shoshannim-Eduth{H7802}, A Psalm{H4210} of Asaph{H623}.',
+    'title': 'To the chief Musician upon Shoshannim-Eduth, A Psalm of Asaph.',
   },
   'Psa 81': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, <i>A Psalm</i> of Asaph{H623}.',
+    'title': 'To the chief Musician upon Gittith, <i>A Psalm</i> of Asaph.',
   },
   'Psa 82': {
-    'title': 'A Psalm{H4210} of Asaph{H623}.',
+    'title': 'A Psalm of Asaph.',
   },
   'Psa 83': {
-    'title': 'A Song{H7892} <i>or</i> Psalm{H4210} of Asaph{H623}.',
+    'title': 'A Song <i>or</i> Psalm of Asaph.',
   },
   'Psa 84': {
-    'title': 'To the chief Musician{H5329}{{H8764}} upon Gittith{H1665}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.',
+    'title': 'To the chief Musician upon Gittith, A Psalm for the sons of Korah.',
   },
   'Psa 85': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} for the sons{H1121} of Korah{H7141}.',
+    'title': 'To the chief Musician, A Psalm for the sons of Korah.',
   },
   'Psa 86': {
-    'title': 'A Prayer{H8605} of David{H1732}.',
+    'title': 'A Prayer of David.',
   },
   'Psa 87': {
-    'title': 'A Psalm{H4210} <i>or</i> Song{H7892} for the sons{H1121} of Korah{H7141}.',
+    'title': 'A Psalm <i>or</i> Song for the sons of Korah.',
   },
   'Psa 88': {
-    'title': 'A Song{H7892} <i>or</i> Psalm{H4210} for the sons{H1121} of Korah{H7141}, to the chief Musician{H5329}{{H8764}} upon Mahalath{H4257} Leannoth{H6031}{{H8763}}, Maschil{H4905}{{H8688}} of Heman{H1968} the Ezrahite{H250}.',
+    'title': 'A Song <i>or</i> Psalm for the sons of Korah, to the chief Musician upon Mahalath Leannoth, Maschil of Heman the Ezrahite.',
   },
   'Psa 89': {
-    'title': 'Maschil{H4905}{{H8688}} of Ethan{H387} the Ezrahite{H250}.',
+    'title': 'Maschil of Ethan the Ezrahite.',
   },
   'Psa 90': {
-    'title': 'A Prayer{H8605} of Moses{H4872} the man{H376} of God{H430}.',
+    'title': 'A Prayer of Moses the man of God.',
   },
   'Psa 92': {
-    'title': 'A Psalm{H4210} <i>or</i> Song{H7892} for the sabbath{H7676} day{H3117}.',
+    'title': 'A Psalm <i>or</i> Song for the sabbath day.',
   },
   'Psa 98': {
-    'title': 'A Psalm{H4210}.',
+    'title': 'A Psalm.',
   },
   'Psa 100': {
-    'title': 'A Psalm{H4210} of praise{H8426}.',
+    'title': 'A Psalm of praise.',
   },
   'Psa 101': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 102': {
-    'title': 'A Prayer{H8605} of the afflicted{H6041}, when he is overwhelmed{H5848}{{H8799}}, and poureth out{H8210}{{H8799}} his complaint{H7879} before{H6440} the LORD{H3068}.',
+    'title': 'A Prayer of the afflicted, when he is overwhelmed, and poureth out his complaint before the LORD.',
   },
   'Psa 103': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 108': {
-    'title': 'A Song{H7892} <i>or</i> Psalm{H4210} of David{H1732}.',
+    'title': 'A Song <i>or</i> Psalm of David.',
   },
   'Psa 109': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 110': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 120': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 121': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 122': {
-    'title': 'A Song{H7892} of degrees{H4609} of David{H1732}.',
+    'title': 'A Song of degrees of David.',
   },
   'Psa 123': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 124': {
-    'title': 'A Song{H7892} of degrees{H4609} of David{H1732}.',
+    'title': 'A Song of degrees of David.',
   },
   'Psa 125': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 126': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 127': {
-    'title': 'A Song{H7892} of degrees{H4609} for Solomon{H8010}.',
+    'title': 'A Song of degrees for Solomon.',
   },
   'Psa 128': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 129': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 130': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 131': {
-    'title': 'A Song{H7892} of degrees{H4609} of David{H1732}.',
+    'title': 'A Song of degrees of David.',
   },
   'Psa 132': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 133': {
-    'title': 'A Song{H7892} of degrees{H4609} of David{H1732}.',
+    'title': 'A Song of degrees of David.',
   },
   'Psa 134': {
-    'title': 'A Song{H7892} of degrees{H4609}.',
+    'title': 'A Song of degrees.',
   },
   'Psa 138': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 139': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 140': {
-    'title': 'To the chief Musician{H5329}{{H8764}}, A Psalm{H4210} of David{H1732}.',
+    'title': 'To the chief Musician, A Psalm of David.',
   },
   'Psa 141': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 142': {
-    'title': 'Maschil{H4905}{{H8688}} of David{H1732}; A Prayer{H8605} when he was in the cave{H4631}.',
+    'title': 'Maschil of David; A Prayer when he was in the cave.',
   },
   'Psa 143': {
-    'title': 'A Psalm{H4210} of David{H1732}.',
+    'title': 'A Psalm of David.',
   },
   'Psa 144': {
-    'title': '<i>A Psalm</i> of David{H1732}.',
+    'title': '<i>A Psalm</i> of David.',
   },
   'Psa 145': {
-    'title': 'David\'s{H1732} <i>Psalm</i> of praise{H8416}.',
+    'title': 'David\'s <i>Psalm</i> of praise.',
   },
   'Rev': {
     'title': 'THE REVELATION OF ST. JOHN THE DIVINE.',
