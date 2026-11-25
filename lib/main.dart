@@ -3135,7 +3135,7 @@ class _MultiBibleViewState extends State<MultiBibleView>
                       helpTitle: 'Treasury of Scripture Knowledge',
                       helpBullets: const [
                         'Shows or hides Treasury of Scripture Knowledge cross-references below verses.',
-                        'The Treasurey of Scripture knowledge is a massive collection of Biblical cross-references built on the principle that the Bible is its own best commentary.',
+                        'The Treasury of Scripture knowledge is a massive collection of Biblical cross-references built on the principle that the Bible is its own best commentary.',
                         'It was first published around 1830 and has seen many revisions since then.',
                         'The digital edition of the TSK used in this app was obtained from http://www.justverses.com/jv/app/downloadTSK.vm',
                       ],
