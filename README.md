@@ -3,9 +3,9 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
 
-Selah is a cross-platform, touch-friendly, 1769 KJB only Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a>. It is intuitive and simple by default but also has unique and advanced features tucked away to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
+Selah is a cross-platform, touch-friendly, 1769 Oxford KJB only Bible study application built with <a href="https://docs.flutter.dev/">Flutter</a>. It is intuitive and simple by default but also has unique and advanced features tucked away to support efficient, distraction-free Bible study. Selah is completely free and has no ads, no analytics, and no gated features.
 
-The purpose of Selah is to faithfully preserve the 1769 Holy Bible (colloquially known as the King James Bible) and to provide tools to make studying it more efficient. If you think that all digital KJB's are the same, remember Isaiah 14:14b and read the following article: https://cheerful-wmcdannell.wordpress.com/2025/09/25/not-all-kjvs-are-equal/. Selah is my response to the war against God's word (Gen 3:1).
+The purpose of Selah is to faithfully preserve the 1769 Oxford Holy Bible (colloquially known as the King James Bible) and to provide tools to make studying it more efficient. If you think that all digital KJB's are the same, remember Isaiah 14:14b and read the following article: https://cheerful-wmcdannell.wordpress.com/2025/09/25/not-all-kjvs-are-equal (that article mostly covers digital editions, but the AV1769 vs PCE is especially important when comparing printed editions).
 
 Selah is named as such because the word itself means a musical refrain and/or to pause and reflect and as it is written in the first Psalm "...in his law doth he meditate day and night.".
 
@@ -14,7 +14,7 @@ Because Selah uses only the 1769 KJB, issues, comments, and pull requests relate
 ## 📖 Features
 
 ### Core Bible Study Tools
-- **AV1769 King James Version** - With the words of the Lord Jesus Christ colored in red.
+- **AV1769 Oxford King James Version** - With the words of the Lord Jesus Christ colored in red.
 - **Offline Reading** - No internet connection required if you don't want to use the online account sync feature
 - **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
