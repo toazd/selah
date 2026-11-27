@@ -12,7 +12,7 @@ The purpose of Selah is to faithfully preserve the King James Version (colloquia
 ## 📖 Features
 
 ### Core Bible Study Tools
-- **AV1769 Oxford King James Version** - With the words of the Lord Jesus Christ colored in red.
+- **King James Version** - With the words of the Lord Jesus Christ colored in red.
 - **Offline Reading** - No internet connection required if you don't want to use the online account sync feature
 - **Cross-Platform** - Runs, looks the same, and has all the same features on all platforms (Android, iOS, Web, Windows, macOS, and Linux). Seemlessly adapts to different platforms and screen sizes.
 
