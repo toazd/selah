@@ -91727,7 +91727,7 @@ const Map<String, Map<String, dynamic>> websters1828 = {
   },
   'Froward': {
     'id': 22932,
-    'definition': '<b>FRO\'WARD</b>, <i>a.</i> [L. versus: turned or looking from.]<br><br>Perverse, that is, turning from, with aversion or reluctance; not willing to yield or comply with what is required; unyielding; ungovernable; refractory; disobedient; peevish; as a froward child.<br><br>They are a very froward generation, children in whom is no fair. Deu 32.',
+    'definition': '<b>FRO\'WARD</b>, <i>a.</i> [L. versus: turned or looking from.]<br><br>Perverse, that is, turning from, with aversion or reluctance; not willing to yield or comply with what is required; unyielding; ungovernable; refractory; disobedient; peevish; as a froward child.<br><br>They are a very froward generation, children in whom is no faith. Deu 32.',
   },
   'Frowardly': {
     'id': 22933,
