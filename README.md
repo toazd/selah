@@ -9,8 +9,6 @@ The purpose of Selah is to faithfully preserve the 1769 Holy Bible (colloquially
 
 Selah is named as such because the word itself means a musical refrain and/or to pause and reflect and as it is written in the first Psalm "...in his law doth he meditate day and night.".
 
-Because Selah uses only the 1769 KJB, issues, comments, and pull requests related to any other translation other than the 1611-1769 KJB will be rejected.
-
 ## 📖 Features
 
 ### Core Bible Study Tools
