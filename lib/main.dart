@@ -5193,12 +5193,11 @@ class _MultiBibleViewState extends State<MultiBibleView>
         final fileName = 'Selah_$timestamp.zip';
 
         // This is an awaitable user interaction that keeps the dialog on screen
-        String? selectedDirectory = await FilePicker.getDirectoryPath(
-          //FilePicker.platform.getDirectoryPath(
+        final selectedDirectoryUri = await FilePicker.pickDirectory(
           dialogTitle: 'Choose Export Location',
         );
 
-        if (selectedDirectory == null) {
+        if (selectedDirectoryUri == null) {
           if (mounted) {
             showStyledSnackBar(
               context,
@@ -5208,6 +5207,22 @@ class _MultiBibleViewState extends State<MultiBibleView>
           }
           return;
         }
+
+        // The archive is written through dart:io, so it needs a filesystem
+        // path. Android may return a content:// URI, which cannot be passed
+        // to File; desktop and iOS directory picks return file:// URIs.
+        if (selectedDirectoryUri.scheme != 'file') {
+          if (mounted) {
+            showStyledSnackBar(
+              context,
+              'The selected location cannot be written to directly.',
+              isError: true,
+            );
+          }
+          return;
+        }
+
+        final selectedDirectory = selectedDirectoryUri.toFilePath();
 
         if (exportData == null) {
           if (mounted) {

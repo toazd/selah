@@ -284,9 +284,10 @@ class _BibleScreenState extends State<BibleScreen> {
     });
 
     // Scroll to initial verse after first build if specified
-    if (_selectedVerse != null) {
+    if (_selectedVerse != null ||
+        (_selectedBook == 'Psa' && _selectedChapter == 119)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToVerseOnCurrentPage(_selectedVerse!);
+        _scrollToLocationOnCurrentPage(verseNumber: _selectedVerse);
       });
     }
   }
@@ -362,11 +363,18 @@ class _BibleScreenState extends State<BibleScreen> {
     return chapterData;
   }
 
-  /// Scrolls to a specific verse on the currently visible page
-  void _scrollToVerseOnCurrentPage(int verseNumber) {
+  /// Scrolls to a requested verse, or to the chapter top for Psalm 119:1.
+  void _scrollToLocationOnCurrentPage({int? verseNumber}) {
     final key = _chapterWidgetKeys[_currentPageIndex];
     if (key?.currentState != null) {
-      key!.currentState!.scrollToVerse(verseNumber);
+      final isPsalm119Start = _selectedBook == 'Psa' &&
+          _selectedChapter == 119 &&
+          (verseNumber == null || verseNumber == 1);
+      if (isPsalm119Start) {
+        key!.currentState!.scrollToTop();
+      } else if (verseNumber != null) {
+        key!.currentState!.scrollToVerse(verseNumber);
+      }
     }
   }
 
@@ -543,9 +551,10 @@ class _BibleScreenState extends State<BibleScreen> {
       setState(() {});
 
       // Scroll to verse if specified
-      if (_selectedVerse != null) {
+      if (_selectedVerse != null ||
+          (_selectedBook == 'Psa' && _selectedChapter == 119)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToVerseOnCurrentPage(_selectedVerse!);
+          _scrollToLocationOnCurrentPage(verseNumber: _selectedVerse);
         });
       }
     } finally {
@@ -617,9 +626,10 @@ class _BibleScreenState extends State<BibleScreen> {
       }
 
       // Scroll to verse if specified
-      if (_selectedVerse != null) {
+      if (_selectedVerse != null ||
+          (_selectedBook == 'Psa' && _selectedChapter == 119)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToVerseOnCurrentPage(_selectedVerse!);
+          _scrollToLocationOnCurrentPage(verseNumber: _selectedVerse);
         });
       }
     } finally {
