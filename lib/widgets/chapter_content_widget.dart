@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import '../main.dart'; // For global notifiers and colors
 import '../data/tsk_data.dart';
+import '../data/psalm_119_metadata.dart';
 import '../utils/verse_display_utils.dart';
 import '../utils/bible_utils.dart';
 import '../utils/font_size_adjustments.dart';
@@ -222,21 +223,61 @@ class ChapterContentWidgetState extends State<ChapterContentWidget> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: verseDataList.map((verseData) {
+                    final sectionTitle = getPsalm119SectionTitle(
+                      widget.book,
+                      widget.chapter,
+                      verseData.verseNumber,
+                    );
+
                     // return Padding(
                     //   padding: EdgeInsets.only(
                     //     top: 0.0,
                     //     bottom: 0.0,
                     //   ),
                     //   child:
-                    return buildVerseWidgetFromData(
-                      context,
-                      verseData,
-                      widget.onVerseTap,
-                      widget.onVerseLongPress,
-                      widget.onLinkTap,
-                      widget.onNoteEditTap,
-                      lightTextColor.value,
-                      darkTextColor.value,
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (sectionTitle != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 12.0,
+                              left: 4.0,
+                              bottom: 4.0,
+                              right: 22.0,
+                            ),
+                            child: Center(
+                              child: Text(
+                                sectionTitle,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: fontFamilyNotifier.value,
+                                  fontSize:
+                                      FontSizeAdjustments.getAdjustedSize(
+                                    fontFamilyNotifier.value,
+                                    fontSizeNotifier.value - 2,
+                                  ),
+                                  fontWeight: FontWeight.bold,
+                                  height: lineHeightNotifier.value,
+                                  color: isDark
+                                      ? darkTextColor.value
+                                      : lightTextColor.value,
+                                ),
+                              ),
+                            ),
+                          ),
+                        buildVerseWidgetFromData(
+                          context,
+                          verseData,
+                          widget.onVerseTap,
+                          widget.onVerseLongPress,
+                          widget.onLinkTap,
+                          widget.onNoteEditTap,
+                          lightTextColor.value,
+                          darkTextColor.value,
+                        ),
+                      ],
                     );
                     //);
                   }).toList(),
