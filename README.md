@@ -39,7 +39,7 @@ The purpose of Selah is to faithfully preserve the King James Version (colloquia
 - **Material Design** - Clean, intuitive user interface
 - **Performance Optimized** - Fast loading and smooth navigation due to a simple yet robust design
 
-## Which digital KJV does this app use?
+## Which digital KJV does this app use and why?
 For its textual source this app uses a text that is exactly equivalent to the Cambridge Concord text, which differs from the "1769 Oxford" / "1769 KJV" (Blayney revisions) and the Pure Cambridge edition. Some publishers, like Christian Art Publishers/Christian Art Gifts, do not disclose the source of their text but they still use the exact equivalent of the Cambridge Concord text (I can't verify that ALL Christian Art Publishers ISBNs use the Cambridge Concord text - only the ones I've purchased so far).
 
 **Many** digital KJV text source files online (and apps that contain a KJV) are **mislabeled** as "1769 Oxford" / "1769 KJV" / "AV 1769" (because they are NOT exactly equivalent to the 1769 Oxford print, which is easy to verify) or are mixed with the 1900+ Pure Cambridge Edition (PCE) changes ([here](https://cheerful-wmcdannell.wordpress.com/wp-content/uploads/2025/09/cambridgeconcord_vs_cambridgepce.pdf) is a concise report of the most important differences between the Concord and the PCE).
